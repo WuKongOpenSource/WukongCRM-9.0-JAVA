@@ -1,2 +1,1 @@
-*.h linguist-language=java
-*.m linguist-language=java
+*.vue linguist-language=java
