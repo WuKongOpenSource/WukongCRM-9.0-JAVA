@@ -1,0 +1,86 @@
+// 跟进记录效果
+.f-container {
+  padding: 0 17px;
+}
+
+/** 发布行css  */
+.se-section {
+  position: relative;
+  margin: 5px 0;
+  height: 40px;
+  line-height: 40px;
+
+  .se-name {
+    font-size: 12px;
+    color: #333333;
+    margin-right: 5px;
+  }
+
+  .se-select {
+    border: 1px solid #dcdfe6;
+    font-size: 12px;
+    color: #606266;
+    padding: 0 8px;
+    border-radius: 2px;
+    font-weight: 500;
+    height: 25px;
+
+    .se-select-name {
+      margin-right: 20px;
+    }
+  }
+
+  .se-datepicker {
+    font-size: 12px;
+    width: 200px;
+    margin-right: 20px;
+  }
+
+  .se-send {
+    position: absolute;
+    right: 0;
+    padding: 5px 15px;
+  }
+}
+
+.el-date-editor /deep/ .el-input__inner {
+  height: 25px;
+  line-height: 25px;
+}
+
+.el-date-editor /deep/ .el-input__icon {
+  height: 25px;
+  line-height: 25px;
+}
+
+.el-checkbox /deep/ .el-checkbox__label {
+  font-size: 12px;
+  color: #333333;
+}
+
+.log-cont {
+  margin: 30px 0;
+  border: 1px solid #e6e6e6;
+  border-radius: 2px;
+
+  .log-tabs-item {
+    font-size: 13px;
+    padding: 8px 15px;
+    cursor: pointer;
+  }
+
+  .log-tabs-item:hover {
+    color: #F18C70 !important;
+  }
+
+  .log-tabs-line {
+    height: 10px;
+    background-color: #e6e6e6;
+    width: 2px;
+  }
+}
+
+.log-items {
+  min-height: 400px;
+  position: relative;
+}

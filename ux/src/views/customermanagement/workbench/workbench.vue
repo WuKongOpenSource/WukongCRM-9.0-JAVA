@@ -1,0 +1,132 @@
+<template>
+  <div>
+    <flexbox class="user-container">
+      <div v-photo="filtersInfo"
+           :key="filtersInfo.img"
+           v-lazy:background-image="$options.filters.filterUserLazyImg(filtersInfo.img)"
+           class="div-photo user-img">
+      </div>
+      <div>
+        <flexbox class="user-info">
+          <div class="user-name">{{filtersInfo.realname}}</div>
+          <div class="user-line"></div>
+          <members-dep :popoverDisplay="'block'"
+                       :userCheckedData="users"
+                       :depCheckedData="strucs"
+                       @popoverSubmit="popoverSubmit">
+            <el-button slot="membersDep"
+                       type="text"
+                       class="user-switch">切换</el-button>
+          </members-dep>
+
+        </flexbox>
+      </div>
+    </flexbox>
+    <customer-dash :data="dashData"></customer-dash>
+  </div>
+</template>
+
+<script>
+import CustomerDash from './components/CustomerDash'
+import membersDep from '@/components/selectEmployee/membersDep'
+import { mapGetters } from 'vuex'
+
+export default {
+  /** 客户管理下的工作台 */
+  name: 'customerWorkbench',
+  components: {
+    CustomerDash,
+    membersDep // 员工部门
+  },
+  filters: {},
+  data() {
+    return {
+      /** 用户部门数组 */
+      users: [],
+      strucs: [],
+      // 条件
+      dashData: { users: [], strucs: [] },
+      filtersInfo: { realname: '', img: '' }
+    }
+  },
+  computed: {
+    ...mapGetters(['userInfo'])
+  },
+  mounted() {
+    this.users.push(this.userInfo)
+    this.dashData = { users: this.users, strucs: [] }
+    this.filtersInfo = this.userInfo
+  },
+  methods: {
+    // 更改筛选条件
+    popoverSubmit(users, strucs) {
+      this.users = users
+      this.strucs = strucs
+      if (this.users.length === 1 && this.strucs.length === 0) {
+        this.dashData = { users: this.users, strucs: this.strucs }
+        this.filtersInfo = {
+          realname: this.users[0].realname,
+          img: this.users[0].img
+        }
+      } else if (this.users.length === 0 && this.strucs.length === 0) {
+        this.users = [this.userInfo]
+        this.dashData = { users: this.users, strucs: this.strucs }
+        this.filtersInfo = {
+          realname: this.userInfo.realname,
+          img: this.userInfo.img
+        }
+      } else {
+        this.dashData = { users: this.users, strucs: this.strucs }
+        var name = ''
+        if (this.users.length > 0) {
+          name = this.users.length + '个员工'
+        }
+        if (this.strucs.length > 0) {
+          if (this.users.length > 0) {
+            name = name + ','
+          }
+          name = name + this.strucs.length + '个部门'
+        }
+        this.filtersInfo = {
+          realname: name,
+          img: require('@/assets/img/crm_multiuser.png')
+        }
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.user-container {
+  margin-bottom: 20px;
+  .user-img {
+    display: block !important;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 16px;
+    margin-left: 0px;
+  }
+  .user-info {
+    .user-name {
+      font-size: 16px;
+      color: #333333;
+    }
+    .user-line {
+      width: 1px;
+      height: 12px;
+      background-color: #aaa;
+      margin: 0 14px;
+    }
+    .user-switch {
+      font-size: 12px;
+    }
+  }
+  .user-more {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #999999;
+  }
+}
+</style>

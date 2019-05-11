@@ -1,0 +1,39 @@
+//客户相关详情 头部类似布局
+.el-tabs /deep/ .el-tabs__nav-wrap::after {
+  display: none !important;
+}
+
+.el-tabs /deep/ .el-tabs__header {
+  background-color: #F5F6F9;
+  padding: 0 17px;
+  margin: 0 0 15px !important;
+}
+
+.el-tabs /deep/ .el-tabs__item {
+  font-size: 13px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+}
+
+.d-container {
+  position: relative;
+  height: 100%;
+}
+
+/** 让element 查询到的标签 */
+.t-loading-content {
+  position: relative;
+  overflow-y: scroll;
+  flex: 1;
+}
+
+/** 审核信息 */
+.examine-info {
+  padding: 0 17px 17px 17px;
+
+  .examine-info-border {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    padding: 17px;
+  }
+}

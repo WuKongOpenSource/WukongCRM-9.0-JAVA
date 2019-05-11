@@ -1,0 +1,22 @@
+.el-tabs /deep/ .el-tabs__header {
+    margin: 0 15px 15px;
+    .el-tabs__item {
+        height: 50px;
+        line-height: 50px;
+    }
+    .el-tabs__nav {
+        margin-left: 15px;
+    }
+    .el-tabs__nav-wrap::after {
+        height: 1px;
+    }
+}
+.oa-bgcolor {
+    background: #fff;
+    height: 100%;
+    width: 920px;
+    // width: 100%;
+    // margin: 0 auto;
+    border: 1px solid #E6E6E6;
+    border-radius: 4px;
+}

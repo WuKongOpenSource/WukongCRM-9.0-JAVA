@@ -1,0 +1,39 @@
+undertow.devMode=true
+# 端口
+undertow.port=8080
+# host
+undertow.host=0.0.0.0
+# 开启 gzip 压缩
+undertow.gzip.enable=true
+# 触发压缩的最小内容长度
+undertow.gzip.minLength=2048
+# 配置压缩级别，默认值 -1。 可配置 1 到 9。 1 拥有最快压缩速度，9 拥有最高压缩率
+undertow.gzip.level=1
+# session 过期时间，注意单位是秒
+undertow.session.timeout=3600
+# 支持 session 热加载
+undertow.session.hotSwap=true
+undertow.ioThreads=8
+undertow.workerThreads=256
+# 是否开启 ssl
+undertow.ssl.enable=false
+# ssl 监听端口号，部署环境设置为 443
+undertow.ssl.port=443
+# ssl 开启时，是否关闭 http
+undertow.http.disable=false
+#  http 重定向到 https
+undertow.http.toHttps=false
+# 密钥库类型，建议使用 PKCS12
+undertow.ssl.keyStoreType=PKCS12
+# 密钥库文件
+undertow.ssl.keyStore=demo.pfx
+# 密钥库密码
+undertow.ssl.keyStorePassword=123456
+# 别名配置，一般不使用
+undertow.ssl.keyAlias=demo
+
+
+
+
+
+

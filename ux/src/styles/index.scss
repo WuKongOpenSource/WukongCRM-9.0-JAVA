@@ -1,0 +1,207 @@
+@import './transition.scss';
+@import './element-ui.scss';
+@import './element-variables.scss';
+// 指令
+@import '../directives/empty/empty.scss';
+@import '../assets/iconfont/iconfont.css';
+@import '../directives/style.scss';
+
+body {
+  height: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-family: 'MicrosoftYaHei', 'Avenir', Helvetica, Arial, sans-serif;
+  color: #333;
+  font-size: 14px;
+  background: #f5f6f9;
+}
+
+// 滚动条样式
+::-webkit-scrollbar-track-piece {
+  background: #EFEFEF;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C7D1DA;
+  border-radius: 3.5px;
+}
+
+html {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#app {
+  height: 100%;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  outline: none;
+  text-decoration: none;
+}
+
+div:focus {
+  outline: none;
+}
+
+a:focus,
+a:active {
+  outline: none;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+.clearfix {
+  &:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+  }
+}
+
+tr,
+th,
+td {
+  font-weight: normal;
+}
+
+li {
+  list-style: none;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 右浮动 */
+.rt {
+  float: right;
+  margin-right: 30px;
+}
+
+/* 左浮动 */
+.lt {
+  float: left;
+  margin-left: 30px;
+}
+
+// 控制svg颜色
+path {
+  fill: inherit !important
+}
+
+// 通过 popper-class 去除默认padding
+.no-padding-popover {
+  padding: 0;
+}
+
+// 去除百度地图 图标
+.BMap_cpyCtrl {
+  display: none;
+}
+
+.anchorBL {
+  display: none;
+}
+
+/** 懒加载样式*/
+img[lazy="loading"] {
+  display: inline-block;
+  padding: 8px;
+  // width: 20px !important;
+  // height: 20px !important;
+  margin: 0 auto;
+}
+
+div[lazy=loading] {
+  display: inline-block;
+  padding: 8px;
+  // width: 20px !important;
+  // height: 20px !important;
+  margin: 0 auto;
+}
+
+// div 头像图片样式
+.div-photo {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  display: inline-block;
+}
+
+/** 拖拽时候的样式 */
+.draggingStyle {
+  cursor: pointer;
+}
+
+// 修改头像为圆形
+.header-circle {
+  border-radius: 50%;
+}
+
+.router-view {
+  width: 100%;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.project-settings-list-top {
+  top: 110px !important;
+}
+
+.task-board-rechristen-popover {
+  padding: 0;
+  margin-top: -40px !important;
+}
+
+.tooltip-change-border {
+  border-color: #eee !important;
+  box-shadow: 0 0 12px 1px #eee;
+  padding: 5px 10px !important;
+}
+
+.tooltip-change-border .popper__arrow {
+  border-color: transparent !important;
+}
+
+.task-tooltip {
+  z-index: 1 !important;
+}
+
+// 关闭message 内容样式
+.el-close-message {
+  p {
+    line-height: 20px;
+    max-height: 60px;
+    overflow-y: scroll;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin-right: 13px;
+  }
+}
+
+// 去除焦点时的蓝色边框
+* :focus {
+  outline: none;
+}

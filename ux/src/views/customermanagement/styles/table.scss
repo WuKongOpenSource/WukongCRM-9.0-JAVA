@@ -1,0 +1,89 @@
+@import './detailview.scss';
+
+.crm-container {
+  background-color: white;
+  border: 1px solid #E6E6E6;
+  border-radius: 2px;
+}
+
+/**
+  .el-table /deep/ thead th {
+    border-right: 1px solid #ebeef5;
+  }
+  
+  .el-table /deep/ tbody tr td:nth-child(2){
+    border-right: 1px solid #ebeef5;
+  }
+  
+  .b-bottom {
+    border-bottom: 1px solid #ebeef5;
+  }
+  */
+
+.el-table /deep/ thead th {
+  background-color: #fafdff;
+  font-weight: 400;
+  border-color: #E6E6E6;
+  color: #475059;
+}
+
+.table-set {
+  width: 15px;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.table-head-name {
+  font-size: 14px;
+  color: #475059;
+  line-height: 23px;
+  padding: 0;
+}
+
+.el-table /deep/ thead .cell {
+  height: 23px;
+}
+
+.el-table /deep/ tbody tr td {
+  border-top-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: #E6E6E6;
+  font-size: 13px;
+}
+
+.el-table /deep/ tbody tr td:nth-child(2) {
+  border-right: 1px solid #E6E6E6;
+}
+
+.n-table--border {
+  border-color: #E6E6E6;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.n-table--border::after {
+  display: none;
+}
+
+.p-contianer {
+  position: relative;
+  background-color: white;
+  height: 44px;
+
+  .p-bar {
+    float: right;
+    margin: 5px 100px 0 0;
+    font-size: 14px !important;
+  }
+}
+
+// 列表状态
+.status_button {
+  padding: 1px 6px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  display: inline-block;
+  font-size: 12px;
+  margin: 0 auto;
+}

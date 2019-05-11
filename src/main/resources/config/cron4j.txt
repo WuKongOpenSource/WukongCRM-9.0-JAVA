@@ -1,0 +1,5 @@
+cron4j=customerCron
+customerCron.cron=*/5 * * * *
+customerCron.class=com.kakarote.crm9.erp.crm.cron.CrmCustomerCron
+customerCron.daemon=true
+customerCron.enable=true

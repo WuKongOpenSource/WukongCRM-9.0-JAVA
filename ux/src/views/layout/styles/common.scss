@@ -1,0 +1,49 @@
+.quick-add {
+  width: 267px;
+  // min-height: 200px;
+  background: #fff;
+
+  .quick-add-content {
+    padding: 24px;
+
+    p {
+      height: 34px;
+      line-height: 28px;
+      width: 100px;
+      display: inline-block;
+      margin-bottom: 14px;
+      border: 1px solid #eee;
+      background: #F7F8FA;
+      margin-right: 19px;
+      text-align: center;
+      border-radius: 3px;
+
+      i,
+      span {
+        vertical-align: middle;
+      }
+
+      i {
+        color: #6C6F73;
+        margin-right: 14px;
+      }
+    }
+
+    p:nth-child(2n) {
+      margin-right: 0;
+    }
+
+    p:hover {
+      background: #3E84E9;
+      cursor: pointer;
+
+      span {
+        color: #fff;
+      }
+
+      i {
+        color: #fff;
+      }
+    }
+  }
+}

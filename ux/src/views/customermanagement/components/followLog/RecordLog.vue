@@ -1,0 +1,152 @@
+<template>
+  <div v-loading="loading">
+    <div v-empty="list.length === 0">
+      <div class="log-items">
+        <follow-record-cell v-for="(item, index) in list"
+                            :item="item"
+                            :crmType="crmType"
+                            :key="index"></follow-record-cell>
+        <div class="load">
+          <el-button type="text"
+                     :loading="loadMoreLoading">{{loadMoreLoading ? '加载更多' : '没有更多了'}}</el-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import FollowRecordCell from './components/FollowRecordCell' // 跟进记录
+import { crmLeadsRecordIndex } from '@/api/customermanagement/clue'
+import { crmCustomerRecordIndex } from '@/api/customermanagement/customer'
+import { crmContactsRecordIndex } from '@/api/customermanagement/contacts'
+import { crmBusinessRecordIndex } from '@/api/customermanagement/business'
+import { crmContractRecordIndex } from '@/api/customermanagement/contract'
+import { formatTimeToTimestamp } from '@/utils'
+
+export default {
+  /** 线索管理 的 线索详情 的 跟进记录*/
+  name: 'record-log',
+  components: {
+    FollowRecordCell
+  },
+  props: {
+    /** 模块ID */
+    id: [String, Number],
+    /** 没有值就是全部类型 有值就是当个类型 */
+    crmType: {
+      type: String,
+      default: ''
+    }
+  },
+  watch: {
+    id: function(val) {
+      this.refreshList()
+    }
+  },
+  data() {
+    return {
+      loading: false,
+      loadMoreLoading: true,
+      isPost: false,
+      page: 1,
+      list: [] // 跟进记录列表
+    }
+  },
+  computed: {},
+  mounted() {
+    this.$bus.on('follow-log-refresh', data => {
+      if (data.type == 'record-log') {
+        this.refreshList()
+      }
+    })
+
+    // 分批次加载
+    let self = this
+    let item = document.getElementById('follow-log-content')
+    item.onscroll = function() {
+      let scrollTop = item.scrollTop
+      let windowHeight = item.clientHeight
+      let scrollHeight = item.scrollHeight //滚动条到底部的条件
+
+      if (
+        scrollTop + windowHeight == scrollHeight &&
+        self.loadMoreLoading == true
+      ) {
+        if (!self.isPost) {
+          self.isPost = true
+          self.page++
+          self.getList()
+        } else {
+          self.loadMoreLoading = false
+        }
+      }
+    }
+
+    this.getList()
+  },
+  activated: function() {},
+  deactivated: function() {},
+  methods: {
+    getList() {
+      this.loading = true
+      let request = {
+        customer: crmCustomerRecordIndex,
+        leads: crmLeadsRecordIndex,
+        contacts: crmContactsRecordIndex,
+        business: crmBusinessRecordIndex,
+        contract: crmContractRecordIndex
+      }[this.crmType]
+
+      let params = {
+        page: this.page,
+        limit: 10
+      }
+      params[this.crmType + 'Id'] = this.id
+      request(params)
+        .then(res => {
+          this.list = this.list.concat(res.data)
+          if (res.data.length < 10) {
+            this.loadMoreLoading = false
+          } else {
+            this.loadMoreLoading = true
+          }
+          this.loading = false
+          this.isPost = false
+        })
+        .catch(() => {
+          this.isPost = false
+          this.loading = false
+        })
+    },
+    refreshList() {
+      this.page = 1
+      this.list = []
+      this.getList()
+    }
+  },
+
+  beforeDestroy() {
+    this.$bus.off('follow-log-refresh')
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.log-items {
+  min-height: 400px;
+  position: relative;
+}
+
+.load {
+  color: #999;
+  font-size: 13px;
+  margin: 0 auto 15px;
+  text-align: center;
+  .el-button,
+  .el-button:focus {
+    color: #ccc;
+    cursor: auto;
+  }
+}
+</style>

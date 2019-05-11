@@ -1,0 +1,36 @@
+
+  @import "@/styles/mixin.scss";
+.box-wrapper {
+  position: relative;
+  padding: 0 20px 10px;
+  border-left: 2px solid transparent;
+  .title {
+    min-height: 34px;
+    font-size: 13px;
+    width: 100%;
+    padding: 10px 0;
+    word-wrap: break-word;
+    word-break: break-all;
+    span:first-child {
+      color: red;
+    }
+    span:nth-child(2) {
+      color: #999;
+    }
+  }
+  .control {
+    position: absolute;
+    right: 30px;
+    bottom: -18px;
+    z-index: 1;
+    width: 36px;
+    height: 36px;
+    background: white;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 2px 4px 0 rgba(163,163,163,.5);
+    color: #d84636;
+    cursor: pointer;
+    @include center;
+  }
+}
