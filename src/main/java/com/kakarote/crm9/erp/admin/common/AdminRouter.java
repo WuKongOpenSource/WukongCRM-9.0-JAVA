@@ -8,10 +8,10 @@ public class AdminRouter extends Routes {
     public void config() {
         addInterceptor(new AdminInterceptor());
         add("/", AdminLoginController.class);
-        add("/manager/user", AdminUserController.class);
-        add("/manager/dept", AdminDeptController.class);
-        add("/manager/menu", AdminMenuController.class);
-        add("/manager/role", AdminRoleController.class);
+        add("/system/user", AdminUserController.class);
+        add("/system/dept", AdminDeptController.class);
+        add("/system/menu", AdminMenuController.class);
+        add("/system/role", AdminRoleController.class);
         add("/file", AdminFileController.class);
         add("/field",AdminFieldController.class);
         add("/scene",AdminSceneController.class);

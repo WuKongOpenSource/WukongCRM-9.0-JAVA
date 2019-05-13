@@ -14,6 +14,12 @@
 JAVA版QQ群交流群①群：[1026560336](https://shang.qq.com/wpa/qunwpa?idkey=13d5e5809eb9feb350336e55c8b7a00b9cb472078b09b4441222a52dd76b278e)
 
 
+微信交流群
+
+
+<img src="https://images.gitee.com/uploads/images/2019/0512/111430_209d1823_345098.png" width="300">
+
+
 
 悟空CRM采用全新的前后端分离模式，本仓库代码中已集成前端vue打包后文件，可免去打包操作
 
@@ -133,7 +139,10 @@ UI框架：Element-UI 2.6.3
 
 以下为悟空CRM9.0 JAVA版部分功能系统截图
 
-![](https://github.com/72crm/72crm/raw/master/ux/intro_img/g5.png)
-![](https://github.com/72crm/72crm/raw/master/ux/intro_img/g7.png)
-![](https://github.com/72crm/72crm/raw/master/ux/intro_img/g9.png)
-![](https://github.com/72crm/72crm/raw/master/ux/intro_img/g10.png)
+![](https://images.gitee.com/uploads/images/2019/0512/111600_4001673d_345098.png "g1.png")
+![](https://images.gitee.com/uploads/images/2019/0512/111608_7e86ecb1_345098.png "g2.png")
+![](https://images.gitee.com/uploads/images/2019/0512/111615_7aea7564_345098.png "g3.png")
+![](https://images.gitee.com/uploads/images/2019/0512/111622_1f47546e_345098.png "g4.png")
+![](https://images.gitee.com/uploads/images/2019/0512/111629_02b69eed_345098.png "g5.png")
+![](https://images.gitee.com/uploads/images/2019/0512/111636_7323ef3a_345098.png "g6.png")
+![](https://images.gitee.com/uploads/images/2019/0512/111643_8516cff1_345098.png "g7.png")

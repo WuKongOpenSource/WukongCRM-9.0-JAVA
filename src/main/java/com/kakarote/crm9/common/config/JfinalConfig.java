@@ -1,5 +1,6 @@
 package com.kakarote.crm9.common.config;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.druid.wall.WallFilter;
 import com.kakarote.crm9.common.config.cache.RedisCache;
 import com.kakarote.crm9.common.config.druid.DruidConfig;
@@ -117,7 +118,12 @@ public class JfinalConfig extends JFinalConfig {
     private void createRedisPlugin(Plugins me) {
         for (String configName : prop.get("jfinal.redis", "").split(",")) {
             if (prop.getBoolean(configName + ".open", false)) {
-                RedisPlugin redisPlugin = new RedisPlugin(prop.get(configName + ".cacheName").trim(), prop.get(configName + ".host").trim(), prop.getInt(configName + ".port", 6379), prop.getInt(configName + ".timeout", 20000), prop.get(configName + ".password", null));
+                RedisPlugin redisPlugin;
+                if(prop.containsKey(configName+".password")&& StrUtil.isNotEmpty(prop.get(configName+".password"))){
+                    redisPlugin = new RedisPlugin(prop.get(configName + ".cacheName").trim(), prop.get(configName + ".host").trim(), prop.getInt(configName + ".port", 6379), prop.getInt(configName + ".timeout", 20000), prop.get(configName + ".password", null));
+                }else {
+                    redisPlugin = new RedisPlugin(prop.get(configName + ".cacheName").trim(), prop.get(configName + ".host").trim(), prop.getInt(configName + ".port", 6379), prop.getInt(configName + ".timeout", 20000));
+                }
                 me.add(redisPlugin);
             }
         }

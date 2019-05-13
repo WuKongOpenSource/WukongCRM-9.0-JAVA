@@ -6,7 +6,7 @@ import request from '@/utils/request'
  */
 export function adminUsersUpdateImg(data) {
   return request({
-    url: 'manager/user/updateImg',
+    url: 'system/user/updateImg',
     method: 'post',
     data: data,
     headers: {
@@ -21,7 +21,7 @@ export function adminUsersUpdateImg(data) {
  */
 export function adminUsersRead(data) {
   return request({
-    url: 'manager/user/queryLoginUser',
+    url: 'system/user/queryLoginUser',
     method: 'post',
     data: data
   })
@@ -33,7 +33,7 @@ export function adminUsersRead(data) {
  */
 export function adminUsersUpdate(data) {
   return request({
-    url: 'manager/user/updateUser',
+    url: 'system/user/updateUser',
     method: 'post',
     data: data
   })
@@ -45,7 +45,7 @@ export function adminUsersUpdate(data) {
  */
 export function adminUsersResetPassword(data) {
   return request({
-    url: 'manager/user/updatePassword',
+    url: 'system/user/updatePassword',
     method: 'post',
     data: data
   })

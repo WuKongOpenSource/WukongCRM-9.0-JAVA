@@ -31,23 +31,7 @@ public class AdminLoginController extends Controller {
     private AdminRoleService adminRoleService;
 
     public void index() {
-        List<String> arrays=new ArrayList<>();
-        try {
-            Connection connection = Db.use().getConfig().getConnection();
-            if(connection!=null){
-                arrays.add("数据库连接成功");
-            }
-        } catch (Exception e) {
-               arrays.add("数据库连接异常");
-        }
-        try {
-            Redis.use().setex(BaseConstant.NAME,3600,BaseConstant.VERSION);
-            Redis.use().del(BaseConstant.NAME);
-            arrays.add("Redis配置成功");
-        }catch (Exception e){
-            arrays.add("Redis配置失败");
-        }
-        renderJson(R.ok().put("data",arrays));
+        redirect("/index.html");
     }
 
     /**
@@ -102,5 +86,29 @@ public class AdminLoginController extends Controller {
 
     public void version(){
         renderJson(R.ok().put("name",BaseConstant.NAME).put("version",BaseConstant.VERSION));
+    }
+
+    public void ping(){
+        List<String> arrays=new ArrayList<>();
+        try {
+            Connection connection = Db.use().getConfig().getConnection();
+            if(connection!=null){
+                arrays.add("数据库连接成功");
+            }
+        } catch (Exception e) {
+            arrays.add("数据库连接异常");
+        }
+        try {
+            String ping = Redis.use().ping();
+            if("PONG".equals(ping)){
+                arrays.add("Redis配置成功");
+            }else {
+                arrays.add("Redis配置失败");
+            }
+
+        }catch (Exception e){
+            arrays.add("Redis配置失败");
+        }
+        renderJson(R.ok().put("data",arrays));
     }
 }

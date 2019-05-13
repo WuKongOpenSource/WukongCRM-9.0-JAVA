@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function depDelete(data) {
   return request({
-    url: 'manager/dept/deleteDept',
+    url: 'system/dept/deleteDept',
     method: 'post',
     data: data
   })
@@ -10,7 +10,7 @@ export function depDelete(data) {
 
 export function depEdit(data) {
   return request({
-    url: 'manager/dept/setDept',
+    url: 'system/dept/setDept',
     method: 'post',
     data: data
   })
@@ -18,7 +18,7 @@ export function depEdit(data) {
 
 export function depSave(data) {
   return request({
-    url: 'manager/dept/setDept',
+    url: 'system/dept/setDept',
     method: 'post',
     data: data
   })
@@ -26,7 +26,7 @@ export function depSave(data) {
 
 export function usersAdd(params) {
   return request({
-    url: 'manager/user/setUser',
+    url: 'system/user/setUser',
     method: 'post',
     data: params
   })
@@ -35,7 +35,7 @@ export function usersAdd(params) {
 // 角色列表
 export function roleList(data) {
   return request({
-    url: 'manager/role/getAllRoleList',
+    url: 'system/role/getAllRoleList',
     method: 'post',
     data: data
   })
@@ -58,7 +58,7 @@ export function resetPassword(data) {
  */
 export function adminUsersUpdatePwd(data) {
   return request({
-    url: 'manager/user/resetPassword',
+    url: 'system/user/resetPassword',
     method: 'post',
     data: data
   })
@@ -68,7 +68,7 @@ export function adminUsersUpdatePwd(data) {
 // 用户状态修改
 export function usersEditStatus(data) {
   return request({
-    url: 'manager/user/setUserStatus',
+    url: 'system/user/setUserStatus',
     method: 'post',
     data: data
   })
