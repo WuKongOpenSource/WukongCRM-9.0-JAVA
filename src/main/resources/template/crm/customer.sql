@@ -1,6 +1,12 @@
 #namespace("crm.customer")
     #sql("getCustomerPageList")
-    select * from customerview
+    select customer_name,owner_user_name from customerview where 1=1
+      #if(customerName)
+      and customer_name like CONCAT('%',#para(customerName),'%')
+      #end
+      #if(telephone)
+      and telephone like CONCAT('%',#para(telephone),'%')
+      #end
     #end
 
     #sql("count")

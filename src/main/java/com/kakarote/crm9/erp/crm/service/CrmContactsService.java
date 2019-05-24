@@ -1,14 +1,21 @@
 package com.kakarote.crm9.erp.crm.service;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.upload.UploadFile;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
+import com.kakarote.crm9.erp.crm.entity.CrmBusiness;
 import com.kakarote.crm9.erp.crm.entity.CrmContacts;
+import com.kakarote.crm9.erp.crm.entity.CrmContactsBusiness;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
 import com.kakarote.crm9.erp.oa.entity.OaEventRelation;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
@@ -27,6 +34,7 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CrmContactsService {
     @Inject
@@ -45,8 +53,14 @@ public class CrmContactsService {
      * @author wyq
      * 分页条件查询联系人
      */
-    public Page<Record> queryList(BasePageRequest basePageRequest){
-        return Db.paginate(basePageRequest.getPage(),basePageRequest.getLimit(),new SqlPara().setSql("select * from contactsView"));
+    public Page<Record> queryList(BasePageRequest<CrmContacts> basePageRequest){
+        String contactsName = basePageRequest.getData().getName();
+        String telephone = basePageRequest.getData().getTelephone();
+        String mobile = basePageRequest.getData().getMobile();
+        if (StrUtil.isEmpty(contactsName) && StrUtil.isEmpty(telephone) && StrUtil.isEmpty(mobile)){
+            return new Page<>();
+        }
+        return Db.paginate(basePageRequest.getPage(),basePageRequest.getLimit(),Db.getSqlPara("crm.contact.getContactsPageList",Kv.by("contactsName",contactsName).set("telephone",telephone).set("mobile",mobile)));
     }
 
     /**
@@ -95,10 +109,26 @@ public class CrmContactsService {
         Integer contactsId = basePageRequest.getData().getContactsId();
         Integer pageType = basePageRequest.getPageType();
         if (0 == pageType){
-            return R.ok().put("data",Db.findFirst(Db.getSqlPara("crm.contact.queryBusiness",Kv.by("id",contactsId))));
+            return R.ok().put("data",Db.findFirst(Db.getSqlPara("crm.contact.7",Kv.by("id",contactsId))));
         }else {
             return R.ok().put("data",Db.paginate(basePageRequest.getPage(),basePageRequest.getLimit(),new SqlPara().setSql(Db.getSql("crm.contact.queryBusiness")).addPara(contactsId)));
         }
+    }
+
+    /**
+     * @author wyq
+     * 联系人关联商机
+     */
+    public R relateBusiness(CrmContactsBusiness crmContactsBusiness){
+        return crmContactsBusiness.save() ? R.ok() : R.error();
+    }
+
+    /**
+     * @author wyq
+     * 联系人解除关联商机
+     */
+    public R unrelateBusiness(Integer id){
+        return CrmContactsBusiness.dao.deleteById(id) ? R.ok() : R.error();
     }
 
     /**
@@ -247,10 +277,141 @@ public class CrmContactsService {
 
     public List<Record> getRecord(BasePageRequest<CrmContacts> basePageRequest){
         CrmContacts crmContacts = basePageRequest.getData();
-        List<Record> recordList = Db.find(Db.getSql("crm.contact.getRecord"),crmContacts.getContactsId());
+        List<Record> recordList = Db.find(Db.getSql("crm.contact.getRecord"),crmContacts.getContactsId(),crmContacts.getContactsId());
         recordList.forEach(record -> {
             adminFileService.queryByBatchId(record.getStr("batch_id"),record);
+            String businessIds = record.getStr("business_ids");
+            List<CrmBusiness> businessList = new ArrayList<>();
+            if (businessIds != null) {
+                String[] businessIdsArr = businessIds.split(",");
+                for (String businessId : businessIdsArr) {
+                    businessList.add(CrmBusiness.dao.findById(Integer.valueOf(businessId)));
+                }
+            }
+            String contactsIds = record.getStr("contacts_ids");
+            List<CrmContacts> contactsList = new ArrayList<>();
+            if (contactsIds != null) {
+                String[] contactsIdsArr = contactsIds.split(",");
+                for (String contactsId : contactsIdsArr) {
+                    contactsList.add(CrmContacts.dao.findById(Integer.valueOf(contactsId)));
+                }
+            }
+            record.set("business_list", businessList).set("contacts_list", contactsList);
         });
         return recordList;
+    }
+
+    /**
+     * @author wyq
+     * 联系人导出
+     */
+    public List<Record> exportContacts(String contactsIds) {
+        String[] contactsIdsArr = contactsIds.split(",");
+        return Db.find(Db.getSqlPara("crm.contact.excelExport", Kv.by("ids", contactsIdsArr)));
+    }
+
+    /**
+     * @author wyq
+     * 获取联系人导入查重字段
+     */
+    public R getCheckingField(){
+        return R.ok().put("data","联系人姓名,电话,手机");
+//        return R.ok().put("data",Db.getSql("crm.contacts.getCheckingField"));
+    }
+
+    /**
+     * @author wyq
+     * 导入联系人
+     */
+    @Before(Tx.class)
+    public R uploadExcel(UploadFile file, Integer repeatHandling, Integer ownerUserId) {
+        ExcelReader reader = ExcelUtil.getReader(FileUtil.file(file.getUploadPath() + "\\" + file.getFileName()));
+        try {
+            List<List<Object>> read = reader.read();
+            List<Object> list = read.get(0);
+            AdminFieldService adminFieldService = new AdminFieldService();
+            Kv kv = new Kv();
+            for (int i = 0; i < list.size(); i++) {
+                kv.set(list.get(i), i);
+            }
+            List<Record> recordList = adminFieldService.list("3");
+            List<Record> fieldList = queryField();
+            fieldList.forEach(record -> {
+                if (record.getInt("is_null") == 1){
+                    record.set("name",record.getStr("name")+"(*)");
+                }
+            });
+            List<String> nameList = fieldList.stream().map(record -> record.getStr("name")).collect(Collectors.toList());
+            if (nameList.size() != list.size() || !nameList.containsAll(list)){
+                return R.error("请使用最新导入模板");
+            }
+            if (read.size() > 1) {
+                R status;
+                JSONObject object = new JSONObject();
+                for (int i = 1; i < read.size(); i++) {
+                    List<Object> contactsList = read.get(i);
+                    if (contactsList.size() < list.size()) {
+                        for (int j = contactsList.size() - 1; j < list.size(); j++) {
+                            contactsList.add(null);
+                        }
+                    }
+                    String contactsName = contactsList.get(kv.getInt("姓名")).toString();
+                    String telephone = contactsList.get(kv.getInt("电话")).toString();
+                    String mobile = contactsList.get(kv.getInt("手机")).toString();
+                    Record  repeatField= Db.findFirst(Db.getSqlPara("crm.contact.queryRepeatFieldNumber",Kv.by("contactsName",contactsName).set("telephone",telephone).set("mobile",mobile)));
+                    Integer number = repeatField.getInt("number");
+                    Integer customerId = Db.queryInt("select customer_id from 72crm_crm_customer where customer_name = ?",contactsList.get(kv.getInt("客户名称(*)")));
+                    if (0 == number) {
+                        object.fluentPut("entity", new JSONObject().fluentPut("name", contactsName)
+                                .fluentPut("customer_id",customerId)
+                                .fluentPut("telephone", contactsList.get(kv.getInt("电话")))
+                                .fluentPut("mobile", contactsList.get(kv.getInt("手机")))
+                                .fluentPut("email",contactsList.get(kv.getInt("电子邮箱")))
+                                .fluentPut("post",contactsList.get(kv.getInt("职务")))
+                                .fluentPut("address", contactsList.get(kv.getInt("地址")))
+                                .fluentPut("next_time", contactsList.get(kv.getInt("下次联系时间")))
+                                .fluentPut("remark", contactsList.get(kv.getInt("备注")))
+                                .fluentPut("owner_user_id", ownerUserId));
+                    } else if (number == 1 && repeatHandling == 1) {
+                        if (repeatHandling == 1){
+                            Record contacts = Db.findFirst(Db.getSqlPara("crm.contact.queryRepeatField",Kv.by("contactsName",contactsName).set("telephone",telephone).set("mobile",mobile)));
+                            object.fluentPut("entity", new JSONObject().fluentPut("contacts_id", contacts.getInt("contacts_id"))
+                                    .fluentPut("name", contactsName)
+                                    .fluentPut("customer_id",customerId)
+                                    .fluentPut("telephone", telephone)
+                                    .fluentPut("mobile", mobile)
+                                    .fluentPut("email",contactsList.get(kv.getInt("电子邮箱")))
+                                    .fluentPut("post",contactsList.get(kv.getInt("职务")))
+                                    .fluentPut("address", contactsList.get(kv.getInt("地址")))
+                                    .fluentPut("next_time", contactsList.get(kv.getInt("下次联系时间")))
+                                    .fluentPut("remark", contactsList.get(kv.getInt("备注")))
+                                    .fluentPut("owner_user_id", ownerUserId)
+                                    .fluentPut("batch_id", contacts.getStr("batch_id")));
+                        }else if (repeatHandling == 2){
+                            continue;
+                        }
+                    } else if (number > 1){
+                        return R.error("数据多条重复");
+                    }
+                    JSONArray jsonArray = new JSONArray();
+                    for (Record record : recordList) {
+                        Integer columnsNum = kv.getInt(record.getStr("name"))!=null?kv.getInt(record.getStr("name")):kv.getInt(record.getStr("name")+"(*)");
+                        record.set("value", contactsList.get(columnsNum));
+                        jsonArray.add(JSONObject.parseObject(record.toJson()));
+                    }
+                    object.fluentPut("field", jsonArray);
+                    status = addOrUpdate(object);
+                    if ("500".equals(status.get("code"))) {
+                        return R.error("第" + i + "行错误!");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.error();
+        } finally {
+            reader.close();
+        }
+        return R.ok();
     }
 }

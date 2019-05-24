@@ -10,20 +10,31 @@ import com.jfinal.plugin.activerecord.Record;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 public class AdminDeptService {
     public R setDept(AdminDept adminDept) {
-        boolean bol;
+        boolean bol=false;
         if (adminDept.getDeptId() == null) {
             bol = adminDept.save();
         } else {
-            bol = adminDept.update();
+            List<Record> deptList = queryDeptTree(null,adminDept.getDeptId());
+            boolean stamp=false;
+            for (Record record : deptList){
+                if (record.getInt("id").equals(adminDept.getPid())){
+                    stamp=true;
+                    break;
+                }
+            }
+            if(stamp){
+                bol = adminDept.update();
+            }
         }
-        return bol ? R.ok() : R.error();
+        return R.isSuccess(bol,"设置失败");
     }
 
-    public List<Record> queryDeptTree(String type) {
+    public List<Record> queryDeptTree(String type,Integer id) {
         List<Record> allDeptList = new ArrayList<>();
         List<Record> adminDeptList = Db.find("select dept_id as id,name,pid from 72crm_admin_dept");
         List<Record> recordList = buildTreeBy2Loop(adminDeptList, 0, allDeptList);
@@ -33,6 +44,7 @@ public class AdminDeptService {
             return adminDeptList;
         } else {
             allDeptList.forEach(record -> record.remove("children"));
+            allDeptList.removeIf(record -> record.getInt("id").equals(id));
             return allDeptList;
         }
     }

@@ -14,7 +14,7 @@
                  v-if="canSave"
                  type="primary">{{mainTitle}}</el-button>
       <el-dropdown trigger="click"
-                   v-if="showMoreHandel && moreTypes.length > 0"
+                   v-if="moreTypes.length > 0"
                    @command="handleTypeDrop">
         <flexbox class="right-more-item">
           <div>更多</div>
@@ -58,16 +58,6 @@ export default {
         return false
       }
       return this.crm[this.crmType].save
-    },
-    // 线索客户展示更多操作
-    showMoreHandel() {
-      if (
-        this.crmType == 'leads' ||
-        (this.crmType == 'customer' && !this.isSeas)
-      ) {
-        return true
-      }
-      return false
     }
   },
   data() {
@@ -109,10 +99,7 @@ export default {
   },
   mounted() {
     // 线索和客户判断更多操作
-    if (
-      this.crmType == 'leads' ||
-      (this.crmType == 'customer' && !this.isSeas)
-    ) {
+    if (!this.isSeas && this.crm[this.crmType]) {
       if (this.crm[this.crmType].excelimport) {
         this.moreTypes.push({ type: 'enter', name: '导入' })
       }

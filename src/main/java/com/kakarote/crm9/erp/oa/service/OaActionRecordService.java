@@ -71,12 +71,10 @@ public class OaActionRecordService {
         Integer type = pageRequest.getData().getType();
         AdminUser user = BaseUtil.getUser();
         SqlPara sqlPara;
-        List<Long> userIdList = new ArrayList<>();
+        List<Long> userIdList = userService.queryChileUserIds(user.getUserId());
         userIdList.add(user.getUserId());
-        List<Integer> deptIdList = new ArrayList<>();
+        List<Integer> deptIdList=userService.queryChileDeptIds(user.getDeptId());
         deptIdList.add(user.getDeptId());
-        userService.queryChileUserIds(userIdList, user.getUserId());
-        userService.queryChileDeptIds(deptIdList, user.getDeptId());
         if (type.equals(OaEnum.ALL_TYPE_KEY.getTypes())) {
             sqlPara = Db.getSqlPara("oa.record.queryList", Kv.by("userId", user.getUserId()).set("deptId", user.getDeptId()).set("userIds", userIdList).set("deptIds", deptIdList));
         } else {

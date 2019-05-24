@@ -229,4 +229,29 @@ public class AdminFieldController extends Controller {
     public void fieldConfig(@Para("")AdminFieldSort adminFieldSort){
         renderJson(adminFieldService.fieldConfig(adminFieldSort));
     }
+
+    /**
+     * @author wyq
+     * 获取导入查重字段
+     */
+    public void getCheckingField(@Para("type")Integer type){
+        R data;
+        switch (type) {
+            case 1:
+                data = crmLeadsService.getCheckingField();
+                break;
+            case 2:
+                data = crmCustomerService.getCheckingField();
+                break;
+            case 3:
+                data = crmContactsService.getCheckingField();
+                break;
+            case 4:
+                data = crmProductService.getCheckingField();
+                break;
+            default:
+                data = R.error("type不符合要求");
+        }
+        renderJson(data);
+    }
 }

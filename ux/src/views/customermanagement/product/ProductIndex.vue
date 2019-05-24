@@ -5,6 +5,7 @@
                      @on-handle="listHeadHandle"
                      @on-search="crmSearch"
                      main-title="新建产品"
+                     @on-export="exportInfos"
                      :crm-type="crmType">
     </c-r-m-list-head>
     <div v-empty="!crm.product.index"

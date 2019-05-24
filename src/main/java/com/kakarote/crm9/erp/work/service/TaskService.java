@@ -40,7 +40,7 @@ public class TaskService {
         } else {
             bol = taskClass.update();
         }
-        return bol ? R.ok() : R.error();
+        return R.isSuccess(bol);
     }
 
 
@@ -231,7 +231,9 @@ public class TaskService {
     public R getTaskList(Integer type , Integer status, Integer priority, Integer date, List<Integer> userIds, BasePageRequest<Task> basePageRequest, String name){
         String total = "select count(*) from 72crm_task a where a.pid = 0 and a.ishidden = 0 ";
         StringBuffer sql = new StringBuffer();
+        if (userIds.size() > 0){
         if ( type == null || type == 0){
+
             sql.append(" and ( a.main_user_id in ( ");
             for (int i = 0;i < userIds.size();i++){
                 if (i == 0){
@@ -291,6 +293,7 @@ public class TaskService {
             }
             sql.append(")");
         }
+        }
         if (status != null ){
             sql.append(" and a.status = ").append(status);
         }
@@ -307,7 +310,7 @@ public class TaskService {
             if (date == 4)
             { sql.append(" and to_days(NOW()) - TO_DAYS(a.stop_time) >= -30 and to_days(NOW()) - TO_DAYS(a.stop_time) <= 0 ");}
         }
-        if (name != null){
+        if (StrUtil.isNotEmpty(name)){
             sql.append(" and a.name like '%").append(name).append("%' ");
         }
         sql.append("order by a.create_time desc");

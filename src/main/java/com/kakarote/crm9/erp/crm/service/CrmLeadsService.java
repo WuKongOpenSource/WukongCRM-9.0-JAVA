@@ -8,6 +8,7 @@ import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.plugin.activerecord.SqlPara;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
@@ -52,8 +53,14 @@ public class CrmLeadsService {
      * @author wyq
      * 分页条件查询线索
      */
-    public Page<Record> getLeadsPageList(BasePageRequest basePageRequest) {
-        return Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select *", "from leadsview");
+    public Page<Record> getLeadsPageList(BasePageRequest<CrmLeads> basePageRequest) {
+        String leadsName = basePageRequest.getData().getLeadsName();
+        String telephone = basePageRequest.getData().getTelephone();
+        String mobile = basePageRequest.getData().getMobile();
+        if (StrUtil.isEmpty(leadsName) && StrUtil.isEmpty(telephone) && StrUtil.isEmpty(mobile)){
+            return new Page<>();
+        }
+        return Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("crm.leads.getLeadsPageList",Kv.by("leadsName",leadsName).set("telephone",telephone).set("mobile",mobile)));
     }
 
     /**
@@ -319,8 +326,11 @@ public class CrmLeadsService {
 
     /**
      * @author wyq
-     * 获取线索导入模板
+     * 获取线索导入查重字段
      */
+    public R getCheckingField(){
+        return R.ok().put("data","线索名称");
+    }
 
     /**
      * @author wyq
@@ -338,6 +348,16 @@ public class CrmLeadsService {
                 kv.set(list.get(i), i);
             }
             List<Record> recordList = adminFieldService.list("1");
+            List<Record> fieldList = queryField();
+            fieldList.forEach(record -> {
+                if (record.getInt("is_null") == 1){
+                    record.set("name",record.getStr("name")+"(*)");
+                }
+            });
+            List<String> nameList = fieldList.stream().map(record -> record.getStr("name")).collect(Collectors.toList());
+            if (nameList.size() != list.size() || !nameList.containsAll(list)){
+                return R.error("请使用最新导入模板");
+            }
             if (read.size() > 1) {
                 R status;
                 JSONObject object = new JSONObject();
@@ -374,7 +394,8 @@ public class CrmLeadsService {
                     }
                     JSONArray jsonArray = new JSONArray();
                     for (Record record : recordList) {
-                        record.set("value", leadsList.get(kv.getInt(record.getStr("name"))));
+                        Integer columnsNum = kv.getInt(record.getStr("name"))!=null?kv.getInt(record.getStr("name")):kv.getInt(record.getStr("name")+"(*)");
+                        record.set("value", leadsList.get(columnsNum));
                         jsonArray.add(JSONObject.parseObject(record.toJson()));
                     }
                     object.fluentPut("field", jsonArray);

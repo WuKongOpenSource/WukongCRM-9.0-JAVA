@@ -3,6 +3,7 @@ package com.kakarote.crm9.erp.admin.service;
 import cn.hutool.core.util.ReUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminMenu;
 import com.kakarote.crm9.erp.admin.entity.AdminRole;
@@ -95,7 +96,11 @@ public class AdminRoleService {
      * 查看权限
      */
     public JSONObject auth(Long userId) {
-        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject=CaffeineCache.ME.get("role:permissions",userId.toString());
+        if(jsonObject!=null){
+            return jsonObject;
+        }
+        jsonObject = new JSONObject();
         List<Record> menuRecords;
         List<Integer> roleIds = queryRoleIdsByUserId(userId);
         if (roleIds.contains(BaseConstant.SUPER_ADMIN_ROLE_ID)) {
@@ -144,6 +149,7 @@ public class AdminRoleService {
                 jsonObject.put(adminMenu.getRealm(), object);
             }
         }
+        CaffeineCache.ME.put("role:permissions:"+userId.toString(),jsonObject);
         return jsonObject;
     }
 

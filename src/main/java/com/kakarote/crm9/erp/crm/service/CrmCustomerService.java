@@ -34,6 +34,7 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CrmCustomerService {
     @Inject
@@ -52,8 +53,13 @@ public class CrmCustomerService {
      * @author wyq
      * 分页条件查询客户
      */
-    public Page<Record> getCustomerPageList(BasePageRequest basePageRequest) {
-        return Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("crm.customer.getCustomerPageList"));
+    public Page<Record> getCustomerPageList(BasePageRequest<CrmCustomer> basePageRequest) {
+        String customerName = basePageRequest.getData().getCustomerName();
+        String telephone = basePageRequest.getData().getTelephone();
+        if (StrUtil.isEmpty(customerName)&&StrUtil.isEmpty(telephone)){
+            return new Page<>();
+        }
+        return Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("crm.customer.getCustomerPageList",Kv.by("customerName",customerName).set("telephone",telephone)));
     }
 
     /**
@@ -428,6 +434,19 @@ public class CrmCustomerService {
         return fieldList;
     }
 
+    public List<Record> queryExcelField(){
+        List<Record> fieldList = new LinkedList<>();
+        String[] settingArr = new String[]{};
+        fieldUtil.getFixedField(fieldList, "customerName", "客户名称", "", "text", settingArr, 1);
+        fieldUtil.getFixedField(fieldList, "telephone", "电话", "", "text", settingArr, 0);
+        fieldUtil.getFixedField(fieldList, "website", "网址", "", "text", settingArr, 0);
+        fieldUtil.getFixedField(fieldList, "nextTime", "下次联系时间", "", "datetime", settingArr, 0);
+        fieldUtil.getFixedField(fieldList, "remark", "备注", "", "text", settingArr, 0);
+        fieldUtil.getFixedField(fieldList, "detail_address", "详细地址", "", "text", settingArr, 0);
+        fieldList.addAll(adminFieldService.list("2"));
+        return fieldList;
+    }
+
     /**
      * @author wyq
      * 查询编辑字段
@@ -479,24 +498,24 @@ public class CrmCustomerService {
             oaEventRelation.setCreateTime(DateUtil.date());
             oaEventRelation.save();
         }
-        if (adminRecord.getBusinessIds() != null) {
-            String[] businessIdsArr = adminRecord.getBusinessIds().split(",");
-            for (String busienssId : businessIdsArr) {
-                AdminRecord businessRecord = adminRecord.build();
-                businessRecord.setTypes("crm_business");
-                businessRecord.setTypesId(Integer.parseInt(busienssId));
-                businessRecord.save();
-            }
-        }
-        if (adminRecord.getContactsIds() != null) {
-            String[] contactsIdsArr = adminRecord.getContactsIds().split(",");
-            for (String contactsId : contactsIdsArr) {
-                AdminRecord contactsRecord = adminRecord.build();
-                contactsRecord.setTypes("crm_contacts");
-                contactsRecord.setTypesId(Integer.parseInt(contactsId));
-                contactsRecord.save();
-            }
-        }
+//        if (adminRecord.getBusinessIds() != null) {
+//            String[] businessIdsArr = adminRecord.getBusinessIds().split(",");
+//            for (String busienssId : businessIdsArr) {
+//                AdminRecord businessRecord = adminRecord.build();
+//                businessRecord.setTypes("crm_business");
+//                businessRecord.setTypesId(Integer.parseInt(busienssId));
+//                businessRecord.save();
+//            }
+//        }
+//        if (adminRecord.getContactsIds() != null) {
+//            String[] contactsIdsArr = adminRecord.getContactsIds().split(",");
+//            for (String contactsId : contactsIdsArr) {
+//                AdminRecord contactsRecord = adminRecord.build();
+//                contactsRecord.setTypes("crm_contacts");
+//                contactsRecord.setTypesId(Integer.parseInt(contactsId));
+//                contactsRecord.save();
+//            }
+//        }
         if (adminRecord.getNextTime() != null) {
             Date nextTime = adminRecord.getNextTime();
             CrmCustomer crmCustomer = new CrmCustomer();
@@ -678,10 +697,18 @@ public class CrmCustomerService {
     }
 
     /**
+     * @author wyq
+     * 获取客户导入查重字段
+     */
+    public R getCheckingField(){
+        return R.ok().put("data","客户名称");
+    }
+
+    /**
      * 导入客户
-     *
      * @author wyq
      */
+    @Before(Tx.class)
     public R uploadExcel(UploadFile file, Integer repeatHandling, Integer ownerUserId) {
         ExcelReader reader = ExcelUtil.getReader(FileUtil.file(file.getUploadPath() + "\\" + file.getFileName()));
         try {
@@ -693,6 +720,16 @@ public class CrmCustomerService {
                 kv.set(list.get(i), i);
             }
             List<Record> recordList = adminFieldService.list("2");
+            List<Record> fieldList = queryExcelField();
+            fieldList.forEach(record -> {
+                if (record.getInt("is_null") == 1){
+                    record.set("name",record.getStr("name")+"(*)");
+                }
+            });
+            List<String> nameList = fieldList.stream().map(record -> record.getStr("name")).collect(Collectors.toList());
+            if (nameList.size() != list.size() || !nameList.containsAll(list)){
+                return R.error("请使用最新导入模板");
+            }
             if (read.size() > 1) {
                 R status;
                 JSONObject object = new JSONObject();
@@ -707,7 +744,7 @@ public class CrmCustomerService {
                     Integer number = Db.queryInt("select count(*) from 72crm_crm_customer where customer_name = ?", customerName);
                     if (0 == number) {
                         object.fluentPut("entity", new JSONObject().fluentPut("customer_name", customerName)
-                                .fluentPut("telephone", customerList.get(kv.getInt("电话")))
+                                .fluentPut("telephone", customerList.get(kv.getInt("电话")!=null?kv.getInt("电话"):kv.getInt("电话(*)")))
                                 .fluentPut("website", customerList.get(kv.getInt("网址")))
                                 .fluentPut("next_time", customerList.get(kv.getInt("下次联系时间")))
                                 .fluentPut("remark", customerList.get(kv.getInt("备注")))
@@ -729,7 +766,8 @@ public class CrmCustomerService {
                     }
                     JSONArray jsonArray = new JSONArray();
                     for (Record record : recordList) {
-                        record.set("value", customerList.get(kv.getInt(record.getStr("name"))));
+                        Integer columnsNum = kv.getInt(record.getStr("name"))!=null?kv.getInt(record.getStr("name")):kv.getInt(record.getStr("name")+"(*)");
+                        record.set("value", customerList.get(columnsNum));
                         jsonArray.add(JSONObject.parseObject(record.toJson()));
                     }
                     object.fluentPut("field", jsonArray);

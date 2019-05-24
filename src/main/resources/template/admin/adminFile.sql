@@ -10,8 +10,6 @@
       where a.batch_id=?
     #end
     #sql("queryPathByBatchId")
-      SELECT path
-      FROM `72crm_admin_file` as a
-      where a.batch_id=?
+      SELECT path FROM `72crm_admin_file` as a where a.batch_id=?
     #end
 #end

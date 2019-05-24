@@ -329,7 +329,7 @@ export default {
                   if (element.key === 'product') {
                     element['value'] = {
                       product: res.data.list,
-                      totalPrice: res.data.totalPrice,
+                      totalPrice: res.data.money,
                       discountRate: res.data.discountRate
                     }
                     break

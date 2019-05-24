@@ -139,6 +139,9 @@ public class OaExamineService{
     public R setOaExamine(JSONObject jsonObject){
         AdminUser user = BaseUtil.getUser();
         OaExamine oaExamine = jsonObject.getObject("oaExamine", OaExamine.class);
+        if(oaExamine.getStartTime().compareTo(oaExamine.getEndTime()) == 1){
+            return R.error("结束时间早于开始时间");
+        }
         boolean bol;
         String batchId = StrUtil.isNotEmpty(oaExamine.getBatchId()) ? oaExamine.getBatchId() : IdUtil.simpleUUID();
         adminFieldService.save(jsonObject.getJSONArray("field"), batchId);

@@ -72,6 +72,14 @@ import {
   crmLeadsExcelImport,
   crmLeadsExcelDownloadURL
 } from '@/api/customermanagement/clue'
+import {
+  crmContactsExcelImport,
+  crmContactsExcelDownloadURL
+} from '@/api/customermanagement/contacts'
+import {
+  crmProductExcelImport,
+  crmProductExcelDownloadURL
+} from '@/api/customermanagement/product'
 import { XhUserCell } from '@/components/CreateCom'
 import { Loading } from 'element-ui'
 
@@ -92,12 +100,14 @@ export default {
   computed: {
     ...mapGetters(['userInfo']),
     crmTypeName() {
-      if (this.crmType == 'customer') {
-        return '客户'
-      } else if (this.crmType == 'leads') {
-        return '线索'
-      }
-      return ''
+      return (
+        {
+          customer: '客户',
+          leads: '线索',
+          contacts: '联系人',
+          product: '产品'
+        }[this.crmType] || ''
+      )
     }
   },
   props: {
@@ -125,7 +135,7 @@ export default {
       if (!this.file.name) {
         this.$message.error('请选择导入文件')
       } else if (
-        this.crmType == 'leads' &&
+        this.crmType != 'customer' &&
         (!this.user || this.user.length == 0)
       ) {
         this.$message.error('请选择负责人')
@@ -133,12 +143,12 @@ export default {
         params.repeatHandling = this.config
         params.file = this.file
         params.ownerUserId = this.user[0].userId
-        var request
-        if (this.crmType == 'customer') {
-          request = crmCustomerExcelImport
-        } else if (this.crmType == 'leads') {
-          request = crmLeadsExcelImport
-        }
+        var request = {
+          customer: crmCustomerExcelImport,
+          leads: crmLeadsExcelImport,
+          contacts: crmContactsExcelImport,
+          product: crmProductExcelImport
+        }[this.crmType]
         let loading = Loading.service({ fullscreen: true })
         request(params)
           .then(res => {
@@ -154,11 +164,12 @@ export default {
     // 下载模板操作
     download() {
       var a = document.createElement('a')
-      if (this.crmType == 'customer') {
-        a.href = crmCustomerExcelDownloadURL
-      } else if (this.crmType == 'leads') {
-        a.href = crmLeadsExcelDownloadURL
-      }
+      a.href = {
+        customer: crmCustomerExcelDownloadURL,
+        leads: crmLeadsExcelDownloadURL,
+        contacts: crmContactsExcelDownloadURL,
+        product: crmProductExcelDownloadURL
+      }[this.crmType]
       a.target = '_black'
       document.body.appendChild(a)
       a.click()

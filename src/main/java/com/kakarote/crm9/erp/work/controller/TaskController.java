@@ -146,10 +146,6 @@ public class TaskController extends Controller {
             //userIds.add(1);
         }else if (mold == 1 && userId == null){
             userIds = userService.queryUserIdsByParentId(BaseUtil.getUser().getUserId().intValue());
-            /*if ( userIds == null || userIds.size () == 0 ){
-                renderJson(R.ok ().put ( "data", new ArrayList<> ()));
-                return;
-            }*/
         }else {
             userIds.add(userId);
         }

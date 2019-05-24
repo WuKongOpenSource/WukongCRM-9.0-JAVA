@@ -32,6 +32,7 @@
       where a.role_id = ?
 			and (b.parent_id in (SELECT menu_id FROM 72crm_admin_menu WHERE parent_id = ?) or b.parent_id = ?)
     #end
+
     #sql ("queryAnnouncementByUserId")
       SELECT a.* FROM 72crm_admin_role as a
       LEFT JOIN 72crm_admin_user_role as saur on saur.role_id = a.role_id

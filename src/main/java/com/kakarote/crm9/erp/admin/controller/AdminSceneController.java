@@ -99,26 +99,6 @@ public class AdminSceneController extends Controller {
      * Crm列表页查询
      */
     public void queryPageList(BasePageRequest basePageRequest){
-        JSONObject jsonObject = basePageRequest.getJsonObject();
-        Integer sceneId = jsonObject.getInteger("sceneId");
-        JSONObject data = new JSONObject();
-        if (sceneId != null && sceneId != 0){
-            data = JSON.parseObject(AdminScene.dao.findById(sceneId).getData());
-        }
-        if (sceneId == null && jsonObject.getInteger("type") == 1){
-            data = new JSONObject().fluentPut("is_transform",new JSONObject().fluentPut("name","is_transform").fluentPut("condition","is").fluentPut("value","下架"));
-        }
-        if (sceneId == null && jsonObject.getInteger("type") == 4){
-            data = new JSONObject().fluentPut("是否上下架",new JSONObject().fluentPut("name","是否上下架").fluentPut("condition","is").fluentPut("value","上架"));
-        }
-        if (jsonObject.getJSONObject("data") != null){
-            if (data != null){
-                jsonObject.getJSONObject("data").putAll(data);
-            }
-        }else {
-            jsonObject.put("data",data);
-        }
-        basePageRequest.setJsonObject(jsonObject);
-        renderJson(adminSceneService.getCrmPageList(basePageRequest));
+        renderJson(adminSceneService.filterConditionAndGetPageList(basePageRequest));
     }
 }

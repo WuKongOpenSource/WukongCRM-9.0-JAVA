@@ -25,7 +25,7 @@
       select count(*) from 72crm_crm_product_category where pid = ?
     #end
     #sql("getByNum")
-      select * from productview where num = ?
+      select COUNT(*) from productview where num = ?
     #end
     #sql("querySubtotalByContractId")
       select distinct ccc.discount_rate,
@@ -38,5 +38,15 @@
       round((( select SUM(subtotal) from 72crm_crm_business_product WHERE business_id = ccc.business_id ) /100*(100 - ccc.discount_rate) ),2)as money
       from 72crm_crm_business as ccc
       where ccc.business_id = ?
+    #end
+
+    #sql ("excelExport")
+    select *
+    from productview
+    where product_id in (
+        #for(i:ids)
+          #(for.index > 0 ? "," : "")#para(i)
+        #end
+    ) order by update_time desc
     #end
 #end

@@ -1,9 +1,15 @@
 package com.kakarote.crm9.erp.crm.controller;
 
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Clear;
+import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
+import com.kakarote.crm9.erp.admin.service.AdminFieldService;
+import com.kakarote.crm9.erp.admin.service.AdminSceneService;
 import com.kakarote.crm9.erp.crm.entity.CrmProduct;
 import com.kakarote.crm9.erp.crm.service.CrmProductService;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
@@ -16,8 +22,12 @@ import com.jfinal.upload.UploadFile;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CrmProductController extends Controller {
 
@@ -87,6 +97,70 @@ public class CrmProductController extends Controller {
     public void queryField() {
         renderJson(R.ok().put("data", crmProductService.queryField()));
     }
+
+    /**
+     * @author wyq
+     * 批量导出产品
+     */
+    @Permissions("crm:product:excelexport")
+    public void batchExportExcel(@Para("ids")String productIds) throws IOException {
+        List<Record> recordList = crmProductService.exportProduct(productIds);
+        export(recordList);
+        renderNull();
+    }
+
+    /**
+     * @author wyq
+     * 导出全部产品
+     */
+    @Permissions("crm:product:excelexport")
+    public void allExportExcel(BasePageRequest basePageRequest) throws IOException{
+        JSONObject jsonObject = basePageRequest.getJsonObject();
+        jsonObject.fluentPut("excel","yes").fluentPut("type","4");
+        AdminSceneService adminSceneService = new AdminSceneService();
+        List<Record> recordList = (List<Record>)adminSceneService.filterConditionAndGetPageList(basePageRequest).get("data");
+        export(recordList);
+        renderNull();
+    }
+
+    private void export(List<Record> recordList) throws IOException{
+        ExcelWriter writer = ExcelUtil.getWriter();
+        AdminFieldService adminFieldService = new AdminFieldService();
+        List<Record> fieldList = adminFieldService.list("4");
+        writer.addHeaderAlias("name","产品名称");
+        writer.addHeaderAlias("num","产品编码");
+        writer.addHeaderAlias("category_name","产品类别");
+        writer.addHeaderAlias("price","价格");
+        writer.addHeaderAlias("description","产品描述");
+        writer.addHeaderAlias("create_user_name","创建人");
+        writer.addHeaderAlias("owner_user_name","负责人");
+        writer.addHeaderAlias("create_time","创建时间");
+        writer.addHeaderAlias("update_time","更新时间");
+        for (Record field:fieldList){
+            writer.addHeaderAlias(field.getStr("name"),field.getStr("name"));
+        }
+        writer.merge(8+fieldList.size(),"产品信息");
+        HttpServletResponse response = getResponse();
+        List<Map<String,Object>> list = new ArrayList<>();
+        for (Record record : recordList){
+            list.add(record.remove("batch_id","status","unit","category_id","product_id","owner_user_id","create_user_id").getColumns());
+        }
+        writer.write(list,true);
+        for (int i=0; i < fieldList.size()+15;i++){
+            writer.setColumnWidth(i,20);
+        }
+        //自定义标题别名
+        //response为HttpServletResponse对象
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        response.setCharacterEncoding("UTF-8");
+        //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+        response.setHeader("Content-Disposition", "attachment;filename=product.xls");
+        ServletOutputStream out = response.getOutputStream();
+        writer.flush(out);
+        // 关闭writer，释放内存
+        writer.close();
+    }
+
     /**
      * @author zxy
      * 获取导入模板
@@ -96,14 +170,18 @@ public class CrmProductController extends Controller {
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("产品导入表");
         HSSFRow row = sheet.createRow(0);
+        List<String> categoryList = Db.query("select name from 72crm_crm_product_category");
         for (int i=0;i < recordList.size();i++){
             Record record = recordList.get(i);
             String[] setting = record.get("setting");
             HSSFCell cell = row.createCell(i);
-            if (record.getInt("is_null") == 0||record.getInt("isNull") == 0){
-                cell.setCellValue(record.getStr("name"));
-            }else if (record.getInt("is_null") == 1||record.getInt("isNull") == 1){
+            if (record.getInt("is_null") == 1){
                 cell.setCellValue(record.getStr("name")+"(*)");
+            }else {
+                cell.setCellValue(record.getStr("name"));
+            }
+            if ("产品分类".equals(record.getStr("name"))){
+                setting = categoryList.toArray(new String[categoryList.size()]);
             }
             if (setting.length != 0){
                 CellRangeAddressList regions = new CellRangeAddressList(0, Integer.MAX_VALUE, i, i);
@@ -130,6 +208,7 @@ public class CrmProductController extends Controller {
      * @author zxy
      * 导入产品
      */
+    @Permissions("crm:product:excelimport")
     public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling, @Para("ownerUserId") Integer ownerUserId){
         renderJson(crmProductService.uploadExcel(file,repeatHandling,ownerUserId));
     }

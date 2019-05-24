@@ -168,7 +168,8 @@ public class OaLogService {
             oaActionRecordService.deleteRecord(OaEnum.LOG_TYPE_KEY.getTypes(), logId);
             Db.deleteById("72crm_oa_log_relation", "log_id", logId);
             adminFileService.removeByBatchId(oaLog.getBatchId());
-            return oaLog.delete();
+            Db.deleteById("72crm_oa_log","log_id",logId);
+            return true;
         }
         return false;
     }

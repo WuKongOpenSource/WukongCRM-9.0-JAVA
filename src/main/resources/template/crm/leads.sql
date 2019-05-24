@@ -1,6 +1,15 @@
 #namespace("crm.leads")
     #sql("getLeadsPageList")
-    select *
+    select leads_name,owner_user_name from leadsview where 1=1
+      #if(leadsName)
+      and leads_name like CONCAT('%',#para(leadsName),'%')
+      #end
+      #if(telephone)
+      and telephone like CONCAT('%',#para(telephone),'%')
+      #end
+      #if(mobile)
+      and mobile like CONCAT('%',#para(mobile),'%')
+      #end
     #end
 
     #sql("count")

@@ -11,7 +11,7 @@
      from 72crm_admin_examine_log as sael where examine_step_id = ? order by create_time
    #end
    #sql("queryNowadayExamineLogByRecordIdAndStepId")
-   select * from 72crm_admin_examine_log where record_id = ? and examine_step_id = ? and examine_user = ? and is_recheck = 0
+     select * from 72crm_admin_examine_log where record_id = ? and examine_step_id = ? and examine_user = ? and is_recheck = 0
    #end
    #sql("queryExamineLogByRecordIdAndStepId")
      select sael.* ,

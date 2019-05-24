@@ -24,8 +24,6 @@ public class ErpInterceptor implements Interceptor {
                 controller.renderJson(R.error(302, "请先登录！"));
                 return;
             }
-            //TODO 权限功能后台拦截待实现
-            //Permissions permissions=invocation.getMethod().getAnnotation(Permissions.class);
             NotNullValidate[] validates = invocation.getMethod().getAnnotationsByType(NotNullValidate.class);
             if (ArrayUtil.isNotEmpty(validates)) {
                 if (HttpEnum.PARA.equals(validates[0].type())) {

@@ -55,7 +55,7 @@ public class CrmCustomerController extends Controller {
      * @author wyq
      *分页条件查询客户
      */
-    public void queryList(BasePageRequest basePageRequest){
+    public void queryList(BasePageRequest<CrmCustomer> basePageRequest){
         renderJson(R.ok().put("data",crmCustomerService.getCustomerPageList(basePageRequest)));
     }
 
@@ -332,12 +332,12 @@ public class CrmCustomerController extends Controller {
      * @author wyq
      * 全部导出
      */
-    @Permissions("crm:customer:excelport")
+    @Permissions("crm:customer:excelexport")
     public void allExportExcel(BasePageRequest basePageRequest) throws IOException{
         JSONObject jsonObject = basePageRequest.getJsonObject();
         jsonObject.fluentPut("excel","yes").fluentPut("type","2");
         AdminSceneService adminSceneService = new AdminSceneService();
-        List<Record> recordList = (List<Record>)adminSceneService.getCrmPageList(basePageRequest).get("data");
+        List<Record> recordList = (List<Record>)adminSceneService.filterConditionAndGetPageList(basePageRequest).get("data");
         export(recordList);
         renderNull();
     }
@@ -411,7 +411,7 @@ public class CrmCustomerController extends Controller {
      * 获取导入模板
      */
     public void downloadExcel(){
-        List<Record> recordList = crmCustomerService.queryField();
+        List<Record> recordList = crmCustomerService.queryExcelField();
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("客户导入表");
         HSSFRow row = sheet.createRow(0);

@@ -254,3 +254,12 @@ export function crmMainIndex(data) {
     }
   })
 }
+
+// 跟进记录删除
+export function crmRecordDelete(data) {
+  return request({
+    url: 'CrmRecord/deleteFollowRecord',
+    method: 'post',
+    data: data
+  })
+}

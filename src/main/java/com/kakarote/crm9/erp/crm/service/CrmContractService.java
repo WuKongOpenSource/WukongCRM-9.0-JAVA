@@ -122,8 +122,8 @@ public class CrmContractService {
         adminFieldService.save(jsonObject.getJSONArray("field"), batchId);
         boolean flag;
         if (crmContract.getContractId() == null) {
-            CrmContract contract = CrmContract.dao.findFirst(Db.getSql("crm.contract.queryByNum"),crmContract.getNum());
-            if (contract != null){
+            Integer contract =Db.queryInt(Db.getSql("crm.contract.queryByNum"),crmContract.getNum());
+            if (contract != 0){
                 return R.error("合同编号已存在，请校对后再添加！");
             }
             crmContract.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
@@ -163,12 +163,22 @@ public class CrmContractService {
             List<CrmContractProduct> contractProductList = jsonArray.toJavaList(CrmContractProduct.class);
             //删除之前的合同产品关联表
             Db.delete(Db.getSql("crm.contract.deleteByContractId"), crmContract.getContractId());
+            if (crmContract.getBusinessId() != null){
+                Db.delete("delete from 72crm_crm_business_product where business_id = ?",crmContract.getBusinessId());
+            }
             if (contractProductList != null) {
                 for (CrmContractProduct crmContractProduct : contractProductList) {
                     crmContractProduct.setContractId(crmContract.getContractId());
                     crmContractProduct.save();
+                    if (crmContract.getBusinessId() != null){
+                        CrmBusinessProduct crmBusinessProduct = new CrmBusinessProduct()._setOrPut(crmContractProduct.toRecord().getColumns());
+                        crmBusinessProduct.setRId(null);
+                        crmBusinessProduct.setBusinessId(crmContract.getBusinessId());
+                        crmBusinessProduct.save();
+                    }
                 }
             }
+
         }
 
         return R.isSuccess(flag);

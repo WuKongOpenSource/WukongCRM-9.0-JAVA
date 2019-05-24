@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Properties;
 
 @SuppressWarnings("all")
+@Deprecated
 public class DruidFilter extends FilterEventAdapter {
     @Override
     public ConnectionProxy connection_connect(FilterChain chain, Properties info) throws SQLException {
@@ -65,33 +66,6 @@ public class DruidFilter extends FilterEventAdapter {
 
     @Override
     public PreparedStatementProxy connection_prepareStatement(FilterChain chain, ConnectionProxy connection, String sql) throws SQLException {
-        if (sql != null && sql.length() > 6 && "select".equals(sql.trim().substring(0, 6))) {
-            SQLExpr exp = SQLUtils.toMySqlExpr(sql);
-            if (exp instanceof SQLQueryExpr && ((SQLQueryExpr) exp).getSubQuery().getQuery() instanceof MySqlSelectQueryBlock) {
-                MySqlSelectQueryBlock select = (MySqlSelectQueryBlock) (((SQLQueryExpr) exp).getSubQuery().getQuery());
-                String tableName = select.getFrom().getAlias() == null ? select.getFrom().toString() : select.getFrom().getAlias();
-                List<String> tables = new ArrayList<>(7);
-                tables.add("leadsview");
-                tables.add("customerview");
-                tables.add("contactsview");
-                // TODO 目前产品全部能看到
-                //tables.add("productview");
-                tables.add("businessview");
-                tables.add("contractview");
-                tables.add("receivablesview");
-                if (tables.contains(tableName)) {
-                    SQLExpr where = select.getWhere();
-                    List<Long> longs=new AdminUserService().queryUserByAuth(BaseUtil.getUserId());
-                    if (where != null&&longs!=null&&longs.size()>0) {
-                        select.setWhere(SQLUtils.toMySqlExpr(where.toString() + " and owner_user_id in ("+ StrUtil.join(",",longs) +")"));
-                    }
-                    if("customerview".equals(tableName)||"contractview".equals(tableName)||"businessview".equals(tableName)){
-                        select.setWhere(SQLUtils.toMySqlExpr(SQLUtils.toSQLString(where) + " or ro_user_id like CONCAT('%,','"+BaseUtil.getUserId()+"',',%')" +" or rw_user_id like CONCAT('%,','"+BaseUtil.getUserId()+"',',%')"));
-                    }
-                    return super.connection_prepareStatement(chain, connection, SQLUtils.toMySqlString(select));
-                }
-            }
-        }
         return super.connection_prepareStatement(chain, connection, sql);
     }
 

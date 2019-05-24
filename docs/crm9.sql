@@ -471,7 +471,10 @@ INSERT INTO `72crm_admin_menu` VALUES ('103', '98', '查看', 'read', '3', '0', 
 INSERT INTO `72crm_admin_menu` VALUES ('104', '99', '查看', 'read', '3', '0', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('105', '100', '查看', 'read', '3', '0', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('106', '101', '查看', 'read', '3', '0', '1', null);
-
+INSERT INTO `72crm_admin_menu` (`parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('11', '联系人导出', 'excelexport', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('11', '联系人导入', 'excelimport', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('15', '产品导入', 'excelimport', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('15', '产品导出', 'excelexport', '3', '1', '1', NULL);
 -- ----------------------------
 -- Table structure for 72crm_admin_record
 -- ----------------------------
@@ -492,6 +495,14 @@ CREATE TABLE `72crm_admin_record` (
   PRIMARY KEY (`record_id`),
   UNIQUE KEY `record_id` (`record_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=152 DEFAULT CHARSET=utf8 COMMENT='跟进记录';
+
+DROP TABLE IF EXISTS `72crm_crm_contacts_business`;
+CREATE TABLE `72crm_crm_contacts_business` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `business_id` int(11) NOT NULL,
+  `contacts_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='商机联系人关联表';
 
 -- ----------------------------
 -- Records of 72crm_admin_record

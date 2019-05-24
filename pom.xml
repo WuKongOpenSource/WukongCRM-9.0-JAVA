@@ -4,13 +4,12 @@
     <groupId>com.kakarote</groupId>
     <artifactId>crm9</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <name>crm9-master</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-        <lombok.version>1.16.20</lombok.version>
     </properties>
 
     <!-- 使用阿里 maven 库 -->
@@ -30,31 +29,17 @@
     </repositories>
 
     <dependencies>
-        <!--Undertow启动将本包取消注释,将javax.servlet-api jetty-server 删除或注释掉-->
         <dependency>
             <groupId>com.jfinal</groupId>
             <artifactId>jfinal-undertow</artifactId>
-            <version>1.5</version>
+            <version>1.6</version>
         </dependency>
-        <!--Tomcat启动将本包取消注释,将jfinal-undertow jetty-server 删除或注释掉-->
-        <!--
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
-            <scope>provided</scope>
-        </dependency>
-        -->
-        <!--Jetty启动将本包取消注释,将jfinal-undertow javax.servlet-api 删除或注释掉-->
-        <!--
-        <dependency>
-            <groupId>com.jfinal</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>2019.3</version>
-            <scope>provided</scope>
-        </dependency>
-        -->
-
+        <!--<dependency>-->
+            <!--<groupId>javax.servlet</groupId>-->
+            <!--<artifactId>javax.servlet-api</artifactId>-->
+            <!--<version>4.0.1</version>-->
+            <!--<scope>provided</scope>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>com.jfinal</groupId>
             <artifactId>jfinal</artifactId>
@@ -107,12 +92,6 @@
             <artifactId>druid</artifactId>
             <version>1.0.29</version>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -124,7 +103,6 @@
             <artifactId>hutool-all</artifactId>
             <version>4.4.0</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
@@ -140,17 +118,15 @@
             <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
             <version>1.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>2.6.2</version>
+        </dependency>
     </dependencies>
 
     <build>
-        <finalName>crm9</finalName>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>2.8</version>
-            </extension>
-        </extensions>
+        <finalName>ROOT</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -101,11 +101,17 @@ import {
   crmCustomerDelete,
   crmCustomerDistribute
 } from '@/api/customermanagement/customer'
-import { crmContactsDelete } from '@/api/customermanagement/contacts'
+import {
+  crmContactsDelete,
+  crmContactsExcelExport
+} from '@/api/customermanagement/contacts'
 import { crmBusinessDelete } from '@/api/customermanagement/business'
 import { crmContractDelete } from '@/api/customermanagement/contract'
 import { crmReceivablesDelete } from '@/api/customermanagement/money'
-import { crmProductStatus } from '@/api/customermanagement/product'
+import {
+  crmProductStatus,
+  crmProductExcelExport
+} from '@/api/customermanagement/product'
 
 import filterForm from './filterForm'
 import filterContent from './filterForm/filterContent'
@@ -265,6 +271,20 @@ export default {
           params.ids = this.selectionList
             .map(function(item, index, array) {
               return item.leadsId
+            })
+            .join(',')
+        } else if (this.crmType == 'contacts') {
+          request = crmContactsExcelExport
+          params.ids = this.selectionList
+            .map(function(item, index, array) {
+              return item.contactsId
+            })
+            .join(',')
+        } else if (this.crmType == 'product') {
+          request = crmProductExcelExport
+          params.ids = this.selectionList
+            .map(function(item, index, array) {
+              return item.productId
             })
             .join(',')
         }
@@ -537,7 +557,11 @@ export default {
           ])
         }
       } else if (this.crmType == 'contacts') {
-        return this.forSelectionHandleItems(handleInfos, ['transfer', 'delete'])
+        return this.forSelectionHandleItems(handleInfos, [
+          'transfer',
+          'export',
+          'delete'
+        ])
       } else if (this.crmType == 'business') {
         return this.forSelectionHandleItems(handleInfos, [
           'transfer',
@@ -555,7 +579,11 @@ export default {
       } else if (this.crmType == 'receivables') {
         return this.forSelectionHandleItems(handleInfos, ['delete'])
       } else if (this.crmType == 'product') {
-        return this.forSelectionHandleItems(handleInfos, ['start', 'disable'])
+        return this.forSelectionHandleItems(handleInfos, [
+          'export',
+          'start',
+          'disable'
+        ])
       }
     },
     forSelectionHandleItems(handleInfos, array) {

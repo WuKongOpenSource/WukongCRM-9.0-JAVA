@@ -16,7 +16,7 @@
       <div id="choicemap"
            class="map"></div>
       <div class="area-title">详细地址</div>
-      <el-input v-model="detail_address"
+      <el-input v-model="detailAddress"
                 placeholder=""></el-input>
     </flexbox-item>
     <flexbox-item>
@@ -38,10 +38,10 @@ export default {
   },
   computed: {},
   watch: {
-    point_address: function(newValue) {
+    pointAddress: function(newValue) {
       this.valueChange()
     },
-    detail_address: function(newValue) {
+    detailAddress: function(newValue) {
       this.valueChange()
     }
   },
@@ -52,8 +52,8 @@ export default {
       searchInput: '',
       searchCopyInput: '', // 避免修改
       /** 完整地址输入框 */
-      detail_address: '',
-      point_address: null, // 经纬度点
+      detailAddress: '',
+      pointAddress: null, // 经纬度点
       /** 区域选择 */
       addressSelect: {
         province: '',
@@ -103,7 +103,7 @@ export default {
   methods: {
     initInfo(val) {
       this.searchInput = val.location
-      this.detail_address = val.detail_address
+      this.detailAddress = val.detailAddress
       if (Object.prototype.toString.call(val.address) == '[object Array]') {
         var address = {}
         for (let index = 0; index < val.address.length; index++) {
@@ -114,8 +114,8 @@ export default {
         this.addressSelect = address
       }
       if (val.lng != 0 && val.lat != 0) {
-        this.point_address = new BMap.Point(val.lng, val.lat)
-        this.addMarkerLabel(this.point_address)
+        this.pointAddress = new BMap.Point(val.lng, val.lat)
+        this.addMarkerLabel(this.pointAddress)
       }
     },
     querySearchAsync(queryString, cb) {
@@ -145,9 +145,9 @@ export default {
       this.searchInput = item.address + item.title
       this.searchCopyInput = this.searchInput // 只能通过这种方式修改
 
-      this.detail_address = this.searchInput
+      this.detailAddress = this.searchInput
       this.addMarkerLabel(item.point)
-      this.point_address = item.point
+      this.pointAddress = item.point
       this.mapSelectArea(item)
     },
     /** Input 失去焦点  searchInput 只能通过选择更改*/
@@ -180,7 +180,7 @@ export default {
     //     this.searchInput =
     //       data.province.value + data.city.value + data.area.value
 
-    //     this.detail_address = this.searchInput
+    //     this.detailAddress = this.searchInput
     //     // 创建地址解析器实例
     //     var myGeo = new BMap.Geocoder()
     //     // 将地址解析结果显示在地图上，并调整地图视野
@@ -212,7 +212,7 @@ export default {
           function(result) {
             if (result) {
               // 获取经纬度点
-              self.point_address = result.point
+              self.pointAddress = result.point
               self.addressSelect.province = result.addressComponents.province
                 ? result.addressComponents.province
                 : ''
@@ -242,9 +242,9 @@ export default {
             this.addressSelect.area
           ],
           location: this.searchInput,
-          detail_address: this.detail_address,
-          lat: this.point_address ? this.point_address.lat : '',
-          lng: this.point_address ? this.point_address.lng : ''
+          detailAddress: this.detailAddress,
+          lat: this.pointAddress ? this.pointAddress.lat : '',
+          lng: this.pointAddress ? this.pointAddress.lng : ''
         }
       })
     }

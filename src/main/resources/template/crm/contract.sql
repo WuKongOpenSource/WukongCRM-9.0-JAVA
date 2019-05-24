@@ -63,6 +63,6 @@
     select IFNULL(sum(money),0) as receivables_money from 72crm_crm_receivables where contract_id = ?
     #end
     #sql ("queryByNum")
-    select * from snowerp_crm_contract when num = ?
+    select count(*) from 72crm_crm_contract where num = ?
     #end
 #end

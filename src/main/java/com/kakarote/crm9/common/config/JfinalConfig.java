@@ -2,18 +2,19 @@ package com.kakarote.crm9.common.config;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.druid.wall.WallFilter;
-import com.kakarote.crm9.common.config.cache.RedisCache;
+import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.druid.DruidConfig;
-import com.kakarote.crm9.common.config.druid.DruidFilter;
 import com.kakarote.crm9.common.config.json.ErpJsonFactory;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.config.paragetter.PageParaGetter;
 import com.kakarote.crm9.common.config.render.ErpRenderFactory;
 import com.kakarote.crm9.common.constant.BaseConstant;
+import com.kakarote.crm9.common.interceptor.AuthInterceptor;
 import com.kakarote.crm9.common.interceptor.ErpInterceptor;
 import com.kakarote.crm9.erp._MappingKit;
 import com.kakarote.crm9.erp.admin.common.AdminRouter;
 import com.kakarote.crm9.erp.bi.common.BiRouter;
+import com.kakarote.crm9.erp.crm.common.CrmDirective;
 import com.kakarote.crm9.erp.crm.common.CrmRouter;
 import com.kakarote.crm9.erp.oa.common.OaRouter;
 import com.kakarote.crm9.erp.work.common.WorkRouter;
@@ -39,12 +40,8 @@ import java.io.File;
  */
 public class JfinalConfig extends JFinalConfig {
 
-    public static Prop prop;
+    public static Prop prop = PropKit.use("config/crm9-config.txt");
 
-
-    static {
-        prop = PropKit.use("config/crm9-config.txt");
-    }
 
     /**
      * 配置常量
@@ -54,6 +51,7 @@ public class JfinalConfig extends JFinalConfig {
         me.setDevMode(prop.getBoolean("jfinal.devMode", true));
         me.setInjectDependency(true);
         me.setBaseUploadPath(BaseConstant.UPLOAD_PATH);
+        me.setBaseDownloadPath(BaseConstant.UPLOAD_PATH);
         me.setJsonFactory(new ErpJsonFactory());
         //限制上传100M
         me.setMaxPostSize(104857600);
@@ -84,7 +82,6 @@ public class JfinalConfig extends JFinalConfig {
         ParaProcessorBuilder.me.regist(BasePageRequest.class, PageParaGetter.class, null);
         // 配置 druid 数据库连接池插件
         DruidPlugin druidPlugin = createDruidPlugin();
-        druidPlugin.addFilter(new DruidFilter());
         druidPlugin.addFilter(new WallFilter());
         druidPlugin.setInitialSize(0);
         druidPlugin.setMinIdle(0);
@@ -96,17 +93,16 @@ public class JfinalConfig extends JFinalConfig {
         me.add(druidPlugin);
         // 配置ActiveRecord插件
         ActiveRecordPlugin arp = new ActiveRecordPlugin(druidPlugin);
-        arp.setCache(new RedisCache());
-        arp.setDialect(new MysqlDialect()).setShowSql(true);
+        arp.setCache(CaffeineCache.ME);
+        arp.setDialect(new MysqlDialect());
+        arp.getEngine().addDirective("CrmAuth", CrmDirective.class);
         me.add(arp);
         //扫描sql模板
         getSqlTemplate(PathKit.getRootClassPath() + "/template", arp);
         //Redis以及缓存插件
         createRedisPlugin(me);
         //cron定时器
-        Cron4jPlugin cron4jPlugin = new Cron4jPlugin(PropKit.use("config/cron4j.txt"));
-        cron4jPlugin.addTask("*/5 * * * *", new TaskCron());
-        me.add(cron4jPlugin);
+        me.add(new Cron4jPlugin(PropKit.use("config/cron4j.txt")));
         //model映射
         _MappingKit.mapping(arp);
     }
@@ -117,11 +113,11 @@ public class JfinalConfig extends JFinalConfig {
 
     private void createRedisPlugin(Plugins me) {
         for (String configName : prop.get("jfinal.redis", "").split(",")) {
+            RedisPlugin redisPlugin;
             if (prop.getBoolean(configName + ".open", false)) {
-                RedisPlugin redisPlugin;
-                if(prop.containsKey(configName+".password")&& StrUtil.isNotEmpty(prop.get(configName+".password"))){
+                if (prop.containsKey(configName + ".password") && StrUtil.isNotEmpty(prop.get(configName + ".password"))) {
                     redisPlugin = new RedisPlugin(prop.get(configName + ".cacheName").trim(), prop.get(configName + ".host").trim(), prop.getInt(configName + ".port", 6379), prop.getInt(configName + ".timeout", 20000), prop.get(configName + ".password", null));
-                }else {
+                } else {
                     redisPlugin = new RedisPlugin(prop.get(configName + ".cacheName").trim(), prop.get(configName + ".host").trim(), prop.getInt(configName + ".port", 6379), prop.getInt(configName + ".timeout", 20000));
                 }
                 me.add(redisPlugin);
@@ -136,6 +132,7 @@ public class JfinalConfig extends JFinalConfig {
     public void configInterceptor(Interceptors me) {
         //添加全局拦截器
         me.addGlobalActionInterceptor(new ErpInterceptor());
+        me.add(new AuthInterceptor());
     }
 
     /**
@@ -154,7 +151,6 @@ public class JfinalConfig extends JFinalConfig {
 
     }
 
-    // 系统关闭之前回调
     @Override
     public void onStop() {
 
@@ -169,7 +165,7 @@ public class JfinalConfig extends JFinalConfig {
                     if (childFile.isDirectory()) {
                         getSqlTemplate(childFile.getAbsolutePath(), arp);
                     } else {
-                        if(childFile.getName().toLowerCase().endsWith(".sql")){
+                        if (childFile.getName().toLowerCase().endsWith(".sql")) {
                             arp.addSqlTemplate(childFile.getAbsolutePath().replace(PathKit.getRootClassPath(), "").replace("\\", "/"));
                         }
                     }

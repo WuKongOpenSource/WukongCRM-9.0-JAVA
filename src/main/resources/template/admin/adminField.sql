@@ -106,6 +106,16 @@
           #end
         )
       #end
+      union all
+      SELECT
+        a.field_id,a.`name` AS fieldName,a.`name`,a.type,a.label,a.remark,a.input_tips,a.max_length,a.default_value,a.is_unique AS isUnique,a.is_null AS isNull,a.sorting,a.`options`,a.`value`,a.operating
+      FROM
+        72crm_admin_field AS a
+      WHERE
+        a.label = (SELECT label FROM 72crm_admin_field WHERE batch_id =#para(batchId) limit 1) and a.batch_id is null and field_id not in (SELECT parent_id FROM 72crm_admin_field WHERE batch_id =#para(batchId))
+        #if(names)
+          and 1=2
+        #end
     #end
     #sql("saveChildField")
       INSERT INTO `72crm_admin_field` (
@@ -140,12 +150,12 @@
     #end
 
     #sql ("sort")
-    update 72crm_admin_field_sort set is_hide = 0,sort = ? where label = ? and user_id = ? and field_id = ?
+    update 72crm_admin_field_sort set is_hide = 0,sort = ? where label = ? and user_id = ? and id = ?
     #end
 
     #sql ("isHide")
     update 72crm_admin_field_sort set is_hide = 1,sort = 0
-    where field_id in (
+    where id in (
        #for(i : ids)
            #(for.index > 0 ? "," : "")#para(i)
        #end

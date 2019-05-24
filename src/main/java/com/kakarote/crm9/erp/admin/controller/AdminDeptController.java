@@ -31,7 +31,8 @@ public class AdminDeptController extends Controller {
      */
     public void queryDeptTree(){
         String type = getPara("type");
-        renderJson(R.ok().put("data",adminDeptService.queryDeptTree(type)));
+        Integer id = getParaToInt("id");
+        renderJson(R.ok().put("data",adminDeptService.queryDeptTree(type,id)));
     }
 
     /**

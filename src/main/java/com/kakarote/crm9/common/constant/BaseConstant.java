@@ -20,7 +20,6 @@ public class BaseConstant implements Serializable {
      */
     public final static String UPLOAD_PATH = BaseUtil.isWindows() ? "D:/upload/" : "/usr/local/upload/";
 
-
     /**
      * 默认文件映射路径
      * TODO 将路径换成自己的路径

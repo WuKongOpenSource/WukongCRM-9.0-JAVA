@@ -282,7 +282,6 @@ public class ErpJsonFactory implements IJsonFactory {
             int len = param.length();
             StringBuilder sb = new StringBuilder(len);
             for (int i = 0; i < len; i++) {
-//                char c = Character.toLowerCase(param.charAt(i));
                 char c = param.charAt(i);
                 if (c == '_') {
                     if (i + 1 < len) {

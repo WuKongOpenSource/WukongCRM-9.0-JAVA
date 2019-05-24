@@ -2,6 +2,7 @@ package com.kakarote.crm9.erp.admin.controller;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.jfinal.core.paragetter.Para;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminRoleService;
@@ -40,7 +41,7 @@ public class AdminLoginController extends Controller {
      * @author zhangzhiwei
      * 用户登录
      */
-    public void login(String username, String password) {
+    public void login(@Para("username") String username, @Para("password") String password) {
         if (StrUtil.isEmpty(username) || StrUtil.isEmpty(password)) {
             renderJson(R.error("请输入用户名和密码！"));
             return;
@@ -84,15 +85,15 @@ public class AdminLoginController extends Controller {
         renderJson(R.ok());
     }
 
-    public void version(){
-        renderJson(R.ok().put("name",BaseConstant.NAME).put("version",BaseConstant.VERSION));
+    public void version() {
+        renderJson(R.ok().put("name", BaseConstant.NAME).put("version", BaseConstant.VERSION));
     }
 
-    public void ping(){
-        List<String> arrays=new ArrayList<>();
+    public void ping() {
+        List<String> arrays = new ArrayList<>();
         try {
             Connection connection = Db.use().getConfig().getConnection();
-            if(connection!=null){
+            if (connection != null) {
                 arrays.add("数据库连接成功");
             }
         } catch (Exception e) {
@@ -100,15 +101,14 @@ public class AdminLoginController extends Controller {
         }
         try {
             String ping = Redis.use().ping();
-            if("PONG".equals(ping)){
+            if ("PONG".equals(ping)) {
                 arrays.add("Redis配置成功");
-            }else {
+            } else {
                 arrays.add("Redis配置失败");
             }
-
-        }catch (Exception e){
+        } catch (Exception e) {
             arrays.add("Redis配置失败");
         }
-        renderJson(R.ok().put("data",arrays));
+        renderJson(R.ok().put("data", arrays));
     }
 }

@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminScene;
 import com.kakarote.crm9.erp.admin.entity.AdminSceneDefault;
 import com.kakarote.crm9.erp.crm.service.CrmBusinessService;
@@ -21,6 +22,7 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class AdminSceneService {
     @Inject
@@ -55,7 +57,8 @@ public class AdminSceneService {
                     .add("website", "网址", "text", settingArr)
                     .add("next_time", "下次联系时间", "datetime", settingArr)
                     .add("remark", "备注", "text", settingArr)
-                    .add("detail_address", "详细地址", "text", settingArr)
+//                    .add("detail_address", "详细地址", "text", settingArr)
+                    .add("map_address","地区","map_address",settingArr)
                     .add("deal_status", "成交状态", "select", dealStatusArr)
                     .add("owner_user_id", "负责人", "user", settingArr)
                     .add("create_user_id", "创建人", "user", settingArr)
@@ -100,6 +103,7 @@ public class AdminSceneService {
         } else if (6 == label) {
             fieldUtil.add("num", "合同编号", "number", settingArr)
                     .add("name", "合同名称", "text", settingArr)
+                    .add("check_status", "审核状态", "select", settingArr)
                     .add("customer_name", "客户名称", "customer", settingArr)
                     .add("business_name", "商机名称", "business", settingArr)
                     .add("order_date", "下单时间", "date", settingArr)
@@ -116,6 +120,7 @@ public class AdminSceneService {
                     .add("create_time", "创建时间", "datetime", settingArr);
         } else if (7 == label) {
             fieldUtil.add("number", "回款编号", "number", settingArr)
+                    .add("check_status", "审核状态", "select", settingArr)
                     .add("customer_name", "客户名称", "customer", settingArr)
                     .add("contract_num", "合同编号", "contract", settingArr)
                     .add("return_time", "回款日期", "date", settingArr)
@@ -319,6 +324,30 @@ public class AdminSceneService {
         return R.ok();
     }
 
+    public R filterConditionAndGetPageList(BasePageRequest basePageRequest){
+        JSONObject jsonObject = basePageRequest.getJsonObject();
+        Integer sceneId = jsonObject.getInteger("sceneId");
+        JSONObject data = new JSONObject();
+        if (sceneId != null && sceneId != 0){
+            data = JSON.parseObject(AdminScene.dao.findById(sceneId).getData());
+        }
+        if (sceneId == null && jsonObject.getInteger("type") == 1){
+            data = new JSONObject().fluentPut("is_transform",new JSONObject().fluentPut("name","is_transform").fluentPut("condition","is").fluentPut("value","下架"));
+        }
+        if (sceneId == null && jsonObject.getInteger("type") == 4){
+            data = new JSONObject().fluentPut("是否上下架",new JSONObject().fluentPut("name","是否上下架").fluentPut("condition","is").fluentPut("value","上架"));
+        }
+        if (jsonObject.getJSONObject("data") != null){
+            if (data != null){
+                jsonObject.getJSONObject("data").putAll(data);
+            }
+        }else {
+            jsonObject.put("data",data);
+        }
+        basePageRequest.setJsonObject(jsonObject);
+        return getCrmPageList(basePageRequest);
+    }
+
     /**
      * @author wyq
      * Crm列表页查询
@@ -381,37 +410,28 @@ public class AdminSceneService {
             }
         }
         String search = basePageRequest.getJsonObject().getString("search");
-        if (search != null && !"".equals(search)) {
-            String name;
-            switch (type) {
-                case 1:
-                    name = "leads_name";
-                    break;
-                case 2:
-                    name = "customer_name";
-                    break;
-                case 3:
-                    name = "name";
-                    break;
-                case 4:
-                    name = "name";
-                    break;
-                case 5:
-                    name = "business_name";
-                    break;
-                case 6:
-                    name = "name";
-                    break;
-                case 7:
-                    name = "number";
-                    break;
-                case 8:
-                    name = "customer_name";
-                    break;
-                default:
-                    return R.error("type不符合要求");
+        if (StrUtil.isNotEmpty(search)) {
+            if (!isValid(search)){
+                return R.error("参数包含非法字段");
             }
-            whereSb.append(" and ").append(name).append(" like '%").append(search).append("%'");
+            if (type == 1){
+                whereSb.append(" and (leads_name like '%").append(search).append("%' or telephone like '%")
+                        .append(search).append("%' or mobile like '%").append(search).append("%')");
+            }else if (type == 2 || type == 8){
+                whereSb.append(" and (customer_name like '%").append(search).append("%' or telephone like '%")
+                        .append(search).append("%')");
+            }else if (type == 3){
+                whereSb.append(" and (name like '%").append(search).append("%' or telephone like '%")
+                        .append(search).append("%' or mobile like '%").append(search).append("%')");
+            }else if (type == 4 || type == 6){
+                whereSb.append(" and (name like '%").append(search).append("%')");
+            }else if (type == 5){
+                whereSb.append(" and (business_name like '%").append(search).append("%')");
+            }else if (type == 7){
+                whereSb.append(" and (number like '%").append(search).append("%')");
+            }else {
+                return R.error("type不符合要求");
+            }
         }
         String viewName;
         switch (type) {
@@ -442,28 +462,64 @@ public class AdminSceneService {
             default:
                 return R.error("type不符合要求");
         }
+        String sortField = basePageRequest.getJsonObject().getString("sortField");
+        String orderNum = basePageRequest.getJsonObject().getString("order");
         String from;
-        if (2 == type) {
-            from = "from " + viewName + whereSb.toString() + " and owner_user_id is not null order by " + viewName + ".update_time desc";
-        } else if (8 == type) {
-            from = "from " + viewName + whereSb.toString() + " and owner_user_id is null order by " + viewName + ".update_time desc";
-        } else {
-            from = "from " + viewName + whereSb.toString() + " order by " + viewName + ".update_time desc";
+        if (StrUtil.isEmpty(sortField) || StrUtil.isEmpty(orderNum)){
+            sortField = "update_time";
+            orderNum = "desc";
+        }else {
+            if (!isValid(sortField)){
+                return R.error("参数包含非法字段");
+            }
+            if ("2".equals(orderNum)){
+                orderNum = "asc";
+            }else {
+                orderNum = "desc";
+            }
         }
+        if (2 == type) {
+            from = "from " + viewName + whereSb.toString() + " and owner_user_id is not null";
+        } else if (8 == type) {
+            from = "from " + viewName + whereSb.toString() + " and owner_user_id is null";
+        } else {
+            from = "from " + viewName + whereSb.toString() ;
+        }
+        Long userId=BaseUtil.getUserId();
+        if(!type.equals(8)&&!type.equals(4)&& !BaseConstant.SUPER_ADMIN_USER_ID.equals(userId)){
+            List<Long> longs=new AdminUserService().queryUserByAuth(userId);
+            if(longs!=null&&longs.size()>0){
+                from += " and owner_user_id in (" + StrUtil.join(",", longs) + ")";
+                if(type.equals(2)||type.equals(6)||type.equals(5)){
+                    from += " or ro_user_id like CONCAT('%,','" + userId + "',',%')" + " or rw_user_id like CONCAT('%,','" + userId + "',',%')";
+                }
+            }
+        }
+        from = from + " order by " + viewName + "." + sortField + " " + orderNum;
         if (StrUtil.isNotEmpty(basePageRequest.getJsonObject().getString("excel"))) {
             return R.ok().put("data", Db.find("select * " + from));
         }
         if (2 == type || 8 == type) {
             Integer configType = Db.queryInt("select type from 72crm_admin_customer_setting");
             if (1 == configType && 2 == type) {
-                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),
-                        "select * , (TO_DAYS(update_time) + (SELECT followup_day FROM 72crm_admin_customer_setting) - TO_DAYS(NOW())) as pool_day ,(select count(*) from 72crm_crm_business as a where a.customer_id = " + viewName + ".customer_id) as business_count", from));
+                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select * , (TO_DAYS(update_time) + (SELECT followup_day FROM 72crm_admin_customer_setting) - TO_DAYS(NOW())) as pool_day ,(select count(*) from 72crm_crm_business as a where a.customer_id = " + viewName + ".customer_id) as business_count", from));
             } else {
-                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),
-                        "select *,(select count(*) from 72crm_crm_business as a where a.customer_id = " + viewName + ".customer_id) as business_count", from));
+                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),"select *,(select count(*) from 72crm_crm_business as a where a.customer_id = " + viewName + ".customer_id) as business_count", from));
             }
 
         }
         return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select *", from));
+    }
+
+    private boolean isValid(String param){
+        String reg = "(?:')|(?:--)|(/\\*(?:.|[\\n\\r])*?\\*/)|"
+                + "(\\b(select|update|union|and|or|delete|insert|trancate|char|into|substr|ascii|declare|exec|count|master|into|drop|execute)\\b)";
+
+        Pattern sqlPattern = Pattern.compile(reg, Pattern.CASE_INSENSITIVE);
+
+        if (sqlPattern.matcher(param).find()) {
+            return false;
+        }
+        return true;
     }
 }

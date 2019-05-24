@@ -11,6 +11,18 @@ import {
   crmFieldColumnWidth,
   crmMainIndex
 } from '@/api/customermanagement/common'
+import {
+  crmCustomerExcelAllExport
+} from '@/api/customermanagement/customer'
+import {
+  crmLeadsExcelAllExport
+} from '@/api/customermanagement/clue'
+import {
+  crmContactsExcelAllExport
+} from '@/api/customermanagement/contacts'
+import {
+  crmProductExcelAllExport
+} from '@/api/customermanagement/product'
 
 export default {
   components: {
@@ -222,6 +234,46 @@ export default {
         }
         this.showDview = true
       }
+    },
+    /**
+     * 导出 线索 客户 联系人 产品
+     * @param {*} data 
+     */
+    // 导出操作
+    exportInfos() {
+      var params = {
+        search: this.search
+      }
+      if (this.sceneId) {
+        params.sceneId = this.sceneId
+      }
+      if (this.filterObj && Object.keys(this.filterObj).length > 0) {
+        params.data = this.filterObj
+      }
+      var request = {
+        customer: crmCustomerExcelAllExport,
+        leads: crmLeadsExcelAllExport,
+        contacts: crmContactsExcelAllExport,
+        product: crmProductExcelAllExport
+      } [this.crmType]
+      request(params)
+        .then(res => {
+          var blob = new Blob([res.data], {
+            type: 'application/vnd.ms-excel;charset=utf-8'
+          })
+          var downloadElement = document.createElement('a')
+          var href = window.URL.createObjectURL(blob) //创建下载的链接
+          downloadElement.href = href
+          downloadElement.download =
+            decodeURI(
+              res.headers['content-disposition'].split('filename=')[1]
+            ) || '' //下载后文件名
+          document.body.appendChild(downloadElement)
+          downloadElement.click() //点击下载
+          document.body.removeChild(downloadElement) //下载完成移除元素
+          window.URL.revokeObjectURL(href) //释放掉blob对象
+        })
+        .catch(() => {})
     },
     /** 筛选操作 */
     handleFilter(data) {

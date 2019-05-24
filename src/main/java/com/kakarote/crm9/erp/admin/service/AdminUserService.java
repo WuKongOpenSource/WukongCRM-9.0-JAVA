@@ -3,6 +3,7 @@ package com.kakarote.crm9.erp.admin.service;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
@@ -45,6 +46,18 @@ public class AdminUserService {
             adminUser.setMobile(adminUser.getUsername());
             bol = adminUser.save();
         } else {
+            if (adminUser.getParentId() != null && adminUser.getParentId() != 0) {
+                List<Record> topUserList = queryTopUserList(adminUser.getUserId());
+                boolean isContain = false;
+                for (Record record : topUserList) {
+                    if (record.getLong("user_id").equals(adminUser.getParentId())) {
+                        isContain = true;
+                    }
+                }
+                if (!isContain) {
+                    return R.error("该员工的下级员工不能设置为直属上级");
+                }
+            }
             String username = Db.queryStr("select username from 72crm_admin_user where user_id = ?", adminUser.getUserId());
             if (!username.equals(adminUser.getUsername())) {
                 return R.error("用户名不能修改！");
@@ -81,7 +94,7 @@ public class AdminUserService {
         List<Integer> deptIdList = new ArrayList<>();
         if (request.getData().getDeptId() != null) {
             deptIdList.add(request.getData().getDeptId());
-            queryChileDeptIds(deptIdList, request.getData().getDeptId());
+            deptIdList.addAll(queryChileDeptIds(request.getData().getDeptId()));
         }
         if (request.getPageType() == 0) {
             List<Record> recordList = Db.find(Db.getSqlPara("admin.user.queryUserList", Kv.by("name", request.getData().getRealname()).set("deptId", deptIdList).set("status", request.getData().getStatus()).set("roleId", roleId)));
@@ -93,35 +106,45 @@ public class AdminUserService {
     }
 
     /**
+     * 查询可设置为上级的user
+     */
+    public List<Record> queryTopUserList(Long userId) {
+        List<Record> recordList = Db.find("select user_id,realname,parent_id from 72crm_admin_user");
+        List<Long> subUserList = queryChileUserIds(userId);
+        recordList.removeIf(record -> subUserList.contains(record.getLong("user_id")));
+        return recordList;
+    }
+
+    /**
      * 查询本部门下的所有部门id
      *
-     * @param list   部门id列表
      * @param deptId 当前部门id
      */
-    public void queryChileDeptIds(List<Integer> list, Integer deptId) {
-        List<Integer> query = Db.query("select dept_id from 72crm_admin_dept where pid = ?", deptId);
-        if (query.size() != 0) {
-            list.addAll(query);
-            query.forEach(integer -> {
-                queryChileDeptIds(list, integer);
-            });
+    public List<Integer> queryChileDeptIds(Integer deptId) {
+        List<Integer> list = Db.query("select dept_id from 72crm_admin_dept where pid = ?", deptId);
+        if (list.size() != 0) {
+            int size = list.size();
+            for (int i = 0; i < size; i++) {
+                list.addAll(queryChileDeptIds(list.get(i)));
+            }
         }
+        return list;
     }
 
     /**
      * 查询本用户下的所有下级id
      *
-     * @param list   用户id列表
      * @param userId 当前用户id
      */
-    public void queryChileUserIds(List<Long> list, Long userId) {
+    public List<Long> queryChileUserIds(Long userId) {
         List<Long> query = Db.query("select user_id from 72crm_admin_user where parent_id = ?", userId);
         if (query.size() != 0) {
-            list.addAll(query);
-            query.forEach(l -> {
-                queryChileUserIds(list, l);
-            });
+            int size = query.size();
+            for (int i = 0; i < size; i++) {
+                query.addAll(queryChileUserIds(query.get(i)));
+            }
         }
+        return query;
     }
 
 
@@ -230,9 +253,9 @@ public class AdminUserService {
     }
 
     public List<Long> queryUserByAuth(Long userId) {
+        List<Long> adminUsers = new ArrayList<>();
         //查询用户数据权限，从高到低排序
         List<Integer> list = Db.query(Db.getSql("admin.role.queryDataTypeByUserId"), userId);
-        List<Long> adminUsers = new ArrayList<>();
         if (list.size() == 0) {
             //无权限查询自己的数据
             adminUsers.add(userId);
@@ -257,6 +280,7 @@ public class AdminUserService {
             }
             adminUsers.add(adminUser.getUserId());
         }
+        adminUsers.add(userId);
         HashSet<Long> hashSet = new HashSet<>(adminUsers);
         adminUsers.clear();
         adminUsers.addAll(hashSet);
@@ -268,9 +292,10 @@ public class AdminUserService {
         if (deepness > 0) {
             List<Long> records = Db.query("SELECT b.user_id FROM 72crm_admin_user AS b WHERE b.parent_id = ?", userId);
             recordList.addAll(records);
-            records.forEach(id -> {
-                recordList.addAll(queryUserByParentUser(id, deepness - 1));
-            });
+            int size = recordList.size();
+            for (int i = 0; i < size; i++) {
+                recordList.addAll(queryUserByParentUser(recordList.get(i), deepness - 1));
+            }
         }
         return recordList;
     }

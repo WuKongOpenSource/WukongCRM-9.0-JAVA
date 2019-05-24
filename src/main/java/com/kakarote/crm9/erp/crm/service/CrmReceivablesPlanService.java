@@ -49,6 +49,23 @@ public class CrmReceivablesPlanService {
     }
 
     /**
+     * @author wyq
+     * 删除回款计划
+     */
+    public R deleteByIds(String planIds){
+        String[] idsArr = planIds.split(",");
+        List<Record> idsList = new ArrayList<>();
+        for (String id : idsArr) {
+            Record record = new Record();
+            idsList.add(record.set("plan_id", Integer.valueOf(id)));
+        }
+        return Db.tx(() -> {
+            Db.batch(Db.getSql("crm.receivablesplan.deleteByIds"), "plan_id", idsList, 100);
+            return true;
+        }) ? R.ok() : R.error();
+    }
+
+    /**
      * @author zxy
      * 查询回款自定义字段（新增）
      */

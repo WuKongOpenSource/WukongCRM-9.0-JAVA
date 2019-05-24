@@ -1,4 +1,17 @@
 #namespace("crm.contact")
+    #sql("getContactsPageList")
+    select name,owner_user_name from contactsview where 1=1
+      #if(contactsName)
+      and name like CONCAT('%',#para(contactsName),'%')
+      #end
+      #if(telephone)
+      and telephone like CONCAT('%',#para(telephone),'%')
+      #end
+      #if(mobile)
+      and mobile like CONCAT('%',#para(mobile),'%')
+      #end
+    #end
+
     #sql ("queryById")
     select * from contactsview where contacts_id = ?
     #end
@@ -36,9 +49,10 @@
     #end
 
     #sql ("getRecord")
-    select a.record_id,b.img as user_img,b.realname,a.create_time,a.content,a.category,a.next_time,a.batch_id
+    select a.record_id,b.img as user_img,b.realname,a.create_time,a.content,a.category,a.next_time,a.batch_id,a.contacts_ids,a.business_ids
     from 72crm_admin_record as a inner join 72crm_admin_user as b
-    where a.create_user_id = b.user_id and types = 'crm_contacts' and types_id = ? order by a.create_time desc
+    where a.create_user_id = b.user_id and ((types = 'crm_contacts' and types_id = ?) or
+    (types = 'crm_customer' and FIND_IN_SET(?,IFNULL(a.contacts_ids,0)))) order by a.create_time desc
     #end
 
     #sql ("queryByIds")
@@ -49,4 +63,41 @@
         #end
     )
     #end
+
+    #sql ("excelExport")
+    select *
+    from contactsview
+    where contacts_id in (
+        #for(i:ids)
+          #(for.index > 0 ? "," : "")#para(i)
+        #end
+    ) order by update_time desc
+    #end
+
+    #sql ("queryRepeatFieldNumber")
+    select count(*) as number from 72crm_crm_contacts where 1=2
+      #if(contactsName)
+      or name = #para(contactsName)
+      #end
+      #if(telephone)
+      or telephone = #para(telephone)
+      #end
+      #if(mobile)
+      or mobile = #para(mobile)
+      #end
+    #end
+
+    #sql ("queryRepeatField")
+    select contacts_id,batch_id from 72crm_crm_contacts where 1=2
+      #if(contactsName)
+      or name = #para(contactsName)
+      #end
+      #if(telephone)
+      or telephone = #para(telephone)
+      #end
+      #if(mobile)
+      or mobile = #para(mobile)
+      #end
+    #end
+
 #end

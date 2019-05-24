@@ -13,6 +13,14 @@
              src="@/assets/img/follow_record.png" />
         <div class="fl-h-mark-name">跟进记录</div>
       </flexbox>
+      <el-dropdown @command="handleCommand"
+                   trigger="click">
+        <i style="color:#CDCDCD;margin-left: 8px;"
+           class="el-icon-arrow-down el-icon-more"></i>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item command="delete">删除</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
     </flexbox>
     <div class="fl-b">
       <div class="fl-b-content">{{item.content}}</div>
@@ -84,6 +92,7 @@
 
 <script>
 import { downloadFile } from '@/utils'
+import { crmRecordDelete } from '@/api/customermanagement/common'
 
 export default {
   /** 客户管理 的 客户详情 的 跟进记录cell*/
@@ -126,6 +135,35 @@ export default {
     },
     downloadFile(file) {
       downloadFile({ path: file.filePath, name: file.name })
+    },
+    /**
+     * 删除跟进记录
+     */
+    handleCommand(command) {
+      this.$confirm('确定删除?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          crmRecordDelete({
+            recordId: this.item.recordId
+          })
+            .then(res => {
+              this.$emit('on-handle', {
+                type: command,
+                data: { item: this.item, index: this.index }
+              })
+              this.$message.success('操作成功')
+            })
+            .catch(() => {})
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消操作'
+          })
+        })
     },
     /**
      * 查看相关客户管理详情

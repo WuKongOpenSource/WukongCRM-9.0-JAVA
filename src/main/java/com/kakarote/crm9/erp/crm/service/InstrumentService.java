@@ -102,8 +102,8 @@ public class InstrumentService {
         BigDecimal money = new BigDecimal(0);
         if (list.size() == 1) {
             Record start = Db.findFirst(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(0)).set("status", status).set("type", type).set("userIds", userIds)));
-            Integer sta = Integer.valueOf(startTime.substring(5, 6));
-            Integer en = Integer.valueOf(endTime.substring(5, 6));
+            Integer sta = Integer.valueOf(startTime.substring(6, 7));
+            Integer en = Integer.valueOf(endTime.substring(6, 7));
             if (start != null) {
                 if (sta <= 1 && en >= 1) {
                     money = money.add(new BigDecimal(start.getStr("january")));
@@ -148,7 +148,7 @@ public class InstrumentService {
                 money = money.add(new BigDecimal(r.getStr("achievementTarget")));
             }
             Record start = Db.findFirst(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(0)).set("status", status).set("type", type).set("userIds", userIds)));
-            Integer sta = Integer.valueOf(startTime.substring(5, 6));
+            Integer sta = Integer.valueOf(startTime.substring(6, 7));
             if (start != null) {
                 if (sta <= 1) {
                     money = money.add(new BigDecimal(start.getStr("january")));
@@ -188,7 +188,7 @@ public class InstrumentService {
                 }
             }
             Record end = Db.findFirst(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(list.size() - 1)).set("status", status).set("type", type).set("userIds", userIds)));
-            Integer en = Integer.valueOf(endTime.substring(5, 6));
+            Integer en = Integer.valueOf(endTime.substring(6, 7));
             if (end != null) {
                 if (en >= 1) {
                     money = money.add(new BigDecimal(end.getStr("january")));

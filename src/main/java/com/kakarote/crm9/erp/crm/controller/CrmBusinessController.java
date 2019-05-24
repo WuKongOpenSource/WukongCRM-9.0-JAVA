@@ -72,6 +72,14 @@ public class CrmBusinessController extends Controller {
 
     /**
      * @author wyq
+     * 根据商机id查询联系人
+     */
+    public void queryContacts(BasePageRequest<CrmBusiness> basePageRequest){
+        renderJson(crmBusinessService.queryContacts(basePageRequest));
+    }
+
+    /**
+     * @author wyq
      * 根据id删除商机
      */
     @Permissions("crm:business:delete")

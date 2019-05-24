@@ -34,4 +34,12 @@ public class CrmReceivablesPlanController extends Controller {
     public void queryByContractAndCustomer(@Para("") CrmReceivablesPlan receivablesPlan){
         renderJson(receivablesPlanService.queryByContractAndCustomer(receivablesPlan));
     }
+
+    /**
+     * @author wyq
+     * 删除回款计划
+     */
+    public void deleteByIds(@Para("planIds")String planIds){
+        renderJson(receivablesPlanService.deleteByIds(planIds));
+    }
 }

@@ -83,6 +83,7 @@ export default {
     color: #727272;
     font-size: 13px;
     margin: 5px;
+    cursor: pointer;
   }
 
   .category-item:hover {

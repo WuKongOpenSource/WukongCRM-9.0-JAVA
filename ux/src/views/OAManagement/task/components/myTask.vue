@@ -214,6 +214,7 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow-y: hidden;
   .wukong {
     vertical-align: middle;
   }

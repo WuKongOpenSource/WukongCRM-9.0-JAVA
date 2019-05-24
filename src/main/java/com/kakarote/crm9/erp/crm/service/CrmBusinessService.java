@@ -13,6 +13,7 @@ import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmBusiness;
 import com.kakarote.crm9.erp.crm.entity.CrmBusinessProduct;
+import com.kakarote.crm9.erp.crm.entity.CrmContacts;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
 import com.kakarote.crm9.erp.oa.entity.OaEventRelation;
@@ -156,6 +157,20 @@ public class CrmBusinessService {
             return R.ok().put("data", Db.find(Db.getSql("crm.business.queryContract"), businessId));
         } else {
             return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), new SqlPara().setSql(Db.getSql("crm.business.queryContract")).addPara(businessId)));
+        }
+    }
+
+    /**
+     * @author wyq
+     * 根据商机id查询联系人
+     */
+    public R queryContacts(BasePageRequest<CrmBusiness> basePageRequest){
+        Integer businessId = basePageRequest.getData().getBusinessId();
+        Integer pageType = basePageRequest.getPageType();
+        if (0 == pageType) {
+            return R.ok().put("data", Db.find(Db.getSql("crm.business.queryContacts"), businessId));
+        } else {
+            return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), new SqlPara().setSql(Db.getSql("crm.business.queryContacts")).addPara(businessId)));
         }
     }
 
@@ -417,9 +432,26 @@ public class CrmBusinessService {
      */
     public List<Record> getRecord(BasePageRequest<CrmBusiness> basePageRequest) {
         CrmBusiness crmBusiness = basePageRequest.getData();
-        List<Record> recordList = Db.find(Db.getSql("crm.business.getRecord"), crmBusiness.getBusinessId());
+        List<Record> recordList = Db.find(Db.getSql("crm.business.getRecord"), crmBusiness.getBusinessId(),crmBusiness.getBusinessId());
         recordList.forEach(record -> {
             adminFileService.queryByBatchId(record.getStr("batch_id"), record);
+            String businessIds = record.getStr("business_ids");
+            List<CrmBusiness> businessList = new ArrayList<>();
+            if (businessIds != null) {
+                String[] businessIdsArr = businessIds.split(",");
+                for (String businessId : businessIdsArr) {
+                    businessList.add(CrmBusiness.dao.findById(Integer.valueOf(businessId)));
+                }
+            }
+            String contactsIds = record.getStr("contacts_ids");
+            List<CrmContacts> contactsList = new ArrayList<>();
+            if (contactsIds != null) {
+                String[] contactsIdsArr = contactsIds.split(",");
+                for (String contactsId : contactsIdsArr) {
+                    contactsList.add(CrmContacts.dao.findById(Integer.valueOf(contactsId)));
+                }
+            }
+            record.set("business_list", businessList).set("contacts_list", contactsList);
         });
         return recordList;
     }

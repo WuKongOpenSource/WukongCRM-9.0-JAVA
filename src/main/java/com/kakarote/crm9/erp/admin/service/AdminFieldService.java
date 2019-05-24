@@ -4,10 +4,12 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.cache.RedisCache;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldStyle;
+import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.R;
@@ -88,8 +90,7 @@ public class AdminFieldService {
         if (nameList.size() != 0) {
             Db.update(Db.getSqlPara("admin.field.deleteFieldSort", Kv.by("label", label).set("names", nameList)));
         }
-        Cache cache = Redis.use("field");
-        cache.keys("listHead:*").forEach(cache::del);
+        CaffeineCache.ME.removeAll("field");
         return R.ok();
     }
 
@@ -148,9 +149,9 @@ public class AdminFieldService {
             String name = record.getStr("name");
             Integer type = record.getInt("type");
             if (type == 10) {
-                sql.append(",(select realname from 72crm_admin_user where user_id = ").append("(SELECT value FROM 72crm_admin_field WHERE name='").append(name).append("' and batch_id=a.batch_id limit 1)) as '").append(name).append("'");
+                sql.append(",(select GROUP_CONCAT(realname) from 72crm_admin_user where FIND_IN_SET(user_id,IFNULL((SELECT value FROM 72crm_admin_field WHERE name='").append(name).append("' and batch_id=a.batch_id limit 1),0))) as '").append(name).append("'");
             } else if (type == 12) {
-                sql.append(",(select name from 72crm_admin_dept where dept_id = ").append("(SELECT value FROM 72crm_admin_field WHERE name='").append(name).append("' and batch_id=a.batch_id limit 1)) as '").append(name).append("'");
+                sql.append(",(select GROUP_CONCAT(name) from 72crm_admin_dept where FIND_IN_SET(dept_id,IFNULL((SELECT value FROM 72crm_admin_field WHERE name='").append(name).append("' and batch_id=a.batch_id limit 1),0))) as '").append(name).append("'");
             } else {
                 sql.append(",(SELECT value FROM 72crm_admin_field WHERE name='").append(name).append("' and batch_id=a.batch_id limit 1) as '").append(name).append("'");
             }
@@ -198,6 +199,25 @@ public class AdminFieldService {
             return new ArrayList<>();
         }
         List<Record> recordList = Db.find(AdminField.dao.getSqlPara("admin.field.queryFieldsByBatchId", Kv.by("batchId", batchId)));
+        recordList.forEach(record -> {
+            if (record.getInt("type") == 10){
+                if(StrUtil.isNotEmpty(record.getStr("value"))){
+                    List<Record> userList = Db.find("select user_id,realname from 72crm_admin_user where user_id in ("+record.getStr("value")+")");
+                    record.set("value",userList);
+                }else {
+                    record.set("value",new ArrayList<>());
+                }
+                record.set("default_value",new ArrayList<>());
+            } else if (record.getInt("type") == 12){
+                if(StrUtil.isNotEmpty(record.getStr("value"))){
+                    List<Record> deptList = Db.find("select dept_id,name from 72crm_admin_dept where dept_id in ("+record.getStr("value")+")");
+                    record.set("value",deptList);;
+                }else {
+                    record.set("value",new ArrayList<>());
+                }
+                record.set("default_value",new ArrayList<>());
+            }
+        });
         recordToFormType(recordList);
         return recordList;
     }
@@ -231,10 +251,12 @@ public class AdminFieldService {
                 recordValueToArray(record);
             } else if (10 == dataType) {
                 record.set("formType", "user");
-                recordValueToArray(record);
+                record.set("default_value",new ArrayList<>());
+                //recordValueToArray(record);
             } else if (12 == dataType) {
                 record.set("formType", "structure");
-                recordValueToArray(record);
+                record.set("default_value",new ArrayList<>());
+                //recordValueToArray(record);
             } else if (13 == dataType) {
                 record.set("formType", "datetime");
             } else if (14 == dataType) {
@@ -472,8 +494,7 @@ public class AdminFieldService {
             String[] hideIdsArr = adminFieldSort.getHideIds().split(",");
             Db.update(Db.getSqlPara("admin.field.isHide", Kv.by("ids", hideIdsArr).set("label", adminFieldSort.getLabel()).set("userId", userId)));
         }
-        RedisCache redisCache = new RedisCache();
-        redisCache.remove("field", "listHead:" + adminFieldSort.getLabel() + userId);
+        CaffeineCache.ME.remove("field", "listHead:" + adminFieldSort.getLabel() + userId);
         return R.ok();
     }
 }

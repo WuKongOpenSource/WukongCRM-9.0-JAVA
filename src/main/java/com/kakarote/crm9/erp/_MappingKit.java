@@ -45,6 +45,7 @@ public class _MappingKit {
 		arp.addMapping("72crm_crm_business_status", "status_id", CrmBusinessStatus.class);
 		arp.addMapping("72crm_crm_business_type", "type_id", CrmBusinessType.class);
 		arp.addMapping("72crm_crm_contacts", "contacts_id", CrmContacts.class);
+		arp.addMapping("72crm_crm_contacts_business", "id", CrmContactsBusiness.class);
 		arp.addMapping("72crm_crm_contract", "contract_id", CrmContract.class);
 		arp.addMapping("72crm_crm_contract_product", "r_id", CrmContractProduct.class);
 		arp.addMapping("72crm_crm_customer", "customer_id", CrmCustomer.class);

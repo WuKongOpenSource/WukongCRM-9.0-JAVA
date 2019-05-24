@@ -78,12 +78,15 @@ public class InstrumentController extends Controller {
         String startTime = getPara("startTime");
         String endTime = getPara("endTime");
         String deptIds = getPara("deptIds");
-        if (userIds == null) {
-            userIds = BaseUtil.getUser().getUserId().intValue() + "";
-        } else if (deptIds != null && StrUtil.isNotEmpty(deptIds)) {
+        if (StrUtil.isNotEmpty(deptIds)) {
             userIds = adminUserService.queryUserIdsByDept(deptIds) + "," + userIds;
+            renderJson(instrumentService.queryPerformance(startTime, endTime, userIds, type, 2));
+        }else {
+            if (userIds == null) {
+                userIds = BaseUtil.getUser().getUserId().intValue() + "";
+            }
+            renderJson(instrumentService.queryPerformance(startTime, endTime, userIds, type, 3));
         }
-        renderJson(instrumentService.queryPerformance(startTime, endTime, userIds, type, 3));
     }
     /**
      * 销售漏斗

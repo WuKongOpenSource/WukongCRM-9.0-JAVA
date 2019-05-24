@@ -132,7 +132,7 @@ public class CrmLeadsController extends Controller {
      * @author wyq
      * 批量导出线索
      */
-    @Permissions("crm.leads.excelexport")
+    @Permissions("crm:leads:excelexport")
     public void batchExportExcel(@Para("ids")String leadsIds) throws IOException {
         List<Record> recordList = crmLeadsService.exportLeads(leadsIds);
         export(recordList);
@@ -143,12 +143,12 @@ public class CrmLeadsController extends Controller {
      * @author wyq
      * 导出全部线索
      */
-    @Permissions("crm.leads.excelexport")
+    @Permissions("crm:leads:excelexport")
     public void allExportExcel(BasePageRequest basePageRequest) throws IOException{
         JSONObject jsonObject = basePageRequest.getJsonObject();
         jsonObject.fluentPut("excel","yes").fluentPut("type","1");
         AdminSceneService adminSceneService = new AdminSceneService();
-        List<Record> recordList = (List<Record>)adminSceneService.getCrmPageList(basePageRequest).get("data");
+        List<Record> recordList = (List<Record>)adminSceneService.filterConditionAndGetPageList(basePageRequest).get("data");
         export(recordList);
         renderNull();
     }
@@ -170,7 +170,7 @@ public class CrmLeadsController extends Controller {
         for (Record field:fieldList){
             writer.addHeaderAlias(field.getStr("name"),field.getStr("name"));
         }
-        writer.merge(12,"线索信息");
+        writer.merge(10+fieldList.size(),"线索信息");
         HttpServletResponse response = getResponse();
         List<Map<String,Object>> list = new ArrayList<>();
         for (Record record : recordList){
@@ -241,8 +241,7 @@ public class CrmLeadsController extends Controller {
      * @author wyq
      * 线索导入
      */
-    @Permissions("crm.leads.excelimport")
-    @Before(Tx.class)
+    @Permissions("crm:leads:excelimport")
     public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling,@Para("ownerUserId") Integer ownerUserId){
         renderJson(crmLeadsService.uploadExcel(file,repeatHandling,ownerUserId));
     }

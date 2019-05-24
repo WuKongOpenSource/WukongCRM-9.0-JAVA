@@ -143,8 +143,8 @@
    #end
    #sql("queryMoneys")
      SELECT distinct
-    (select IFNULL(SUM(money),0) FROM 72crm_crm_contract where DATE_FORMAT(create_time,'%Y%m') between  #para(startTime)  and #para(endTime) AND create_user_id in (#para(userIds))) as contractMoneys,
-    (select IFNULL(SUM(money),0) FROM 72crm_crm_receivables where DATE_FORMAT(create_time,'%Y%m') between  #para(startTime)  and #para(endTime) AND create_user_id in (#para(userIds))) as receivablesMoneys
+    (select IFNULL(SUM(money),0) FROM 72crm_crm_contract where DATE_FORMAT(create_time,'%Y-%m') between  #para(startTime)  and #para(endTime) AND create_user_id in (#para(userIds))) as contractMoneys,
+    (select IFNULL(SUM(money),0) FROM 72crm_crm_receivables where DATE_FORMAT(create_time,'%Y-%m') between  #para(startTime)  and #para(endTime) AND create_user_id in (#para(userIds))) as receivablesMoneys
      FROM 72crm_crm_contract
    #end
    #sql("queryTarget")

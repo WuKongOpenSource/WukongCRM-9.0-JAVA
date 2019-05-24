@@ -27,6 +27,7 @@ import com.jfinal.upload.UploadFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CrmProductService {
     @Inject
@@ -63,8 +64,8 @@ public class CrmProductService {
         crmRecordService.updateRecord(jsonObject.getJSONArray("field"), batchId);
         adminFieldService.save(jsonObject.getJSONArray("field"), batchId);
         if (crmProduct.getProductId() == null) {
-            CrmProduct product = CrmProduct.dao.findFirst(Db.getSql("crm.product.getByNum"),crmProduct.getNum());
-            if (product != null){
+            Integer product = Db.queryInt(Db.getSql("crm.product.getByNum"),crmProduct.getNum());
+            if (product != 0){
                 return R.error("产品编号已存在，请校对后再添加！");
             }
             crmProduct.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
@@ -185,6 +186,23 @@ public class CrmProductService {
     }
 
     /**
+     * @author wyq
+     * 产品导出
+     */
+    public List<Record> exportProduct(String productIds) {
+        String[] productIdsArr = productIds.split(",");
+        return Db.find(Db.getSqlPara("crm.product.excelExport", Kv.by("ids", productIdsArr)));
+    }
+
+    /**
+     * @author wyq
+     * 获取产品导入查重字段
+     */
+    public R getCheckingField(){
+        return R.ok().put("data","产品名称");
+    }
+
+    /**
      * 导入产品
      *
      * @author zxy
@@ -199,44 +217,55 @@ public class CrmProductService {
             for (int i = 0; i < list.size(); i++) {
                 kv.set(list.get(i), i);
             }
-            List<Record> recordList = adminFieldService.list("2");
+            List<Record> recordList = adminFieldService.list("4");
+            List<Record> fieldList = queryField();
+            fieldList.forEach(record -> {
+                if (record.getInt("is_null") == 1){
+                    record.set("name",record.getStr("name")+"(*)");
+                }
+            });
+            List<String> nameList = fieldList.stream().map(record -> record.getStr("name")).collect(Collectors.toList());
+            if (nameList.size() != list.size() || !nameList.containsAll(list)){
+                return R.error("请使用最新导入模板");
+            }
             if (read.size() > 1) {
                 R status;
                 JSONObject object = new JSONObject();
                 for (int i = 1; i < read.size(); i++) {
-                    List<Object> customerList = read.get(i);
-                    if (customerList.size() < list.size()) {
-                        for (int j = customerList.size() - 1; j < list.size(); j++) {
-                            customerList.add(null);
+                    List<Object> productList = read.get(i);
+                    if (productList.size() < list.size()) {
+                        for (int j = productList.size() - 1; j < list.size(); j++) {
+                            productList.add(null);
                         }
                     }
-                    String customerName = customerList.get(kv.getInt("产品名称")).toString();
-                    Integer number = Db.queryInt("select count(*) from 72crm_crm_product where name = ?", customerName);
+                    String productName = productList.get(kv.getInt("产品名称(*)")).toString();
+                    Integer number = Db.queryInt("select count(*) from 72crm_crm_product where name = ?", productName);
+                    Integer categoryId = Db.queryInt("select category_id from 72crm_crm_product_category where name = ?",productList.get(kv.getInt("产品分类(*)")));
                     if (0 == number) {
-                        object.fluentPut("entity", new JSONObject().fluentPut("name", customerName)
-                                .fluentPut("num", customerList.get(kv.getInt("产品编码")))
-                                .fluentPut("unit", customerList.get(kv.getInt("单位")))
-                                .fluentPut("price", customerList.get(kv.getInt("价格")))
-                                .fluentPut("category_id", customerList.get(kv.getInt("产品分类ID")))
-                                .fluentPut("description", customerList.get(kv.getInt("产品描述")))
+                        object.fluentPut("entity", new JSONObject().fluentPut("name", productName)
+                                .fluentPut("num", productList.get(kv.getInt("产品编码(*)")))
+                                .fluentPut("unit", productList.get(kv.getInt("单位")))
+                                .fluentPut("price", productList.get(kv.getInt("价格(*)")))
+                                .fluentPut("category_id", categoryId)
+                                .fluentPut("description", productList.get(kv.getInt("产品描述")))
                                 .fluentPut("owner_user_id", ownerUserId));
                     } else if (number > 0 && repeatHandling == 1) {
-                        Record leads = Db.findFirst("select customer_id,batch_id from 72crm_crm_product where name = ?", customerName);
-                        object.fluentPut("entity", new JSONObject().fluentPut("product_id", leads.getInt("product_id"))
-                                .fluentPut("name", customerName)
-                                .fluentPut("num", customerList.get(kv.getInt("产品编码")))
-                                .fluentPut("unit", customerList.get(kv.getInt("单位")))
-                                .fluentPut("price", customerList.get(kv.getInt("价格")))
-                                .fluentPut("category_id", customerList.get(kv.getInt("产品分类ID")))
-                                .fluentPut("description", customerList.get(kv.getInt("产品描述")))
+                        Record product = Db.findFirst("select product_id,batch_id from 72crm_crm_product where name = ?", productName);
+                        object.fluentPut("entity", new JSONObject().fluentPut("product_id", product.getInt("product_id"))
+                                .fluentPut("name", productName)
+                                .fluentPut("num", productList.get(kv.getInt("产品编码(*)")))
+                                .fluentPut("unit", productList.get(kv.getInt("单位")))
+                                .fluentPut("price", productList.get(kv.getInt("价格(*)")))
+                                .fluentPut("category_id", categoryId)
+                                .fluentPut("description", productList.get(kv.getInt("产品描述")))
                                 .fluentPut("owner_user_id", ownerUserId)
-                                .fluentPut("batch_id", leads.getStr("batch_id")));
+                                .fluentPut("batch_id", product.getStr("batch_id")));
                     } else if (number > 0 && repeatHandling == 2) {
                         continue;
                     }
                     JSONArray jsonArray = new JSONArray();
                     for (Record record : recordList) {
-                        record.set("value", customerList.get(kv.getInt(record.getStr("name"))));
+                        record.set("value", productList.get(kv.getInt(record.getStr("name"))!=null?kv.getInt(record.getStr("name")):kv.getInt(record.getStr("name")+"(*)")));
                         jsonArray.add(JSONObject.parseObject(record.toJson()));
                     }
                     object.fluentPut("field", jsonArray);

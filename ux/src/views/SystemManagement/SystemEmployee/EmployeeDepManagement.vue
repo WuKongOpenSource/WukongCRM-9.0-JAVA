@@ -161,7 +161,7 @@
         <label>上级部门：</label>
         <el-select v-model="depSelect"
                    :clearable="false"
-                   :disabled="treeEditId == 0"
+                   :disabled="depSelect == 0"
                    placeholder="请选择">
           <el-option v-for="item in dialogOptions"
                      :key="item.id"
@@ -572,8 +572,8 @@ export default {
     // 编辑组织架构
     edit(node, data) {
       this.treeInput = data.label
-      this.treeEditId = data.pid
-      this.depSelect = data.id
+      this.treeEditId = data.id
+      this.depSelect = data.pid
       this.navBtnTitle = '编辑部门'
       this.labelName = '编辑部门'
       this.getStructuresListBySuperior({ id: data.id, type: 'update' })
@@ -620,8 +620,8 @@ export default {
       } else {
         depEdit({
           name: this.treeInput,
-          deptId: this.depSelect,
-          pid: this.treeEditId
+          deptId: this.treeEditId,
+          pid: this.depSelect
         }).then(res => {
           this.$message.success('操作成功')
           this.treeListFun()

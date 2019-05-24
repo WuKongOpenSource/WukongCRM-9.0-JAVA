@@ -13,7 +13,6 @@
          LEFT JOIN 72crm_crm_receivables_plan as sccp on sccp.receivables_id = scr.receivables_id
         where scr.receivables_id = ?
      #end
-
      #sql ("deleteByIds")
      delete from 72crm_crm_receivables where receivables_id = ?
      #end
@@ -26,13 +25,12 @@
                 when 2 then '审核通过'
                 when 4 then '已撤回'
                 ELSE '未审核' END
-							as check_status
-                ,rec.return_time,rec.money as receivables_money
+							as check_status,rec.return_time,rec.money as receivables_money
         FROM receivablesview as rec
         LEFT JOIN 72crm_crm_contract as scco on scco.contract_id = rec.contract_id
         where rec.contract_id = ?
      #end
-      #sql("queryReceivablesByContractIds")
+     #sql("queryReceivablesByContractIds")
        select * from 72crm_crm_receivables where contract_id in (
             #for(contractId:contractIds)
               #(for.index == 0 ? "" : ",")
@@ -50,7 +48,7 @@
      #sql("queryReceivablesByContractId")
        select * from 72crm_crm_receivables where contract_id = ?
      #end
-      #sql ("queryByNumber")
-    select * from snowerp_crm_receivables when number = ?
-    #end
+     #sql ("queryByNumber")
+       select * from 72crm_crm_receivables where number = ?
+     #end
 #end

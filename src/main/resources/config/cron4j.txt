@@ -1,5 +1,10 @@
-cron4j=customerCron
+cron4j=customerCron,taskCron
 customerCron.cron=*/5 * * * *
 customerCron.class=com.kakarote.crm9.erp.crm.cron.CrmCustomerCron
 customerCron.daemon=true
 customerCron.enable=true
+
+taskCron.cron=*/5 * * * *
+taskCron.class=com.kakarote.crm9.erp.work.cron.TaskCron
+taskCron.daemon=true
+taskCron.enable=true

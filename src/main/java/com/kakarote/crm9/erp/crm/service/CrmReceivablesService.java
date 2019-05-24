@@ -81,8 +81,8 @@ public class CrmReceivablesService {
         crmRecordService.updateRecord(jsonObject.getJSONArray("field"), batchId);
         adminFieldService.save(jsonObject.getJSONArray("field"), batchId);
         if (crmReceivables.getReceivablesId() == null) {
-            CrmReceivables receivables = CrmReceivables.dao.findFirst(Db.getSql("crm.receivables.queryByNumber"),crmReceivables.getNumber());
-           if (receivables != null){
+           Integer count =  Db.queryInt(Db.getSql("crm.receivables.queryByNumber"),crmReceivables.getNumber());
+           if (count != 0){
                return R.error("回款编号已存在，请校对后再添加！");
            }
             crmReceivables.setCreateTime(DateUtil.date());

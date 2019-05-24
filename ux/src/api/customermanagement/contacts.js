@@ -81,3 +81,57 @@ export function crmContactsRecordIndex(data) {
     data: data
   })
 }
+
+
+/**
+ * 联系人导出
+ * @param {*} data
+ * Contacts_id 联系人ID
+ */
+export function crmContactsExcelExport(data) {
+  return request({
+    url: 'CrmContacts/batchExportExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob'
+  })
+}
+
+export function crmContactsExcelAllExport(data) {
+  return request({
+    url: 'CrmContacts/allExportExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
+/**
+ * 联系人导入
+ * @param {*} data
+ *
+ */
+export function crmContactsExcelImport(data) {
+  var param = new FormData()
+  Object.keys(data).forEach(key => {
+    param.append(key, data[key])
+  })
+  return request({
+    url: 'CrmContacts/uploadExcel',
+    method: 'post',
+    data: param,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+/**
+ * 联系人导入模板下载
+ * @param {*} data
+ *
+ */
+export const crmContactsExcelDownloadURL = process.env.BASE_API + 'CrmContacts/downloadExcel'
