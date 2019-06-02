@@ -9,17 +9,6 @@
              style="height: 350px;">
           <flexbox class="mark-header"><img class="img-mark"
                  src="@/assets/img/jianbao.png" />销售简报</flexbox>
-          <el-select class="jianbaoSelect"
-                     v-model="jianbaoSelectValue"
-                     placeholder="请选择"
-                     @change="getCrmIndexIndex">
-            <el-option v-for="item in jianbaoOptions"
-                       :key="item.value"
-                       :label="item.name"
-                       :value="item.value">
-            </el-option>
-          </el-select>
-
           <flexbox :gutter="0"
                    wrap="wrap">
             <flexbox-item :span="1/2"
@@ -45,24 +34,6 @@
           <flexbox class="mark-header"><img class="img-mark"
                  src="@/assets/img/zhibiao.png" />业绩指标</flexbox>
           <flexbox class="gaugeSelect">
-            <el-date-picker v-model="gaugeStartDate"
-                            style="width: 130px;margin-right: 15px;"
-                            type="month"
-                            value-format="yyyy-MM"
-                            :clearable="false"
-                            :picker-options="pickerOptions"
-                            placeholder="开始日期"
-                            @change="getCrmIndexAchievementData">
-            </el-date-picker>
-            <el-date-picker v-model="gaugeEndDate"
-                            style="width: 130px;margin-right: 15px;"
-                            type="month"
-                            value-format="yyyy-MM"
-                            :clearable="false"
-                            :picker-options="pickerOptions"
-                            placeholder="结束日期"
-                            @change="getCrmIndexAchievementData">
-            </el-date-picker>
             <el-select style="display: block;width: 100px;"
                        v-model="gaugeSelectValue"
                        placeholder="请选择"
@@ -102,17 +73,6 @@
                  src="@/assets/img/loudou.png" />销售漏斗
           </flexbox>
           <flexbox class="funnelSelect">
-            <el-date-picker v-model="dateSelect"
-                            type="daterange"
-                            :clearable="false"
-                            range-separator="-"
-                            format="yyyy-MM-dd"
-                            value-format="yyyy-MM-dd"
-                            :picker-options="pickerOptions"
-                            start-placeholder="开始日期"
-                            end-placeholder="结束日期"
-                            @change="getBusinessStatustatistics">
-            </el-date-picker>
             <el-select v-model="businessStatusValue"
                        placeholder="商机组"
                        @change="getBusinessStatustatistics">
@@ -138,35 +98,14 @@
              style="height: 400px;">
           <flexbox class="mark-header"><img class="img-mark"
                  src="@/assets/img/qushi.png" />销售趋势</flexbox>
-          <flexbox class="trendSelect">
-            <el-date-picker v-model="trendDateValue"
-                            style="width: 100px;margin-right: 15px;"
-                            type="year"
-                            :clearable="false"
-                            value-format="yyyy"
-                            :picker-options="pickerOptions"
-                            placeholder="选择年"
-                            @change="getCrmIndexSaletrend">
-            </el-date-picker>
-            <el-select v-model="trendSelectValue"
-                       style="width: 80px;"
-                       @change="getCrmIndexSaletrend"
-                       placeholder="请选择">
-              <el-option v-for="item in [{ label: '按月', value: '月' }, { label: '按季度', value: '季度' }]"
-                         :key="item.value"
-                         :label="item.label"
-                         :value="item.value">
-              </el-option>
-            </el-select>
-          </flexbox>
           <flexbox style="position: relative;">
             <div class="trend-target-item">
               <div class="name">合同金额</div>
-              <div class="value">{{trendData.contractMoneySum}}元</div>
+              <div class="value">{{trendData.totlaContractMoney}}元</div>
             </div>
             <div class="trend-target-item">
               <div class="name">回款金额</div>
-              <div class="value">{{trendData.receivablesMoneySum}}元</div>
+              <div class="value">{{trendData.totlaReceivablesMoney}}元</div>
             </div>
           </flexbox>
           <div class="trend-label">
@@ -182,8 +121,9 @@
               <div class="label-item-name">回款金额</div>
             </flexbox>
           </div>
-          <div id="axismain"
-               style="width: 480px;height:250px;"></div>
+          <div class="axismain-content">
+            <div id="axismain"></div>
+          </div>
         </div>
       </flexbox-item>
     </flexbox>
@@ -207,11 +147,6 @@ export default {
   name: 'customer-dash',
   data() {
     return {
-      pickerOptions: {
-        disabledDate(time) {
-          return time.getTime() > Date.now()
-        }
-      },
       /** 销售简报 */
       jianbaoLoading: false,
       jianbaoItems: [
@@ -258,37 +193,19 @@ export default {
           value: 0
         }
       ],
-      jianbaoSelectValue: '5',
-      jianbaoOptions: [
-        { name: '今天', value: '1' }, // today
-        { name: '昨天', value: '2' }, // yesterday
-        { name: '本周', value: '3' }, // week
-        { name: '上周', value: '4' }, // lastWeek
-        { name: '本月', value: '5' }, // month
-        { name: '上月', value: '6' }, // lastMonth
-        { name: '本季度', value: '7' }, // quarter
-        { name: '上季度', value: '8' }, // lastQuarter
-        { name: '本年', value: '9' }, // year
-        { name: '去年', value: '10' } // lastYear
-      ],
       /** 业绩指标 */
       gaugeLoading: false,
-      gaugeSelectValue: 1,
-      gaugeStartDate: '',
-      gaugeEndDate: '',
+      gaugeSelectValue: 2,
       gaugeData: { contractMoney: 0, receivablesMoney: 0, achievementMoney: 0 },
       /** 销售漏斗 */
       /** 商机状态 */
       funnelLoading: false,
       businessOptions: [],
       businessStatusValue: '',
-      dateSelect: [], // 选择的date区间
       funnelData: { winSingle: 0, loseSingle: 0 },
       /** 销售趋势 */
       trendLoading: false,
-      trendDateValue: '',
-      trendSelectValue: '月',
-      trendData: { contractMoneyTotal: 0, receivablesMoneyTotal: 0 },
+      trendData: { contractTotal: 0, receivablesTotal: 0 },
       gaugeChart: null, // 指标图
       gaugeOption: null,
       funnelChart: null, // 漏斗图
@@ -316,14 +233,6 @@ export default {
     }
   },
   mounted() {
-    this.gaugeEndDate = moment(new Date()).format('YYYY-MM')
-    this.gaugeStartDate = this.gaugeEndDate.split('-')[0] + '-01'
-    this.trendDateValue = this.gaugeEndDate.split('-')[0]
-    var endDate = moment(new Date()).format('YYYY-MM-DD')
-    var times = endDate.split('-')
-    var startDate = times[0] + '-' + times[1] + '-01'
-    this.dateSelect = [startDate, endDate]
-
     this.initGauge()
     this.initFunnel()
     this.initAxis()
@@ -340,7 +249,6 @@ export default {
     getCrmIndexIndex() {
       this.jianbaoLoading = true
       var params = this.getBaseParams()
-      params.type = this.jianbaoSelectValue
       crmIndexIndex(params)
         .then(res => {
           for (let index = 0; index < this.jianbaoItems.length; index++) {
@@ -356,7 +264,7 @@ export default {
         })
     },
     getBaseParams() {
-      return {
+      let params = {
         userIds: this.data.users
           .map(function(item, index, array) {
             return item.userId
@@ -368,15 +276,23 @@ export default {
           })
           .join(',')
       }
+
+      if (this.data.timeTypeValue.type) {
+        if (this.data.timeTypeValue.type == 'custom') {
+          params.startTime = this.data.timeTypeValue.startTime
+          params.endTime = this.data.timeTypeValue.endTime
+        } else {
+          params.type = this.data.timeTypeValue.value || ''
+        }
+      }
+      return params
     },
     /** 指标图 */
     // 销售简报
     getCrmIndexAchievementData() {
       this.gaugeLoading = true
       var params = this.getBaseParams()
-      params.startTime = this.gaugeStartDate
-      params.endTime = this.gaugeEndDate
-      params.type = this.gaugeSelectValue
+      params.status = this.gaugeSelectValue
       crmIndexAchievementData(params)
         .then(res => {
           if (res.data) {
@@ -460,23 +376,24 @@ export default {
     getBusinessStatustatistics() {
       this.funnelLoading = true
       var params = this.getBaseParams()
-      params.startTime = this.dateSelect[0]
-      params.endTime = this.dateSelect[1]
       params.typeId = this.businessStatusValue
       crmIndexFunnel(params)
         .then(res => {
           this.funnelLoading = false
           var data = []
           let sumMoney = 0
-          for (let index = 0; index < res.data.record.length; index++) {
-            const element = res.data.record[index]
+          for (let index = 0; index < res.data.list.length; index++) {
+            const element = res.data.list[index]
             data.push({
-              name: (element.name || '') + '(' + element.businessNum + ')',
-              value: element.totalPrice
+              name: (element.name || '') + '(' + element.orderNum + ')',
+              value: element.money
             })
-            sumMoney += element.totalPrice
+            sumMoney += parseFloat(element.money || 0)
           }
-          this.funnelData = res.data
+          this.funnelData = {
+            winSingle: res.data.sumYing,
+            loseSingle: res.data.sumShu
+          }
           this.funnelOption.series[0].data = data
           this.funnelOption.series[0].max = sumMoney < 1 ? 1 : sumMoney
           this.funnelChart.setOption(this.funnelOption, true)
@@ -558,12 +475,28 @@ export default {
     getCrmIndexSaletrend() {
       this.trendLoading = true
       var params = this.getBaseParams()
-      params.year = this.trendDateValue
-      params.type = this.trendSelectValue == '月' ? '1' : '2' // 1.月份 2.季度
       crmIndexSaletrend(params)
         .then(res => {
-          this.trendData = res.data
-          this.getTrendAxisInfo()
+          this.trendData = {
+            totlaContractMoney: res.data.totlaContractMoney,
+            totlaReceivablesMoney: res.data.totlaReceivablesMoney
+          }
+          let list = res.data.list || []
+          let contractList = []
+          let receivablesList = []
+          let xAxisData = []
+          for (let index = 0; index < list.length; index++) {
+            const element = list[index]
+            contractList.push(element.contractMoneys)
+            receivablesList.push(element.receivablesMoneys)
+            xAxisData.push(element.type)
+          }
+
+          this.axisOption.xAxis[0].data = xAxisData
+          this.axisOption.series[0].data = contractList
+          this.axisOption.series[1].data = receivablesList
+
+          this.axisChart.setOption(this.axisOption, true)
           this.trendLoading = false
         })
         .catch(() => {
@@ -630,20 +563,7 @@ export default {
         xAxis: [
           {
             type: 'category',
-            data: [
-              '1月',
-              '2月',
-              '3月',
-              '4月',
-              '5月',
-              '6月',
-              '7月',
-              '8月',
-              '9月',
-              '10月',
-              '11月',
-              '12月'
-            ],
+            data: [],
             axisTick: {
               alignWithLabel: true,
               lineStyle: { width: 0 }
@@ -684,14 +604,14 @@ export default {
             name: '合同金额',
             type: 'bar',
             stack: 'one',
-            barWidth: '60%',
+            barWidth: 10,
             data: []
           },
           {
             name: '回款金额',
             type: 'bar',
             stack: 'one',
-            barWidth: '60%',
+            barWidth: 10,
             data: []
           }
         ]
@@ -860,11 +780,12 @@ export default {
   }
 }
 
-.trendSelect {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  width: auto;
+.axismain-content {
+  padding: 0 10px;
+  #axismain {
+    width: 100%;
+    height: 250px;
+  }
 }
 </style>
 

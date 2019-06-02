@@ -1,6 +1,7 @@
 package com.kakarote.crm9.utils;
 
 import cn.hutool.core.date.DateUtil;
+import com.jfinal.kit.PropKit;
 import com.kakarote.crm9.common.config.JfinalConfig;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
@@ -66,7 +67,7 @@ public class BaseUtil {
     }
 
     public static String getIpAddress() {
-        Prop prop = JfinalConfig.prop;
+        Prop prop = PropKit.use("config/undertow.txt");
         try {
             if (isDevelop()) {
                 return "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + prop.get("undertow.port", "8080") + "/";

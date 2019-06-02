@@ -193,12 +193,11 @@ public class AdminFieldService {
         }
         return AdminField.dao.find(AdminField.dao.getSqlPara("admin.field.queryFieldsByBatchId", Kv.by("batchId", batchId).set("names", name)));
     }
-
-    public List<Record> queryByBatchId(String batchId) {
+    public List<Record> queryByBatchId(String batchId,Integer label) {
         if (StrUtil.isEmpty(batchId)) {
             return new ArrayList<>();
         }
-        List<Record> recordList = Db.find(AdminField.dao.getSqlPara("admin.field.queryFieldsByBatchId", Kv.by("batchId", batchId)));
+        List<Record> recordList = Db.find(AdminField.dao.getSqlPara("admin.field.queryFieldsByBatchId", Kv.by("batchId", batchId).set("label",label)));
         recordList.forEach(record -> {
             if (record.getInt("type") == 10){
                 if(StrUtil.isNotEmpty(record.getStr("value"))){
@@ -207,19 +206,22 @@ public class AdminFieldService {
                 }else {
                     record.set("value",new ArrayList<>());
                 }
-                record.set("default_value",new ArrayList<>());
+                record.set("default_value", new ArrayList<>(0));
             } else if (record.getInt("type") == 12){
                 if(StrUtil.isNotEmpty(record.getStr("value"))){
                     List<Record> deptList = Db.find("select dept_id,name from 72crm_admin_dept where dept_id in ("+record.getStr("value")+")");
-                    record.set("value",deptList);;
+                    record.set("value",deptList);
                 }else {
                     record.set("value",new ArrayList<>());
                 }
-                record.set("default_value",new ArrayList<>());
+                record.set("default_value", new ArrayList<>(0));
             }
         });
         recordToFormType(recordList);
         return recordList;
+    }
+    public List<Record> queryByBatchId(String batchId) {
+        return queryByBatchId(batchId,null);
     }
 
     public R queryFields() {
@@ -251,11 +253,11 @@ public class AdminFieldService {
                 recordValueToArray(record);
             } else if (10 == dataType) {
                 record.set("formType", "user");
-                record.set("default_value",new ArrayList<>());
+                record.set("default_value", new ArrayList<>(0));
                 //recordValueToArray(record);
             } else if (12 == dataType) {
                 record.set("formType", "structure");
-                record.set("default_value",new ArrayList<>());
+                record.set("default_value", new ArrayList<>(0));
                 //recordValueToArray(record);
             } else if (13 == dataType) {
                 record.set("formType", "datetime");

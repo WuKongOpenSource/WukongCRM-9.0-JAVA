@@ -253,22 +253,28 @@ export default {
   methods: {
     // 获取权限规则信息
     getRulesList() {
-      rulesList({ type: 'tree' }).then(res => {
-        var arr = []
-        var map = {}
-        for (var i = 0; i < res.data.length; i++) {
-          arr.push({
-            label: res.data[i].menuName,
-            index: i,
-            realm: res.data[i].realm
-          })
-          map[res.data[i].realm] = res.data[i]
-        }
-        this.treeData = map
-        this.muneList = arr
-        this.showTreeData = [this.treeData[this.jurisdictionIndex]]
-        this.getRoleList()
-      })
+      this.navLoading = true
+      rulesList({ type: 'tree' })
+        .then(res => {
+          this.navLoading = false
+          var arr = []
+          var map = {}
+          for (var i = 0; i < res.data.length; i++) {
+            arr.push({
+              label: res.data[i].menuName,
+              index: i,
+              realm: res.data[i].realm
+            })
+            map[res.data[i].realm] = res.data[i]
+          }
+          this.treeData = map
+          this.muneList = arr
+          this.showTreeData = [this.treeData[this.jurisdictionIndex]]
+          this.getRoleList()
+        })
+        .catch(() => {
+          this.navLoading = false
+        })
     },
     // 获取角色列表
     getRoleList() {

@@ -277,7 +277,7 @@ public class CrmLeadsService {
         fieldUtil.getFixedField(fieldList, "nextTime", "下次联系时间", DateUtil.formatDateTime(leads.get("next_time")), "datetime", settingArr, 0);
         fieldUtil.getFixedField(fieldList, "remark", "备注", leads.getStr("remark"), "text", settingArr, 0);
         fieldList.addAll(fixedFieldList);
-        List endList = fieldList.stream().distinct().collect(Collectors.toList());
+        List<Record> endList = fieldList.stream().distinct().collect(Collectors.toList());
         return endList;
     }
 

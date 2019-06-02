@@ -40,15 +40,17 @@ public class AdminMenuService {
      * @author wyq
      * 展示全部菜单
      */
-    public List<AdminMenu> getAllMenuList(Integer parentId){
+    public List<AdminMenu> getAllMenuList(Integer parentId,Integer deepness){
         List<AdminMenu> adminMenus=AdminMenu.dao.find(Db.getSql("admin.menu.queryMenuByParentId"),parentId);
-        adminMenus.forEach(adminMenu -> {
-            if(adminMenu.getMenuId().equals(3)){
-                adminMenu.clear();
-                return;
-            }
-            adminMenu.put("childMenu",getAllMenuList(adminMenu.getMenuId()));
-        });
+        if (deepness != 0){
+            adminMenus.forEach(adminMenu -> {
+                if(adminMenu.getMenuType().equals(3)){
+                    adminMenu.clear();
+                    return;
+                }
+                adminMenu.put("childMenu",getAllMenuList(adminMenu.getMenuId(),deepness-1));
+            });
+        }
         return adminMenus;
     }
 

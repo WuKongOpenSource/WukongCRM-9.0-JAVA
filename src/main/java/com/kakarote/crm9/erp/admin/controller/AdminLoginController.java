@@ -62,6 +62,7 @@ public class AdminLoginController extends Controller {
                 user.setLastLoginTime(new Date());
                 user.update();
                 user.setRoles(adminRoleService.queryRoleIdsByUserId(user.getUserId()));
+                user.remove("password","salt");
                 Redis.use().setex(token, 360000, user);
                 setCookie("Admin-Token", token, 360000);
                 renderJson(R.ok().put("Admin-Token", token).put("user", user).put("auth", adminRoleService.auth(user.getUserId())));

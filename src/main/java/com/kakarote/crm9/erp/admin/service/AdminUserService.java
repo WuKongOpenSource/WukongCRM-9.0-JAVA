@@ -52,6 +52,7 @@ public class AdminUserService {
                 for (Record record : topUserList) {
                     if (record.getLong("user_id").equals(adminUser.getParentId())) {
                         isContain = true;
+                        break;
                     }
                 }
                 if (!isContain) {
@@ -94,7 +95,7 @@ public class AdminUserService {
         List<Integer> deptIdList = new ArrayList<>();
         if (request.getData().getDeptId() != null) {
             deptIdList.add(request.getData().getDeptId());
-            deptIdList.addAll(queryChileDeptIds(request.getData().getDeptId()));
+            deptIdList.addAll(queryChileDeptIds(request.getData().getDeptId(),BaseConstant.AUTH_DATA_RECURSION_NUM));
         }
         if (request.getPageType() == 0) {
             List<Record> recordList = Db.find(Db.getSqlPara("admin.user.queryUserList", Kv.by("name", request.getData().getRealname()).set("deptId", deptIdList).set("status", request.getData().getStatus()).set("roleId", roleId)));
@@ -110,8 +111,9 @@ public class AdminUserService {
      */
     public List<Record> queryTopUserList(Long userId) {
         List<Record> recordList = Db.find("select user_id,realname,parent_id from 72crm_admin_user");
-        List<Long> subUserList = queryChileUserIds(userId);
+        List<Long> subUserList = queryChileUserIds(userId,BaseConstant.AUTH_DATA_RECURSION_NUM);
         recordList.removeIf(record -> subUserList.contains(record.getLong("user_id")));
+        recordList.removeIf(record -> record.getLong("user_id").equals(userId));
         return recordList;
     }
 
@@ -120,12 +122,12 @@ public class AdminUserService {
      *
      * @param deptId 当前部门id
      */
-    public List<Integer> queryChileDeptIds(Integer deptId) {
+    public List<Integer> queryChileDeptIds(Integer deptId,Integer deepness) {
         List<Integer> list = Db.query("select dept_id from 72crm_admin_dept where pid = ?", deptId);
-        if (list.size() != 0) {
+        if (list.size() != 0 && deepness > 0) {
             int size = list.size();
             for (int i = 0; i < size; i++) {
-                list.addAll(queryChileDeptIds(list.get(i)));
+                list.addAll(queryChileDeptIds(list.get(i),deepness-1));
             }
         }
         return list;
@@ -136,12 +138,12 @@ public class AdminUserService {
      *
      * @param userId 当前用户id
      */
-    public List<Long> queryChileUserIds(Long userId) {
+    public List<Long> queryChileUserIds(Long userId,Integer deepness) {
         List<Long> query = Db.query("select user_id from 72crm_admin_user where parent_id = ?", userId);
-        if (query.size() != 0) {
+        if (query.size() != 0 && deepness > 0) {
             int size = query.size();
             for (int i = 0; i < size; i++) {
-                query.addAll(queryChileUserIds(query.get(i)));
+                query.addAll(queryChileUserIds(query.get(i),deepness-1));
             }
         }
         return query;
@@ -298,5 +300,52 @@ public class AdminUserService {
             }
         }
         return recordList;
+    }
+    public List<Record> queryUserByDeptId(Integer deptId){
+        return Db.find(Db.getSql("admin.user.queryUserByDeptId"),deptId);
+    }
+
+    /**
+     * @author zxy
+     * 根据部门id和用户ID 去重 （仪盘表中业绩指标用）
+     */
+    public Record queryByDeptIds(String deptIds,String userIds){
+        Record record = new Record();
+        List<Record> allDepts = Db.find("select * from 72crm_admin_dept where dept_id in ( ? )",deptIds);
+        deptIds = getDeptIds(null,allDepts);
+        userIds = getUserIds(deptIds,userIds);
+        String arrUserIds  = queryUserIdsByDept(deptIds);
+        record.set("deptIds",deptIds);
+        record.set("userIds",userIds);
+        record.set("arrUserIds",arrUserIds);
+        return record;
+    }
+
+    private String getDeptIds(String deptIds, List<Record> allDepts){
+        for ( Record dept: allDepts) {
+            Integer pid =   dept.getInt("pid");
+            if (pid != 0){
+                deptIds = getDeptIds(deptIds,  Db.find("select * from 72crm_admin_dept where dept_id in ( ? )",pid));
+            }else {
+                if (deptIds == null){
+                    deptIds = dept.getStr("dept_id");
+                }else {
+                    deptIds = deptIds + "," + dept.getStr("dept_id");
+                }
+            }
+        }
+        return deptIds;
+    }
+    private String getUserIds(String deptIds,String userIds){
+        List<Record> allUsers = Db.find("select * from 72crm_admin_user where dept_id   NOT in ( ? ) and user_id in (?)",deptIds,userIds);
+        userIds = null;
+        for ( Record user: allUsers) {
+            if (userIds == null){
+                userIds = user.getStr("user_id");
+            }else {
+                userIds = deptIds + "," + user.getStr("user_id");
+            }
+        }
+        return userIds;
     }
 }

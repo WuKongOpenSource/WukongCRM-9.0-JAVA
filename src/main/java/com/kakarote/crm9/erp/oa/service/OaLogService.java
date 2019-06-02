@@ -150,7 +150,7 @@ public class OaLogService {
      * @author zhangzhiwei
      */
     public Record queryById(Integer id) {
-        Record record = Db.findById("72crm_oa_log", "log_id", id);
+        Record record = Db.findFirst(Db.getSqlPara("oa.log.queryList", Kv.by("logId",id)));
         queryLogDetail(record, BaseUtil.getUser().getUserId());
         return record;
     }

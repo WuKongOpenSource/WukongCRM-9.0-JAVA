@@ -14,12 +14,10 @@ import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
-import com.kakarote.crm9.erp.crm.entity.AdminCustomerSetting;
-import com.kakarote.crm9.erp.crm.entity.CrmBusiness;
-import com.kakarote.crm9.erp.crm.entity.CrmContacts;
-import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
+import com.kakarote.crm9.erp.crm.entity.*;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
 import com.kakarote.crm9.erp.oa.entity.OaEventRelation;
+import com.kakarote.crm9.erp.oa.service.OaActionRecordService;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.R;
@@ -32,6 +30,7 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.SqlPara;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
+import com.kakarote.crm9.utils.TagUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -410,7 +409,11 @@ public class CrmCustomerService {
      * 定时将客户放入公海
      */
     public void putInInternational(Record record) {
-        Db.update(Db.getSql("crm.customer.updateOwnerUserId"), record.getInt("followup_day") * 60 * 60 * 24, record.getInt("deal_day") * 60 * 60 * 24);
+        List<Integer> ids = Db.query(Db.getSql("crm.customer.selectOwnerUserId"), record.getInt("followup_day") * 60 * 60 * 24, record.getInt("deal_day") * 60 * 60 * 24);
+        if(ids != null && ids.size() > 0){
+            crmRecordService.addPutIntoTheOpenSeaRecord(ids,CrmEnum.CUSTOMER_TYPE_KEY.getTypes());
+            Db.update(Db.getSql("crm.customer.updateOwnerUserId"), ids);
+        }
     }
 
     /**
@@ -670,7 +673,9 @@ public class CrmCustomerService {
      *
      * @author zxy
      */
+    @Before(Tx.class)
     public R updateCustomerByIds(String ids) {
+        crmRecordService.addPutIntoTheOpenSeaRecord(TagUtil.toSet(ids),CrmEnum.CUSTOMER_TYPE_KEY.getTypes());
         StringBuffer sq = new StringBuffer("select count(*) from 72crm_crm_customer where customer_id in ( ");
         sq.append(ids).append(") and is_lock = 1");
         Integer count = Db.queryInt(sq.toString());
@@ -679,6 +684,16 @@ public class CrmCustomerService {
         }
         StringBuffer sql = new StringBuffer("UPDATE 72crm_crm_customer SET owner_user_id = null where customer_id in (");
         sql.append(ids).append(") and is_lock = 0");
+        String[] idsArr = ids.split(",");
+        for (String id:idsArr){
+            CrmCustomer crmCustomer = CrmCustomer.dao.findById(Integer.valueOf(id));
+            CrmOwnerRecord crmOwnerRecord = new CrmOwnerRecord();
+            crmOwnerRecord.setTypeId(Integer.valueOf(id));
+            crmOwnerRecord.setType(8);
+            crmOwnerRecord.setPreOwnerUserId(crmCustomer.getOwnerUserId());
+            crmOwnerRecord.setCreateTime(DateUtil.date());
+            crmOwnerRecord.save();
+        }
         return Db.update(sql.toString()) > 0 ? R.ok() : R.error();
     }
 
@@ -687,10 +702,20 @@ public class CrmCustomerService {
      *
      * @author zxy
      */
+    @Before(Tx.class)
     public R getCustomersByIds(String ids, Long userId) {
         crmRecordService.addDistributionRecord(ids, CrmEnum.CUSTOMER_TYPE_KEY.getTypes(), userId);
         if (userId == null) {
             userId = BaseUtil.getUser().getUserId();
+        }
+        String[] idsArr = ids.split(",");
+        for (String id:idsArr){
+            CrmOwnerRecord crmOwnerRecord = new CrmOwnerRecord();
+            crmOwnerRecord.setTypeId(Integer.valueOf(id));
+            crmOwnerRecord.setType(8);
+            crmOwnerRecord.setPostOwnerUserId(userId.intValue());
+            crmOwnerRecord.setCreateTime(DateUtil.date());
+            crmOwnerRecord.save();
         }
         String sql = "update 72crm_crm_customer set owner_user_id = " + userId + " where customer_id in (" + ids + ")";
         return Db.update(sql) > 0 ? R.ok() : R.error();

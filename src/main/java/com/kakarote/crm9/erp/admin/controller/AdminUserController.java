@@ -139,4 +139,8 @@ public class AdminUserController extends Controller {
         boolean b=adminUserService.updateUser(adminUser);
         renderJson(R.isSuccess(b,"修改信息失败"));
     }
+
+    public void queryUserByDeptId(@Para("deptId")Integer deptId){
+        renderJson(R.ok().put("data",adminUserService.queryUserByDeptId(deptId)));;
+    }
 }

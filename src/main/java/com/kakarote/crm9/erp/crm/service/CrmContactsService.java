@@ -109,7 +109,7 @@ public class CrmContactsService {
         Integer contactsId = basePageRequest.getData().getContactsId();
         Integer pageType = basePageRequest.getPageType();
         if (0 == pageType){
-            return R.ok().put("data",Db.findFirst(Db.getSqlPara("crm.contact.7",Kv.by("id",contactsId))));
+            return R.ok().put("data",Db.find(Db.getSql("crm.contact.queryBusiness"),contactsId));
         }else {
             return R.ok().put("data",Db.paginate(basePageRequest.getPage(),basePageRequest.getLimit(),new SqlPara().setSql(Db.getSql("crm.contact.queryBusiness")).addPara(contactsId)));
         }

@@ -1,17 +1,3 @@
-/*
-Navicat MySQL Data Transfer
-
-Source Server         : local
-Source Server Version : 50720
-Source Host           : localhost:3306
-Source Database       : crm9
-
-Target Server Type    : MYSQL
-Target Server Version : 50720
-File Encoding         : 65001
-
-Date: 2019-05-11 16:33:30
-*/
 
 SET FOREIGN_KEY_CHECKS=0;
 
@@ -387,7 +373,7 @@ CREATE TABLE `72crm_admin_menu` (
   `status` tinyint(4) DEFAULT '1' COMMENT '状态 1 启用 0 禁用',
   `remarks` varchar(255) DEFAULT NULL COMMENT '菜单说明',
   PRIMARY KEY (`menu_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=107 DEFAULT CHARSET=utf8 COMMENT='后台菜单表';
+) ENGINE=InnoDB AUTO_INCREMENT=127 DEFAULT CHARSET=utf8 COMMENT='后台菜单表';
 
 -- ----------------------------
 -- Records of 72crm_admin_menu
@@ -471,10 +457,27 @@ INSERT INTO `72crm_admin_menu` VALUES ('103', '98', '查看', 'read', '3', '0', 
 INSERT INTO `72crm_admin_menu` VALUES ('104', '99', '查看', 'read', '3', '0', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('105', '100', '查看', 'read', '3', '0', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('106', '101', '查看', 'read', '3', '0', '1', null);
-INSERT INTO `72crm_admin_menu` (`parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('11', '联系人导出', 'excelexport', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('11', '联系人导入', 'excelimport', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('15', '产品导入', 'excelimport', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('15', '产品导出', 'excelexport', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` VALUES ('107', '11', '联系人导出', 'excelexport', '3', '1', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('108', '11', '联系人导入', 'excelimport', '3', '1', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('109', '15', '产品导入', 'excelimport', '3', '1', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('110', '15', '产品导出', 'excelexport', '3', '1', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('111', '2', '员工客户分析', 'customer', '1', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('112', '111', '查看', 'read', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('113', '2', '销售漏斗', 'funnel', '1', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('114', '113', '查看', 'read', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('115', '2', '回款统计', 'receivables', '1', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('116', '115', '查看', 'read', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('117', '2', '产品分析', 'product', '1', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('118', '117', '查看', 'read', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('119', '2', '业绩目标完成情况', 'performance', '1', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('120', '119', '查看', 'read', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('121', '2', '员工业绩分析', 'employe', '1', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('122', '121', '查看', 'read', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('123', '2', '客户画像分析', 'portrait', '1', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('124', '123', '查看', 'read', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('125', '2', '排行榜', 'ranking', '1', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('126', '125', '查看', 'read', '3', '0', '1', null);
+
 -- ----------------------------
 -- Table structure for 72crm_admin_record
 -- ----------------------------
@@ -495,14 +498,6 @@ CREATE TABLE `72crm_admin_record` (
   PRIMARY KEY (`record_id`),
   UNIQUE KEY `record_id` (`record_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=152 DEFAULT CHARSET=utf8 COMMENT='跟进记录';
-
-DROP TABLE IF EXISTS `72crm_crm_contacts_business`;
-CREATE TABLE `72crm_crm_contacts_business` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `business_id` int(11) NOT NULL,
-  `contacts_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='商机联系人关联表';
 
 -- ----------------------------
 -- Records of 72crm_admin_record
@@ -832,6 +827,21 @@ CREATE TABLE `72crm_crm_contacts` (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for 72crm_crm_contacts_business
+-- ----------------------------
+DROP TABLE IF EXISTS `72crm_crm_contacts_business`;
+CREATE TABLE `72crm_crm_contacts_business` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `business_id` int(11) NOT NULL,
+  `contacts_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='商机联系人关联表';
+
+-- ----------------------------
+-- Records of 72crm_crm_contacts_business
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for 72crm_crm_contract
 -- ----------------------------
 DROP TABLE IF EXISTS `72crm_crm_contract`;
@@ -921,6 +931,22 @@ CREATE TABLE `72crm_crm_customer` (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for 72crm_crm_customer_stats
+-- ----------------------------
+DROP TABLE IF EXISTS `72crm_crm_customer_stats`;
+CREATE TABLE `72crm_crm_customer_stats` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(20) NOT NULL COMMENT '用户id',
+  `customer_num` int(10) NOT NULL DEFAULT '0' COMMENT '客户总数',
+  `create_time` datetime NOT NULL COMMENT '统计时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=190 DEFAULT CHARSET=utf8 COMMENT='每日客户统计';
+
+-- ----------------------------
+-- Records of 72crm_crm_customer_stats
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for 72crm_crm_leads
 -- ----------------------------
 DROP TABLE IF EXISTS `72crm_crm_leads`;
@@ -944,6 +970,24 @@ CREATE TABLE `72crm_crm_leads` (
 
 -- ----------------------------
 -- Records of 72crm_crm_leads
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for 72crm_crm_owner_record
+-- ----------------------------
+DROP TABLE IF EXISTS `72crm_crm_owner_record`;
+CREATE TABLE `72crm_crm_owner_record` (
+  `record_id` int(11) NOT NULL AUTO_INCREMENT,
+  `type_id` int(11) NOT NULL COMMENT '对象id',
+  `type` int(4) NOT NULL COMMENT '对象类型',
+  `pre_owner_user_id` int(20) DEFAULT NULL COMMENT '上一负责人',
+  `post_owner_user_id` int(20) DEFAULT NULL COMMENT '接手负责人',
+  `create_time` datetime NOT NULL COMMENT '创建时间',
+  PRIMARY KEY (`record_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='负责人变更记录表';
+
+-- ----------------------------
+-- Records of 72crm_crm_owner_record
 -- ----------------------------
 
 -- ----------------------------

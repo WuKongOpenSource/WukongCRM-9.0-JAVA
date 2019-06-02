@@ -37,10 +37,10 @@
               </div>
               <div class="title"
                    @click="rowFun(item)">{{item.title}}</div>
-              <pre class="item-content"
-                   v-if="item.preShow">{{item.content}}</pre>
-              <pre class="item-content"
-                   v-else>{{item.contentSub}}</pre>
+              <div class="item-content"
+                   v-if="item.preShow">{{item.content}}</div>
+              <div class="item-content"
+                   v-else>{{item.contentSub}}</div>
               <div v-if="item.contentSub.length < item.content.length"
                    class="load-more">
                 <span v-if="!item.loadMore"
@@ -271,6 +271,11 @@ export default {
           line-height: 18px;
           white-space: pre-wrap;
           word-wrap: break-word;
+          background-color: #f0f7ff;
+          padding: 15px;
+          border-radius: 3px;
+          color: #333;
+          letter-spacing: 0.5px;
         }
         .load-more {
           text-align: left;

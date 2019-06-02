@@ -81,14 +81,14 @@
     #end
 
     #sql("list")
-      SELECT *,name as fieldName FROM 72crm_admin_field WHERE label=#para(label) and (batch_id is null or batch_id ='')
+      SELECT field_id,parent_id,name as fieldName,name,type,label,remark,input_tips,max_length,default_value,is_unique,is_null,options,value,operating,update_time,batch_id,examine_category_id FROM 72crm_admin_field WHERE label=#para(label) and (batch_id is null or batch_id ='')
       #if(categoryId)
         and examine_category_id=#para(categoryId)
       #end
       ORDER BY sorting asc
     #end
     #sql("list1")
-    SELECT *,field_name as fieldName FROM 72crm_admin_field WHERE label=#para(label) and (batch_id is null or batch_id ='')
+      SELECT field_id,parent_id,field_name,name,type,label,remark,input_tips,max_length,default_value,is_unique,is_null,options,value,operating,update_time,batch_id,examine_category_id FROM 72crm_admin_field WHERE label=#para(label) and (batch_id is null or batch_id ='')
       #if(categoryId)
            and examine_category_id=#para(categoryId)
       #end
@@ -114,7 +114,16 @@
       WHERE
         a.label = (SELECT label FROM 72crm_admin_field WHERE batch_id =#para(batchId) limit 1) and a.batch_id is null and field_id not in (SELECT parent_id FROM 72crm_admin_field WHERE batch_id =#para(batchId))
         #if(names)
-          and 1=2
+          and name in
+          (
+            #for(i:names)
+              #(for.index > 0 ? "," : "")#para(i)
+            #end
+          )
+        #end
+        #if(label)
+          and a.examine_category_id = (SELECT examine_category_id FROM 72crm_admin_field WHERE batch_id =#para(batchId) limit 1)
+          and a.field_name not in ('content','remark')
         #end
     #end
     #sql("saveChildField")

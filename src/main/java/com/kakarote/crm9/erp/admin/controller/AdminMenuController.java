@@ -24,6 +24,6 @@ public class AdminMenuController extends Controller {
      * 展示全部菜单
      */
     public void getAllMenuList(){
-        renderJson(R.ok().put("data",adminMenuService.getAllMenuList(0)));
+        renderJson(R.ok().put("data",adminMenuService.getAllMenuList(0,20)));
     }
 }

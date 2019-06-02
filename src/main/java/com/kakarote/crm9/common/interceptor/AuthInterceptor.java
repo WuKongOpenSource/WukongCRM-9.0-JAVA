@@ -38,16 +38,16 @@ public class AuthInterceptor implements Interceptor {
 
         invocation.invoke();
     }
+    @SuppressWarnings("unchecked")
     private List<String> queryAuth(Map<String,Object> map,String key){
         List<String> permissions=new ArrayList<>();
         map.keySet().forEach(str->{
             if(map.get(str) instanceof Map){
-                permissions.addAll(queryAuth((Map<String, Object>) map.get(str),key+str+":"));
+                permissions.addAll(this.queryAuth((Map<String, Object>) map.get(str),key+str+":"));
             }else {
                 permissions.add(key+str);
             }
         });
-
         return permissions;
     }
 }

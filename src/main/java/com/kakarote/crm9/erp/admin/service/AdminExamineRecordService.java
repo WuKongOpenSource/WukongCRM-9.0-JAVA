@@ -247,6 +247,7 @@ public class AdminExamineRecordService {
                     //根据审核记录ID，审核步骤ID，查询审核日志
                     // List<AdminExamineLog> examineLogs = AdminExamineLog.dao.find(Db.getSql("admin.examineLog.queryNowadayExamineLogByRecordIdAndStepId"),examineRecord.getRecordId(),examineRecord.getExamineStepId());
                     //当前并签人员
+                    nowadayExamineLog.update();
                     String[] userIds = examineStep.getCheckUserId().split(",");
                     for (String userId : userIds) {
                         if (StrUtil.isNotEmpty(userId)) {

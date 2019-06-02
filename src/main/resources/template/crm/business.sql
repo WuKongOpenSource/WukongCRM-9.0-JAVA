@@ -54,7 +54,7 @@
     #end
 
     #sql ("queryBusinessStatus")
-    select b.status_id,b.name,b.rate,b.order_num
+    select b.status_id,b.name,b.rate,b.order_num,a.status_id as current_status_id,a.is_end
     from 72crm_crm_business as a inner join 72crm_crm_business_status as b on a.type_id = b.type_id
     where a.business_id = ?
     #end

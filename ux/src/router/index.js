@@ -10,7 +10,7 @@ import workbenchRouter from './modules/workbench'
 import customerRouter from './modules/customer'
 import managerRouter from './modules/manager'
 import personRouter from './modules/person'
-import businessRouter from './modules/business'
+import { biRouter } from './modules/business'
 
 /**
 * hidden: true                   if `hidden:true` will not show in the sidebar(default is false)
@@ -41,6 +41,7 @@ export const constantRouterMap = [{
   },
   workbenchRouter,
   personRouter,
+  biRouter,
   {
     path: '/',
     redirect: '/workbench/index',
@@ -59,7 +60,6 @@ export default new Router({
 export const asyncRouterMap = [
   customerRouter,
   managerRouter,
-  businessRouter,
   {
     path: '*',
     redirect: '/404',

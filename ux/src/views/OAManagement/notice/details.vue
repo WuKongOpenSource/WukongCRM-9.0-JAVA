@@ -10,7 +10,7 @@
       <div class="content">
         <div class="title">{{titleList.title}}</div>
         <div class="time">{{titleList.createTime}}</div>
-        <pre class="text">{{titleList.content}}</pre>
+        <div class="text">{{titleList.content}}</div>
       </div>
       <div class="btn-box"
            v-if="btnShow">

@@ -129,6 +129,19 @@
       (SELECT COUNT(*) FROM 72crm_crm_action_record WHERE types = 'business' and content LIKE '%将销售阶段 由%' AND YEAR(create_time)=YEAR(date_sub(now(),interval 1 year)) AND create_user_id in (#para(userIds))) as recordStatusCount
       FROM 72crm_crm_customer
    #end
+   #sql("custom")
+       select distinct
+      (SELECT COUNT(*) FROM 72crm_crm_business WHERE  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in (#para(userIds))) as businessCount,
+      (SELECT COUNT(*) FROM 72crm_crm_contacts WHERE  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in (#para(userIds))) as contactsCount,
+      (SELECT COUNT(*) FROM 72crm_crm_contract WHERE  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in (#para(userIds))) as contractCount,
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in (#para(userIds))) as customerCount,
+      (SELECT COUNT(*) FROM 72crm_crm_product WHERE  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in (#para(userIds))) as productCount,
+      (SELECT COUNT(*) FROM 72crm_crm_leads WHERE  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in (#para(userIds))) as leadsCount,
+      (SELECT COUNT(*) FROM 72crm_crm_receivables WHERE  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in (#para(userIds))) as receivablesCount,
+      (SELECT COUNT(*) FROM 72crm_admin_record WHERE  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in (#para(userIds))) as recordCount,
+      (SELECT COUNT(*) FROM 72crm_crm_action_record WHERE types = 'business' and content LIKE '%将销售阶段 由%' AND  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in (#para(userIds))) as recordStatusCount
+      FROM 72crm_crm_customer
+   #end
    #sql("sellMonth")
      SELECT distinct
     (SELECT IFNULL(SUM(money),0) FROM 72crm_crm_contract WHERE DATE_FORMAT( create_time, '%Y%m' ) = #para(timeYearMonth) AND create_user_id in (#para(userIds))) as contractMoneys,
@@ -143,17 +156,33 @@
    #end
    #sql("queryMoneys")
      SELECT distinct
-    (select IFNULL(SUM(money),0) FROM 72crm_crm_contract where DATE_FORMAT(create_time,'%Y-%m') between  #para(startTime)  and #para(endTime) AND create_user_id in (#para(userIds))) as contractMoneys,
-    (select IFNULL(SUM(money),0) FROM 72crm_crm_receivables where DATE_FORMAT(create_time,'%Y-%m') between  #para(startTime)  and #para(endTime) AND create_user_id in (#para(userIds))) as receivablesMoneys
+    (select IFNULL(SUM(money),0) FROM 72crm_crm_contract where DATE_FORMAT(create_time,'%Y%m') between  #para(startTime)  and #para(endTime) AND create_user_id in (#para(userIds))) as contractMoneys,
+    (select IFNULL(SUM(money),0) FROM 72crm_crm_receivables where DATE_FORMAT(create_time,'%Y%m') between  #para(startTime)  and #para(endTime) AND create_user_id in (#para(userIds))) as receivablesMoneys
      FROM 72crm_crm_contract
    #end
    #sql("queryTarget")
-     SELECT (january + february + march + april + may  + june + july + august  + september + october + november + december) as achievementTarget
-      FROM 72crm_crm_achievement WHERE year = #para(year) and type = #para(status) and obj_id in (#para(userIds)) and status = #para(type)
+     SELECT sum(january + february + march + april + may  + june + july + august  + september + october + november + december) as achievementTarget
+      FROM 72crm_crm_achievement
+       WHERE year = #para(year)
+      #if(userIds)
+       and type = 3 and obj_id in (#para(userIds))
+      #end
+       #if(deptIds)
+       and type = 2 and obj_id in (#para(deptIds))
+      #end
+       and status = #para(status)
    #end
    #sql("queryTargets")
      SELECT january , february , march , april , may  , june , july , august  , september , october , november , december
-      FROM 72crm_crm_achievement WHERE year = #para(year) and type = #para(status) and obj_id in (#para(userIds)) and status = #para(type)
+      FROM 72crm_crm_achievement
+      WHERE year = #para(year)
+      #if(userIds)
+       and type = 3 and obj_id in (#para(userIds))
+      #end
+       #if(deptIds)
+       and type = 2 and obj_id in (#para(deptIds))
+      #end
+       and status = #para(status)
    #end
    #sql("queryBusinessStatistics")
      SELECT DISTINCT (SELECT COUNT(*) from 72crm_crm_business WHERE scb.status_id = status_id) as  businessNum,
@@ -228,4 +257,85 @@
       #end),0) as  loseSingle
     from 72crm_crm_business
    #end
+    #sql("queryContractMoeny")
+       SELECT IFNULL(SUM(money),0) as money
+      FROM 72crm_crm_contract
+      where check_status = 2
+      and  owner_user_id in (#para(userIds))
+      #if(type == 1)
+          and to_days(NOW()) = TO_DAYS(order_date)
+          #end
+           #if(type == 2)
+          and to_days(NOW()) - TO_DAYS(order_date) = 1
+          #end
+           #if(type == 3)
+          and YEARWEEK(date_format(order_date,'%Y-%m-%d')) = YEARWEEK(now())
+          #end
+           #if(type == 4)
+          and YEARWEEK(date_format(order_date,'%Y-%m-%d')) = YEARWEEK(now()) -1
+          #end
+           #if(type == 5)
+          and date_format(order_date,'%Y-%m')=date_format(now(),'%Y-%m')
+          #end
+           #if(type == 6)
+          and date_format(order_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+          #end
+           #if(type == 7)
+          and QUARTER(order_date)=QUARTER(now()) AND YEAR(order_date)=YEAR(NOW())
+          #end
+           #if(type == 8)
+          and QUARTER(order_date)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(order_date,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
+          #end
+           #if(type == 9)
+          and YEAR(order_date)=YEAR(NOW())
+          #end
+           #if(type == 10)
+          and YEAR(order_date)=YEAR(date_sub(now(),interval 1 year))
+          #end
+           #if(type == 11)
+            and  TO_DAYS(order_date) >= TO_DAYS(#para(startTime))
+            and  TO_DAYS(order_date) <= TO_DAYS(#para(endTime))
+          #end
+    #end
+    #sql("queryReceivablesMoeny")
+       SELECT IFNULL(SUM(money),0) as money
+      FROM 72crm_crm_receivables
+      where check_status = 2
+      and  owner_user_id in (#para(userIds))
+      #if(type == 1)
+          and to_days(NOW()) = TO_DAYS(return_time)
+          #end
+           #if(type == 2)
+          and to_days(NOW()) - TO_DAYS(return_time) = 1
+          #end
+           #if(type == 3)
+          and YEARWEEK(date_format(return_time,'%Y-%m-%d')) = YEARWEEK(now())
+          #end
+           #if(type == 4)
+          and YEARWEEK(date_format(return_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
+          #end
+           #if(type == 5)
+          and date_format(return_time,'%Y-%m')=date_format(now(),'%Y-%m')
+          #end
+           #if(type == 6)
+          and date_format(return_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+          #end
+           #if(type == 7)
+          and QUARTER(return_time)=QUARTER(now()) AND YEAR(return_time)=YEAR(NOW())
+          #end
+           #if(type == 8)
+          and QUARTER(return_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(return_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
+          #end
+           #if(type == 9)
+          and YEAR(return_time)=YEAR(NOW())
+          #end
+           #if(type == 10)
+          and YEAR(return_time)=YEAR(date_sub(now(),interval 1 year))
+          #end
+           #if(type == 11)
+            and  TO_DAYS(return_time) >= TO_DAYS(#para(startTime))
+            and  TO_DAYS(return_time) <= TO_DAYS(#para(endTime))
+          #end
+    #end
+
 #end

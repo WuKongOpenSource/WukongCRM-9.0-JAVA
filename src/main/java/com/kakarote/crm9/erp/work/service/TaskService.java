@@ -231,6 +231,7 @@ public class TaskService {
     public R getTaskList(Integer type , Integer status, Integer priority, Integer date, List<Integer> userIds, BasePageRequest<Task> basePageRequest, String name){
         String total = "select count(*) from 72crm_task a where a.pid = 0 and a.ishidden = 0 ";
         StringBuffer sql = new StringBuffer();
+        Page<Record> page = new Page<>();
         if (userIds.size() > 0){
         if ( type == null || type == 0){
 
@@ -293,6 +294,8 @@ public class TaskService {
             }
             sql.append(")");
         }
+        }else {
+            page.setList(new ArrayList<>());
         }
         if (status != null ){
             sql.append(" and a.status = ").append(status);
@@ -306,21 +309,16 @@ public class TaskService {
             if (date == 2)
             { sql.append(" and to_days(NOW()) - TO_DAYS(a.stop_time) = -1 ");}
             if (date == 3)
-            { sql.append(" and to_days(NOW()) - TO_DAYS(a.stop_time) >= -7 and to_days(NOW()) - TO_DAYS(a.stop_time) <= 0");}
+            { sql.append(" and to_days(NOW()) - TO_DAYS(a.stop_time) >= -7 and to_days(NOW()) - TO_DAYS(a.stop_time) <= 0 ");}
             if (date == 4)
             { sql.append(" and to_days(NOW()) - TO_DAYS(a.stop_time) >= -30 and to_days(NOW()) - TO_DAYS(a.stop_time) <= 0 ");}
         }
         if (StrUtil.isNotEmpty(name)){
             sql.append(" and a.name like '%").append(name).append("%' ");
         }
-        sql.append("order by a.create_time desc");
-        Page<Record> page = Db.paginateByFullSql(basePageRequest.getPage(),basePageRequest.getLimit(),total + sql,Db.getSql("work.task.getTaskList")+sql);
-        if (userIds.size() == 0){
-            page.setList(new ArrayList<>());
-        }else {
-            page.setList(queryUser(page.getList()));
-        }
-
+        sql.append(" order by a.create_time desc ");
+        page = Db.paginateByFullSql(basePageRequest.getPage(),basePageRequest.getLimit(),total + sql,Db.getSql("work.task.getTaskList")+sql);
+        page.setList(queryUser(page.getList()));
         return R.ok().put("data", page);
     }
     private List<Record> queryUser(List<Record> tasks){

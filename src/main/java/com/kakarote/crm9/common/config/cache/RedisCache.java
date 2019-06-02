@@ -47,7 +47,7 @@ public class RedisCache implements ICache {
                 cache.del(cache.keys("*").toArray());
             }catch (JedisDataException exception){
                 //TODO keys同样被禁用
-                throw new RuntimeException();
+                throw new RuntimeException(exception);
             }
         }
 

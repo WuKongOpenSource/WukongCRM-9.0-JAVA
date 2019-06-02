@@ -44,7 +44,7 @@ public class AdminSysConfigController extends Controller {
     public void querySysConfig(){
         Cache cache = Redis.use();
         if (cache.get(SYS_CONFIG_KEY) == null){
-            renderJson(R.ok().put("data",null));
+            renderJson(R.ok().put("data",Kv.by("logo","").set("name","")));
             return;
         }
         String data = cache.get(SYS_CONFIG_KEY);

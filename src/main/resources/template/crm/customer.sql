@@ -103,10 +103,25 @@
 
     #sql ("updateOwnerUserId")
     UPDATE 72crm_crm_customer SET owner_user_id = null
+    WHERE customer_id in (
+        #for(i:ids)
+             #(for.index > 0 ? "," : "")#para(i)
+             #end
+        )
+
+    #end
+    #sql ("selectOwnerUserId")
+    select customer_id from 72crm_crm_customer as ccc
     WHERE owner_user_id != 0
-    and deal_status ='未成交'
-    and is_lock = 0
-    and ((unix_timestamp(now()) - unix_timestamp(update_time)) > ? or (unix_timestamp(now()) - unix_timestamp(create_time)) > ?)
+        and deal_status ='未成交'
+        and is_lock = 0
+        and ((unix_timestamp(now()) - unix_timestamp((
+		SELECT car.create_time
+		 FROM 72crm_admin_record  as car
+		where
+		car.types = 'crm_customer'
+		and car.types_id = ccc.customer_id
+		ORDER BY car.create_time DESC LIMIT 1))) > ? or (unix_timestamp(now()) - unix_timestamp(create_time)) > ?)
     #end
 
     #sql ("getRecord")

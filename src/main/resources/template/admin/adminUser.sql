@@ -78,4 +78,7 @@
         #end
       )
     #end
+    #sql("queryUserByDeptId")
+      select user_id as id,realname from 72crm_admin_user where dept_id =?
+    #end
 #end

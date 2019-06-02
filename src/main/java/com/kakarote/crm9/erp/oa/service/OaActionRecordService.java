@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminUserService;
 import com.kakarote.crm9.erp.oa.common.OaEnum;
@@ -71,9 +72,9 @@ public class OaActionRecordService {
         Integer type = pageRequest.getData().getType();
         AdminUser user = BaseUtil.getUser();
         SqlPara sqlPara;
-        List<Long> userIdList = userService.queryChileUserIds(user.getUserId());
+        List<Long> userIdList = userService.queryChileUserIds(user.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
         userIdList.add(user.getUserId());
-        List<Integer> deptIdList=userService.queryChileDeptIds(user.getDeptId());
+        List<Integer> deptIdList=userService.queryChileDeptIds(user.getDeptId(),BaseConstant.AUTH_DATA_RECURSION_NUM);
         deptIdList.add(user.getDeptId());
         if (type.equals(OaEnum.ALL_TYPE_KEY.getTypes())) {
             sqlPara = Db.getSqlPara("oa.record.queryList", Kv.by("userId", user.getUserId()).set("deptId", user.getDeptId()).set("userIds", userIdList).set("deptIds", deptIdList));

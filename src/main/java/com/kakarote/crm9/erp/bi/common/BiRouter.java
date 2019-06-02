@@ -1,6 +1,6 @@
 package com.kakarote.crm9.erp.bi.common;
 
-import com.kakarote.crm9.erp.bi.controller.BiController;
+import com.kakarote.crm9.erp.bi.controller.*;
 import com.jfinal.config.Routes;
 
 public class BiRouter extends Routes {
@@ -8,5 +8,9 @@ public class BiRouter extends Routes {
     public void config() {
         addInterceptor(new BiInterceptor());
         add("/bi", BiController.class);
+        add("/biCustomer", BiCustomerController.class);
+        add("/biRanking", BiRankingController.class);
+        add("/biFunnel", BiFunnelController.class);
+        add("/biEmployee", BiEmployeeController.class);
     }
 }

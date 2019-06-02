@@ -147,4 +147,14 @@ export default {
   flex-shrink: 0;
   padding: 0 10px;
 }
+
+.create-item {
+  flex: 0 0 50%;
+  flex-shrink: 0;
+  padding: 0 10px;
+}
+
+.el-dialog__wrapper /deep/.el-dialog__body {
+  padding: 20px;
+}
 </style>

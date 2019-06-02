@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.plugin.activerecord.Page;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminScene;
@@ -22,6 +23,7 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class AdminSceneService {
@@ -101,9 +103,15 @@ public class AdminSceneService {
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
         } else if (6 == label) {
+            List<Map<String,Object>> checkList=new ArrayList<>();
+            checkList.add(new JSONObject().fluentPut("name","待审核").fluentPut("value",0));
+            checkList.add(new JSONObject().fluentPut("name","审核中").fluentPut("value",1));
+            checkList.add(new JSONObject().fluentPut("name","审核通过").fluentPut("value",2));
+            checkList.add(new JSONObject().fluentPut("name","审核未通过").fluentPut("value",3));
+            checkList.add(new JSONObject().fluentPut("name","已撤回").fluentPut("value",4));
             fieldUtil.add("num", "合同编号", "number", settingArr)
                     .add("name", "合同名称", "text", settingArr)
-                    .add("check_status", "审核状态", "select", settingArr)
+                    .add("check_status", "审核状态", "checkStatus", checkList)
                     .add("customer_name", "客户名称", "customer", settingArr)
                     .add("business_name", "商机名称", "business", settingArr)
                     .add("order_date", "下单时间", "date", settingArr)
@@ -119,8 +127,14 @@ public class AdminSceneService {
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
         } else if (7 == label) {
+            List<Map<String,Object>> checkList=new ArrayList<>();
+            checkList.add(new JSONObject().fluentPut("name","待审核").fluentPut("value",0));
+            checkList.add(new JSONObject().fluentPut("name","审核中").fluentPut("value",1));
+            checkList.add(new JSONObject().fluentPut("name","审核通过").fluentPut("value",2));
+            checkList.add(new JSONObject().fluentPut("name","审核未通过").fluentPut("value",3));
+            checkList.add(new JSONObject().fluentPut("name","已撤回").fluentPut("value",4));
             fieldUtil.add("number", "回款编号", "number", settingArr)
-                    .add("check_status", "审核状态", "select", settingArr)
+                    .add("check_status", "审核状态", "checkStatus", checkList)
                     .add("customer_name", "客户名称", "customer", settingArr)
                     .add("contract_num", "合同编号", "contract", settingArr)
                     .add("return_time", "回款日期", "date", settingArr)
@@ -215,12 +229,12 @@ public class AdminSceneService {
             JSONObject ownerObject = new JSONObject();
             ownerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "is").fluentPut("value", userId));
             JSONObject subOwnerObject = new JSONObject();
-            subOwnerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "in").fluentPut("value", getSubUserId(userId.intValue(),20).substring(1)));
+            subOwnerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "in").fluentPut("value", getSubUserId(userId.intValue(),BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1)));
             if (1 == type) {
                 systemScene.setName("全部线索").setData(new JSONObject().fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", 0)).toString()).save();
                 ownerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "is").fluentPut("value", userId)).fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", 0));
                 systemScene.setSceneId(null).setName("我负责的线索").setData(ownerObject.toString()).save();
-                subOwnerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "in").fluentPut("value", getSubUserId(userId.intValue(),20).substring(1))).fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", 0));
+                subOwnerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "in").fluentPut("value", getSubUserId(userId.intValue(),BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1))).fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", 0));
                 systemScene.setSceneId(null).setName("下属负责的线索").setData(subOwnerObject.toString()).save();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", "1"));
@@ -508,7 +522,25 @@ public class AdminSceneService {
             }
 
         }
-        return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select *", from));
+        Page<Record> recordPage = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select *", from);
+        if (type == 5){
+            recordPage.getList().forEach(record -> {
+                if (record.getInt("is_end") == 0){
+                    Integer sortNum = Db.queryInt("select order_num from 72crm_crm_business_status where status_id = ?",record.getInt("status_id"));
+                    Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
+                    record.set("progressBar",sortNum+"/"+totalStatsNum);
+                }else if (record.getInt("is_end") == 1){
+                    Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
+                    record.set("progressBar",totalStatsNum+"/"+totalStatsNum);
+                }else if (record.getInt("is_end") == 2){
+                    Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
+                    record.set("progressBar","0/"+totalStatsNum);
+                }else if (record.getInt("is_end") == 3){
+                    record.set("progressBar","0/0");
+                }
+            });
+        }
+        return R.ok().put("data",recordPage);
     }
 
     private boolean isValid(String param){

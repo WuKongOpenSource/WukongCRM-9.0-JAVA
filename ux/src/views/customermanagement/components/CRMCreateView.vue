@@ -100,7 +100,8 @@ import {
   regexIsCRMMobile,
   regexIsCRMEmail,
   formatTimeToTimestamp,
-  timestampToFormatTime
+  timestampToFormatTime,
+  objDeepCopy
 } from '@/utils'
 
 import {
@@ -506,11 +507,23 @@ export default {
         } else {
           var params = {}
           if (this.action.type == 'update') {
-            params['value'] = item.value || '' // 编辑的值 在value字段
+            params['value'] = item.value || '' // 编辑的值 在value∂ç字段
           } else {
-            params['value'] = item.defaultValue
-              ? item.defaultValue
-              : item.value || ''
+            if (
+              item.formType == 'user' ||
+              item.formType == 'structure' ||
+              item.formType == 'file' ||
+              item.formType == 'category' ||
+              item.formType == 'customer' ||
+              item.formType == 'business' ||
+              item.formType == 'contract'
+            ) {
+              params['value'] = item.defaultValue
+                ? objDeepCopy(item.defaultValue)
+                : []
+            } else {
+              params['value'] = item.defaultValue || ''
+            }
           }
           params['key'] = item.fieldName
           params['data'] = item

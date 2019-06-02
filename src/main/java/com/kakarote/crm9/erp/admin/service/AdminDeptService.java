@@ -3,6 +3,7 @@ package com.kakarote.crm9.erp.admin.service;
 import cn.hutool.core.util.StrUtil;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminDept;
+import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.plugin.activerecord.Db;
@@ -15,21 +16,24 @@ import java.util.List;
 
 public class AdminDeptService {
     public R setDept(AdminDept adminDept) {
-        boolean bol=false;
+        boolean bol;
         if (adminDept.getDeptId() == null) {
             bol = adminDept.save();
         } else {
-            List<Record> deptList = queryDeptTree(null,adminDept.getDeptId());
-            boolean stamp=false;
-            for (Record record : deptList){
-                if (record.getInt("id").equals(adminDept.getPid())){
-                    stamp=true;
-                    break;
+            if (adminDept.getPid() != null && adminDept.getPid() != 0) {
+                List<Record> topDeptList = queryDeptTree(null,adminDept.getDeptId());
+                boolean isContain = false;
+                for (Record record : topDeptList) {
+                    if (record.getInt("id").equals(adminDept.getPid())) {
+                        isContain = true;
+                        break;
+                    }
+                }
+                if (!isContain) {
+                    return R.error("该部门的下级部门不能设置为上级部门");
                 }
             }
-            if(stamp){
-                bol = adminDept.update();
-            }
+            bol = adminDept.update();
         }
         return R.isSuccess(bol,"设置失败");
     }
@@ -43,10 +47,20 @@ public class AdminDeptService {
         } else if (StrUtil.isNotBlank(type) && "save".equals(type)) {
             return adminDeptList;
         } else {
-            allDeptList.forEach(record -> record.remove("children"));
-            allDeptList.removeIf(record -> record.getInt("id").equals(id));
-            return allDeptList;
+            return queryTopDeptList(id);
         }
+    }
+
+    /**
+     * 查询可设置为上级的部门
+     */
+    private List<Record> queryTopDeptList(Integer deptId) {
+        List<Record> recordList = Db.find("select dept_id,name,pid from 72crm_admin_dept");
+        AdminUserService adminUserService = new AdminUserService();
+        List<Integer> subDeptList = adminUserService.queryChileDeptIds(deptId,BaseConstant.AUTH_DATA_RECURSION_NUM);
+        recordList.removeIf(record -> subDeptList.contains(record.getInt("dept_id")));
+        recordList.removeIf(record -> record.getInt("dept_id").equals(deptId));
+        return recordList;
     }
 
     /**

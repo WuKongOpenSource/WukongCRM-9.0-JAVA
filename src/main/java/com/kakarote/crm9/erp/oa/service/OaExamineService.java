@@ -139,8 +139,10 @@ public class OaExamineService{
     public R setOaExamine(JSONObject jsonObject){
         AdminUser user = BaseUtil.getUser();
         OaExamine oaExamine = jsonObject.getObject("oaExamine", OaExamine.class);
-        if(oaExamine.getStartTime().compareTo(oaExamine.getEndTime()) == 1){
-            return R.error("结束时间早于开始时间");
+        if (oaExamine.getStartTime() != null && oaExamine.getEndTime() != null){
+            if(oaExamine.getStartTime().compareTo(oaExamine.getEndTime()) == 1){
+                return R.error("结束时间早于开始时间");
+            }
         }
         boolean bol;
         String batchId = StrUtil.isNotEmpty(oaExamine.getBatchId()) ? oaExamine.getBatchId() : IdUtil.simpleUUID();
@@ -255,7 +257,7 @@ public class OaExamineService{
         //根据审核记录id查询审核记录
         OaExamineRecord examineRecord = OaExamineRecord.dao.findById(recordId);
         if(status == 4){
-            if(! examineRecord.getCreateUser().equals(auditUserId) || ! auditUserId.equals(BaseConstant.SUPER_ADMIN_USER_ID)){
+            if(! examineRecord.getCreateUser().equals(auditUserId) && ! auditUserId.equals(BaseConstant.SUPER_ADMIN_USER_ID)){
                 return R.error("当前用户没有审批权限！");
             }
         }else{
@@ -267,8 +269,9 @@ public class OaExamineService{
             }
         }
         examineRecord.setExamineStatus(status);
+        Integer examineId = examineRecord.getExamineId();
         //查询审批流程
-        OaExamine examine = OaExamine.dao.findById(examineRecord.getExamineId());
+        OaExamine examine = OaExamine.dao.findById(examineId);
         //查询审批类型
         OaExamineCategory examineCategory = OaExamineCategory.dao.findById(examine.getCategoryId());
         //查询当前审批步骤
@@ -385,6 +388,12 @@ public class OaExamineService{
                 //没有上级，审核通过
                 examineRecord.setExamineStatus(1);
             }else{
+                //把下一步审批人放入操作记录中
+                OaActionRecord oaActionRecord = new OaActionRecord().findFirst("select * from `72crm_oa_action_record` where type = 5 and action_id = ? and content = '添加了审批' limit 1", examineId);
+                String joinUserIds = oaActionRecord.getJoinUserIds();
+                joinUserIds += checkUserIds;
+                oaActionRecord.setJoinUserIds(TagUtil.fromString(joinUserIds));
+                oaActionRecord.update();
                 //添加审核日志
                 for(Integer userId : TagUtil.toSet(checkUserIds)){
                         OaExamineLog oaExamineLog = new OaExamineLog();
@@ -469,7 +478,7 @@ public class OaExamineService{
             default:
                 fieldUtil.oaFieldAdd("content", "审批事由", "textarea", arr, 1, 0, oaExamineInfo.get("content"), "", 1)
                         .oaFieldAdd("remark", "备注", "textarea", arr, 1, 0, oaExamineInfo.get("remark"), "", 1);
-                List<Record> recordList1 = adminFieldService.queryByBatchId(oaExamineInfo.getStr("batch_id"));
+                List<Record> recordList1 = adminFieldService.queryByBatchId(oaExamineInfo.getStr("batch_id"),10);
                 recordList.addAll(recordList1);
                 break;
         }

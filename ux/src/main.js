@@ -12,6 +12,7 @@ import '@/styles/index.scss' // global css
 import App from './App'
 import router from './router'
 import store from './store'
+
 import cache from '@/utils/cache'
 cache.loadingCache()
 
@@ -38,11 +39,13 @@ Vue.use(VueLazyload, {
   loading: require('@/assets/img/loading.gif'),
   attempt: 1
 })
+
 import * as filters from './filters' // global filters
 // 注册全局过滤器
 Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])
 })
+
 // 处理时间的过滤器
 Vue.use(require('vue-moment'))
 import moment from 'moment'
@@ -61,6 +64,7 @@ import {
   emoji
 } from './utils/emoji'
 Vue.prototype.emoji = emoji
+
 Vue.config.productionTip = false
 
 window.app = new Vue({

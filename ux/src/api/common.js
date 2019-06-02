@@ -32,7 +32,14 @@ export function adminStructuresSubIndex(data) {
     data: data
   })
 }
-
+// 获取权限范围内部门接口
+export function getUserByDeptId(data) {
+  return request({
+    url: 'system/user/queryUserByDeptId',
+    method: 'post',
+    data: data
+  })
+}
 
 
 // 部门下的员工

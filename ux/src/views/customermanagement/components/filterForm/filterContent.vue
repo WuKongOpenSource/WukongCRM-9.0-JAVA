@@ -7,6 +7,7 @@
         <span v-if="item.formType == 'date'">{{item.name +'&nbsp;“' + item.value[0] + '-' + item.value[1] + '”'}}</span>
         <span v-else-if="item.formType === 'datetime'">{{item.name +'&nbsp;“' + item.value[0] + '-' + item.value[1] + '”'}}</span>
         <span v-else-if="item.formType === 'business_type'">{{item.name +'&nbsp;“' + getTypesName(item) + getStatusName(item) + '”'}}</span>
+        <span v-else-if="item.formType === 'checkStatus'">{{item.name +'&nbsp;“' + optionsNames[item.condition]+ '”'+'&nbsp;'+ getCheckName(item)}}</span>
         <span v-else-if="item.formType === 'user'">{{item.name +'&nbsp;' + optionsNames[item.condition] + '“' + item.value[0].realname + '”'}}</span>
         <span v-else>{{item.name + '&nbsp;' + optionsNames[item.condition] + '“' + item.value + '”' }}</span>
         <i class="el-icon-close icon"
@@ -76,6 +77,16 @@ export default {
         return obj.name || ''
       }
       return ''
+    },
+    getCheckName(data) {
+      let value=''
+      data.setting.forEach(item=>{
+        if(item.value===data.value){
+          value=item.name;
+          return;
+        }
+      })
+      return value;
     },
     // 商机阶段展示名称
     getStatusName(data) {

@@ -61,6 +61,15 @@
                            :value="item">
                 </el-option>
               </el-select>
+              <el-select v-else-if="formItem.formType === 'checkStatus'"
+                         v-model="formItem.value"
+                         placeholder="请选择筛选条件">
+                <el-option v-for="item in formItem.setting"
+                           :key="item.value"
+                           :label="item.name"
+                           :value="item.value">
+                </el-option>
+              </el-select>
               <el-date-picker v-else-if="formItem.formType === 'date' || formItem.formType === 'datetime'"
                               v-model="formItem.value"
                               :value-format="formItem.formType === 'date' ? 'yyyy-MM-dd' : 'yyyy-MM-dd HH:mm:ss'"
@@ -231,7 +240,7 @@ export default {
       if (
         formType == 'select' ||
         formType == 'checkbox' ||
-        formType == 'user'
+        formType == 'user' ||formType=='checkStatus'
       ) {
         return [
           { value: 'is', label: '等于', disabled: false },
@@ -294,7 +303,7 @@ export default {
           formItem.statusOption = []
           formItem.typeId = ''
           formItem.statusId = ''
-        } else if (formItem.formType == 'select') {
+        } else if (formItem.formType == 'select'||formItem.formType == 'checkStatus') {
           formItem.setting = obj.setting || []
         } else if (
           formItem.formType === 'date' ||
@@ -351,7 +360,7 @@ export default {
             this.$message.error('请输入筛选条件的值！')
             return
           }
-        } else if (!o.value) {
+        } else if (!o.value&&o.value!==0) {
           this.$message.error('请输入筛选条件的值！')
           return
         }

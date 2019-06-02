@@ -94,6 +94,10 @@ const managerRouter = {
       name: 'handlefield',
       path: 'system-customer/handlefield/:type/:id/:label', // type customer contacts business contract money
       component: () => import('@/views/SystemManagement/SystemCustomer/HandleField'),
+      meta: {
+        changeMenu: false, // 跳转不更改路径
+        menuSelct: 'system-customer'
+      },
       hidden: true
     }
   ]

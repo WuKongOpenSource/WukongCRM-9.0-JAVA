@@ -7,12 +7,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
+import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.*;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
+import com.kakarote.crm9.utils.TagUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -217,6 +219,29 @@ public class CrmRecordService<T> {
         strings.add("将线索\""+name+"\"转化为客户");
         crmActionRecord.setContent(JSON.toJSONString(strings));
         crmActionRecord.save();
+    }
+    /**
+     * 放入公海
+     *
+     * @param actionIds
+     * @param crmTypes
+     */
+    public void addPutIntoTheOpenSeaRecord(Collection actionIds, String crmTypes) {
+        CrmActionRecord crmActionRecord = new CrmActionRecord();
+        if(BaseUtil.getRequest() == null){
+            crmActionRecord.setCreateUserId(BaseConstant.SUPER_ADMIN_USER_ID.intValue());
+        }else {
+            crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        }
+        crmActionRecord.setCreateTime(new Date());
+        crmActionRecord.setTypes(crmTypes);
+        ArrayList<String> strings = new ArrayList<>();
+        strings.add("将客户放入公海");
+        crmActionRecord.setContent(JSON.toJSONString(strings));
+        for(Object actionId : actionIds){
+            crmActionRecord.setActionId((Integer) actionId);
+            crmActionRecord.save();
+        }
     }
 
 
