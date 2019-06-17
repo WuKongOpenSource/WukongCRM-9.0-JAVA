@@ -17,6 +17,14 @@
     update 72crm_admin_scene set is_hide = 0,sort = ? where type = ? and user_id = ? and scene_id = ?
     #end
 
+    #sql ("queryIsHideSystem")
+    select count(scene_id) as number from 72crm_admin_scene where scene_id in (
+       #for(i : ids)
+           #(for.index > 0 ? "," : "")#para(i)
+       #end
+    ) and is_system = 1
+    #end
+
     #sql ("isHide")
     update 72crm_admin_scene set is_hide = 1,sort = 0
     where scene_id in (

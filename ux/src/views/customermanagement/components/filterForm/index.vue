@@ -4,7 +4,7 @@
              @close="handleCancel"
              width="800px">
     <div style="margin-bottom: 10px;">筛选条件</div>
-    <el-form class="filter-container">
+    <el-form class="filter-container" id="filter-container">
       <el-form-item>
         <template v-for="(formItem, index) in form">
           <el-row :key="index">
@@ -208,6 +208,13 @@ export default {
       },
       deep: true,
       immediate: true
+    },
+
+    form() {
+      this.$nextTick(() => {
+        var container = document.getElementById('filter-container')
+        container.scrollTop = container.scrollHeight
+      })
     }
   },
   methods: {
@@ -240,7 +247,8 @@ export default {
       if (
         formType == 'select' ||
         formType == 'checkbox' ||
-        formType == 'user' ||formType=='checkStatus'
+        formType == 'user' ||
+        formType == 'checkStatus'
       ) {
         return [
           { value: 'is', label: '等于', disabled: false },
@@ -303,7 +311,10 @@ export default {
           formItem.statusOption = []
           formItem.typeId = ''
           formItem.statusId = ''
-        } else if (formItem.formType == 'select'||formItem.formType == 'checkStatus') {
+        } else if (
+          formItem.formType == 'select' ||
+          formItem.formType == 'checkStatus'
+        ) {
           formItem.setting = obj.setting || []
         } else if (
           formItem.formType === 'date' ||
@@ -360,7 +371,7 @@ export default {
             this.$message.error('请输入筛选条件的值！')
             return
           }
-        } else if (!o.value&&o.value!==0) {
+        } else if (!o.value && o.value !== 0) {
           this.$message.error('请输入筛选条件的值！')
           return
         }

@@ -6,6 +6,7 @@
              :id="id"
              :listenerIDs="listenerIDs"
              :noListenerIDs="noListenerIDs"
+             @handle="detailHandle"
              @hide-view="hiddenView">
   </component>
 </template>
@@ -98,6 +99,13 @@ export default {
   methods: {
     hiddenView() {
       this.$emit('update:visible', false)
+    },
+
+    /**
+     * 详情操作
+     */
+    detailHandle(data) {
+      this.$emit('handle', data)
     }
   },
   destroyed() {

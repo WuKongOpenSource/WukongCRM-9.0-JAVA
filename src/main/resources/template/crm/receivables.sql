@@ -14,7 +14,7 @@
         where scr.receivables_id = ?
      #end
      #sql ("deleteByIds")
-     delete from 72crm_crm_receivables where receivables_id = ?
+     delete from 72crm_crm_receivables where receivables_id = ? and check_status != 1 and check_status != 2
      #end
      #sql("queryReceivablesPageList")
        select  rec.receivables_id,rec.number as receivables_num,rec.contract_name as contract_name,scco.money as contract_money

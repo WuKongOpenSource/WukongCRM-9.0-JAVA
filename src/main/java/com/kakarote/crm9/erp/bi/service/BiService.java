@@ -14,25 +14,6 @@ import java.util.Map;
 public class BiService {
 
     /**
-     * 回款统计
-     * @author zhangzhiwei
-     * @param year 年份
-     * @param userId 用户ID
-     * @param deptId 部门Id
-     */
-    public Map<Integer,Object> moneyStatistics(Integer year, Long userId, Integer deptId){
-        if(year==null){
-            year= DateUtil.year(new Date());
-        }
-        List<Record> recordList= Db.find(Db.getSqlPara("bi.base.moneystatistics", Kv.by("year",year).set("userId",userId).set("deptId",deptId)));
-        Map<Integer,Object> map=new LinkedHashMap<>(12,1f);
-        recordList.forEach(record -> {
-            map.put(record.getInt("month"),record.remove("month"));
-        });
-        return map;
-    }
-
-    /**
      * @author hjp
      * 根据商机id查询合同
      */

@@ -15,14 +15,6 @@ public class BiController extends Controller {
     private BiService biService;
 
     /**
-     * @author zhangzhiwei
-     * 回款统计
-     */
-    @Permissions("bi:receivables:read")
-    public void moneyStatistics(){
-        renderJson(R.ok().put("data",biService.moneyStatistics(getParaToInt("year"),getParaToLong("userId"),getParaToInt("deptId"))));
-    }
-    /**
      * @author zxy
      * 商业智能，销售漏斗
      */

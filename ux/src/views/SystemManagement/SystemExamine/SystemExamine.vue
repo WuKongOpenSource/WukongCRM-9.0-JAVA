@@ -188,18 +188,25 @@ export default {
       } else if (column.property === 'categoryType') {
         return { 1: '合同', 2: '回款' }[row[column.property]]
       } else if (column.property === 'userIds') {
-        var name = ''
-        var structures = row['deptIds'] || []
-        for (let index = 0; index < structures.length; index++) {
-          const element = structures[index]
-          name = name + element.name + '、'
+        let structures = row['deptIds'] || []
+        let strName = structures
+          .map(item => {
+            return item.name
+          })
+          .join('、')
+
+        if (strName) {
+          strName += '、'
         }
-        var users = row['userIds'] || []
-        for (let index = 0; index < users.length; index++) {
-          const element = users[index]
-          name =
-            name + element.realname + (index === users.length - 1 ? '' : '、')
-        }
+
+        let users = row['userIds'] || []
+        let userName = users
+          .map(item => {
+            return item.realname
+          })
+          .join('、')
+
+        let name = strName + userName
         return name ? name : '全公司'
         // 1 启用 0 禁用 2 删除
       } else if (column.property === 'status') {

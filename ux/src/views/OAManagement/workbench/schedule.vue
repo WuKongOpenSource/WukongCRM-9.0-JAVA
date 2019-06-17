@@ -55,6 +55,7 @@ export default {
     return {
       // 日历事件
       scheduleList: [],
+      currentMonthDate: new Date(),
       // 新建日程
       formData: {},
       showDialog: false,
@@ -97,6 +98,7 @@ export default {
     },
     // 创建日程
     addSchedule() {
+      this.formData = {}
       this.showDialog = true
       this.newText = '创建日程'
     },
@@ -105,6 +107,7 @@ export default {
       this.showDialog = false
     },
     onSubmit() {
+      this.$emit('changeMonth', this.currentMonthDate)
       this.closeDialog()
     },
     // 查看详情
@@ -114,10 +117,8 @@ export default {
     // 切换月份
     changeMonth(val) {
       this.scheduleList = []
-      this.$emit(
-        'changeMonth',
-        new Date(val)
-      )
+      this.currentMonthDate = new Date(val)
+      this.$emit('changeMonth', this.currentMonthDate)
     }
   }
 }

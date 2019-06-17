@@ -1,11 +1,17 @@
 #namespace("bi.funnel")
     #sql ("sellFunnel")
-      SELECT COUNT(1) as count,ccbs.`name`,ccbs.order_num,IFNULL(SUM(ccb.money),0) as money,ccb.type_id
+      SELECT COUNT(1) as count,
+      ccbs.`name`,
+      ccbs.order_num,IFNULL(SUM(ccb.money),0) as money,
+      ccb.type_id
       FROM 72crm_crm_business as ccb
       LEFT JOIN 72crm_crm_business_status as ccbs ON ccbs.status_id = ccb.status_id
       where
         ccbs.type_id = #para(typeId)
-        and  ccb.owner_user_id in (#para(userIds))
+        and  ccb.owner_user_id in (#for(x:userIds)
+          #(for.index == 0 ? "" : ",")
+              #para(x)
+          #end)
            #if(type == 1)
           and to_days(NOW()) = TO_DAYS(ccb.create_time)
           #end
@@ -48,7 +54,10 @@
       LEFT JOIN 72crm_crm_business_status as ccbs ON ccbs.status_id = ccb.status_id
       where
         ccbs.type_id = #para(typeId)
-         and  ccb.owner_user_id in (#para(userIds))
+         and  ccb.owner_user_id in (#for(x:userIds)
+          #(for.index == 0 ? "" : ",")
+              #para(x)
+          #end)
         #if(isEnd)
           and ccb.is_end = #para(isEnd)
         #end
@@ -96,7 +105,10 @@
         status_id,status_name,type_id,type_name
         FROM businessview
         where
-        owner_user_id in (#para(userIds))
+        owner_user_id in (#for(x:userIds)
+          #(for.index == 0 ? "" : ",")
+              #para(x)
+          #end)
         #if(type == 1)
           and to_days(NOW()) = TO_DAYS(create_time)
           #end

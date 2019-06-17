@@ -157,11 +157,11 @@
         <el-input v-model="treeInput"
                   placeholder="请输入内容"></el-input>
       </div>
-      <div class="nav-dialog-div">
+      <div v-if="depSelect != 0"
+           class="nav-dialog-div">
         <label>上级部门：</label>
         <el-select v-model="depSelect"
                    :clearable="false"
-                   :disabled="depSelect == 0"
                    placeholder="请选择">
           <el-option v-for="item in dialogOptions"
                      :key="item.id"
@@ -213,7 +213,7 @@
                :visible.sync="employeeCreateDialog"
                v-if="employeeCreateDialog"
                width="60%"
-               :popper-append-to-body="false"
+               :modal-append-to-body="true"
                v-loading="loading"
                :append-to-body="true"
                :before-close="newHandleClose">
@@ -356,11 +356,15 @@ export default {
         },
         parentId: {
           field: 'parentId',
-          list: [{id:0,name:'请选择'}]
+          list: [{ id: 0, name: '请选择' }]
         },
         sex: {
           field: 'sex',
-          list: [{id:0,name:'请选择'},{ id: 1, name: '男' }, { id: 2, name: '女' }]
+          list: [
+            { id: 0, name: '请选择' },
+            { id: 1, name: '男' },
+            { id: 2, name: '女' }
+          ]
         }
       },
       groupsList: [],
@@ -714,9 +718,11 @@ export default {
     },
     /** 操作 */
     selectionBarClick(type) {
-      var ids = this.selectionList.map(function(item, index, array) {
-        return item.userId
-      }).join(',')
+      var ids = this.selectionList
+        .map(function(item, index, array) {
+          return item.userId
+        })
+        .join(',')
       if (type === 'lock' || type === 'unlock') {
         var message = type === 'lock' ? '禁用' : '激活'
         this.$confirm('这些员工账号将被' + message + ', 是否继续?', '提示', {
@@ -997,9 +1003,12 @@ export default {
 /* 新建和编辑 */
 .new-dialog-title {
   padding-left: 10px;
+  margin-bottom: 3px;
   border-left: 2px solid #46cdcf;
 }
 .new-dialog-form {
+  height: 47vh;
+  overflow-y: auto;
   padding: 20px;
 }
 .new-dialog-form /deep/ .el-form-item {

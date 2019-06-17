@@ -25,7 +25,9 @@
     SELECT (SELECT IFNULL(SUM(money), 0) FROM 72crm_crm_contract as a #if(deptId) LEFT JOIN 72crm_admin_user as b on a.owner_user_id=b.user_id #end WHERE DATE_FORMAT(a.order_date, '%Y%m') = CONCAT('2019', '12') #if(userId) and a.owner_user_id=#para(userId) #end #if(deptId) and b.dept_id=#para(deptId) #end ) AS contractMoney,(SELECT IFNULL(SUM(money), 0) FROM 72crm_crm_receivables as a #if(deptId) LEFT JOIN 72crm_admin_user as b on a.owner_user_id=b.user_id #end WHERE DATE_FORMAT(a.return_time, '%Y%m') = CONCAT('2019', '12') #if(userId) and a.owner_user_id=#para(userId) #end #if(deptId) and b.dept_id=#para(deptId) #end ) AS receivablesMoney,12 AS month
   #end
   #sql ("queryCrmBusinessStatistics")
-    SELECT DISTINCT (SELECT COUNT(*) from 72crm_crm_business WHERE scb.status_id = status_id) as  businessNum,scb.status_id,IFNULL((SELECT sum(money)  from 72crm_crm_business WHERE scb.status_id = status_id),0)as  total_price,scbs.`name`
+    SELECT DISTINCT (SELECT COUNT(*) from 72crm_crm_business WHERE scb.status_id = status_id) as  businessNum,
+    scb.status_id,IFNULL((SELECT sum(money)  from 72crm_crm_business WHERE scb.status_id = status_id),0)as  total_price,
+    scbs.`name`
     from 72crm_crm_business as scb
     LEFT JOIN 72crm_crm_business_product as scbp on scbp.business_id = scb.business_id
     LEFT JOIN 72crm_crm_business_status as scbs on scbs.status_id = scb.status_id

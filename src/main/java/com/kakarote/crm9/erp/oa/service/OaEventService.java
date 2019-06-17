@@ -51,6 +51,11 @@ public class OaEventService {
      * 新增日程
      */
     public R add(OaEvent oaEvent){
+        if (oaEvent.getStartTime() != null && oaEvent.getEndTime() != null){
+            if(oaEvent.getStartTime().compareTo(oaEvent.getEndTime()) == 1){
+                return R.error("结束时间早于开始时间");
+            }
+        }
         OaEventRelation oaEventRelation = new OaEventRelation();
         oaEventRelation.setCustomerIds(TagUtil.fromString(oaEvent.getCustomerIds()));
         oaEventRelation.setContactsIds(TagUtil.fromString(oaEvent.getContactsIds()));
@@ -75,6 +80,11 @@ public class OaEventService {
      * 更新日程
      */
     public R update(OaEvent oaEvent){
+        if (oaEvent.getStartTime() != null && oaEvent.getEndTime() != null){
+            if(oaEvent.getStartTime().compareTo(oaEvent.getEndTime()) == 1){
+                return R.error("结束时间早于开始时间");
+            }
+        }
         OaEventRelation oaEventRelation = new OaEventRelation();
         oaEventRelation.setEventId(oaEvent.getEventId());
         oaEventRelation.setCustomerIds(TagUtil.fromString(oaEvent.getCustomerIds()));

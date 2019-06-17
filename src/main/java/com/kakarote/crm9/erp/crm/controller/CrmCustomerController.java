@@ -66,7 +66,7 @@ public class CrmCustomerController extends Controller {
     @Permissions({"crm:customer:save","crm:customer:update"})
     public void addOrUpdate(){
         JSONObject jsonObject= JSON.parseObject(getRawData());
-        renderJson(crmCustomerService.addOrUpdate(jsonObject));
+        renderJson(crmCustomerService.addOrUpdate(jsonObject,"noImport"));
     }
 
     /**
@@ -453,6 +453,7 @@ public class CrmCustomerController extends Controller {
      * 导入客户
      */
     @Permissions("crm:customer:excelimport")
+    @NotNullValidate(value = "ownerUserId",message = "请选择负责人")
     public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling, @Para("ownerUserId") Integer ownerUserId){
         renderJson(crmCustomerService.uploadExcel(file,repeatHandling,ownerUserId));
     }

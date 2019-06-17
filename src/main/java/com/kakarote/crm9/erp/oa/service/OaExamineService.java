@@ -141,7 +141,7 @@ public class OaExamineService{
         OaExamine oaExamine = jsonObject.getObject("oaExamine", OaExamine.class);
         if (oaExamine.getStartTime() != null && oaExamine.getEndTime() != null){
             if(oaExamine.getStartTime().compareTo(oaExamine.getEndTime()) == 1){
-                return R.error("结束时间早于开始时间");
+                return R.error("审批结束时间早于开始时间");
             }
         }
         boolean bol;
@@ -233,12 +233,17 @@ public class OaExamineService{
         }
         if(jsonObject.get("oaExamineTravelList") != null){
             JSONArray oaExamineRelation = jsonObject.getJSONArray("oaExamineTravelList");
-            oaExamineRelation.forEach(json -> {
+            for(Object json : oaExamineRelation){
                 OaExamineTravel oaExamineTravel = TypeUtils.castToJavaBean(json, OaExamineTravel.class);
+                if (oaExamineTravel.getStartTime() != null && oaExamineTravel.getEndTime() != null){
+                    if(oaExamineTravel.getStartTime().compareTo(oaExamineTravel.getEndTime()) == 1){
+                        return R.error("差旅结束时间早于开始时间");
+                    }
+                }
                 oaExamineTravel.setTravelId(null);
                 oaExamineTravel.setExamineId(oaExamine.getExamineId());
                 oaExamineTravel.save();
-            });
+            }
         }
         return bol ? R.ok() : R.error();
     }

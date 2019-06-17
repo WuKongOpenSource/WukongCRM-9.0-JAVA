@@ -107,7 +107,7 @@ import { usersList } from '@/api/common'
 // 关联业务 - 选中列表
 import relatedBusiness from '@/components/relatedBusiness'
 import XhUser from '@/components/CreateCom/XhUser'
-import { getMaxIndex } from '@/utils/index'
+import { getMaxIndex, formatTimeToTimestamp } from '@/utils/index'
 
 export default {
   components: {
@@ -115,6 +115,17 @@ export default {
     XhUser
   },
   data() {
+    var validateTime = (rule, value, callback) => {
+      if (this.formData.startTime && this.formData.endTime) {
+        if (
+          formatTimeToTimestamp(this.formData.startTime) >=
+          formatTimeToTimestamp(this.formData.endTime)
+        ) {
+          callback(new Error('开始时间必须小于结束时间'))
+        }
+      }
+      callback()
+    }
     return {
       zIndex: getMaxIndex(),
       formList: [
@@ -185,10 +196,12 @@ export default {
           { max: 50, message: '主题长度最多为50个字符', trigger: 'blur' }
         ],
         startTime: [
-          { required: true, message: '开始时间不能为空', trigger: 'blur' }
+          { required: true, message: '开始时间不能为空', trigger: 'blur' },
+          { validator: validateTime, trigger: 'blur' }
         ],
         endTime: [
-          { required: true, message: '结束时间不能为空', trigger: 'blur' }
+          { required: true, message: '结束时间不能为空', trigger: 'blur' },
+          { validator: validateTime, trigger: 'blur' }
         ]
       },
       // 获取选择的数据id数组

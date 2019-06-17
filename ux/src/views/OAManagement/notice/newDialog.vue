@@ -79,12 +79,34 @@ import { usersList, depList } from '@/api/common'
 import membersDep from '@/components/selectEmployee/membersDep'
 // API
 import { noticeAdd } from '@/api/oamanagement/notice'
+import { formatTimeToTimestamp } from '@/utils/index'
+
 export default {
   components: {
     CreateView,
     membersDep
   },
   data() {
+    var validateTime = (rule, value, callback) => {
+      if (
+        (rule.field == 'startTime' &&
+          !this.formData.startTime &&
+          this.formData.endTime) ||
+        (rule.field == 'endTime' &&
+          !this.formData.endTime &&
+          this.formData.startTime)
+      ) {
+        callback(new Error('请完善时间'))
+      } else if (this.formData.startTime && this.formData.endTime) {
+        if (
+          formatTimeToTimestamp(this.formData.startTime) >=
+          formatTimeToTimestamp(this.formData.endTime)
+        ) {
+          callback(new Error('开始时间必须小于结束时间'))
+        }
+      }
+      callback()
+    }
     return {
       formList: [
         { label: '公告标题', field: 'title' },
@@ -101,7 +123,9 @@ export default {
         ],
         content: [
           { required: true, message: '公告正文不能为空', trigger: 'blur' }
-        ]
+        ],
+        startTime: [{ validator: validateTime, trigger: 'blur' }],
+        endTime: [{ validator: validateTime, trigger: 'blur' }]
       },
       loading: false
     }

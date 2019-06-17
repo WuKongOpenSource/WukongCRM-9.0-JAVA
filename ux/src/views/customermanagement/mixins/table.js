@@ -120,8 +120,8 @@ export default {
       if (this.fieldList.length == 0) {
         this.loading = true
         filedGetTableField({
-            label: this.isSeas ? 8 : crmTypeModel[this.crmType] // 8 是公海
-          })
+          label: this.isSeas ? 8 : crmTypeModel[this.crmType] // 8 是公海
+        })
           .then(res => {
             for (let index = 0; index < res.data.length; index++) {
               const element = res.data[index]
@@ -255,7 +255,7 @@ export default {
         leads: crmLeadsExcelAllExport,
         contacts: crmContactsExcelAllExport,
         product: crmProductExcelAllExport
-      } [this.crmType]
+      }[this.crmType]
       request(params)
         .then(res => {
           var blob = new Blob([res.data], {
@@ -273,7 +273,7 @@ export default {
           document.body.removeChild(downloadElement) //下载完成移除元素
           window.URL.revokeObjectURL(href) //释放掉blob对象
         })
-        .catch(() => {})
+        .catch(() => { })
     },
     /** 筛选操作 */
     handleFilter(data) {
@@ -292,10 +292,13 @@ export default {
     },
     /** 勾选操作 */
     handleHandle(data) {
-      if (data.type === 'alloc' || data.type === 'get' || data.type === 'transfer' || data.type === 'transform' || data.type === 'delete') {
+      if (data.type === 'alloc' || data.type === 'get' || data.type === 'transfer' || data.type === 'transform' || data.type === 'delete' || data.type === 'put_seas') {
         this.showDview = false
       }
-      this.getList()
+
+      if (data.type !== 'edit') {
+        this.getList()
+      }
     },
     /** 自定义字段管理 */
     setSave() {
@@ -326,17 +329,17 @@ export default {
       if (column.property) {
         const crmType = this.isSeas ? this.crmType + '_pool' : this.crmType
         crmFieldColumnWidth({
-            types: 'crm_' + crmType,
-            field: column.property,
-            width: newWidth
-          })
+          types: 'crm_' + crmType,
+          field: column.property,
+          width: newWidth
+        })
           .then(res => {
             this.$message({
               type: 'success',
               message: res.data
             })
           })
-          .catch(() => {})
+          .catch(() => { })
       }
     },
     // 更改每页展示数量
@@ -397,5 +400,5 @@ export default {
     },
   },
 
-  beforeDestroy() {}
+  beforeDestroy() { }
 }

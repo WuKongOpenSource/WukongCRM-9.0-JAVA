@@ -75,6 +75,7 @@
     <c-r-m-all-detail :visible.sync="showDview"
                       :crmType="rowType"
                       :id="rowID"
+                      @handle="handleHandle"
                       class="d-view">
     </c-r-m-all-detail>
     <fields-set :crmType="crmType"

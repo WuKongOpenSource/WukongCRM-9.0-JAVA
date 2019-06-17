@@ -77,6 +77,7 @@ public class _MappingKit {
 		arp.addMapping("72crm_work_task_class", "class_id", WorkTaskClass.class);
 		arp.addMapping("72crm_work_task_lable", "lable_id", WorkTaskLable.class);
 		arp.addMapping("72crm_work_task_log", "log_id", WorkTaskLog.class);
+		arp.addMapping("72crm_crm_business_change", "change_id", CrmBusinessChange.class);
 	}
 }
 

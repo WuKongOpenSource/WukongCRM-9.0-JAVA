@@ -37,6 +37,11 @@ public class OaAnnouncementService {
             return R.error("没有发布公告权限，不能发布公告！");
         }
         boolean flag;
+        if (oaAnnouncement.getStartTime() != null && oaAnnouncement.getEndTime() != null){
+            if(oaAnnouncement.getStartTime().compareTo(oaAnnouncement.getEndTime()) == 1){
+                return R.error("结束时间早于开始时间");
+            }
+        }
         oaAnnouncement.setDeptIds(TagUtil.fromString(oaAnnouncement.getDeptIds()));
         oaAnnouncement.setOwnerUserIds(TagUtil.fromString(oaAnnouncement.getOwnerUserIds()));
         if (oaAnnouncement.getAnnouncementId() == null){

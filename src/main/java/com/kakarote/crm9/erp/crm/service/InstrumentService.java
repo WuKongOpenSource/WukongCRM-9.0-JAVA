@@ -18,36 +18,37 @@ import java.util.*;
 
 public class InstrumentService {
     @Inject
-    BiTimeUtil biTimeUtil;
+    private BiTimeUtil biTimeUtil;
     /**
      * 销售简报
      */
     public R queryBulletin(String status, String userIds,String startTime ,String endTime) {
         //1.今天 2.昨天 3.本周 4.上周 5.本月6.上月7.本季度8.上季度9.本年10上年
+        String[] userIdss = userIds.split(",");
         Integer type = biTimeUtil.analyzeType(status);
         if (type == 1) {
-            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.intraday", Kv.by("userIds", userIds))));
+            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.intraday", Kv.by("userIds", userIdss))));
         } else if (type == 2) {
-            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.yesterday", Kv.by("userIds", userIds))));
+            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.yesterday", Kv.by("userIds", userIdss))));
         } else if (type == 3) {
-            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.thisWeek", Kv.by("userIds", userIds))));
+            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.thisWeek", Kv.by("userIds", userIdss))));
         } else if (type == 4) {
-            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.lastWeek", Kv.by("userIds", userIds))));
+            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.lastWeek", Kv.by("userIds", userIdss))));
         } else if (type == 5) {
-            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.theSameMonth", Kv.by("userIds", userIds))));
+            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.theSameMonth", Kv.by("userIds", userIdss))));
         } else if (type == 6) {
-            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.lastMonth", Kv.by("userIds", userIds))));
+            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.lastMonth", Kv.by("userIds", userIdss))));
         } else if (type == 7) {
-            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.currentSeason", Kv.by("userIds", userIds))));
+            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.currentSeason", Kv.by("userIds", userIdss))));
         } else if (type == 8) {
-            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.precedingQuarter", Kv.by("userIds", userIds))));
+            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.precedingQuarter", Kv.by("userIds", userIdss))));
         } else if (type == 9) {
-            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.thisYear", Kv.by("userIds", userIds))));
+            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.thisYear", Kv.by("userIds", userIdss))));
         } else if (type == 10) {
-            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.lastYear", Kv.by("userIds", userIds))));
+            return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.lastYear", Kv.by("userIds", userIdss))));
         }else if (type == 11){
             return R.ok().put("data", Db.findFirst(Db.getSqlPara("crm.Instrument.custom",
-                    Kv.by("userIds", userIds).set("startTime",startTime).set("endTime",endTime))));
+                    Kv.by("userIds", userIdss).set("startTime",startTime).set("endTime",endTime))));
         }
         return R.error();
     }
@@ -57,13 +58,25 @@ public class InstrumentService {
      * 业绩指标
      */
     public R queryPerformance(String startTime, String endTime, String userIds,String deptIds, Integer status,String type,String allUsetIds) {
+        String[] userIdss = {};
+        String[] deptIdss = {};
+        String[] allUsetIdss = {};
+        if (StrUtil.isNotEmpty(userIds)){
+            userIdss = userIds.split(",");
+       }
+        if (StrUtil.isNotEmpty(deptIds)){
+             deptIdss = deptIds.split(",");
+        }
+        if (StrUtil.isNotEmpty(allUsetIds)){
+            allUsetIdss = allUsetIds.split(",");
+        }
             if (StrUtil.isNotEmpty(type)){
                 Record r = getTime(type);
                 startTime = r.getStr("startTime");
                 endTime = r.getStr("endTime");
             }
         //status 1 回款 2.合同
-        Record record = Db.findFirst(Db.getSqlPara("crm.Instrument.queryMoneys", Kv.by("startTime", startTime).set("endTime", endTime).set("userIds", allUsetIds)));
+        Record record = Db.findFirst(Db.getSqlPara("crm.Instrument.queryMoneys", Kv.by("startTime", startTime).set("endTime", endTime).set("userIds", allUsetIdss)));
         if (record == null) {
             return R.ok().put("data", new Record().set("contractMoneys", 0).set("receivablesMoneys", 0).set("achievementMoneys", 0).set("proportion", 0));
         }
@@ -72,14 +85,14 @@ public class InstrumentService {
         if (list.size() == 1) {
             List<Record> starts = new ArrayList<>();
             if (StrUtil.isNotEmpty(deptIds)){
-                starts.addAll( Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(0)).set("status", status).set("deptIds",deptIds))));
+                starts.addAll( Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(0)).set("status", status).set("deptIds",deptIdss))));
             }
 
             if (StrUtil.isNotEmpty(userIds)){
-                starts.addAll(Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(0)).set("status", status).set("userIds",userIds))));
+                starts.addAll(Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(0)).set("status", status).set("userIds",userIdss))));
             }
-            Integer sta = Integer.valueOf(startTime.substring(4, 6));
-            Integer en = Integer.valueOf(endTime.substring(4, 6));
+            Integer sta = DateUtil.month(DateUtil.parse(startTime,"yyyyMM"))+1;
+            Integer en = DateUtil.month(DateUtil.parse(endTime,"yyyyMM"))+1;
             for (Record start: starts) {
                 if (start != null) {
                     if (sta <= 1 && en >= 1) {
@@ -125,22 +138,22 @@ public class InstrumentService {
             for (int i = 1; i < list.size() - 1; i++) {
                 Record r = new Record();
                 if (StrUtil.isNotEmpty(userIds)){
-                    r = Db.findFirst(Db.getSqlPara("crm.Instrument.queryTarget", Kv.by("year", list.get(i)).set("status", status).set("userIds", userIds)));
+                    r = Db.findFirst(Db.getSqlPara("crm.Instrument.queryTarget", Kv.by("year", list.get(i)).set("status", status).set("userIds", userIdss)));
                     money = money.add(new BigDecimal(r.getStr("achievementTarget")));
                 }
                 if (StrUtil.isNotEmpty(deptIds)){
-                    r = Db.findFirst(Db.getSqlPara("crm.Instrument.queryTarget", Kv.by("year", list.get(i)).set("status", status).set("deptIds", deptIds)));
+                    r = Db.findFirst(Db.getSqlPara("crm.Instrument.queryTarget", Kv.by("year", list.get(i)).set("status", status).set("deptIds", deptIdss)));
                     money = money.add(new BigDecimal(r.getStr("achievementTarget")));
                 }
             }
             List<Record> starts = new ArrayList<>();
             if (StrUtil.isNotEmpty(deptIds)){
-                starts.addAll(Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(0)).set("deptIds",deptIds).set("status", status))));
+                starts.addAll(Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(0)).set("deptIds",deptIdss).set("status", status))));
             }
             if (StrUtil.isNotEmpty(userIds)){
-                starts.addAll(Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(0)).set("userIds",userIds).set("status", status))));
+                starts.addAll(Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(0)).set("userIds",userIdss).set("status", status))));
             }
-            Integer sta = Integer.valueOf(startTime.substring(4, 6));
+            Integer sta = DateUtil.month(DateUtil.parse(startTime,"yyyyMM"))+1;
             for (Record start: starts) {
                 if (start != null) {
                     if (sta <= 1) {
@@ -183,12 +196,12 @@ public class InstrumentService {
             }
             List<Record> ends = new ArrayList<>();
             if (StrUtil.isNotEmpty(deptIds)){
-                ends.addAll(Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(list.size() - 1)).set("deptIds",deptIds).set("status", status))));
+                ends.addAll(Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(list.size() - 1)).set("deptIds",deptIdss).set("status", status))));
             }
             if (StrUtil.isNotEmpty(userIds)){
-                ends.addAll(Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(list.size() - 1)).set("userIds",userIds).set("status", status))));
+                ends.addAll(Db.find(Db.getSqlPara("crm.Instrument.queryTargets", Kv.by("year", list.get(list.size() - 1)).set("userIds",userIdss).set("status", status))));
             }
-            Integer en = Integer.valueOf(endTime.substring(4, 6));
+            Integer en = DateUtil.month(DateUtil.parse(endTime,"yyyyMM"))+1;
             for (Record end: ends) {
                 if (end != null) {
                     if (en >= 1) {
@@ -248,8 +261,8 @@ public class InstrumentService {
      */
     private List<Integer> getYear(String startTime, String endTime) {
         List<Integer> list = new ArrayList<>();
-        Integer start = Integer.valueOf(startTime.substring(0, 4));
-        Integer end = Integer.valueOf(endTime.substring(0, 4));
+        Integer start = DateUtil.year(DateUtil.parse(startTime,"yyyyMM"));
+        Integer end = DateUtil.year(DateUtil.parse(endTime,"yyyyMM"));
         for (int i = start; i <= end; i++) {
             list.add(i);
         }
@@ -374,12 +387,14 @@ public class InstrumentService {
      * 销售漏斗
      */
     public R queryBusiness(String userIds, String deptIds, Integer typeId, Date startTime, Date endTime) {
+        String[] userIdss = userIds.split(",");
+        String[] deptIdss = deptIds.split(",");
         Record record = Db.findFirst(Db.getSqlPara("crm.Instrument.queryBusiness",
-                Kv.by("userIds", userIds).set("typeId", typeId)
-                        .set("startTime", startTime).set("endTime", endTime).set("deptIds", deptIds)));
+                Kv.by("userIds", userIdss).set("typeId", typeId)
+                        .set("startTime", startTime).set("endTime", endTime).set("deptIds", deptIdss)));
         List<Record> records = Db.find(Db.getSqlPara("crm.Instrument.queryBusinessStatistics",
-                Kv.by("userIds", userIds).set("typeId", typeId)
-                        .set("startTime", startTime).set("endTime", endTime).set("deptIds", deptIds)));
+                Kv.by("userIds", userIdss).set("typeId", typeId)
+                        .set("startTime", startTime).set("endTime", endTime).set("deptIds", deptIdss)));
         if(record!=null){
             record.set("record", records);
         }
@@ -393,6 +408,7 @@ public class InstrumentService {
      * deptIds 部门id
      */
     public R salesTrend(String type,String userIds,String startTime,String endTime){
+        String[] userIdss = userIds.split(",");
         Record record = new Record();
         record.set("type",type).set("startTime",startTime).set("endTime",endTime);
         biTimeUtil.analyzeType(record);
@@ -414,10 +430,10 @@ public class InstrumentService {
         List<Record> recordList = Db.find(sqlStringBuffer.toString());
         Integer ststus = biTimeUtil.analyzeType(type);
         Record totlaContractMoney = Db.findFirst(Db.getSqlPara("crm.Instrument.queryContractMoeny",
-                Kv.by("userIds",userIds).set("type",ststus).set("startTime",startTime).
+                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
                         set("endTime",endTime)));
         Record totlaReceivablesMoney = Db.findFirst(Db.getSqlPara("crm.Instrument.queryReceivablesMoeny",
-                Kv.by("userIds",userIds).set("type",ststus).set("startTime",startTime).
+                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
                         set("endTime",endTime)));
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("list",recordList);
@@ -435,21 +451,22 @@ public class InstrumentService {
     }
 
     public R sellFunnel(  String type,String userIds, String startTime, String endTime,Integer typeId){
+        String[] userIdss = userIds.split(",");
         Record record = new Record();
         record.set("type",type).set("startTime",startTime).set("endTime",endTime);
         biTimeUtil.analyzeType(record);
         Integer ststus = biTimeUtil.analyzeType(type);
         List<Record> list = Db.find(Db.getSqlPara("bi.funnel.sellFunnel",
-                Kv.by("userIds",userIds).set("type",ststus).set("startTime",startTime).
+                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
                         set("endTime",endTime).set("typeId",typeId)));
         Record sum_money = Db.findFirst(Db.getSqlPara("bi.funnel.sellFunnelSum",
-                Kv.by("userIds",userIds).set("type",ststus).set("startTime",startTime).
+                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
                         set("endTime",endTime).set("typeId",typeId)));
         Record sum_shu = Db.findFirst(Db.getSqlPara("bi.funnel.sellFunnelSum",
-                Kv.by("userIds",userIds).set("type",ststus).set("startTime",startTime).
+                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
                         set("endTime",endTime).set("typeId",typeId).set("isEnd",2)));
         Record sum_ying = Db.findFirst(Db.getSqlPara("bi.funnel.sellFunnelSum",
-                Kv.by("userIds",userIds).set("type",ststus).set("startTime",startTime).
+                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
                         set("endTime",endTime).set("typeId",typeId).set("isEnd",1)));
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("list",list);

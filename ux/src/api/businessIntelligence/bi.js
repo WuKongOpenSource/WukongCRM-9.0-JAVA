@@ -66,7 +66,7 @@ export function biCustomerStatistics(data) {
  */
 export function biBusinessFunnel(data) {
   return request({
-    url: 'bi/funnelStatistics',
+    url: 'biFunnel/sellFunnel',
     method: 'post',
     data: data
   })

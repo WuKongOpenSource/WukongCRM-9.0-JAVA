@@ -8,14 +8,13 @@ import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.jfinal.plugin.activerecord.SqlPara;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
+import com.kakarote.crm9.erp.admin.entity.AdminFile;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
-import com.kakarote.crm9.erp.crm.entity.CrmContacts;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
 import com.kakarote.crm9.erp.crm.entity.CrmLeads;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
@@ -207,21 +206,27 @@ public class CrmLeadsService {
                 }
             }
             adminFieldService.save(customerFields, customerBatchId);
-            if (StrUtil.isNotEmpty(crmLeads.getStr("telephone")) || StrUtil.isNotEmpty(crmLeads.getStr("mobile"))) {
-                CrmContacts crmContacts = new CrmContacts();
-                crmContacts.setMobile(crmLeads.getStr("telephone"));
-                crmContacts.setTelephone(crmLeads.getStr("mobile"));
-                crmContacts.setCustomerId(crmCustomer.getCustomerId());
-                String contactsBatchId = IdUtil.simpleUUID();
-                crmContacts.setBatchId(contactsBatchId);
-                crmContacts.setCreateTime(DateUtil.date());
-                crmContacts.setUpdateTime(DateUtil.date());
-                crmContacts.save();
-                List<AdminField> contactsFields = AdminField.dao.find("select * from 72crm_admin_field where label = 3 and parent_id = 0");
-                adminFieldService.save(contactsFields, contactsBatchId);
-            }
             Db.update("update 72crm_crm_leads set is_transform = 1,update_time = ?,customer_id = ? where leads_id = ?",
                     DateUtil.date(), crmCustomer.getCustomerId(), Integer.valueOf(leadsId));
+            List<AdminRecord> adminRecordList = AdminRecord.dao.find("select * from 72crm_admin_record where types = 'crm_leads' and types_id = ?",Integer.valueOf(leadsId));
+            if (adminRecordList.size() != 0){
+                adminRecordList.forEach(adminRecord -> {
+                    adminRecord.setBatchId(customerBatchId);
+                    adminRecord.setRecordId(null);
+                    adminRecord.setTypes("crm_customer");
+                    adminRecord.setTypesId(crmCustomer.getCustomerId());
+                    adminRecord.setUpdateTime(DateUtil.date());
+                });
+                Db.batchSave(adminRecordList,100);
+            }
+            List<AdminFile> adminFileList = AdminFile.dao.find("select * from 72crm_admin_file where batch_id = ?",crmLeads.getStr("batch_id"));
+            if (adminFileList.size() != 0){
+                adminFileList.forEach(adminFile -> {
+                    adminFile.setBatchId(customerBatchId);
+                    adminFile.setFileId(null);
+                });
+                Db.batchSave(adminFileList,100);
+            }
         }
         return R.ok();
     }

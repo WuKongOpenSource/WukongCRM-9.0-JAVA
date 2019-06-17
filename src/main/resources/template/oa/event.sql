@@ -67,8 +67,8 @@
     #sql("queryEventRelation")
     select a.*,b.*,c.realname,c.img,GROUP_CONCAT(d.realname) as 'owner_user_name'
     from 72crm_oa_event as a inner join 72crm_oa_event_relation as b on a.event_id = b.event_id
-    inner join 72crm_admin_user as c on a.create_user_id = c.user_id
-    inner join 72crm_admin_user as d on FIND_IN_SET(d.user_id,IFNULL(a.owner_user_ids, 0))
+    left join 72crm_admin_user as c on a.create_user_id = c.user_id
+    left join 72crm_admin_user as d on FIND_IN_SET(d.user_id,IFNULL(a.owner_user_ids, 0))
     where 1=2
     #if(businessIds)
       or b.business_ids like concat('%,',#para(businessIds),',%')

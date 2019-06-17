@@ -262,6 +262,7 @@ public class CrmContactsController extends Controller {
      * 联系人导入
      */
     @Permissions("crm:contacts:excelimport")
+    @NotNullValidate(value = "ownerUserId",message = "请选择负责人")
     public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling, @Para("ownerUserId") Integer ownerUserId){
         renderJson(crmContactsService.uploadExcel(file,repeatHandling,ownerUserId));
     }

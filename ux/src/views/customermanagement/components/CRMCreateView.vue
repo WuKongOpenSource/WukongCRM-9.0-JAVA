@@ -104,6 +104,8 @@ import {
   objDeepCopy
 } from '@/utils'
 
+import { isArray } from '@/utils/types'
+
 import {
   XhInput,
   XhTextarea,
@@ -668,12 +670,35 @@ export default {
       //验证唯一
       if (item.isUnique == 1) {
         var validateUnique = (rule, value, callback) => {
-          if (!value && rule.item.isNull == 0) {
+          if ((isArray(value) && value.length == 0) || !value) {
             callback()
           } else {
             var validatesParams = {}
             validatesParams.name = item.name
-            validatesParams.val = value
+            if (isArray(value)) {
+              let postValue = ''
+              if (value.length > 0) {
+                if (
+                  rule.item.formType == 'user' ||
+                  rule.item.formType == 'structure'
+                ) {
+                  postValue = value
+                    .map(valueItem => {
+                      return rule.item.formType == 'user'
+                        ? valueItem.userId
+                        : valueItem.id
+                    })
+                    .join(',')
+                } else if (rule.item.fieldName == 'categoryId') {
+                  postValue = element.value[element.value.length - 1]
+                } else if (rule.item.formType == 'checkbox') {
+                  postValue = value.join(',')
+                }
+              }
+              validatesParams.val = postValue
+            } else {
+              validatesParams.val = value
+            }
             validatesParams.types = crmTypeModel[this.crmType]
             if (this.action.type == 'update') {
               validatesParams.id = this.action.id
@@ -690,7 +715,10 @@ export default {
         tempList.push({
           validator: validateUnique,
           item: item,
-          trigger: ['blur']
+          trigger:
+            item.formType == 'checkbox' || item.formType == 'select'
+              ? ['change']
+              : ['blur']
         })
       }
 

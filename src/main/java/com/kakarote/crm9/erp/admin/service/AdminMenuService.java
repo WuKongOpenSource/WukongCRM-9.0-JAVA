@@ -44,11 +44,9 @@ public class AdminMenuService {
         List<AdminMenu> adminMenus=AdminMenu.dao.find(Db.getSql("admin.menu.queryMenuByParentId"),parentId);
         if (deepness != 0){
             adminMenus.forEach(adminMenu -> {
-                if(adminMenu.getMenuType().equals(3)){
-                    adminMenu.clear();
-                    return;
+                if(!adminMenu.getMenuType().equals(3)){
+                    adminMenu.put("childMenu",getAllMenuList(adminMenu.getMenuId(),deepness-1));
                 }
-                adminMenu.put("childMenu",getAllMenuList(adminMenu.getMenuId(),deepness-1));
             });
         }
         return adminMenus;

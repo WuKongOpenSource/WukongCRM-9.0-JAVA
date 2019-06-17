@@ -239,6 +239,7 @@ public class CrmRecordService<T> {
         strings.add("将客户放入公海");
         crmActionRecord.setContent(JSON.toJSONString(strings));
         for(Object actionId : actionIds){
+            crmActionRecord.remove("id");
             crmActionRecord.setActionId((Integer) actionId);
             crmActionRecord.save();
         }

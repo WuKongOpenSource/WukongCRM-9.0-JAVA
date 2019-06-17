@@ -333,6 +333,10 @@ public class AdminSceneService {
         }
         if (null != adminScene.getHideIds()) {
             String[] hideIdsArr = adminScene.getHideIds().split(",");
+            Record number = Db.findFirst(Db.getSqlPara("admin.scene.queryIsHideSystem",Kv.by("ids",hideIdsArr)));
+            if (number.getInt("number") > 0){
+                return R.error("系统场景不能隐藏");
+            }
             Db.update(Db.getSqlPara("admin.scene.isHide", Kv.by("ids", hideIdsArr).set("type", adminScene.getType()).set("userId", userId)));
         }
         return R.ok();
@@ -524,23 +528,28 @@ public class AdminSceneService {
         }
         Page<Record> recordPage = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select *", from);
         if (type == 5){
-            recordPage.getList().forEach(record -> {
-                if (record.getInt("is_end") == 0){
-                    Integer sortNum = Db.queryInt("select order_num from 72crm_crm_business_status where status_id = ?",record.getInt("status_id"));
-                    Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
-                    record.set("progressBar",sortNum+"/"+totalStatsNum);
-                }else if (record.getInt("is_end") == 1){
-                    Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
-                    record.set("progressBar",totalStatsNum+"/"+totalStatsNum);
-                }else if (record.getInt("is_end") == 2){
-                    Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
-                    record.set("progressBar","0/"+totalStatsNum);
-                }else if (record.getInt("is_end") == 3){
-                    record.set("progressBar","0/0");
-                }
-            });
+            setBusinessStatus(recordPage.getList());
         }
         return R.ok().put("data",recordPage);
+    }
+
+    public void setBusinessStatus(List<Record> list){
+        list.forEach(
+                record -> {
+                    if (record.getInt("is_end") == 0){
+                        Integer sortNum = Db.queryInt("select order_num from 72crm_crm_business_status where status_id = ?",record.getInt("status_id"));
+                        Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
+                        record.set("progressBar",sortNum+"/"+totalStatsNum);
+                    }else if (record.getInt("is_end") == 1){
+                        Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
+                        record.set("progressBar",totalStatsNum+"/"+totalStatsNum);
+                    }else if (record.getInt("is_end") == 2){
+                        Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
+                        record.set("progressBar","0/"+totalStatsNum);
+                    }else if (record.getInt("is_end") == 3){
+                        record.set("progressBar","0/0");
+                    }
+                });
     }
 
     private boolean isValid(String param){

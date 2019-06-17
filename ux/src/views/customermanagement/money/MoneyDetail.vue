@@ -165,6 +165,7 @@ export default {
     //** tab标签点击 */
     handleClick(tab, event) {},
     editSaveSuccess() {
+      this.$emit('handle', { type: 'save-success' })
       this.getDetial()
     }
   }

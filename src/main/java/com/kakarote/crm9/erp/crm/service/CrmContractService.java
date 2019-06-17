@@ -14,13 +14,16 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
+import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminExamineRecordService;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.*;
+import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
 import com.kakarote.crm9.erp.oa.entity.OaEventRelation;
+import com.kakarote.crm9.erp.oa.service.OaActionRecordService;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.R;
@@ -43,8 +46,11 @@ public class CrmContractService {
     @Inject
     private AdminExamineRecordService examineRecordService;
 
+    @Inject
+    private OaActionRecordService oaActionRecordService;
+
     /**
-     * 分页条件查询合同(暂时未完成)
+     * 分页条件查询合同
      */
     public Page<Record> queryPage(BasePageRequest<CrmContract> basePageRequest) {
         return Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("crm.contract.getProductPageList"));
@@ -55,10 +61,6 @@ public class CrmContractService {
      */
     public R queryById(Integer id) {
         Record record = Db.findFirst(Db.getSql("crm.contract.queryByContractId"), id);
-        Record r = Db.findFirst(Db.getSql("crm.contract.queryMoneyByContractId"), id);
-        if (r != null) {
-            record.set("receivables_money", r.getStr("receivables_money"));
-        }
         return R.ok().put("data", record);
     }
 
@@ -76,10 +78,10 @@ public class CrmContractService {
                 .set("合同名称", record.getStr("name"))
                 .set("客户名称", record.getStr("customer_name"))
                 .set("商机名称", record.getStr("business_name"))
-                .set("下单时间", record.getStr("order_date"))
+                .set("下单时间", DateUtil.formatDate(record.getDate("order_date")))
                 .set("合同金额", record.getStr("money"))
-                .set("合同开始时间", DateUtil.formatDateTime(record.getDate("start_time")))
-                .set("合同结束时间", DateUtil.formatDateTime(record.getDate("end_time")))
+                .set("合同开始时间", DateUtil.formatDate(record.getDate("start_time")))
+                .set("合同结束时间", DateUtil.formatDate(record.getDate("end_time")))
                 .set("客户签约人", record.getStr("contacts_name"))
                 .set("公司签约人", record.getStr("company_user_name")).
                 set("备注", record.getStr("remark"));
@@ -97,7 +99,7 @@ public class CrmContractService {
 
         String[] idsArr = contractIds.split(",");
         List<CrmReceivables> list = CrmReceivables.dao.find(Db.getSqlPara("crm.receivables.queryReceivablesByContractIds", Kv.by("contractIds", idsArr)));
-        if (list != null) {
+        if (list.size() > 0) {
             return R.error("该数据已被其他模块引用，不能被删除！");
         }
         List<Record> idsList = new ArrayList<>();
@@ -463,9 +465,12 @@ public class CrmContractService {
             oaEvent.setCreateTime(DateUtil.date());
             oaEvent.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
             oaEvent.save();
+
+            AdminUser user = BaseUtil.getUser();
+            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),oaActionRecordService.getJoinIds(user.getDeptId(),""));
             OaEventRelation oaEventRelation = new OaEventRelation();
             oaEventRelation.setEventId(oaEvent.getEventId());
-            oaEventRelation.setContractIds(adminRecord.getTypesId().toString());
+            oaEventRelation.setContractIds(","+adminRecord.getTypesId().toString()+",");
             oaEventRelation.setCreateTime(DateUtil.date());
             oaEventRelation.save();
         }

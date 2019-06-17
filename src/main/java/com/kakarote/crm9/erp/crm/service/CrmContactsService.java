@@ -9,6 +9,7 @@ import cn.hutool.poi.excel.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.upload.UploadFile;
+import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
@@ -16,9 +17,11 @@ import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.crm.entity.CrmBusiness;
 import com.kakarote.crm9.erp.crm.entity.CrmContacts;
 import com.kakarote.crm9.erp.crm.entity.CrmContactsBusiness;
+import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
 import com.kakarote.crm9.erp.oa.entity.OaEventRelation;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.erp.oa.service.OaActionRecordService;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.R;
@@ -48,6 +51,9 @@ public class CrmContactsService {
 
     @Inject
     private AdminFileService adminFileService;
+
+    @Inject
+    private OaActionRecordService oaActionRecordService;
 
     /**
      * @author wyq
@@ -149,7 +155,9 @@ public class CrmContactsService {
             crmContacts.setCreateTime(DateUtil.date());
             crmContacts.setUpdateTime(DateUtil.date());
             crmContacts.setCreateUserId(BaseUtil.getUserId().intValue());
-            crmContacts.setOwnerUserId(BaseUtil.getUserId().intValue());
+            if (crmContacts.getOwnerUserId() == null){
+                crmContacts.setOwnerUserId(BaseUtil.getUserId().intValue());
+            }
             crmContacts.setBatchId(batchId);
             boolean save = crmContacts.save();
             crmRecordService.addRecord(crmContacts.getContactsId(),CrmEnum.CONTACTS_TYPE_KEY.getTypes());
@@ -207,7 +215,7 @@ public class CrmContactsService {
     public List<Record> queryField(){
         List<Record> fieldList = new LinkedList<>();
         String[] settingArr = new String[]{};
-        fieldUtil.getFixedField(fieldList,"name","姓名","","text",settingArr,0);
+        fieldUtil.getFixedField(fieldList,"name","姓名","","text",settingArr,1);
         fieldUtil.getFixedField(fieldList,"customerId","客户名称","","customer",settingArr,1);
         fieldUtil.getFixedField(fieldList,"mobile","手机","","mobile",settingArr,0);
         fieldUtil.getFixedField(fieldList,"telephone","电话","","text",settingArr,0);
@@ -228,7 +236,7 @@ public class CrmContactsService {
         List<Record> fieldList = new LinkedList<>();
         Record record = Db.findFirst("select * from contactsview where contacts_id = ?",contactsId);
         String[] settingArr = new String[]{};
-        fieldUtil.getFixedField(fieldList,"name","姓名",record.getStr("name"),"text",settingArr,0);
+        fieldUtil.getFixedField(fieldList,"name","姓名",record.getStr("name"),"text",settingArr,1);
         List<Record> customerList = new ArrayList<>();
         Record customer = new Record();
         customerList.add(customer.set("customer_id",record.getInt("customer_id")).set("customer_name",record.getStr("customer_name")));
@@ -261,9 +269,12 @@ public class CrmContactsService {
             oaEvent.setCreateTime(DateUtil.date());
             oaEvent.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
             oaEvent.save();
+
+            AdminUser user = BaseUtil.getUser();
+            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),oaActionRecordService.getJoinIds(user.getDeptId(),""));
             OaEventRelation oaEventRelation = new OaEventRelation();
             oaEventRelation.setEventId(oaEvent.getEventId());
-            oaEventRelation.setContactsIds(adminRecord.getTypesId().toString());
+            oaEventRelation.setContactsIds(","+adminRecord.getTypesId().toString()+",");
             oaEventRelation.setCreateTime(DateUtil.date());
             oaEventRelation.save();
         }
@@ -355,9 +366,9 @@ public class CrmContactsService {
                             contactsList.add(null);
                         }
                     }
-                    String contactsName = contactsList.get(kv.getInt("姓名")).toString();
-                    String telephone = contactsList.get(kv.getInt("电话")).toString();
-                    String mobile = contactsList.get(kv.getInt("手机")).toString();
+                    String contactsName = contactsList.get(kv.getInt("姓名(*)")).toString();
+                    String telephone = contactsList.get(kv.getInt("电话"))!=null?contactsList.get(kv.getInt("电话")).toString():null;
+                    String mobile = contactsList.get(kv.getInt("手机"))!=null?contactsList.get(kv.getInt("手机")).toString():null;
                     Record  repeatField= Db.findFirst(Db.getSqlPara("crm.contact.queryRepeatFieldNumber",Kv.by("contactsName",contactsName).set("telephone",telephone).set("mobile",mobile)));
                     Integer number = repeatField.getInt("number");
                     Integer customerId = Db.queryInt("select customer_id from 72crm_crm_customer where customer_name = ?",contactsList.get(kv.getInt("客户名称(*)")));
@@ -372,7 +383,7 @@ public class CrmContactsService {
                                 .fluentPut("next_time", contactsList.get(kv.getInt("下次联系时间")))
                                 .fluentPut("remark", contactsList.get(kv.getInt("备注")))
                                 .fluentPut("owner_user_id", ownerUserId));
-                    } else if (number == 1 && repeatHandling == 1) {
+                    } else if (number == 1 ) {
                         if (repeatHandling == 1){
                             Record contacts = Db.findFirst(Db.getSqlPara("crm.contact.queryRepeatField",Kv.by("contactsName",contactsName).set("telephone",telephone).set("mobile",mobile)));
                             object.fluentPut("entity", new JSONObject().fluentPut("contacts_id", contacts.getInt("contacts_id"))

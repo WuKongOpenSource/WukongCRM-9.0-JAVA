@@ -375,6 +375,7 @@ export default {
               type: 'success',
               message: '操作成功'
             })
+            this.$emit('handle', { type: type })
           })
           .catch(() => {})
       } else if (type === 'put_seas') {

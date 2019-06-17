@@ -21,7 +21,7 @@
    #end
 
    #sql ("deleteByIds")
-   delete from 72crm_crm_contract where contract_id = ?
+   delete from 72crm_crm_contract where contract_id = ?  and check_status != 1 and check_status != 2
    #end
 
    #sql ("transfer")
@@ -54,13 +54,12 @@
     update 72crm_crm_contract set rw_user_id = replace(rw_user_id,?,','),ro_user_id = replace(ro_user_id,?,',') where contract_id = ?
     #end
      #sql ("queryByContractId")
-    select * from contractview where contract_id = ?
+    select *,
+    ( select IFNULL(sum(money),0) from 72crm_crm_receivables where contract_id =  crt.contract_id and check_status = 2) as receivablesMoney
+    from contractview as crt where crt.contract_id = ?
     #end
     #sql ("deleteByContractId")
     delete from 72crm_crm_contract_product where contract_id = ?
-    #end
-    #sql ("queryMoneyByContractId")
-    select IFNULL(sum(money),0) as receivables_money from 72crm_crm_receivables where contract_id = ?
     #end
     #sql ("queryByNum")
     select count(*) from 72crm_crm_contract where num = ?

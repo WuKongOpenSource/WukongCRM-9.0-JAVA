@@ -26,7 +26,7 @@ public class CrmContractController extends Controller {
     @Inject
     private CrmReceivablesPlanService receivablesPlanService;
     /**
-     * 分页条件查询合同(暂时未完成)
+     * 分页条件查询合同
      * @author zxy
      */
     public void queryPage(BasePageRequest<CrmContract> basePageRequest){

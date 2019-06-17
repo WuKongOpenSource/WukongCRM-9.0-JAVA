@@ -8,15 +8,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
+import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
-import com.kakarote.crm9.erp.crm.entity.CrmBusiness;
-import com.kakarote.crm9.erp.crm.entity.CrmBusinessProduct;
-import com.kakarote.crm9.erp.crm.entity.CrmContacts;
-import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
+import com.kakarote.crm9.erp.crm.entity.*;
+import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
 import com.kakarote.crm9.erp.oa.entity.OaEventRelation;
+import com.kakarote.crm9.erp.oa.service.OaActionRecordService;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.R;
@@ -43,6 +43,9 @@ public class CrmBusinessService {
 
     @Inject
     private AdminFileService adminFileService;
+
+    @Inject
+    private OaActionRecordService oaActionRecordService;
 
     /**
      * @author wyq
@@ -337,7 +340,14 @@ public class CrmBusinessService {
      * @author wyq
      * 商机状态组推进
      */
+    @Before(Tx.class)
     public R boostBusinessStatus(CrmBusiness crmBusiness) {
+        CrmBusinessChange change = new CrmBusinessChange();
+        change.setBusinessId(crmBusiness.getBusinessId());
+        change.setStatusId(crmBusiness.getStatusId());
+        change.setCreateTime(DateUtil.date());
+        change.setCreateUserId(BaseUtil.getUserId().intValue());
+        change.save();
         return crmBusiness.update() ? R.ok() : R.error();
     }
 
@@ -417,9 +427,11 @@ public class CrmBusinessService {
             oaEvent.setCreateTime(DateUtil.date());
             oaEvent.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
             oaEvent.save();
+            AdminUser user = BaseUtil.getUser();
+            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),oaActionRecordService.getJoinIds(user.getDeptId(),""));
             OaEventRelation oaEventRelation = new OaEventRelation();
             oaEventRelation.setEventId(oaEvent.getEventId());
-            oaEventRelation.setBusinessIds(adminRecord.getTypesId().toString());
+            oaEventRelation.setBusinessIds(","+adminRecord.getTypesId().toString()+",");
             oaEventRelation.setCreateTime(DateUtil.date());
             oaEventRelation.save();
         }

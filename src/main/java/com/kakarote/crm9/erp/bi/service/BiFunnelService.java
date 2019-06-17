@@ -19,9 +19,10 @@ public class BiFunnelService {
         record.set("deptId",deptId).set("userId",userId).set("type",type).set("startTime",startTime).set("endTime",endTime);
         biTimeUtil.analyzeType(record);
         String userIds = record.getStr("userIds");
+        String[] userIdss = userIds.split(",");
         Integer ststus = biTimeUtil.analyzeType(type);
         List<Record> list = Db.find(Db.getSqlPara("bi.funnel.sellFunnel",
-                Kv.by("userIds",userIds).set("type",ststus).set("startTime",startTime).
+                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
                         set("endTime",endTime).set("typeId",typeId)));
         return R.ok().put("data",list);
     }
@@ -56,9 +57,10 @@ public class BiFunnelService {
         record.set("deptId",deptId).set("userId",userId).set("type",type).set("startTime",startTime).set("endTime",endTime);
         biTimeUtil.analyzeType(record);
         String userIds = record.getStr("userIds");
+        String[] userIdss = userIds.split(",");
         Integer ststus = biTimeUtil.analyzeType(type);
         List<Record> list = Db.find(Db.getSqlPara("bi.funnel.sellFunnelList",
-                Kv.by("userIds",userIds).set("type",ststus).set("startTime",startTime).
+                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
                         set("endTime",endTime)));
         return R.ok().put("data",list);
     }

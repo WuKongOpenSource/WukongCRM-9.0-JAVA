@@ -16,7 +16,7 @@
         </div>
       </div>
       <div class="sections">
-        <div>二、请选择数据重复时的处理方式（查重规则：【{{crmTypeName}}名称】）</div>
+        <div>二、请选择数据重复时的处理方式（查重规则：【{{fieldUniqueInfo}}】）</div>
         <div class="content">
           <el-select v-model="config"
                      placeholder="请选择">
@@ -40,7 +40,7 @@
         </div>
       </div>
       <div class="sections">
-        <div>四、请选择负责人（{{crmType == 'leads' ? '必选' : '如不选择，导入的客户将进入公海'}}）</div>
+        <div>四、请选择负责人（{{crmType == 'customer' ? '如不选择，导入的客户将进入公海' : '必选'}}）</div>
         <div class="content">
           <div class="user-cell">
             <xh-user-cell :value="user"
@@ -99,6 +99,7 @@ export default {
   },
   computed: {
     ...mapGetters(['userInfo']),
+
     crmTypeName() {
       return (
         {
@@ -108,6 +109,13 @@ export default {
           product: '产品'
         }[this.crmType] || ''
       )
+    },
+
+    fieldUniqueInfo() {
+      if (this.crmType == 'contacts') {
+        return '姓名/电话/手机'
+      }
+      return this.crmTypeName + '名称'
     }
   },
   props: {
@@ -142,7 +150,7 @@ export default {
       } else {
         params.repeatHandling = this.config
         params.file = this.file
-        params.ownerUserId = this.user[0].userId
+        params.ownerUserId = this.user.length > 0 ? this.user[0].userId : ''
         var request = {
           customer: crmCustomerExcelImport,
           leads: crmLeadsExcelImport,

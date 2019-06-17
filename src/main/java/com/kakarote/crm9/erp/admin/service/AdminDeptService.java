@@ -21,7 +21,7 @@ public class AdminDeptService {
             bol = adminDept.save();
         } else {
             if (adminDept.getPid() != null && adminDept.getPid() != 0) {
-                List<Record> topDeptList = queryDeptTree(null,adminDept.getDeptId());
+                List<Record> topDeptList = queryDeptTree("update",adminDept.getDeptId());
                 boolean isContain = false;
                 for (Record record : topDeptList) {
                     if (record.getInt("id").equals(adminDept.getPid())) {
@@ -44,10 +44,12 @@ public class AdminDeptService {
         List<Record> recordList = buildTreeBy2Loop(adminDeptList, 0, allDeptList);
         if (StrUtil.isNotBlank(type) && "tree".equals(type)) {
             return recordList;
-        } else if (StrUtil.isNotBlank(type) && "save".equals(type)) {
+        } else if (StrUtil.isBlank(type) || "save".equals(type)) {
             return adminDeptList;
-        } else {
+        } else if (StrUtil.isNotBlank(type) && "update".equals(type)){
             return queryTopDeptList(id);
+        } else {
+            return new ArrayList<>();
         }
     }
 
@@ -55,11 +57,11 @@ public class AdminDeptService {
      * 查询可设置为上级的部门
      */
     private List<Record> queryTopDeptList(Integer deptId) {
-        List<Record> recordList = Db.find("select dept_id,name,pid from 72crm_admin_dept");
+        List<Record> recordList = Db.find("select dept_id as id,name,pid from 72crm_admin_dept");
         AdminUserService adminUserService = new AdminUserService();
         List<Integer> subDeptList = adminUserService.queryChileDeptIds(deptId,BaseConstant.AUTH_DATA_RECURSION_NUM);
-        recordList.removeIf(record -> subDeptList.contains(record.getInt("dept_id")));
-        recordList.removeIf(record -> record.getInt("dept_id").equals(deptId));
+        recordList.removeIf(record -> subDeptList.contains(record.getInt("id")));
+        recordList.removeIf(record -> record.getInt("id").equals(deptId));
         return recordList;
     }
 

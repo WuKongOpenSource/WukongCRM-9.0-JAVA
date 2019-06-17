@@ -9,12 +9,14 @@ import cn.hutool.poi.excel.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.erp.admin.service.AdminSceneService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.crm.entity.*;
+import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
 import com.kakarote.crm9.erp.oa.entity.OaEventRelation;
 import com.kakarote.crm9.erp.oa.service.OaActionRecordService;
@@ -48,6 +50,12 @@ public class CrmCustomerService {
     @Inject
     private AdminFileService adminFileService;
 
+    @Inject
+    private AdminSceneService adminSceneService;
+
+    @Inject
+    private OaActionRecordService oaActionRecordService;
+
     /**
      * @author wyq
      * 分页条件查询客户
@@ -65,7 +73,7 @@ public class CrmCustomerService {
      * @author wyq
      * 新增或更新客户
      */
-    public R addOrUpdate(JSONObject jsonObject) {
+    public R addOrUpdate(JSONObject jsonObject,String type) {
         CrmCustomer crmCustomer = jsonObject.getObject("entity", CrmCustomer.class);
         String batchId = StrUtil.isNotEmpty(crmCustomer.getBatchId()) ? crmCustomer.getBatchId() : IdUtil.simpleUUID();
         crmRecordService.updateRecord(jsonObject.getJSONArray("field"), batchId);
@@ -79,7 +87,9 @@ public class CrmCustomerService {
             crmCustomer.setCreateTime(DateUtil.date());
             crmCustomer.setUpdateTime(DateUtil.date());
             crmCustomer.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
-            crmCustomer.setOwnerUserId(BaseUtil.getUser().getUserId().intValue());
+            if ("noImport".equals(type)){
+                crmCustomer.setOwnerUserId(BaseUtil.getUser().getUserId().intValue());
+            }
             crmCustomer.setBatchId(batchId);
             crmCustomer.setRwUserId(",");
             crmCustomer.setRoUserId(",");
@@ -142,11 +152,16 @@ public class CrmCustomerService {
         String search = jsonObject.getString("search");
         Integer pageType = basePageRequest.getPageType();
         if (0 == pageType) {
-            return R.ok().put("data", Db.find(Db.getSqlPara("crm.customer.queryBusiness",Kv.by("customerId",customerId).set("businessName",search))));
+            List<Record> recordList = Db.find(Db.getSqlPara("crm.customer.queryBusiness", Kv.by("customerId", customerId).set("businessName", search)));
+            adminSceneService.setBusinessStatus(recordList);
+            return R.ok().put("data", recordList);
         } else {
-            return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),Db.getSqlPara("crm.customer.queryBusiness",Kv.by("customerId",customerId).set("businessName",search))));
+            Page<Record> paginate = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("crm.customer.queryBusiness", Kv.by("customerId", customerId).set("businessName", search)));
+            adminSceneService.setBusinessStatus(paginate.getList());
+            return R.ok().put("data",paginate );
         }
     }
+
 
     /**
      * @author wyq
@@ -412,7 +427,7 @@ public class CrmCustomerService {
         List<Integer> ids = Db.query(Db.getSql("crm.customer.selectOwnerUserId"), record.getInt("followup_day") * 60 * 60 * 24, record.getInt("deal_day") * 60 * 60 * 24);
         if(ids != null && ids.size() > 0){
             crmRecordService.addPutIntoTheOpenSeaRecord(ids,CrmEnum.CUSTOMER_TYPE_KEY.getTypes());
-            Db.update(Db.getSql("crm.customer.updateOwnerUserId"), ids);
+            Db.update(Db.getSqlPara("crm.customer.updateOwnerUserId", Kv.by("ids",ids)));
         }
     }
 
@@ -495,9 +510,11 @@ public class CrmCustomerService {
             oaEvent.setCreateTime(DateUtil.date());
             oaEvent.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
             oaEvent.save();
+            AdminUser user = BaseUtil.getUser();
+            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),oaActionRecordService.getJoinIds(user.getDeptId(),""));
             OaEventRelation oaEventRelation = new OaEventRelation();
             oaEventRelation.setEventId(oaEvent.getEventId());
-            oaEventRelation.setCustomerIds(adminRecord.getTypesId().toString());
+            oaEventRelation.setCustomerIds(","+adminRecord.getTypesId().toString()+",");
             oaEventRelation.setCreateTime(DateUtil.date());
             oaEventRelation.save();
         }
@@ -796,7 +813,7 @@ public class CrmCustomerService {
                         jsonArray.add(JSONObject.parseObject(record.toJson()));
                     }
                     object.fluentPut("field", jsonArray);
-                    status = addOrUpdate(object);
+                    status = addOrUpdate(object,null);
                     if ("500".equals(status.get("code"))) {
                         return R.error("第" + i + "行错误!");
                     }

@@ -242,6 +242,7 @@ public class CrmLeadsController extends Controller {
      * 线索导入
      */
     @Permissions("crm:leads:excelimport")
+    @NotNullValidate(value = "ownerUserId",message = "请选择负责人")
     public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling,@Para("ownerUserId") Integer ownerUserId){
         renderJson(crmLeadsService.uploadExcel(file,repeatHandling,ownerUserId));
     }

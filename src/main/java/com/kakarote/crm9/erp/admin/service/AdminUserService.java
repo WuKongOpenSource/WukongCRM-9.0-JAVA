@@ -313,8 +313,11 @@ public class AdminUserService {
         Record record = new Record();
         List<Record> allDepts = Db.find("select * from 72crm_admin_dept where dept_id in ( ? )",deptIds);
         deptIds = getDeptIds(null,allDepts);
-        userIds = getUserIds(deptIds,userIds);
+
         String arrUserIds  = queryUserIdsByDept(deptIds);
+        if (StrUtil.isNotEmpty(userIds)) {
+            userIds = getUserIds(deptIds, userIds);
+        }
         record.set("deptIds",deptIds);
         record.set("userIds",userIds);
         record.set("arrUserIds",arrUserIds);
@@ -337,7 +340,7 @@ public class AdminUserService {
         return deptIds;
     }
     private String getUserIds(String deptIds,String userIds){
-        List<Record> allUsers = Db.find("select * from 72crm_admin_user where dept_id   NOT in ( ? ) and user_id in (?)",deptIds,userIds);
+        List<Record> allUsers = Db.find("select * from 72crm_admin_user where dept_id   NOT in ( ? ) and user_id in (?)", deptIds, userIds);
         userIds = null;
         for ( Record user: allUsers) {
             if (userIds == null){

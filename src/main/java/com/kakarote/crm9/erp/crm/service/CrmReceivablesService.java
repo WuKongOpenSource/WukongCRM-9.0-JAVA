@@ -82,7 +82,7 @@ public class CrmReceivablesService {
         adminFieldService.save(jsonObject.getJSONArray("field"), batchId);
         if (crmReceivables.getReceivablesId() == null) {
            Integer count =  Db.queryInt(Db.getSql("crm.receivables.queryByNumber"),crmReceivables.getNumber());
-           if (count != 0){
+           if (count!=null&&count > 0){
                return R.error("回款编号已存在，请校对后再添加！");
            }
             crmReceivables.setCreateTime(DateUtil.date());
@@ -151,7 +151,7 @@ public class CrmReceivablesService {
         field.set("回款编号", record.getStr("number"))
                 .set("客户名称", record.getStr("customer_name"))
                 .set("合同编号", record.getStr("contract_num"))
-                .set("回款日期", DateUtil.formatDateTime(record.getDate("return_time")))
+                .set("回款日期", DateUtil.formatDate(record.getDate("return_time")))
                 .set("回款金额", record.getStr("money"))
                 .set("期数", record.getStr("plan_num"))
                 .set("备注", record.getStr("remark"));
@@ -214,7 +214,7 @@ public class CrmReceivablesService {
         customer = new Record();
         customerList.add(customer.set("contractId", record.getStr("contract_id")).set("contract_num", record.getStr("contract_num")));
         fieldUtil.getFixedField(fieldList, "contractId", "合同编号", customerList, "contract", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "returnTime", "回款日期", DateUtil.formatDateTime(record.get("return_time")), "date", settingArr, 1);
+        fieldUtil.getFixedField(fieldList, "returnTime", "回款日期", DateUtil.formatDate(record.get("return_time")), "date", settingArr, 1);
         fieldUtil.getFixedField(fieldList, "money", "回款金额", record.getStr("money"), "floatnumber", settingArr, 1);
         fieldUtil.getFixedField(fieldList, "planId", "期数", record.getInt("plan_id"), "receivables_plan", settingArr, 0);
         fieldUtil.getFixedField(fieldList, "remark", "备注", record.getStr("remark"), "textarea", settingArr, 0);

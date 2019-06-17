@@ -28,7 +28,7 @@
     #end
 
     #sql("queryBusiness")
-    select a.business_id,a.business_name,a.money,b.customer_name,c.name as type_name,d.name as status_name
+    select a.business_id,a.business_name,a.money,a.is_end,a.type_id,a.status_id,b.customer_name,c.name as type_name,d.name as status_name
     from 72crm_crm_business as a inner join 72crm_crm_customer as b inner join 72crm_crm_business_type as c inner join
     72crm_crm_business_status as d
     where a.customer_id = b.customer_id and a.type_id = c.type_id and a.status_id = d.status_id and a.customer_id = #para(customerId)
@@ -74,7 +74,8 @@
     #end
 
     #sql ("queryContract")
-    select a.contract_id,a.num,a.name as contract_name,b.customer_name,a.money,a.start_time,a.end_time
+    select a.contract_id,a.num,a.name as contract_name,b.customer_name,a.money,a.start_time,a.end_time,
+    ifnull((select sum(c.money) from `72crm_crm_receivables` c where c.contract_id = a.contract_id and c.check_status = 2),0) as receivablesMoneyCount
     from 72crm_crm_contract as a inner join 72crm_crm_customer as b on a.customer_id = b.customer_id
     where a.customer_id = ?
     #end

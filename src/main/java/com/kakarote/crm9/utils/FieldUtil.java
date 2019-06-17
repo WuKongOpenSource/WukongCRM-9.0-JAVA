@@ -50,9 +50,9 @@ public class FieldUtil {
         fieldList.add(record);
     }
 
-    public List<Record> getFixedField(String fieldName, String value){
+    public List<Record> getFixedField(String name, String value){
         Record record = new Record();
-        record.set("name",fieldName).set("value",value);
+        record.set("name",name).set("value",value);
         recordList.add(record);
         return this.recordList;
     }
