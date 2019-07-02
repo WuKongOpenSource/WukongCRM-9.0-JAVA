@@ -122,7 +122,7 @@
         <!-- 行程 报销 -->
         <create-sections title="行程"
                          class="create-sections"
-                         v-if="categoryId && categoryId == 3 && travelList && travelList.length > 0">
+                         v-if="type && type == 3 && travelList && travelList.length > 0">
           <el-table :data="travelList"
                     style="font-size: 13px;"
                     align="center"
@@ -142,7 +142,7 @@
         </create-sections>
         <create-sections title="报销"
                          class="create-sections"
-                         v-if="categoryId && categoryId == 5 && travelList && travelList.length > 0">
+                         v-if="type && type == 5 && travelList && travelList.length > 0">
           <el-table :data="travelList"
                     style="font-size: 13px;"
                     align="center"
@@ -247,6 +247,7 @@ export default {
     return {
       loading: false,
       categoryId: '',
+      type: '',
       detail: {
         examineRecordId: ''
       },
@@ -322,6 +323,7 @@ export default {
         .then(res => {
           this.loading = false
           this.categoryId = res.data.categoryId
+          this.type = res.data.type
           this.getBaseInfo()
           this.detail = res.data
           this.categoryName = this.detail.category
@@ -381,6 +383,7 @@ export default {
     },
     // 审批操作
     examineHandle(data) {
+      this.$store.dispatch('GetOAMessageNum', 'examine')
       this.$emit('on-examine-handle', data)
     }
   }

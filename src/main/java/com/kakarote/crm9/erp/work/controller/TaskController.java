@@ -4,12 +4,15 @@ import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.service.AdminUserService;
+import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.work.entity.Task;
 import com.kakarote.crm9.erp.work.entity.TaskRelation;
 import com.kakarote.crm9.erp.work.entity.WorkTaskClass;
 import com.kakarote.crm9.erp.work.entity.WorkTaskLable;
 import com.kakarote.crm9.erp.work.service.TaskService;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
@@ -53,6 +56,10 @@ public class TaskController extends Controller {
      * @param task 任务对象
      */
     public void setTask(@Para("") Task task){
+        if(task.getPid() != null && task.getPid() != 0){
+            boolean oaAuth = AuthUtil.isOaAuth(OaEnum.TASK_TYPE_KEY.getTypes(), task.getPid());
+            if(oaAuth){renderJson(R.noAuth());return;}
+        }
         String customerIds = getPara("customerIds");
         String contactsIds = getPara("contactsIds");
         String businessIds = getPara("businessIds");
@@ -126,6 +133,8 @@ public class TaskController extends Controller {
      */
     public void queryTaskInfo(){
         String taskId = getPara("taskId");
+        boolean oaAuth = AuthUtil.isOaAuth(OaEnum.TASK_TYPE_KEY.getTypes(), Integer.valueOf(taskId));
+        if(oaAuth){renderJson(R.noAuth());return;}
         renderJson(taskService.queryTaskInfo(taskId));
     }
 
@@ -147,7 +156,12 @@ public class TaskController extends Controller {
         }else if (mold == 1 && userId == null){
             userIds = userService.queryUserIdsByParentId(BaseUtil.getUser().getUserId().intValue());
         }else {
-            userIds.add(userId);
+            List<Long> list = userService.queryChileUserIds(BaseUtil.getUser().getUserId(),BaseConstant.AUTH_DATA_RECURSION_NUM);
+            for (Long id: list) {
+                if (id.intValue() == userId){
+                    userIds.add(userId);
+                }
+            }
         }
         renderJson(taskService.getTaskList(type,status,priority,date,userIds,basePageRequest,name));
     }
@@ -158,6 +172,8 @@ public class TaskController extends Controller {
      */
     public void queryWorkTaskLog(){
         Integer taskId = getParaToInt("taskId");
+        boolean oaAuth = AuthUtil.isOaAuth(OaEnum.TASK_TYPE_KEY.getTypes(), taskId);
+        if(oaAuth){renderJson(R.noAuth());return;}
         renderJson(taskService.queryWorkTaskLog(taskId));
     }
     /**

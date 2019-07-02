@@ -72,14 +72,17 @@ public class OaActionRecordService {
         Integer type = pageRequest.getData().getType();
         AdminUser user = BaseUtil.getUser();
         SqlPara sqlPara;
-        List<Long> userIdList = userService.queryChileUserIds(user.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
+        List<Long> userIdList;
+        if(user.getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID)){
+            userIdList = Db.query("SELECT user_id FROM `72crm_admin_user` where user_id != ? ",user.getUserId());
+        }else {
+            userIdList = new AdminUserService().queryUserByParentUser(user.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
+        }
         userIdList.add(user.getUserId());
-        List<Integer> deptIdList=userService.queryChileDeptIds(user.getDeptId(),BaseConstant.AUTH_DATA_RECURSION_NUM);
-        deptIdList.add(user.getDeptId());
         if (type.equals(OaEnum.ALL_TYPE_KEY.getTypes())) {
-            sqlPara = Db.getSqlPara("oa.record.queryList", Kv.by("userId", user.getUserId()).set("deptId", user.getDeptId()).set("userIds", userIdList).set("deptIds", deptIdList));
+            sqlPara = Db.getSqlPara("oa.record.queryList", Kv.by("userId", user.getUserId()).set("deptId", user.getDeptId()).set("userIds", userIdList));
         } else {
-            sqlPara = Db.getSqlPara("oa.record.queryList", Kv.by("userId", user.getUserId()).set("deptId", user.getDeptId()).set("type", type).set("userIds", userIdList).set("deptIds", deptIdList));
+            sqlPara = Db.getSqlPara("oa.record.queryList", Kv.by("userId", user.getUserId()).set("deptId", user.getDeptId()).set("type", type).set("userIds", userIdList));
         }
         Page<Record> pageData = Db.paginate(pageRequest.getPage(), pageRequest.getLimit(), sqlPara);
         pageData.getList().forEach(record -> {
@@ -134,7 +137,7 @@ public class OaActionRecordService {
 
     public R queryEventByDay(String day) {
         Long userId = BaseUtil.getUser().getUserId();
-        List<Record> recordList = Db.find("select title,date_format(start_time,'%Y-%d-%m') as start_time ,date_format(end_time,'%Y-%d-%m') as end_time ,owner_user_ids from 72crm_oa_event where  (create_user_id = ? or owner_user_ids like concat('%', ?, '%')) and  '" + day + "' between start_time and end_time", userId, userId);
+        List<Record> recordList = Db.find("select title,date_format(start_time,'%Y-%d-%m') as start_time ,date_format(end_time,'%Y-%d-%m') as end_time ,owner_user_ids from 72crm_oa_event where  (create_user_id = ? or owner_user_ids like concat('%', ?, '%')) and  ? between start_time and end_time", userId, userId,day);
 
         recordList.forEach(record -> {
             StringBuilder realnames = new StringBuilder();

@@ -199,6 +199,13 @@ export default {
                 temps.push({ value: item })
               }
               element.showSetting = temps //放到showSeeting上
+
+              // 删除无效的多选默认值
+              if (element.formType == 'checkbox') {
+                element.defaultValue = element.defaultValue.filter(item => {
+                  return element.setting.indexOf(item) != -1
+                })
+              }
             }
             element.isNull = element.isNull == 1 ? true : false
             element.isUnique = element.isUnique == 1 ? true : false
@@ -325,7 +332,14 @@ export default {
           user: 10,
           structure: 12,
           datetime: 13,
-          email: 14
+          email: 14,
+          customer: 15,
+          business: 16,
+          contacts: 17,
+          map_address: 18,
+          category: 19,
+          contract: 20,
+          receivables_plan: 21
         }[formType] || '0'
       )
     },

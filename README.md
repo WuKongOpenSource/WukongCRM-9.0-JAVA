@@ -1,24 +1,22 @@
 ### Wukong CRM9.0 (JAVA version)
-Wukong Software has long provided enterprises with information services such as R&D, implementation, marketing, consulting, training and service of enterprise management software (CRM/HRM/OA/ERP, etc.). We have taken high technology as its starting point, technology as the core, and perfect after-sales service as its backing. With the spirit of stability and development, factualism and innovation, it has provided services for thousands of enterprises at home and abroad.
+Wukong Software has long provided enterprises with integrated information services in the development, implementation, marketing, consulting, training and service of Business Management Software(CRM/HRM/OA/ERP, etc.). Upholding high-tech as our starting point, technology as the core and perfect after-sale service as our backing, with the spirit of steady development and constant innovation, we have provided services for thousands of enterprises at home and abroad.
 
 
-The development of Wukong benefits from open source and vice versa. In 2019, Wukong CRM will continue to adhere to the concept of “embracing openness, cooperation and win-win, creating value”, move forward on the road of open source, and make positive contributions to open source at home and abroad with more community developers.
+The development of Wukong benefits from open source and vice versa. In the future, Wukong CRM will still uphold the idea of "embracing, openness, cooperation and win-win, creating values". We will keep moving forward with more community developers to make more contributions for the world's open source.
 
 
-Official website：[http://www.5kcrm.com](http://www.5kcrm.com/)
-
-Official website：[http://www.72crm.com](http://www.72crm.com/)
+Official website：[http://www.5kcrm.com](http://www.5kcrm.com/) / [http://www.72crm.com](http://www.72crm.com/)
 
 
-DEMO：[demo9java.5kcrm.net](http://demo9java.5kcrm.net/)(account：18888888888   password：123456)
+DEMO：[demo9java.5kcrm.net](http://demo9java.5kcrm.net/) (Account：18888888888   Password：123456)
 
 
-Wukong CRM adopts a new mode separating front-end from back-end. The front-end vue packaged files have been integrated into the warehouse code, eliminating the need for packaging operations.
+Wukong CRM adopts the brand new mode of front-end and back-end seperation. The front-end vue packaged files have been integrated in the repository, so users needn't to package it.
 
-If you need to adjust the front-end code, please download the front-end code separately. The front-end code is in the ux folder of the root directory.
+If you need to modify the front-end code, please download the front-end code separately. The front-end code is in the ux folder of the root directory.
 
 
-## Main technology stack
+## Main Technology Stack
 
 Core framework：jfinal3.8
 
@@ -26,11 +24,11 @@ Cache：redis
 
 Database connection pool：Druid
 
-Tools：hutool,fastjson,poi-ooxml
+Utility classes：hutool,fastjson,poi-ooxml
 
 Timed task：jfinal-cron
 
-Project build tool：maven
+Project management tool：maven
 
 Web container：tomcat,jetty,undertow(默认)
 
@@ -47,7 +45,7 @@ UI framework：Element-UI 2.6.3
 ## Installation Instructions
 
 
-Configure java runtime environment, redis environment and mysql  environment, import 72crm.sql in directory doc to the database, modify the database in `resources/config/erpsnow-config.txt` and redis configuration file, modify undertow startup port number in `resources/config/undertow.txt`.
+Configure Java runtime environment, redis environment and mysql environment; import the 72crm.sql in directory doc into database; modify database in `resources/config/erpsnow-config.txt` and redis configuration file; modify undertow start port number in `resources/config/undertow.txt`. (Default Account: admin  Default Password: 123456) 
 
 
 
@@ -55,7 +53,7 @@ Configure java runtime environment, redis environment and mysql  environment, im
 
 ## Deployment Instructions
 
-This project JDK requires JDK8 and above.
+The project requires JDK8 or higher.
 
 ### 一、Tomcat deployment
 
@@ -69,57 +67,49 @@ This project JDK requires JDK8 and above.
 </dependency>
 ```
 
-Uncomment the above code, comment undertow references, change  package method to war, run the maven package command, and place the war package in the `tomcat/webapps directory`.
+Uncomment the above code, comment undertow references; change the packaging method to war, run the maven package command, and place the war package in the `tomcat/webapps directory`.
 
-### 二、Jetty部署
 
-         
-```
-<dependency>
-    <groupId>com.jfinal</groupId>
-    <artifactId>jetty-server</artifactId>
-    <version>2019.3</version>
-    <scope>provided</scope>
-</dependency>
-```
-
-Uncomment the above code, comment tomcat and undertow references, change packaging to jar and the rest of steps are the same as Undertow.
-
-### 三、Undertow (default)
+### 二、Undertow (default)
 
 
 ```
 <dependency>
     <groupId>com.jfinal</groupId>
     <artifactId>jfinal-undertow</artifactId>
-    <version>1.5</version>
+    <version>1.6</version>
 </dependency>
 ```
 
 
 
-Uncomment the above code, comment jetty and undertow references, change  packaging to jar and run maven package. Upload the zip file generated by the above package command to the server and extract it. Put 72crm.sh/72crm.bat in the decompressed directory and run it.
-When you change the startup mode jetty and undertow, you need to change the startup file in Application.java.
+Uncomment the above code, comment tomcat and undertow references, change the packaging method to jar. Upload the zip file generated by the above packaging commands to server and decompress it. Put `72crm.sh/72crm.bat` in directory to the decompressed directory and run it.
 
+The project webapp includes the packaged front-end code. If you needn't to modify the front-end code, please directly visit it. If you have modified the front-end code, please replace the static folder and index.html in packaged dist into webapp.
+p.s.: you can use `nginx` proxy to process static file, the back-end only implement interfaces. And the designation of the program is a completely separated front-end the back-end.
 
 
 
 
 ### Front-end deployment
 
-The front-end part of installing node.js is based on node.js, so you must first install node.js with a version number of 6.0 or higher.
+Install node.js. :
 
-Use npm to install dependencies, download the Wukong CRM9.0 front-end code; place the code in the backend peer directory frontend, execute the command to install dependencies:
+Due to the front-end runs on node.js, you should first install `node.js` 6.0 or above.
+Use npm install dependency to download the front-end code of Wukong CRM; And you can first put the front-end code into the the sibling directory "front-end" of back-end, and then executive the command to install dependency：
 
     npm install
 
-Modify the internal configuration and request address or domain name: modify BASE_API (development environment server address, default localhost) in config / dev.env.js. Modify the custom port: the dev object port parameter (default 8080, not recommend to modify) in config / index.js.
+Modify the interior configuration and the Domain Name or IP: 
+Modify BASE_API in config/dev.env.js (the default address of SDE is localhost) 
 
-### Running front end
+Modify custom port: the port parameter of dev object in config/index.js (the default port is 8090 and we do not recommend to modify it. )
+
+### Running front-end
 
      npm run dev
 
-Note: The front-end service starts, it will occupy port 8080 by default. Before starting the front-end service, please make sure that port 8080 is not occupied. The Server port needs to be set up before the program runs.
+NOTE: Port 8090 will be used when running the front-end. So before running the front-end service, please ensure port 8090 is not in use, and the server needs to be set up before the program runs.
 
 ---
 

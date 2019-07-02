@@ -2,10 +2,12 @@ package com.kakarote.crm9.erp.oa.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.OaLog;
 import com.kakarote.crm9.erp.oa.entity.OaLogRelation;
 import com.kakarote.crm9.erp.oa.service.OaLogService;
 import com.kakarote.crm9.erp.work.service.TaskService;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
@@ -55,6 +57,8 @@ public class OaLogController extends Controller {
      * @author zhangzhiwei
      */
     public void deleteById(@Para("logId") Integer logId){
+        boolean oaAuth = AuthUtil.isOaAuth(OaEnum.LOG_TYPE_KEY.getTypes(), logId);
+        if(oaAuth){renderJson(R.noAuth());return;}
         renderJson(oaLogService.deleteById(logId) ? R.ok() : R.error("删除失败"));
     }
 

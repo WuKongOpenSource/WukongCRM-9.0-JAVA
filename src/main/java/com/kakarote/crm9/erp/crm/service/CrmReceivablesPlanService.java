@@ -43,6 +43,10 @@ public class CrmReceivablesPlanService {
             }
             return crmReceivablesPlan.save() ? R.ok() : R.error();
         } else {
+            Integer number = Db.queryInt("select count(*) from 72crm_crm_receivables where plan_id = ?",crmReceivablesPlan.getPlanId());
+            if (number > 0 ){
+                return R.error("该回款计划已收到回款，请勿编辑");
+            }
             crmReceivablesPlan.setUpdateTime(DateUtil.date());
             return crmReceivablesPlan.update() ? R.ok() : R.error();
         }
@@ -56,6 +60,10 @@ public class CrmReceivablesPlanService {
         String[] idsArr = planIds.split(",");
         List<Record> idsList = new ArrayList<>();
         for (String id : idsArr) {
+            Integer number = Db.queryInt("select count(*) from 72crm_crm_receivables where plan_id = ?",id);
+            if (number > 0 ){
+                return R.error("该回款计划已关联回款，禁止删除");
+            }
             Record record = new Record();
             idsList.add(record.set("plan_id", Integer.valueOf(id)));
         }
@@ -72,13 +80,37 @@ public class CrmReceivablesPlanService {
     public List<Record> queryField() {
         List<Record> fieldList = new ArrayList<>();
         String[] settingArr = new String[]{};
-        fieldUtil.getFixedField(fieldList, "customerId", "客户名称", "", "customer", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "contractId", "合同编号", "", "contract", settingArr, 1);
+        String[] returnTypeArr = new String[]{"支票","现金","邮政汇款","电汇","网上转账","支付宝","微信支付","其他"};
+        fieldUtil.getFixedField(fieldList, "customer_id", "客户名称", "", "customer", settingArr, 1);
+        fieldUtil.getFixedField(fieldList, "contract_id", "合同编号", "", "contract", settingArr, 1);
         fieldUtil.getFixedField(fieldList, "money", "计划回款金额", "", "number", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "returnDate", "计划回款日期", "", "date", settingArr, 1);
+        fieldUtil.getFixedField(fieldList, "return_date", "计划回款日期", "", "date", settingArr, 1);
+        fieldUtil.getFixedField(fieldList, "return_type", "计划回款方式", "", "select", returnTypeArr, 1);
         fieldUtil.getFixedField(fieldList, "remind", "提前几天提醒", "", "number", settingArr, 0);
         fieldUtil.getFixedField(fieldList, "remark", "备注", "", "textarea", settingArr, 0);
-        fieldList.addAll(adminFieldService.list("8"));
+        return fieldList;
+    }
+
+    /**
+     * @author wyq
+     * 查询回款自定义字段（编辑）
+     */
+    public List<Record> queryField(Integer id) {
+        Record receivablesPlan = Db.findFirst(Db.getSql("crm.receivablesplan.queryUpdateField"),id);
+        List<Record> fieldList = new ArrayList<>();
+        String[] settingArr = new String[]{};
+        String[] returnTypeArr = new String[]{"支票","现金","邮政汇款","电汇","网上转账","支付宝","微信支付","其他"};
+        List<Record> customerList = new ArrayList<>();
+        customerList.add(new Record().set("customer_id", receivablesPlan.getInt("customer_id")).set("customer_name", receivablesPlan.getStr("customer_name")));
+        fieldUtil.getFixedField(fieldList, "customer_id", "客户名称", customerList, "customer", settingArr, 1);
+        List<Record> contractList = new ArrayList<>();
+        contractList.add(new Record().set("contract_id", receivablesPlan.getInt("contract_id")).set("num", receivablesPlan.getStr("num")));
+        fieldUtil.getFixedField(fieldList, "contract_id", "合同编号", contractList, "contract", settingArr, 1);
+        fieldUtil.getFixedField(fieldList, "money", "计划回款金额", receivablesPlan.getStr("money"), "number", settingArr, 1);
+        fieldUtil.getFixedField(fieldList, "return_date", "计划回款日期", receivablesPlan.getStr("return_date"), "date", settingArr, 1);
+        fieldUtil.getFixedField(fieldList, "return_type", "计划回款方式", receivablesPlan.getStr("return_type"), "select", returnTypeArr, 1);
+        fieldUtil.getFixedField(fieldList, "remind", "提前几天提醒", receivablesPlan.getStr("remind"), "number", settingArr, 0);
+        fieldUtil.getFixedField(fieldList, "remark", "备注", receivablesPlan.getStr("remark"), "textarea", settingArr, 0);
         return fieldList;
     }
 

@@ -29,39 +29,42 @@
                       v-model="field.defaultValue"
                       :disabled="disabled">
         <draggable :list="field.showSetting">
-          <el-radio class="radio"
-                    v-for="(item, index) in field.showSetting"
-                    @click.native.prevent="radioChange(item.value)"
-                    :key="index"
-                    :label="item.value">
-            <el-input class="input"
-                      v-model="item.value"
-                      :disabled="disabled"></el-input>
+          <div class="radio"
+               v-for="(item, index) in field.showSetting"
+               :key="index">
+            <el-radio @click.native.prevent="radioChange(item.value)"
+                      :label="item.value">
+              <el-input class="input"
+                        v-model="item.value"
+                        :disabled="disabled"></el-input>
+            </el-radio>
             <i @click="handleRadio('add', item, index)"
                class="el-icon-circle-plus handle"></i>
             <i v-if="field.showSetting.length > 1"
                @click="handleRadio('remove', item, index)"
                class="el-icon-remove handle"></i>
-          </el-radio>
+          </div>
         </draggable>
       </el-radio-group>
       <el-checkbox-group v-if="field.formType == 'checkbox'"
                          v-model="field.defaultValue"
                          :disabled="disabled">
         <draggable :list="field.showSetting">
-          <el-checkbox class="checkbox"
-                       v-for="(item, index) in field.showSetting"
-                       :key="index"
-                       :label="item.value">
+          <div v-for="(item, index) in field.showSetting"
+               :key="index"
+               class="checkbox">
+            <el-checkbox :label="item.value">
+            </el-checkbox>
             <el-input class="input"
                       v-model="item.value"
                       :disabled="disabled"></el-input>
-            <i @click="handleRadio('add', item, index)"
+            <i @click.stop="handleCheckbox('add', item, index)"
                class="el-icon-circle-plus handle"></i>
             <i v-if="field.showSetting.length > 1"
-               @click="handleRadio('remove', item, index)"
+               @click.stop="handleCheckbox('remove', item, index)"
                class="el-icon-remove handle"></i>
-          </el-checkbox>
+          </div>
+          
         </draggable>
       </el-checkbox-group>
     </div>
@@ -154,20 +157,14 @@ export default {
     },
     /** 展示时间选择 */
     showDatepicker() {
-      if (
-        this.field.formType == 'date' ||
-        this.field.formType == 'datetime'
-      ) {
+      if (this.field.formType == 'date' || this.field.formType == 'datetime') {
         return true
       }
       return false
     },
     /** 控制人员和部分不展示默认值 */
     isUserStructure() {
-      if (
-        this.field.formType == 'user' ||
-        this.field.formType == 'structure'
-      ) {
+      if (this.field.formType == 'user' || this.field.formType == 'structure') {
         return true
       }
       return false
@@ -246,6 +243,26 @@ export default {
         ? (this.field.defaultValue = '')
         : (this.field.defaultValue = val)
     },
+    /**
+     * 多选
+     */
+    handleCheckbox(type, item, index) {
+      if (this.disabled) {
+        // 不能点击
+        return
+      }
+      if (type == 'add') {
+        this.field.showSetting.push({
+          value: '选' + (this.field.showSetting.length + 1)
+        })
+      } else if (type == 'remove') {
+        let removeIndex = this.field.default_value.indexOf(item.value)
+        if (removeIndex != -1) {
+          this.field.default_value.splice(removeIndex, 1)
+        }
+        this.field.showSetting.splice(index, 1)
+      }
+    },
     /*** 输入默认值触发 */
     inputBlur(e) {
       if (this.field.formType == 'mobile') {
@@ -304,7 +321,11 @@ export default {
 .radio {
   margin-top: 5px;
   margin-left: 0;
+  /deep/.el-radio {
+    margin-right: 10px;
+  }
   .input {
+    display: inline-block;
     width: 180px;
   }
   .handle {
@@ -317,7 +338,14 @@ export default {
   display: block;
   margin-left: 0;
   margin-top: 5px;
+  /deep/.el-checkbox {
+    margin-right: 10px;
+    .el-checkbox__label {
+      display: none;
+    }
+  }
   .input {
+    display: inline-block;
     width: 180px;
   }
   .handle {

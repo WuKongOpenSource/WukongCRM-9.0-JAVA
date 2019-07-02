@@ -5,10 +5,14 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.constant.BaseConstant;
+import com.kakarote.crm9.erp.admin.entity.AdminConfig;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
+import com.kakarote.crm9.erp.admin.entity.AdminFieldv;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.*;
@@ -127,10 +131,10 @@ public class CrmRecordService<T> {
         if (jsonArray == null) {
             return;
         }
-        List<AdminField> oldFieldList = new AdminField().dao().find("select * from 72crm_admin_field where batch_id = ? and parent_id != 0", batchId);
+        List<AdminFieldv> oldFieldList = new AdminFieldv().dao().find("select * from 72crm_admin_fieldv where batch_id = ?", batchId);
         oldFieldList.forEach(oldField -> {
             jsonArray.forEach(json -> {
-                AdminField newField = TypeUtils.castToJavaBean(json, AdminField.class);
+                AdminFieldv newField = TypeUtils.castToJavaBean(json, AdminFieldv.class);
                 String oldFieldValue;
                 String newFieldValue;
                 if (oldField.getValue() == null) {
@@ -283,5 +287,33 @@ public class CrmRecordService<T> {
      */
     public R deleteFollowRecord(Integer recordId){
         return AdminRecord.dao.deleteById(recordId) ? R.ok() : R.error();
+    }
+
+    /**
+     * @author wyq
+     * 查询跟进记录类型
+     */
+    public R queryRecordOptions(){
+        List<String> list = Db.query("select value from 72crm_admin_config where name = 'followRecordOption'");
+        return R.ok().put("data",list);
+    }
+
+    /**
+     * @author wyq
+     * 设置跟进记录类型
+     */
+    @Before(Tx.class)
+    public R setRecordOptions(List<String> list){
+        Db.delete("delete from 72crm_admin_config where name = 'followRecordOption'");
+        List<AdminConfig> adminConfigList = new ArrayList<>();
+        for(int i=0;i<list.size();i++){
+            AdminConfig adminConfig = new AdminConfig();
+            adminConfig.setName("followRecordOption");
+            adminConfig.setValue(list.get(i));
+            adminConfig.setDescription("跟进记录选项");
+            adminConfigList.add(adminConfig);
+        }
+        Db.batchSave(adminConfigList,100);
+        return R.ok();
     }
 }

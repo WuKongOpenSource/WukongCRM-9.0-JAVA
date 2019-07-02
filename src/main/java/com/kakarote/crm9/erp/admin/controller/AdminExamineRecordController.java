@@ -1,8 +1,12 @@
 package com.kakarote.crm9.erp.admin.controller;
 
+import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.erp.admin.service.AdminExamineRecordService;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
+import com.kakarote.crm9.utils.AuthUtil;
+import com.kakarote.crm9.utils.R;
 
 /**
  * 审核合同或回款
@@ -31,6 +35,9 @@ public class AdminExamineRecordController extends Controller {
      */
     public void queryExamineLogList(){
         Integer recordId = getInt("recordId");
+        if(getExamineObjIdByRecordId(recordId)){
+            renderJson(R.noAuth()); return;
+        }
         renderJson(examineRecordService.queryExamineLogList(recordId));
     }
     /**
@@ -40,6 +47,26 @@ public class AdminExamineRecordController extends Controller {
     public void queryExamineRecordList(){
         Integer recordId = getInt("recordId");
         Integer ownerUserId = getInt("ownerUserId");
+        if(getExamineObjIdByRecordId(recordId)){
+            renderJson(R.noAuth()); return;
+        }
         renderJson(examineRecordService.queryExamineRecordList(recordId,ownerUserId));
+    }
+
+    /**
+     * 根据recordId查询权限
+     * @param recordId
+     * @return
+     */
+    private boolean getExamineObjIdByRecordId(Integer recordId){
+        boolean auth;
+        Integer id = Db.queryInt("select contract_id from `72crm_crm_contract` where examine_record_id = ?",recordId);
+        if(id != null){
+            auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CONTRACT_TYPE_KEY.getSign()),id);
+        }else {
+            id = Db.queryInt("select receivables_id from `72crm_crm_receivables` where examine_record_id = ?",recordId);
+            auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.RECEIVABLES_TYPE_KEY.getSign()),id);
+        }
+        return auth;
     }
 }

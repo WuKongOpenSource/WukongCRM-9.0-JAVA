@@ -17,14 +17,6 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		return getInt("field_id");
 	}
 
-	public void setParentId(java.lang.Integer parentId) {
-		set("parent_id", parentId);
-	}
-
-	public java.lang.Integer getParentId() {
-		return getInt("parent_id");
-	}
-
 	public void setFieldName(java.lang.String fieldName) {
 		set("field_name", fieldName);
 	}
@@ -121,24 +113,12 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 		return getStr("options");
 	}
 
-	public void setValue(java.lang.String value) {
-		set("value", value);
-	}
-
-	public java.lang.String getValue() {
-		return getStr("value");
-	}
-
 	public void setUpdateTime(java.util.Date updateTime) {
 		set("update_time", updateTime);
 	}
 
 	public java.util.Date getUpdateTime() {
 		return get("update_time");
-	}
-
-	public void setBatchId(java.lang.String batchId) {
-		set("batch_id", batchId);
 	}
 
 	public java.lang.Integer getOperating() {
@@ -154,5 +134,13 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 	}
 	public java.lang.Integer getExamineCategoryId() {
 		return getInt("examine_category_id");
+	}
+
+	public void setFieldType(java.lang.Integer fieldType) {
+		set("field_type", fieldType);
+	}
+
+	public java.lang.Integer getFieldType() {
+		return getInt("field_type");
 	}
 }

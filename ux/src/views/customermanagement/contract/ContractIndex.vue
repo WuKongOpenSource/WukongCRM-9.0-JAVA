@@ -87,6 +87,7 @@
                        layout="total, sizes, prev, pager, next, jumper"
                        :total="total">
         </el-pagination>
+        <span class="money-bar">合同总金额：{{moneyPageData.contractMoney || 0}} / 已回款金额：{{moneyPageData.receivedMoney || 0}}</span>
       </div>
     </div>
     <!-- 相关详情页面 -->
@@ -115,10 +116,33 @@ export default {
   mixins: [table],
   data() {
     return {
-      crmType: 'contract'
+      crmType: 'contract',
+      moneyData: null //合同列表金额
     }
   },
-  computed: {},
+  computed: {
+    moneyPageData() {
+      // 未勾选展示合同总金额信息
+      if (this.selectionList.length == 0 && this.moneyData) {
+        return this.moneyData
+      } else {
+        let contractMoney = 0.0
+        let receivedMoney = 0.0
+        for (let index = 0; index < this.selectionList.length; index++) {
+          const element = this.selectionList[index]
+          // 2 审核通过的合同
+          if (element.checkStatus == 2) {
+            contractMoney += parseFloat(element.money)
+            receivedMoney += parseFloat(element.receivedMoney)
+          }
+        }
+        return {
+          contractMoney: contractMoney.toFixed(2),
+          receivedMoney: receivedMoney.toFixed(2)
+        }
+      }
+    }
+  },
   mounted() {},
   methods: {
     /** 通过回调控制style */
@@ -140,4 +164,11 @@ export default {
 
 <style lang="scss" scoped>
 @import '../styles/table.scss';
+.money-bar {
+  color: #99a9bf;
+  line-height: 44px !important;
+  position: absolute;
+  left: 20px;
+  top: 0;
+}
 </style>

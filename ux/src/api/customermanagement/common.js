@@ -197,6 +197,18 @@ export function crmIndexFieldRecord(data) {
   })
 }
 
+/**
+ * 记录类型 数据 与系统设置系统(repeat)
+ * @param {*} data 
+ */
+export function crmSettingRecordListAPI(data) {
+  return request({
+    url: 'CrmRecord/queryRecordOptions',
+    method: 'post',
+    data: data
+  })
+}
+
 // 客户管理下 合同审批信息 新建
 export function crmExamineFlowStepList(data) {
   return request({
@@ -235,23 +247,6 @@ export function crmExamineFlowAuditExamine(data) {
     url: 'examineRecord/auditExamine',
     method: 'post',
     data: data
-  })
-}
-
-/**
- * 相关团队列表
- * @param {*} data
- * types crm_leads
- * typesId 分类ID
- */
-export function crmMainIndex(data) {
-  return request({
-    url: 'scene/queryPageList',
-    method: 'post',
-    data: data,
-    headers: {
-      'Content-Type': 'application/json;charset=UTF-8'
-    }
   })
 }
 

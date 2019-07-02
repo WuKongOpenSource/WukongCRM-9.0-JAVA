@@ -65,7 +65,13 @@
 </template>
 <script type="text/javascript">
 import crmTypeModel from '@/views/customermanagement/model/crmTypeModel'
-import { crmSceneIndex, crmMainIndex } from '@/api/customermanagement/common'
+import { crmLeadsIndex } from '@/api/customermanagement/clue'
+import { crmCustomerIndex } from '@/api/customermanagement/customer'
+import { crmContactsIndex } from '@/api/customermanagement/contacts'
+import { crmBusinessIndex } from '@/api/customermanagement/business'
+import { crmContractIndex } from '@/api/customermanagement/contract'
+import { crmProductIndex } from '@/api/customermanagement/product'
+import { crmSceneIndex } from '@/api/customermanagement/common'
 // 客户下商机和联系人
 import {
   crmCustomerQueryBusiness,
@@ -182,6 +188,14 @@ export default {
   },
   mounted() {},
   methods: {
+    /**
+     * 刷新列表
+     */
+    refreshList() {
+      this.currentPage = 1
+      this.getList()
+    },
+
     getSceneList() {
       this.loading = true
       crmSceneIndex({
@@ -261,7 +275,7 @@ export default {
       } else if (this.crmType === 'product') {
         return [
           { name: '产品名称', field: 'name', formType: 'text' },
-          { name: '单位', field: 'unit', formType: 'text' },
+          { name: '单位', field: '单位', formType: 'text' },
           { name: '价格', field: 'price', formType: 'text' },
           { name: '产品类别', field: 'categoryId', formType: 'text' },
           { name: '状态 ', field: 'status', formType: 'text' }
@@ -271,7 +285,7 @@ export default {
     /** 获取列表数据 */
     getList() {
       this.loading = true
-      let crmIndexRequest = crmMainIndex
+      let crmIndexRequest = this.getIndexRequest()
       let params = { search: this.searchContent }
       // 注入场景
       if (this.sceneInfo) {
@@ -341,6 +355,22 @@ export default {
           this.$refs.relativeTable.toggleRowSelection(row, true)
         })
       })
+    },
+    /** 获取列表请求 */
+    getIndexRequest() {
+      if (this.crmType === 'leads') {
+        return crmLeadsIndex
+      } else if (this.crmType === 'customer') {
+        return crmCustomerIndex
+      } else if (this.crmType === 'contacts') {
+        return crmContactsIndex
+      } else if (this.crmType === 'business') {
+        return crmBusinessIndex
+      } else if (this.crmType === 'contract') {
+        return crmContractIndex
+      } else if (this.crmType === 'product') {
+        return crmProductIndex
+      }
     },
     // 场景选择
     handleTypeDrop(command) {

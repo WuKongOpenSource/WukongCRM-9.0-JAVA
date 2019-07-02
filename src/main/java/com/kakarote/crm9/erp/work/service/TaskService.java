@@ -16,6 +16,7 @@ import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.service.OaActionRecordService;
 import com.kakarote.crm9.erp.work.entity.*;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.kakarote.crm9.utils.TagUtil;
@@ -296,6 +297,7 @@ public class TaskService {
         }
         }else {
             page.setList(new ArrayList<>());
+            return R.ok().put("data", page);
         }
         if (status != null ){
             sql.append(" and a.status = ").append(status);
@@ -592,6 +594,9 @@ public class TaskService {
      */
     public R queryTaskRelation(BasePageRequest<TaskRelation> basePageRequest){
         TaskRelation relation = basePageRequest.getData();
+        if(AuthUtil.oaAnth(relation.toRecord())){
+            return R.noAuth();
+        }
         return R.ok().put("data",Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("work.task.queryTaskRelation", Kv.by("businessIds", relation.getBusinessIds()).set("contactsIds", relation.getContactsIds()).set("contractIds", relation.getContractIds()).set("customerIds", relation.getCustomerIds()))));
     }
 

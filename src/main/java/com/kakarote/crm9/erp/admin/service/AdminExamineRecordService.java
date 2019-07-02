@@ -9,6 +9,7 @@ import com.kakarote.crm9.erp.admin.entity.AdminExamineLog;
 import com.kakarote.crm9.erp.admin.entity.AdminExamineRecord;
 import com.kakarote.crm9.erp.admin.entity.AdminExamineStep;
 import com.kakarote.crm9.erp.crm.entity.CrmContract;
+import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
 import com.kakarote.crm9.erp.crm.entity.CrmReceivables;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
@@ -178,14 +179,10 @@ public class AdminExamineRecordService {
 
             if (examine.getCategoryType() == 1) {
                 //合同
-                CrmContract contract = CrmContract.dao.findById(id);
-                contract.setCheckStatus(3);
-                contract.update();
+                Db.update(Db.getSql("crm.contract.updateCheckStatusById"),3,id);
             } else {
                 //回款
-                CrmReceivables receivables = CrmReceivables.dao.findById(id);
-                receivables.setCheckStatus(3);
-                receivables.update();
+                Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),3,id);
             }
         } else if (status == 4) {
             //先查询该审批流程的审批步骤的第一步
@@ -218,16 +215,14 @@ public class AdminExamineRecordService {
                 if (contract.getCheckStatus() == 2) {
                     return R.error("该合同已审核通过，不能撤回！");
                 }
-                contract.setCheckStatus(4);
-                contract.update();
+                Db.update(Db.getSql("crm.contract.updateCheckStatusById"),4,id);
             } else {
                 //回款
                 CrmReceivables receivables = CrmReceivables.dao.findById(id);
                 if (receivables.getCheckStatus() == 2) {
                     return R.error("该回款已审核通过，不能撤回！");
                 }
-                receivables.setCheckStatus(4);
-                receivables.update();
+                Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),4,id);
             }
         } else {
             //审核通过
@@ -264,14 +259,12 @@ public class AdminExamineRecordService {
                         examineRecord.setExamineStatus(3);
                         if (examine.getCategoryType() == 1) {
                             //合同
-                            CrmContract contract = CrmContract.dao.findById(id);
-                            contract.setCheckStatus(1);
-                            contract.update();
+                            Db.update(Db.getSql("crm.contract.updateCheckStatusById"),1,id);
+
                         } else {
                             //回款
-                            CrmReceivables receivables = CrmReceivables.dao.findById(id);
-                            receivables.setCheckStatus(1);
-                            receivables.update();
+                            Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),1,id);
+
                         }
                     }
                 }
@@ -338,27 +331,21 @@ public class AdminExamineRecordService {
                         // AdminExamineLog examineLog = new AdminExamineLog();
                         if (examine.getCategoryType() == 1) {
                             //合同
-                            CrmContract contract = CrmContract.dao.findById(id);
-                            contract.setCheckStatus(1);
-                            contract.update();
+                            Db.update(Db.getSql("crm.contract.updateCheckStatusById"),1,id);
                         } else {
                             //回款
-                            CrmReceivables receivables = CrmReceivables.dao.findById(id);
-                            receivables.setCheckStatus(1);
-                            receivables.update();
+                            Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),1,id);
                         }
                     } else {
                         //没有下一审批流程步骤
                         if (examine.getCategoryType() == 1) {
                             //合同
+                            Db.update(Db.getSql("crm.contract.updateCheckStatusById"),2,id);
                             CrmContract contract = CrmContract.dao.findById(id);
-                            contract.setCheckStatus(2);
-                            contract.update();
+                            Db.update(Db.getSql("crm.customer.updateDealStatusById"),"已成交",contract.getCustomerId());
                         } else {
                             //回款
-                            CrmReceivables receivables = CrmReceivables.dao.findById(id);
-                            receivables.setCheckStatus(2);
-                            receivables.update();
+                            Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),2,id);
                         }
 
                     }
@@ -378,27 +365,21 @@ public class AdminExamineRecordService {
                     examineLog.save();
                     if (examine.getCategoryType() == 1) {
                         //合同
-                        CrmContract contract = CrmContract.dao.findById(id);
-                        contract.setCheckStatus(1);
-                        contract.update();
+                        Db.update(Db.getSql("crm.contract.updateCheckStatusById"),1,id);
                     } else {
                         //回款
-                        CrmReceivables receivables = CrmReceivables.dao.findById(id);
-                        receivables.setCheckStatus(1);
-                        receivables.update();
+                        Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),1,id);
                     }
                 } else {
                     //没有下一审批人
                     if (examine.getCategoryType() == 1) {
                         //合同
+                        Db.update(Db.getSql("crm.contract.updateCheckStatusById"),2,id);
                         CrmContract contract = CrmContract.dao.findById(id);
-                        contract.setCheckStatus(2);
-                        contract.update();
+                        Db.update(Db.getSql("crm.customer.updateDealStatusById"),"已成交",contract.getCustomerId());
                     } else {
                         //回款
-                        CrmReceivables receivables = CrmReceivables.dao.findById(id);
-                        receivables.setCheckStatus(2);
-                        receivables.update();
+                        Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),2,id);
                     }
                 }
 

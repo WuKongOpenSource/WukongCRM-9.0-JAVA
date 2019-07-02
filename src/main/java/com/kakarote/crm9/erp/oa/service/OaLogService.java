@@ -12,6 +12,7 @@ import com.kakarote.crm9.erp.admin.service.AdminUserService;
 import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.OaLog;
 import com.kakarote.crm9.erp.oa.entity.OaLogRelation;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.kakarote.crm9.utils.TagUtil;
@@ -123,11 +124,13 @@ public class OaLogService {
         oaLog.setSendUserIds(TagUtil.fromString(oaLog.getSendUserIds()));
         oaLog.setSendDeptIds(TagUtil.fromString(oaLog.getSendDeptIds()));
         if (oaLog.getLogId() != null) {
+            boolean oaAuth = AuthUtil.isOaAuth(OaEnum.LOG_TYPE_KEY.getTypes(), oaLog.getLogId());
+            if(oaAuth){return R.noAuth();}
             oaLog.update();
-            oaActionRecordService.addRecord(oaLog.getLogId(), OaEnum.LOG_TYPE_KEY.getTypes(), 2, oaActionRecordService.getJoinIds(user.getUserId().intValue(), oaLog.getSendUserIds()), oaActionRecordService.getJoinIds(user.getDeptId(), oaLog.getSendDeptIds()));
+            oaActionRecordService.addRecord(oaLog.getLogId(), OaEnum.LOG_TYPE_KEY.getTypes(), 2, oaActionRecordService.getJoinIds(user.getUserId().intValue(), oaLog.getSendUserIds()),  oaLog.getSendDeptIds());
         } else {
             oaLog.save();
-            oaActionRecordService.addRecord(oaLog.getLogId(), OaEnum.LOG_TYPE_KEY.getTypes(), 1, oaActionRecordService.getJoinIds(user.getUserId().intValue(), oaLog.getSendUserIds()), oaActionRecordService.getJoinIds(user.getDeptId(), oaLog.getSendDeptIds()));
+            oaActionRecordService.addRecord(oaLog.getLogId(), OaEnum.LOG_TYPE_KEY.getTypes(), 1, oaActionRecordService.getJoinIds(user.getUserId().intValue(), oaLog.getSendUserIds()),  oaLog.getSendDeptIds());
         }
         if (oaLogRelation != null) {
             Db.deleteById("72crm_oa_log_relation", "log_id", oaLog.getLogId());
@@ -193,6 +196,9 @@ public class OaLogService {
      */
     public R queryLogRelation(BasePageRequest<OaLogRelation> basePageRequest) {
         OaLogRelation relation = basePageRequest.getData();
+        if(AuthUtil.oaAnth(relation.toRecord())){
+            return R.noAuth();
+        }
         Page<Record> recordPage = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("oa.log.queryLogRelation", Kv.by("businessIds", relation.getBusinessIds()).set("contactsIds", relation.getContactsIds()).set("contractIds", relation.getContractIds()).set("customerIds", relation.getCustomerIds())));
         AdminUser user = BaseUtil.getUser();
         recordPage.getList().forEach((record -> {

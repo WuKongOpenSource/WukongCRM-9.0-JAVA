@@ -1,8 +1,10 @@
 package com.kakarote.crm9.erp.oa.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.OaExamine;
 import com.kakarote.crm9.erp.oa.entity.OaExamineLog;
 import com.kakarote.crm9.erp.oa.entity.OaExamineRelation;
@@ -10,6 +12,8 @@ import com.kakarote.crm9.erp.oa.service.OaExamineService;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
+import com.kakarote.crm9.utils.AuthUtil;
+import com.kakarote.crm9.utils.R;
 
 public class OaExamineController extends Controller {
 
@@ -36,6 +40,8 @@ public class OaExamineController extends Controller {
 
     public void getField(){
         String id = getPara("examineId");
+        boolean oaAuth = AuthUtil.isOaAuth(- 1, Integer.valueOf(id));
+        if(oaAuth){renderJson(R.noAuth());return;}
         renderJson(oaExamineService.getField(id));
     }
 
@@ -72,6 +78,8 @@ public class OaExamineController extends Controller {
     @NotNullValidate(value = "examineId",message = "审批id不能为空")
     public void queryOaExamineInfo(){
         String id = getPara("examineId");
+        boolean oaAuth = AuthUtil.isOaAuth(- 1, Integer.valueOf(id));
+        if(oaAuth){renderJson(R.noAuth());return;}
         renderJson(oaExamineService.queryOaExamineInfo(id));
     }
 
@@ -81,6 +89,9 @@ public class OaExamineController extends Controller {
      */
     public void queryExamineRecordList(){
         Integer recordId = getInt("recordId");
+        Integer examineId = Db.queryInt("select examine_id from `72crm_oa_examine_record` where record_id = ?",recordId);
+        boolean oaAuth = AuthUtil.isOaAuth(- 1, examineId);
+        if(oaAuth){renderJson(R.noAuth());return;}
         renderJson(oaExamineService.queryExamineRecordList(recordId));
     }
 
@@ -91,6 +102,9 @@ public class OaExamineController extends Controller {
     @NotNullValidate(value = "recordId",message = "记录id不能为空")
     public void queryExamineLogList(){
         Integer recordId = getInt("recordId");
+        Integer examineId = Db.queryInt("select examine_id from `72crm_oa_examine_record` where record_id = ?",recordId);
+        boolean oaAuth = AuthUtil.isOaAuth(- 1, examineId);
+        if(oaAuth){renderJson(R.noAuth());return;}
         renderJson(oaExamineService.queryExamineLogList(recordId));
     }
 
@@ -101,6 +115,8 @@ public class OaExamineController extends Controller {
     @NotNullValidate(value = "examineId",message = "审批id不能为空")
     public void deleteOaExamine(){
         Integer oaExamineId = getParaToInt("examineId");
+        boolean oaAuth = AuthUtil.isOaAuth(OaEnum.EXAMINE_TYPE_KEY.getTypes(), oaExamineId);
+        if(oaAuth){renderJson(R.noAuth()); return;}
         renderJson(oaExamineService.deleteOaExamine(oaExamineId));
     }
 

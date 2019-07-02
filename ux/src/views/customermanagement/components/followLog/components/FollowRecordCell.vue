@@ -41,9 +41,9 @@
           <img class="cell-head"
                src="@/assets/img/relevance_file.png" />
           <div class="cell-body">{{file.name}}<span style="color: #ccc;">（{{file.size}}）</span></div>
-          <i class="el-icon-download cell-foot"
-             style="cursor: pointer;color: #ccc;"
-             @click="downloadFile(file)"></i>
+          <el-button type="primary"
+                     icon="el-icon-download"
+                     @click="downloadFile(file)">下载</el-button>
         </flexbox>
       </div>
       <div class="follow"

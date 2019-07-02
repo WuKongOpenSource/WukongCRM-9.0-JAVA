@@ -18,9 +18,12 @@ export function crmReceivablesSave(data) {
  */
 export function crmReceivablesIndex(data) {
   return request({
-    url: 'CrmReceivables/queryPage',
+    url: 'CrmReceivables/queryPageList',
     method: 'post',
-    data: data
+    data: data,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
   })
 }
 
@@ -59,6 +62,18 @@ export function crmReceivablesRead(data) {
 export function crmReceivablesPlanIndex(data) {
   return request({
     url: 'CrmCustomer/queryReceivablesPlan',
+    method: 'post',
+    data: data
+  })
+}
+
+/**
+ * 回款计划删除
+ * @param {*} data
+ */
+export function crmReceivablesPlanDeleteAPI(data) {
+  return request({
+    url: 'Crm/ReceivablesPlan/deleteByIds',
     method: 'post',
     data: data
   })

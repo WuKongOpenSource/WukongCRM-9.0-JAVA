@@ -17,12 +17,11 @@
                class="button-name">{{createButtonTitle}}</div>
           <div v-show="!buttonNameCollapse"
                class="button-line"></div>
-          <i class="el-icon-arrow-right button-mark"></i>
+          <i class="button-mark" :class="createButtonIcon"></i>
         </div>
       </el-popover>
     </div>
     <el-menu :default-active="activeIndex"
-             @select="menuSelect"
              :style="{'border-right-color': backgroundColor, 'padding-top': createButtonTitle != '' ? '90px' : '40px'}"
              class="el-menu-vertical"
              :text-color="textColor"
@@ -32,16 +31,21 @@
              unique-opened>
       <template v-for="(item, index) in items"
                 v-if="!item.hidden">
-        <el-menu-item v-if="!item.children"
-                      :key="index"
-                      :index="item.path"
-                      class="menu-item-defalt"
-                      :class="{'menu-item-select': activeIndex == item.path}">
-          <i class="wukong"
-             :class="'wukong-' + item.meta.icon"
-             :style="{ 'color': activeIndex == item.path ? activeTextColor : textColor}"></i>
-          <span slot="title">{{item.meta.title}}</span>
-        </el-menu-item>
+        <router-link v-if="!item.children"
+                     :key="index"
+                     :to="'/' + mainRouter + '/' + item.path">
+          <el-menu-item :index="item.path"
+                        class="menu-item-defalt"
+                        :class="{'menu-item-select': activeIndex == item.path}">
+            <i class="wukong"
+               :class="'wukong-' + item.meta.icon"
+               :style="{ 'color': activeIndex == item.path ? activeTextColor : textColor}"></i>
+            <span slot="title">{{item.meta.title}}</span>
+            <el-badge v-if="item.meta.num && item.meta.num > 0"
+                      :max="99"
+                      :value="item.meta.num"></el-badge>
+          </el-menu-item>
+        </router-link>
         <el-submenu v-else
                     :key="index"
                     :index="item.path">
@@ -51,14 +55,16 @@
                :class="'wukong-' + item.meta.icon"></i>
             <span slot="title">{{item.meta.title}}</span>
           </template>
-          <el-menu-item v-for="(subitem, subindex) in item.children"
-                        v-if="!item.hidden"
-                        :key="subindex"
-                        :index="subitem.path"
-                        class="menu-item-defalt"
-                        :class="{'menu-item-select': activeIndex == subitem.path }">
-            {{subitem.meta.title}}
-          </el-menu-item>
+          <router-link v-for="(subitem, subindex) in item.children"
+                       v-if="!item.hidden"
+                       :key="subindex"
+                       :to="'/' + mainRouter + '/' + subitem.path">
+            <el-menu-item :index="subitem.path"
+                          class="menu-item-defalt"
+                          :class="{'menu-item-select': activeIndex == subitem.path }">
+              {{subitem.meta.title}}
+            </el-menu-item>
+          </router-link>
         </el-submenu>
       </template>
     </el-menu>
@@ -141,24 +147,20 @@ export default {
     createButtonBackgroundColor: {
       type: String,
       default: '#3E84E9'
+    },
+    createButtonIcon: {
+      type: String,
+      default: 'el-icon-arrow-right'
     }
   },
   mounted() {},
   methods: {
     toggleSideBarClick() {
       this.collapse = !this.collapse
-      this.$root.eventHub.$emit('collapseBtn', this.collapse)
     },
-    menuSelect(key, keyPath) {
-      this.$router.push('/' + this.mainRouter + '/' + key)
-    },
+
     // 快速创建
     quicklyCreate() {
-      switch (this.mainRouter) {
-        case 'project':
-          this.$router.push('add-project')
-          break
-      }
       this.$emit('quicklyCreate')
     }
   }
@@ -285,5 +287,15 @@ export default {
 
 .wukong {
   margin-right: 8px;
+}
+
+// 消息数
+.el-badge {
+  position: absolute;
+  right: 15px;
+  top: 5px;
+  /deep/ .el-badge__content {
+    border-width: 0;
+  }
 }
 </style>

@@ -17,6 +17,14 @@ public abstract class BaseCrmLeads<M extends BaseCrmLeads<M>> extends Model<M> i
 		return getInt("leads_id");
 	}
 
+	public void setFollowup(Integer followup) {
+		set("followup", followup);
+	}
+
+	public Integer getFollowup() {
+		return getInt("followup");
+	}
+
 	public void setIsTransform(Integer isTransform) {
 		set("is_transform", isTransform);
 	}

@@ -4,8 +4,10 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
 import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
@@ -25,6 +27,7 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +36,23 @@ public class CrmProductController extends Controller {
 
     @Inject
     private CrmProductService crmProductService;
+
+    @Inject
+    private AdminFieldService adminFieldService;
+
+    @Inject
+    private AdminSceneService adminSceneService;
+
+    /**
+     * @author wyq
+     * 查看列表页
+     */
+    @Permissions({"crm:product:index"})
+    public void queryPageList(BasePageRequest basePageRequest){
+        JSONObject jsonObject = basePageRequest.getJsonObject().fluentPut("type",4);
+        basePageRequest.setJsonObject(jsonObject);
+        renderJson(adminSceneService.filterConditionAndGetPageList(basePageRequest));
+    }
 
     /**
      * 分页条件查询产品
@@ -126,7 +146,7 @@ public class CrmProductController extends Controller {
     private void export(List<Record> recordList) throws IOException{
         ExcelWriter writer = ExcelUtil.getWriter();
         AdminFieldService adminFieldService = new AdminFieldService();
-        List<Record> fieldList = adminFieldService.list("4");
+        List<Record> fieldList = adminFieldService.customFieldList("4");
         writer.addHeaderAlias("name","产品名称");
         writer.addHeaderAlias("num","产品编码");
         writer.addHeaderAlias("category_name","产品类别");
@@ -143,7 +163,7 @@ public class CrmProductController extends Controller {
         HttpServletResponse response = getResponse();
         List<Map<String,Object>> list = new ArrayList<>();
         for (Record record : recordList){
-            list.add(record.remove("batch_id","status","unit","category_id","product_id","owner_user_id","create_user_id").getColumns());
+            list.add(record.remove("batch_id","status","unit","category_id","product_id","owner_user_id","create_user_id","field_batch_id").getColumns());
         }
         writer.write(list,true);
         for (int i=0; i < fieldList.size()+15;i++){
@@ -166,7 +186,8 @@ public class CrmProductController extends Controller {
      * 获取导入模板
      */
     public void downloadExcel(){
-        List<Record> recordList = crmProductService.queryField();
+        List<Record> recordList = adminFieldService.queryAddField(4);
+        recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("产品导入表");
         HSSFRow row = sheet.createRow(0);
@@ -180,7 +201,7 @@ public class CrmProductController extends Controller {
             }else {
                 cell.setCellValue(record.getStr("name"));
             }
-            if ("产品分类".equals(record.getStr("name"))){
+            if ("产品类型".equals(record.getStr("name"))){
                 setting = categoryList.toArray(new String[categoryList.size()]);
             }
             if (setting.length != 0){
@@ -209,9 +230,17 @@ public class CrmProductController extends Controller {
      * 导入产品
      */
     @Permissions("crm:product:excelimport")
-    public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling, @Para("ownerUserId") Integer ownerUserId){
-        renderJson(crmProductService.uploadExcel(file,repeatHandling,ownerUserId));
+    public void uploadExcel (@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling, @Para("ownerUserId") Integer ownerUserId){
+        Db.tx(() ->{
+            R result = crmProductService.uploadExcel(file,repeatHandling,ownerUserId);
+            renderJson(result);
+            if (result.get("code").equals(500)){
+                return false;
+            }
+            return true;
+        });
     }
+
     /**
      * @author zxy
      * 获取上架商品

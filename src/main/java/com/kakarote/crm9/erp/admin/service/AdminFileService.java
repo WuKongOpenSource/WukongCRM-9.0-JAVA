@@ -1,7 +1,11 @@
 package com.kakarote.crm9.erp.admin.service;
 
+import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.jfinal.config.Constants;
+import com.jfinal.kit.Prop;
+import com.jfinal.kit.PropKit;
 import com.kakarote.crm9.erp.admin.entity.AdminFile;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
@@ -12,14 +16,11 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class AdminFileService {
-
+    public static Prop prop = PropKit.use("config/crm9-config.txt");
     /**
      * @param file    文件
      * @param batchId 批次ID
@@ -33,7 +34,11 @@ public class AdminFileService {
         adminFile.setCreateTime(new Date());
         adminFile.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
         adminFile.setPath(file.getFile().getAbsolutePath());
-        adminFile.setFilePath(BaseUtil.getIpAddress() + prefix + "/" + file.getFileName());
+        if(ClassLoaderUtil.isPresent("com.jfinal.server.undertow.UndertowServer")){
+            adminFile.setFilePath(BaseUtil.getIpAddress() + prefix + "/" + file.getFileName());
+        }else {
+            adminFile.setFilePath(BaseUtil.getIpAddress()+new Constants().getBaseUploadPath()+"/"+ prefix + "/" + file.getFileName());
+        }
         adminFile.setName(file.getFileName());
         if(StrUtil.isNotBlank(fileType)){
             adminFile.setFileType(fileType);

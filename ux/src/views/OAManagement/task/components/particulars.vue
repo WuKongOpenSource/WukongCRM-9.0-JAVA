@@ -180,9 +180,7 @@
             <div class="add-description">
               <div v-show="!addDescriptionShow">
                 <div v-if="taskData.description"
-                     @click="addDescriptionShow = true; addDescriptionTextarea = taskData.description">
-                  {{taskData.description}}
-                </div>
+                     @click="addDescriptionShow = true; addDescriptionTextarea = taskData.description">{{taskData.description}}</div>
                 <div v-else
                      class="no-description">
                   <span class="color-label">暂无描述</span>
@@ -550,6 +548,7 @@ import membersDep from '@/components/selectEmployee/membersDep'
 import tagIndex from './tag/tagIndex'
 import subTask from './subTask'
 // emoji
+import xss from 'xss'
 import emoji from '@/components/emoji'
 // 关联业务 - 选中列表
 import relatedBusiness from '@/components/relatedBusiness'
@@ -744,6 +743,7 @@ export default {
             value: val,
             index: this.detailIndex
           })
+          this.$store.dispatch('GetOAMessageNum', 'task')
         })
         .catch(err => {
           this.$emit('on-handle', {
@@ -1002,7 +1002,7 @@ export default {
         setCommentAPI({
           typeId: this.id,
           type: 1,
-          content: this.commentsTextarea
+          content: xss(this.commentsTextarea)
         })
           .then(res => {
             res.data.childCommentList = []
@@ -1035,7 +1035,7 @@ export default {
           typeId: item.typeId,
           mainId: item.mainId == 0 ? item.commentId : item.mainId,
           type: 1,
-          content: this.childCommentsTextarea
+          content: xss(this.childCommentsTextarea)
         })
           .then(res => {
             this.childCommentsPopover = false
@@ -1747,7 +1747,10 @@ export default {
       }
       .add-description /deep/ {
         margin-bottom: 20px;
+        position: relative;
         cursor: pointer;
+        white-space: pre-wrap;
+        word-wrap: break-word;
         .no-description {
           color: #3e84e9;
           .color-label {

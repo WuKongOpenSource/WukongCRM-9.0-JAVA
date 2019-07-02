@@ -7,6 +7,7 @@ import com.kakarote.crm9.utils.BaseUtil;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
+import com.kakarote.crm9.utils.R;
 
 /**
  * 公告
@@ -39,5 +40,15 @@ public class OaAnnouncementController extends Controller {
      */
     public void queryList(BasePageRequest<OaAnnouncement> basePageRequest,@Para("type")Integer type){
         renderJson(announcementService.queryList(basePageRequest,type));
+    }
+
+    /**
+     * 公告设为已读
+     * @param announcementId 公告ID
+     * @author wyq
+     */
+    public void readAnnouncement(@Para("announcementId")Integer announcementId){
+        announcementService.readAnnouncement(announcementId);
+        renderJson(R.ok());
     }
 }

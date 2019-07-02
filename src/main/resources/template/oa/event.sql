@@ -16,7 +16,7 @@
     #end
 
     #sql ("queryOwnerList")
-    select * from 72crm_admin_user
+    select user_id, username,img, create_time, realname, num, mobile, email, sex, dept_id, post from 72crm_admin_user
     where user_id in (
         #for(i : ids)
             #(for.index > 0 ? "," : "")#para(i)

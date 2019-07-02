@@ -2,16 +2,20 @@ package com.kakarote.crm9.erp.crm.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.plugin.activerecord.Page;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
+import com.kakarote.crm9.erp.admin.service.AdminSceneService;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmContract;
 import com.kakarote.crm9.erp.crm.entity.CrmContractProduct;
 import com.kakarote.crm9.erp.crm.entity.CrmReceivables;
 import com.kakarote.crm9.erp.crm.service.CrmContractService;
 import com.kakarote.crm9.erp.crm.service.CrmReceivablesPlanService;
 import com.kakarote.crm9.erp.crm.service.CrmReceivablesService;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
@@ -25,6 +29,21 @@ public class CrmContractController extends Controller {
     private CrmReceivablesService receivablesService;
     @Inject
     private CrmReceivablesPlanService receivablesPlanService;
+
+    @Inject
+    private AdminSceneService adminSceneService;
+
+    /**
+     * @author wyq
+     * 查看列表页
+     */
+    @Permissions({"crm:contract:index"})
+    public void queryPageList(BasePageRequest basePageRequest){
+        JSONObject jsonObject = basePageRequest.getJsonObject().fluentPut("type",6);
+        basePageRequest.setJsonObject(jsonObject);
+        renderJson(adminSceneService.filterConditionAndGetPageList(basePageRequest));
+    }
+
     /**
      * 分页条件查询合同
      * @author zxy
@@ -115,6 +134,8 @@ public class CrmContractController extends Controller {
      * 查询团队成员
      */
     public void getMembers(@Para("contractId")Integer contractId){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CONTRACT_TYPE_KEY.getSign()), contractId);
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(R.ok().put("data",crmContractService.getMembers(contractId)));
     }
 
@@ -159,6 +180,8 @@ public class CrmContractController extends Controller {
     @NotNullValidate(value = "content",message = "内容不能为空")
     @NotNullValidate(value = "category",message = "跟进类型不能为空")
     public void addRecord(@Para("")AdminRecord adminRecord){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CONTRACT_TYPE_KEY.getSign()), adminRecord.getTypesId());
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmContractService.addRecord(adminRecord));
     }
 
@@ -167,6 +190,8 @@ public class CrmContractController extends Controller {
      * 查看跟进记录
      */
     public void getRecord(BasePageRequest<CrmContract> basePageRequest){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CONTRACT_TYPE_KEY.getSign()), basePageRequest.getData().getContractId());
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(R.ok().put("data",crmContractService.getRecord(basePageRequest)));
     }
     /**
@@ -174,6 +199,8 @@ public class CrmContractController extends Controller {
      * @author zxy
      */
     public void qureyReceivablesListByContractId(BasePageRequest<CrmReceivables> basePageRequest){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CONTRACT_TYPE_KEY.getSign()), basePageRequest.getData().getContractId());
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(receivablesService.qureyListByContractId(basePageRequest));
     }
     /**
@@ -181,6 +208,8 @@ public class CrmContractController extends Controller {
      * @author zxy
      */
     public void qureyProductListByContractId(BasePageRequest<CrmContractProduct> basePageRequest){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CONTRACT_TYPE_KEY.getSign()), basePageRequest.getData().getContractId());
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmContractService.qureyProductListByContractId(basePageRequest));
     }
     /**
@@ -188,7 +217,24 @@ public class CrmContractController extends Controller {
      * @author zxy
      */
     public void qureyReceivablesPlanListByContractId(BasePageRequest<CrmReceivables> basePageRequest){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CONTRACT_TYPE_KEY.getSign()), basePageRequest.getData().getContractId());
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(receivablesPlanService.qureyListByContractId(basePageRequest));
     }
 
+    /**
+     * 查询合同到期提醒设置
+     */
+    public void queryContractConfig(){
+        renderJson(crmContractService.queryContractConfig());
+    }
+
+    /**
+     * 修改合同到期提醒设置
+     */
+    @NotNullValidate(value = "status",message = "status不能为空")
+    @NotNullValidate(value = "contractDay",message = "contractDay不能为空")
+    public void setContractConfig(@Para("status") Integer status,@Para("contractDay") Integer contractDay){
+        renderJson(crmContractService.setContractConfig(status,contractDay));
+    }
 }

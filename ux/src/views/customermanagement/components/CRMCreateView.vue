@@ -301,7 +301,7 @@ export default {
           // 新建合同 选择客户 要将id交于 商机
           for (let index = 0; index < this.crmForm.crmFields.length; index++) {
             const element = this.crmForm.crmFields[index]
-            if (element.key === 'businessId') {
+            if (element.key === 'business_id') {
               // 如果是商机 改变商机样式和传入客户ID
               if (item.value.length > 0) {
                 element.disabled = false
@@ -348,7 +348,7 @@ export default {
           var planItem = null // 合同更改 重置回款计划
           for (let index = 0; index < this.crmForm.crmFields.length; index++) {
             const element = this.crmForm.crmFields[index]
-            if (element.key === 'contractId') {
+            if (element.key === 'contract_id') {
               // 如果是合同 改变合同样式和传入客户ID
               if (item.value.length > 0) {
                 element.disabled = false
@@ -361,7 +361,7 @@ export default {
                 element['relation'] = {}
                 element.value = []
               }
-            } else if (element.key === 'planId') {
+            } else if (element.key === 'plan_id') {
               planItem = element
             }
           }
@@ -373,7 +373,7 @@ export default {
         } else if (item.data.formType == 'contract') {
           for (let index = 0; index < this.crmForm.crmFields.length; index++) {
             const element = this.crmForm.crmFields[index]
-            if (element.key === 'planId') {
+            if (element.key === 'plan_id') {
               // 如果是回款 改变回款样式和传入客户ID
               if (item.value.length > 0) {
                 element.disabled = false
@@ -508,25 +508,31 @@ export default {
           this.crmForm.crmFields.push(params)
         } else {
           var params = {}
-          if (this.action.type == 'update') {
-            params['value'] = item.value || '' // 编辑的值 在value∂ç字段
-          } else {
-            if (
-              item.formType == 'user' ||
-              item.formType == 'structure' ||
-              item.formType == 'file' ||
-              item.formType == 'category' ||
-              item.formType == 'customer' ||
-              item.formType == 'business' ||
-              item.formType == 'contract'
-            ) {
+          if (
+            item.formType == 'user' ||
+            item.formType == 'structure' ||
+            item.formType == 'file' ||
+            item.formType == 'category' ||
+            item.formType == 'customer' ||
+            item.formType == 'business' ||
+            item.formType == 'contract'
+          ) {
+            if (this.action.type == 'update') {
+              params['value'] = item.value ? objDeepCopy(item.value) : []
+              
+            } else {
               params['value'] = item.defaultValue
                 ? objDeepCopy(item.defaultValue)
                 : []
+            }
+          } else {
+            if (this.action.type == 'update') {
+              params['value'] = item.value || '' // 编辑的值 在value∂ç字段
             } else {
               params['value'] = item.defaultValue || ''
             }
           }
+
           params['key'] = item.fieldName
           params['data'] = item
           params['disabled'] = false // 是否可交互
@@ -806,7 +812,8 @@ export default {
       this.loading = true
       var crmRequest = this.getSubmiteRequest()
       if (this.action.type == 'update') {
-        params.entity[this.crmType + 'Id'] = this.action.id
+        let key = this.crmType == 'receivables_plan' ? 'plan' : this.crmType
+        params.entity[key + 'Id'] = this.action.id
         params.entity.batchId = this.action.batchId
       }
       crmRequest(params)
@@ -853,7 +860,6 @@ export default {
       } else if (this.crmType == 'receivables') {
         return crmReceivablesSave
       } else if (this.crmType == 'receivables_plan') {
-        // 回款计划 不能编辑
         return crmReceivablesPlanSave
       }
     },
@@ -895,7 +901,7 @@ export default {
       params['address'] = element.value.address
         ? element.value.address.join(',')
         : []
-      params['detail_address'] = element.value.detail_address
+      params['detailAddress'] = element.value.detailAddress
       params['location'] = element.value.location
       params['lng'] = element.value.lng
       params['lat'] = element.value.lat
@@ -903,14 +909,15 @@ export default {
     // 关联客户 联系人等数据要特殊处理
     getRealParams(element) {
       if (
-        element.key == 'customerId' ||
-        element.key == 'contactsId' ||
-        element.key == 'businessId' ||
-        element.key == 'leadsId' ||
-        element.key == 'contractId'
+        element.key == 'customer_id' ||
+        element.key == 'contacts_id' ||
+        element.key == 'business_id' ||
+        element.key == 'leads_id' ||
+        element.key == 'contract_id'
       ) {
         if (element.value && element.value.length) {
-          return element.value[0][element.key]
+          let key = element.key.replace('_id', 'Id')
+          return element.value[0][key]
         } else {
           return ''
         }
@@ -928,7 +935,7 @@ export default {
           return element.value[0].batchId
         }
         return ''
-      } else if (element.key == 'categoryId') {
+      } else if (element.key == 'category_id') {
         if (element.value && element.value.length > 0) {
           return element.value[element.value.length - 1]
         }

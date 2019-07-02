@@ -19,10 +19,15 @@
     </div>
     <el-tabs v-model="activeName"
              @tab-click="tabClick">
-      <el-tab-pane :label="item.label"
-                   :name="item.key"
+      <el-tab-pane :name="item.key"
                    v-for="(item, index) in tabsData"
                    :key="index">
+        <el-badge slot="label"
+                  :hidden="item.key != 'examine' || messageOANum.examineNum == 0"
+                  :max="99"
+                  :value="messageOANum.examineNum">
+          <span>{{item.label}}</span>
+        </el-badge>
         <v-content :by="item.key"
                    :categoryId="categoryType"
                    :ref="'tabcontent' + item.key"
@@ -37,6 +42,7 @@
                              @close="showCategorySelect=false"></examine-category-select>
     <examine-create-view v-if="isCreate"
                          :categoryId="createInfo.categoryId"
+                         :type="createInfo.type"
                          :categoryTitle="createInfo.title"
                          :action="createAction"
                          @save-success="createSaveSuccess"
@@ -45,6 +51,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { oaExamineCategoryList } from '@/api/oamanagement/examine' // 审批类型数据
 import VContent from './components/content'
 import ExamineCategorySelect from './components/examineCategorySelect'
@@ -56,6 +63,7 @@ export default {
     ExamineCategorySelect,
     ExamineCreateView
   },
+
   data() {
     return {
       loading: false,
@@ -74,9 +82,15 @@ export default {
       createInfo: {} // 创建所需要的id 标题名信息
     }
   },
+
+  computed: {
+    ...mapGetters(['messageOANum'])
+  },
+
   mounted() {
     this.getExamineCategoryList()
   },
+
   methods: {
     // 审批类型列表
     getExamineCategoryList() {
@@ -92,32 +106,39 @@ export default {
           this.loading = false
         })
     },
+
     // 重置按钮
     reset() {
       this.categoryType = ''
     },
+
     editDetail(item) {
       item.title = item.categoryName
       this.createInfo = item
       this.createAction = { type: 'update', id: item.examineId, data: item }
       this.isCreate = true
     },
+
     // 创建
     newBtn() {
       this.showCategorySelect = true
     },
+
     // 审批类型选择
     selcetExamineCategory(item) {
       this.createInfo = item
       this.createAction = { type: 'save' }
       this.isCreate = true
     },
+
     createSaveSuccess() {
       this.$refs.tabcontentmy[0].searchBtn()
     },
+
     hideView() {
       this.isCreate = false
     },
+
     tabClick(val) {}
   }
 }
@@ -160,5 +181,10 @@ export default {
       overflow: hidden;
     }
   }
+}
+
+// 消息效果
+.el-badge /deep/ .el-badge__content.is-fixed {
+  top: 15px;
 }
 </style>

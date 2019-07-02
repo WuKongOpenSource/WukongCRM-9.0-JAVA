@@ -34,12 +34,14 @@
                              @close="showCategorySelect=false"></examine-category-select>
     <examine-create-view v-if="isCreate"
                          :categoryId="createInfo.categoryId"
+                         :type="createInfo.type"
                          :categoryTitle="createInfo.title"
                          @hiden-view="isCreate = false"></examine-create-view>
   </el-container>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import workbenchRouter from '@/router/modules/workbench'
 import { Navbar, Sidebar, AppMain } from './components'
 import ExamineCreateView from '@/views/OAManagement/examine/components/examineCreateView'
@@ -47,6 +49,7 @@ import ExamineCategorySelect from '@/views/OAManagement/examine/components/exami
 
 export default {
   name: 'Layout',
+
   components: {
     Navbar,
     Sidebar,
@@ -54,6 +57,7 @@ export default {
     ExamineCategorySelect,
     ExamineCreateView
   },
+
   data() {
     return {
       addDialog: false,
@@ -90,13 +94,49 @@ export default {
       createInfo: {} // 创建所需要的id 标题名信息
     }
   },
+
   computed: {
+    ...mapGetters(['messageOANum']),
     sidebarItems() {
-      return workbenchRouter.children
+      let workbenchMenus = workbenchRouter.children
+      let keys = [
+        {
+          index: 1,
+          type: 'eventNum'
+        },
+        {
+          index: 2,
+          type: 'taskNum'
+        },
+        {
+          index: 3,
+          type: 'announcementNum'
+        },
+        {
+          index: 4,
+          type: 'logNum'
+        },
+        {
+          index: 5,
+          type: 'examineNum'
+        }
+      ]
+      for (let index = 0; index < keys.length; index++) {
+        const element = keys[index]
+        let messageItem = workbenchMenus[element.index]
+        messageItem.meta.num = this.messageOANum[element.type] || 0
+      }
+      return workbenchMenus
     }
   },
+
+  created() {
+    this.getOAMessagNum()
+  },
+
   methods: {
     navClick(index) {},
+
     // 新增跳转
     addSkip(val) {
       switch (val.label) {
@@ -117,10 +157,21 @@ export default {
           break
       }
     },
+
     // 审批类型选择
     selcetExamineCategory(item) {
       this.createInfo = item
       this.isCreate = true
+    },
+
+    /**
+     * 获取消息数
+     */
+    getOAMessagNum() {
+      this.$store
+        .dispatch('GetOAMessageNum')
+        .then(res => {})
+        .catch(() => {})
     }
   }
 }

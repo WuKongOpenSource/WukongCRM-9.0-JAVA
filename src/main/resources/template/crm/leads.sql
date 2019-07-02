@@ -1,14 +1,14 @@
 #namespace("crm.leads")
     #sql("getLeadsPageList")
-    select leads_name,owner_user_name from leadsview where 1=1
+    select leads_id,leads_name,owner_user_name from leadsview where 1=1
       #if(leadsName)
       and leads_name like CONCAT('%',#para(leadsName),'%')
       #end
       #if(telephone)
-      and telephone like CONCAT('%',#para(telephone),'%')
+      and telephone = #para(telephone)
       #end
       #if(mobile)
-      and mobile like CONCAT('%',#para(mobile),'%')
+      and mobile = #para(mobile)
       #end
     #end
 
@@ -35,7 +35,7 @@
 
     #sql ("updateOwnerUserId")
     update 72crm_crm_leads
-    set owner_user_id = #para(ownerUserId)
+    set owner_user_id = #para(ownerUserId),followup = 0
     where leads_id in (
         #for(i:ids)
           #(for.index > 0 ? "," : "")#para(i)

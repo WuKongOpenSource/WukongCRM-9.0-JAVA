@@ -3,10 +3,10 @@
     select a.*,b.examine_status,b.record_id as examine_record_id,b.examine_step_id ,c.category_id,c.title as categoryTitle
     from 72crm_oa_examine a left join 72crm_oa_examine_record b on a.examine_id = b.examine_id left join 72crm_oa_examine_category c on a.category_id = c.category_id
     where a.create_user_id = #para(userId)
-    #if(categoryId)
+    #if(categoryId!=null&&categoryId!="")
     and a.category_id = #para(categoryId)
     #end
-    #if(status)
+    #if(status!=null&&status!="")
     and  b.examine_status = #para(status)
     #end
     #if(startTime!=null && endTime!=null)
@@ -17,7 +17,7 @@
   #sql("myOaExamine")
     select a.*,b.examine_status,b.record_id,b.examine_step_id,c.category_id,c.title as categoryTitle  from 72crm_oa_examine a  left join  72crm_oa_examine_record b on a.examine_id = b.examine_id left join 72crm_oa_examine_category c on a.category_id = c.category_id left join 72crm_oa_examine_log d on d.record_id = b.record_id
     where 1 = 1
-      #if(categoryId)
+      #if(categoryId!=null&&categoryId!="")
       and a.category_id = #para(categoryId)
       #end
       #if(status==1)
@@ -153,7 +153,7 @@
     select travel_id as travelId, examine_id as examineId, start_address as startAddress, start_time as startTime, end_address as endAddress, end_time as endTime, traffic, stay, diet, other, money, vehicle, trip, duration, description, batch_id as batchId from 72crm_oa_examine_travel where examine_id = ?
    #end
    #sql("queryAllExamineCategoryList")
-      select category_id,title from 72crm_oa_examine_category where
+      select category_id,title,type from 72crm_oa_examine_category where
         case when user_ids != '' or dept_ids != '' then (user_ids like concat('%,',#para(userId),',%') or dept_ids like concat('%,',#para(deptId),',%')) and is_deleted = 0 and status = 1
              else is_deleted = 0 and status = 1
         end

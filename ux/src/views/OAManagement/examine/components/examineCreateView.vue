@@ -139,7 +139,8 @@ import {
   regexIsCRMMoneyNumber,
   regexIsCRMMobile,
   regexIsCRMEmail,
-  guid
+  guid,
+  objDeepCopy
 } from '@/utils'
 
 import {
@@ -257,6 +258,7 @@ export default {
       type: [String, Number],
       default: ''
     },
+    type: [String, Number],
     // 类型名称
     categoryTitle: {
       type: String,
@@ -644,8 +646,8 @@ export default {
           this.crmForm.crmFields.push(params)
         } else if (
           // 出差审批 差旅报销
-          (item.fieldName == 'duration' && this.categoryId == 3) ||
-          (item.fieldName == 'money' && this.categoryId == 5)
+          (item.fieldName == 'duration' && this.type == 3) ||
+          (item.fieldName == 'money' && this.type == 5)
         ) {
           // 报销事项
           var params = {}
@@ -665,7 +667,21 @@ export default {
           if (this.action.type == 'update') {
             params['value'] = item.value // 编辑的值 在value字段
           } else {
-            params['value'] = item.defaultValue || '' // 加入默认值 可能编辑的时候需要调整
+            if (
+              item.formType == 'user' ||
+              item.formType == 'structure' ||
+              item.formType == 'file' ||
+              item.formType == 'category' ||
+              item.formType == 'customer' ||
+              item.formType == 'business' ||
+              item.formType == 'contract'
+            ) {
+              params['value'] = item.defaultValue
+                ? objDeepCopy(item.defaultValue)
+                : []
+            } else {
+              params['value'] = item.defaultValue || ''
+            }
           }
           params['key'] = item.fieldName || item.name
           params['data'] = item
@@ -758,7 +774,7 @@ export default {
             params[element.key] = causeList
           }
         } else {
-          if (element.data.fieldName) {
+          if (element.data.fieldType == 1) {
             params.oaExamine[element.key] = this.getRealParams(element)
           } else {
             element.data.value = this.getRealParams(element)

@@ -134,7 +134,7 @@ export default {
       let item = {}
       item.name = data.name
       item.categoryName = data.categoryName
-      item.unit = data.unit
+      item.unit = data.单位
       item.price = data.price
       item.salesPrice = data.price
       item.num = 0

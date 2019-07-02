@@ -2,15 +2,16 @@
   <flexbox class="cell">
     <img class="cell-head"
          src="@/assets/img/relevance_file.png"
-         alt="">
+         alt>
     <div class="cell-body"
          :class="{'cursor-pointer' :cursorPointer}">
-      <span>{{data.name}}</span>
+      <span>{{data.name.length > 20 ? data.name.substring(0, 20) + '...' : data.name}}</span>
       <span class="size">({{data.size}})</span>
     </div>
     <div class="cell-foot">
-      <i class="el-icon-download"
-         @click="downloadClick"></i>
+      <el-button type="primary"
+                 icon="el-icon-download"
+                 @click="downloadClick">下载</el-button>
       <i v-if="showDelete"
          class="el-icon-delete"
          @click="deleteClick"></i>

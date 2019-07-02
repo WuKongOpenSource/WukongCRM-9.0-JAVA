@@ -99,11 +99,16 @@ export default {
   },
   mounted() {
     // 线索和客户判断更多操作
-    if (!this.isSeas && this.crm[this.crmType]) {
+    if (!this.isSeas) {
       if (this.crm[this.crmType].excelimport) {
         this.moreTypes.push({ type: 'enter', name: '导入' })
       }
       if (this.crm[this.crmType].excelexport) {
+        this.moreTypes.push({ type: 'out', name: '导出' })
+      }
+    } else {
+      // 客户池的导出关键字不同
+      if (this.crm.pool.excelexport) {
         this.moreTypes.push({ type: 'out', name: '导出' })
       }
     }

@@ -1,5 +1,7 @@
 <template>
   <slide-view v-empty="!canShowDetail"
+              xs-empty-icon="nopermission"
+              xs-empty-text="暂无权限"
               :listenerIDs="listenerIDs"
               :noListenerIDs="noListenerIDs"
               :noListenerClass="noListenerClass"
@@ -7,8 +9,6 @@
               :body-style="{padding: 0, height: '100%'}">
     <flexbox v-if="canShowDetail"
              v-loading="loading"
-             xs-empty-icon="nopermission"
-             xs-empty-text="暂无权限"
              direction="column"
              align="stretch"
              class="d-container">
@@ -116,6 +116,7 @@ import CRMDetailHead from '../components/CRMDetailHead'
 import BusinessFollow from './components/BusinessFollow' // 跟进记录
 import CRMBaseInfo from '../components/CRMBaseInfo' // 商机基本信息
 import RelativeContract from '../components/RelativeContract' //相关合同
+import RelativeContacts from '../components/RelativeContacts' // 相关联系人
 import RelativeHandle from '../components/RelativeHandle' //相关操作
 import RelativeTeam from '../components/RelativeTeam' //相关团队
 import RelativeProduct from '../components/RelativeProduct' //相关团队
@@ -136,6 +137,7 @@ export default {
     BusinessFollow,
     CRMBaseInfo,
     RelativeContract,
+    RelativeContacts,
     RelativeHandle,
     RelativeTeam,
     RelativeProduct,
@@ -222,6 +224,8 @@ export default {
         return 'relative-product'
       } else if (this.tabCurrentName == 'file') {
         return 'relative-files'
+      } else if (this.tabCurrentName == 'contacts') {
+        return 'relative-contacts'
       }
       return ''
     },
@@ -231,12 +235,19 @@ export default {
       if (this.crm.business && this.crm.business.read) {
         tempsTabs.push({ label: '基本信息', name: 'basicinfo' })
       }
-      if (this.crm.product && this.crm.product.index) {
-        tempsTabs.push({ label: '产品', name: 'product' })
+
+      if (this.crm.contacts && this.crm.contacts.index) {
+        tempsTabs.push({ label: '联系人', name: 'contacts' })
       }
+
       if (this.crm.contract && this.crm.contract.index) {
         tempsTabs.push({ label: '合同', name: 'contract' })
       }
+
+      if (this.crm.product && this.crm.product.index) {
+        tempsTabs.push({ label: '产品', name: 'product' })
+      }
+
       tempsTabs.push({ label: '相关团队', name: 'team' })
       tempsTabs.push({ label: '附件', name: 'file' })
       tempsTabs.push({ label: '操作记录', name: 'operationlog' })

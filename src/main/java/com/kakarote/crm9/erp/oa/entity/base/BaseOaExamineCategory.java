@@ -41,6 +41,14 @@ public abstract class BaseOaExamineCategory<M extends BaseOaExamineCategory<M>> 
 		return getInt("create_user_id");
 	}
 
+	public void setType(Integer type) {
+		set("type", type);
+	}
+
+	public Integer getType() {
+		return getInt("type");
+	}
+
 	public void setStatus(Integer status) {
 		set("status", status);
 	}

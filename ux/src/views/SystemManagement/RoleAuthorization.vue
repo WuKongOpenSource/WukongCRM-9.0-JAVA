@@ -138,6 +138,7 @@
                 <el-tree :data="showTreeData"
                          show-checkbox
                          node-key="menuId"
+                         style="height: 0;"
                          ref="tree"
                          :indent="0"
                          empty-text=""

@@ -64,4 +64,15 @@
     #sql ("queryByNum")
     select count(*) from 72crm_crm_contract where num = ?
     #end
+    #sql ("updateCheckStatusById")
+      update 72crm_crm_contract set check_status = ? where contract_id = ?
+    #end
+
+    #sql ("setContractConfig")
+    update 72crm_admin_config set status = #para(status)
+    #if(contractDay)
+    ,value = #para(contractDay)
+    #end
+     where name = 'expiringContractDays'
+    #end
 #end

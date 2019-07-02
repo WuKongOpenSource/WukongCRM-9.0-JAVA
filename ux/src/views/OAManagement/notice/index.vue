@@ -21,34 +21,14 @@
             </el-option>
           </el-select>
         </div>
-        <div class="content">
+        <div class="content" id="notice-list-box">
           <div class="list-box">
-            <div class="list"
-                 v-for="(item, index) in listData"
-                 :key="index">
-              <div class="header">
-                <div v-photo="item"
-                     v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
-                     class="div-photo"></div>
-                <div class="name-time">
-                  <p class="name">{{item.realname}}</p>
-                  <p class="time">{{item.createTime | moment("YYYY-MM-DD HH:mm")}}</p>
-                </div>
-              </div>
-              <div class="title"
-                   @click="rowFun(item)">{{item.title}}</div>
-              <div class="item-content"
-                   v-if="item.preShow">{{item.content}}</div>
-              <div class="item-content"
-                   v-else>{{item.contentSub}}</div>
-              <div v-if="item.contentSub.length < item.content.length"
-                   class="load-more">
-                <span v-if="!item.loadMore"
-                      @click="loadMoreBtn(item)">展开全文</span>
-                <span v-else
-                      @click="item.loadMore = false, item.preShow = false">收起全文</span>
-              </div>
-            </div>
+            <notice-cell v-for="(item, index) in listData"
+                         :key="index"
+                         :data="item"
+                         :cellIndex="index"
+                         @handle="noticeHandle">
+            </notice-cell>
             <p class="load">
               <el-button type="text"
                          :loading="loadMoreLoading">{{loadText}}</el-button>
@@ -75,13 +55,15 @@
 <script>
 import VDetails from './details'
 import newDialog from './newDialog'
+import NoticeCell from './noticeCell'
 // API
 import { noticeList } from '@/api/oamanagement/notice'
 
 export default {
   components: {
     VDetails,
-    newDialog
+    newDialog,
+    NoticeCell
   },
   data() {
     return {
@@ -118,8 +100,9 @@ export default {
     this.noticeDataFun(1, this.pageNum)
     // 分批次加载
     let _this = this
-    document.getElementsByClassName('content')[0].onscroll = function() {
+    document.getElementsByClassName('content')[0].onscroll = function(e) {
       let doms = document.getElementsByClassName('content')[0]
+      _this.$bus.emit('notice-list-box-scroll', e.target)
       var scrollTop = doms.scrollTop
       var windowHeight = doms.clientHeight
       var scrollHeight = doms.scrollHeight //滚动条到底部的条件
@@ -166,9 +149,11 @@ export default {
         })
     },
     // 点击显示详情
-    rowFun(val) {
-      this.titleList = val
-      this.dialog = true
+    noticeHandle(data) {
+      if (data.type == 'detail') {
+        this.titleList = data.value
+        this.dialog = true
+      }
     },
     close() {
       this.dialog = false
@@ -206,10 +191,6 @@ export default {
       this.listData = []
       this.pageNum = 1
       this.noticeDataFun(type, this.pageNum)
-    },
-    loadMoreBtn(val) {
-      this.$set(val, 'preShow', true)
-      this.$set(val, 'loadMore', true)
     }
   }
 }
@@ -239,54 +220,6 @@ export default {
     .list-box {
       margin-top: 20px;
       padding-right: 20px;
-      .list {
-        margin-bottom: 30px;
-        padding-bottom: 30px;
-        border-bottom: 1px solid #e6e6e6;
-        .header {
-          margin-bottom: 15px;
-          .div-photo {
-            width: 35px;
-            height: 35px;
-            border-radius: 17.5px;
-            margin-right: 10px;
-          }
-          .name-time {
-            display: inline-block;
-            .time {
-              color: #999;
-              margin-top: 5px;
-              font-size: 12px;
-            }
-          }
-        }
-        .title {
-          cursor: pointer;
-          display: inline-block;
-        }
-        .item-content {
-          margin-top: 10px;
-          color: #999;
-          font-size: 12px;
-          line-height: 18px;
-          white-space: pre-wrap;
-          word-wrap: break-word;
-          background-color: #f0f7ff;
-          padding: 15px;
-          border-radius: 3px;
-          color: #333;
-          letter-spacing: 0.5px;
-        }
-        .load-more {
-          text-align: left;
-          margin-top: 15px;
-          span {
-            cursor: pointer;
-            font-size: 13px;
-            color: #8ab7f5;
-          }
-        }
-      }
       .load {
         color: #999;
         font-size: 13px;

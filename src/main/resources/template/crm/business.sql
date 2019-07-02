@@ -42,7 +42,7 @@
     #end
 
     #sql ("queryContacts")
-    select a.name,a.mobile,a.post
+    select a.contacts_id,a.name,a.mobile,a.post
     from 72crm_crm_contacts as a inner join 72crm_crm_contacts_business as b
     where a.contacts_id = b.contacts_id and b.business_id = ?
     #end

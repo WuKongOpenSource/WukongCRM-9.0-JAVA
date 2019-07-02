@@ -14,5 +14,6 @@ public class OaRouter extends Routes {
         add("/OaLog", OaLogController.class);
         add("/OaRecord", OaActionRecordController.class);
         add("/comment", OaCommentController.class);
+        add("/OaBackLog", OaBackLogController.class);
     }
 }

@@ -24,6 +24,7 @@
                  class="default-mark"></div>
             <el-checkbox class="list-item-check"
                          v-model="item.check"
+                         :disabled="true"
                          @change="leftCheckItemChange"></el-checkbox>
             <div class="list-item-name">{{item.name}}</div>
             <div class="list-item-handle">

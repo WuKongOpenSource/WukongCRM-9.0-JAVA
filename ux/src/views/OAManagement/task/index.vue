@@ -247,12 +247,12 @@ export default {
     .el-tabs /deep/ .el-tabs__content {
       padding: 0 30px;
       flex: 1;
-      // overflow-y: auto;
       margin-bottom: 20px;
       .el-tab-pane {
         height: 100%;
         display: flex;
         flex-direction: column;
+        overflow-y: hidden;
       }
     }
     .search-input {

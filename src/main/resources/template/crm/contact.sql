@@ -1,14 +1,17 @@
 #namespace("crm.contact")
     #sql("getContactsPageList")
-    select name,owner_user_name from contactsview where 1=1
+    select contacts_id,name,customer_name,owner_user_name from contactsview where 1=1
       #if(contactsName)
       and name like CONCAT('%',#para(contactsName),'%')
       #end
+      #if(customerName)
+      and customer_name like CONCAT('%',#para(customerName),'%')
+      #end
       #if(telephone)
-      and telephone like CONCAT('%',#para(telephone),'%')
+      and telephone = #para(telephone)
       #end
       #if(mobile)
-      and mobile like CONCAT('%',#para(mobile),'%')
+      and mobile = #para(mobile)
       #end
     #end
 
@@ -35,10 +38,11 @@
     #end
 
     #sql("queryBusiness")
-    select a.business_id,a.business_name,a.money,b.customer_name,d.name as type_name,e.name as status_name
-    from 72crm_crm_business as a inner join 72crm_crm_customer as b inner join 72crm_crm_contacts as c
+    select a.business_id,a.business_name,a.money,f.customer_name,d.name as type_name,e.name as status_name
+    from 72crm_crm_business as a inner join 72crm_crm_contacts_business as b inner join 72crm_crm_contacts as c
     inner join 72crm_crm_business_type as d inner join 72crm_crm_business_status as e
-    where a.customer_id = b.customer_id and b.customer_id = c.customer_id and a.type_id = d.type_id
+    inner join 72crm_crm_customer as f on a.customer_id = f.customer_id
+    where a.business_id = b.business_id and b.contacts_id = c.contacts_id and a.type_id = d.type_id
     and a.status_id = e.status_id and c.contacts_id = ?
     #end
 
@@ -99,5 +103,4 @@
       or mobile = #para(mobile)
       #end
     #end
-
 #end

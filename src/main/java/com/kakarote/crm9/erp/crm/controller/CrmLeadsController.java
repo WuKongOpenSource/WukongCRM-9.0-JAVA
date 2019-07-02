@@ -4,14 +4,17 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmLeads;
 import com.kakarote.crm9.erp.crm.service.CrmLeadsService;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
@@ -34,9 +37,26 @@ public class CrmLeadsController extends Controller {
     @Inject
     private CrmLeadsService crmLeadsService;
 
+    @Inject
+    private AdminFieldService adminFieldService;
+
+    @Inject
+    private AdminSceneService adminSceneService;
+
     /**
      * @author wyq
-     * 分页条件查询线索
+     * 查看列表页
+     */
+    @Permissions({"crm:leads:index"})
+    public void queryPageList(BasePageRequest basePageRequest){
+        JSONObject jsonObject = basePageRequest.getJsonObject().fluentPut("type",1);
+        basePageRequest.setJsonObject(jsonObject);
+        renderJson(adminSceneService.filterConditionAndGetPageList(basePageRequest));
+    }
+
+    /**
+     * @author wyq
+     * 全局搜索查询线索
      */
     public void queryList(BasePageRequest<CrmLeads> basePageRequest){
         renderJson(R.ok().put("data",crmLeadsService.getLeadsPageList(basePageRequest)));
@@ -117,6 +137,11 @@ public class CrmLeadsController extends Controller {
     @NotNullValidate(value = "content",message = "内容不能为空")
     @NotNullValidate(value = "category",message = "跟进类型不能为空")
     public void addRecord(@Para("")AdminRecord adminRecord){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.LEADS_TYPE_KEY.getSign()), adminRecord.getTypesId());
+        if(auth){
+            renderJson(R.noAuth());
+            return;
+        }
         renderJson(crmLeadsService.addRecord(adminRecord));
     }
 
@@ -125,6 +150,8 @@ public class CrmLeadsController extends Controller {
      * 查看跟进记录
      */
     public void getRecord(BasePageRequest<CrmLeads> basePageRequest){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.LEADS_TYPE_KEY.getSign()), basePageRequest.getData().getLeadsId());
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(R.ok().put("data",crmLeadsService.getRecord(basePageRequest)));
     }
 
@@ -156,7 +183,7 @@ public class CrmLeadsController extends Controller {
     private void export(List<Record> recordList) throws IOException{
         ExcelWriter writer = ExcelUtil.getWriter();
         AdminFieldService adminFieldService = new AdminFieldService();
-        List<Record> fieldList = adminFieldService.list("1");
+        List<Record> fieldList = adminFieldService.customFieldList("1");
         writer.addHeaderAlias("leads_name","线索名称");
         writer.addHeaderAlias("next_time","下次联系时间");
         writer.addHeaderAlias("telephone","电话");
@@ -174,7 +201,7 @@ public class CrmLeadsController extends Controller {
         HttpServletResponse response = getResponse();
         List<Map<String,Object>> list = new ArrayList<>();
         for (Record record : recordList){
-            list.add(record.remove("batch_id","is_transform","customer_id","leads_id","owner_user_id","create_user_id").getColumns());
+            list.add(record.remove("batch_id","is_transform","customer_id","leads_id","owner_user_id","create_user_id","followup","field_batch_id").getColumns());
         }
         writer.write(list,true);
         for (int i=0; i < fieldList.size()+15;i++){
@@ -197,7 +224,8 @@ public class CrmLeadsController extends Controller {
      * 获取线索导入模板
      */
     public void downloadExcel(){
-        List<Record> recordList = crmLeadsService.queryField();
+        List<Record> recordList = adminFieldService.queryAddField(1);
+        recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("线索导入表");
         HSSFRow row = sheet.createRow(0);
@@ -243,7 +271,15 @@ public class CrmLeadsController extends Controller {
      */
     @Permissions("crm:leads:excelimport")
     @NotNullValidate(value = "ownerUserId",message = "请选择负责人")
+    @Before(Tx.class)
     public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling,@Para("ownerUserId") Integer ownerUserId){
-        renderJson(crmLeadsService.uploadExcel(file,repeatHandling,ownerUserId));
+        Db.tx(() ->{
+            R result = crmLeadsService.uploadExcel(file,repeatHandling,ownerUserId);
+            renderJson(result);
+            if (result.get("code").equals(500)){
+                return false;
+            }
+            return true;
+        });
     }
 }

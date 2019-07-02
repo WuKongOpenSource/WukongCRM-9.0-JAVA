@@ -6,8 +6,11 @@ import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
+import com.kakarote.crm9.erp.admin.service.AdminSceneService;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmBusiness;
 import com.kakarote.crm9.erp.crm.service.CrmBusinessService;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
@@ -17,9 +20,23 @@ public class CrmBusinessController extends Controller {
     @Inject
     private CrmBusinessService crmBusinessService;
 
+    @Inject
+    private AdminSceneService adminSceneService;
+
     /**
      * @author wyq
-     * 分页条件查询商机
+     * 查看列表页
+     */
+    @Permissions({"crm:business:index"})
+    public void queryPageList(BasePageRequest basePageRequest){
+        JSONObject jsonObject = basePageRequest.getJsonObject().fluentPut("type",5);
+        basePageRequest.setJsonObject(jsonObject);
+        renderJson(adminSceneService.filterConditionAndGetPageList(basePageRequest));
+    }
+
+    /**
+     * @author wyq
+     * 全局搜索查询商机
      */
     public void queryList(BasePageRequest basePageRequest){
         renderJson(R.ok().put("data",crmBusinessService.getBusinessPageList(basePageRequest)));
@@ -42,7 +59,7 @@ public class CrmBusinessController extends Controller {
     @Permissions("crm:business:read")
     @NotNullValidate(value = "businessId",message = "商机id不能为空")
     public void queryById(@Para("businessId")Integer businessId){
-        renderJson(R.ok().put("data",crmBusinessService.queryById(businessId)));
+        renderJson(crmBusinessService.queryById(businessId));
     }
 
     /**
@@ -59,6 +76,8 @@ public class CrmBusinessController extends Controller {
      * 根据商机id查询产品
      */
     public void queryProduct(BasePageRequest<CrmBusiness> basePageRequest){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), basePageRequest.getData().getBusinessId());
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmBusinessService.queryProduct(basePageRequest));
     }
 
@@ -67,6 +86,8 @@ public class CrmBusinessController extends Controller {
      * 根据商机id查询合同
      */
     public void queryContract(BasePageRequest<CrmBusiness> basePageRequest){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), basePageRequest.getData().getBusinessId());
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmBusinessService.queryContract(basePageRequest));
     }
 
@@ -76,6 +97,22 @@ public class CrmBusinessController extends Controller {
      */
     public void queryContacts(BasePageRequest<CrmBusiness> basePageRequest){
         renderJson(crmBusinessService.queryContacts(basePageRequest));
+    }
+
+    /**
+     * @author wyq
+     * 商机关联联系人
+     */
+    public void relateContacts(@Para("businessId")Integer businessId,@Para("contactsIds")String contactsIds){
+        renderJson(crmBusinessService.relateContacts(businessId,contactsIds));
+    }
+
+    /**
+     * @author wyq
+     * 商机解除关联联系人
+     */
+    public void unrelateContacts(@Para("businessId")Integer businessId,@Para("contactsIds")String contactsIds){
+        renderJson(crmBusinessService.unrelateContacts(businessId,contactsIds));
     }
 
     /**
@@ -106,6 +143,8 @@ public class CrmBusinessController extends Controller {
      */
     @NotNullValidate(value = "businessId",message = "商机id不能为空")
     public void getMembers(@Para("businessId")Integer businessId){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), businessId);
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(R.ok().put("data",crmBusinessService.getMembers(businessId)));
     }
 
@@ -148,6 +187,8 @@ public class CrmBusinessController extends Controller {
      */
     @NotNullValidate(value = "businessId",message = "商机id不能为空")
     public void queryBusinessStatus(@Para("businessId")Integer businessId){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), businessId);
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(R.ok().put("data",crmBusinessService.queryBusinessStatus(businessId)));
     }
 
@@ -157,6 +198,8 @@ public class CrmBusinessController extends Controller {
      */
     @NotNullValidate(value = "businessId",message = "商机id不能为空")
     public void boostBusinessStatus(@Para("")CrmBusiness crmBusiness){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), crmBusiness.getBusinessId());
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmBusinessService.boostBusinessStatus(crmBusiness));
     }
 
@@ -173,7 +216,7 @@ public class CrmBusinessController extends Controller {
      * 查询商机状态组及商机状态
      */
     public void queryBusinessStatusOptions(){
-        renderJson(R.ok().put("data",crmBusinessService.queryBusinessStatusOptions()));
+        renderJson(R.ok().put("data",crmBusinessService.queryBusinessStatusOptions(null)));
     }
 
     /**
@@ -184,6 +227,8 @@ public class CrmBusinessController extends Controller {
     @NotNullValidate(value = "content",message = "内容不能为空")
     @NotNullValidate(value = "category",message = "跟进类型不能为空")
     public void addRecord(@Para("")AdminRecord adminRecord){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), adminRecord.getTypesId());
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmBusinessService.addRecord(adminRecord));
     }
 
@@ -192,6 +237,8 @@ public class CrmBusinessController extends Controller {
      * 查看跟进记录
      */
     public void getRecord(BasePageRequest<CrmBusiness> basePageRequest){
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), basePageRequest.getData().getBusinessId());
+        if(auth){renderJson(R.noAuth()); return; }
         renderJson(R.ok().put("data",crmBusinessService.getRecord(basePageRequest)));
     }
 

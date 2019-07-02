@@ -21,6 +21,7 @@ public class AuthInterceptor implements Interceptor {
         Permissions permissions=invocation.getMethod().getAnnotation(Permissions.class);
         if(permissions!=null&&permissions.value().length>0){
             JSONObject jsonObject= Aop.get(AdminRoleService.class).auth(BaseUtil.getUserId());
+            //组装应有权限列表
             List<String> arr=queryAuth(jsonObject, "");
             boolean isRelease=false;
             for (String key : permissions.value()) {
@@ -35,7 +36,6 @@ public class AuthInterceptor implements Interceptor {
                 return;
             }
         }
-
         invocation.invoke();
     }
     @SuppressWarnings("unchecked")

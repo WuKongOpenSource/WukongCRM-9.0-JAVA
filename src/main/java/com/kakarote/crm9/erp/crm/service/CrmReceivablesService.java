@@ -10,6 +10,7 @@ import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmReceivables;
 import com.kakarote.crm9.erp.crm.entity.CrmReceivablesPlan;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.R;
@@ -39,6 +40,9 @@ public class CrmReceivablesService {
 
     @Inject
     private AdminExamineRecordService examineRecordService;
+
+    @Inject
+    private AuthUtil authUtil;
 
     /**
      * 获取用户审核通过和未通过的回款
@@ -133,8 +137,10 @@ public class CrmReceivablesService {
      * 根据id查询回款
      */
     public R queryById(Integer id) {
+        if(!authUtil.dataAuth("receivables","receivables_id",id)){
+            return R.ok().put("data",new Record().set("dataAuth",0));
+        }
         Record record = Db.findFirst(Db.getSqlPara("crm.receivables.queryReceivablesById", Kv.by("id", id)));
-
         return R.ok().put("data", record);
     }
 
@@ -155,27 +161,31 @@ public class CrmReceivablesService {
                 .set("回款金额", record.getStr("money"))
                 .set("期数", record.getStr("plan_num"))
                 .set("备注", record.getStr("remark"));
-        List<Record> fields = adminFieldService.list("7");
-        for (Record r:fields){
-            field.set(r.getStr("name"),record.getStr(r.getStr("name")));
-        }
+        List<Record> recordList = Db.find("select name,value from 72crm_admin_fieldv where batch_id = ?",record.getStr("batch_id"));
+        fieldList.addAll(recordList);
         return fieldList;
     }
 
     /**
      * 根据id删除回款
      */
+    @Before(Tx.class)
     public R deleteByIds(String receivablesIds) {
         String[] idsArr = receivablesIds.split(",");
-        List<Record> idsList = new ArrayList<>();
-        for (String id : idsArr) {
-            Record record = new Record();
-            idsList.add(record.set("receivables_id", Integer.valueOf(id)));
+        List<CrmReceivables> list = CrmReceivables.dao.find(Db.getSqlPara("crm.receivablesplan.queryReceivablesReceivablesId", Kv.by("receivablesIds", idsArr)));
+        if (list.size() > 0) {
+            return R.error("该数据已被其他模块引用，不能被删除！");
         }
-        return Db.tx(() -> {
-            Db.batch(Db.getSql("crm.receivables.deleteByIds"), "receivables_id", idsList, 100);
-            return true;
-        }) ? R.ok() : R.error();
+        for (String id : idsArr) {
+                CrmReceivables receivables = CrmReceivables.dao.findById(id);
+            if (receivables != null) {
+                Db.delete("delete FROM 72crm_admin_fieldv where batch_id = ?",receivables.getBatchId());
+            }
+            if (!CrmReceivables.dao.deleteById(id)){
+                return R.error();
+            }
+        }
+            return R.ok();
     }
 
     /**
@@ -197,30 +207,44 @@ public class CrmReceivablesService {
     }
 
     /**
+     * @author wyq
+     * 查询编辑字段
+     */
+    public List<Record> queryField(Integer receivablesId) {
+        Record receivables = Db.findFirst("select * from receivablesview where receivables_id = ?",receivablesId);
+        List<Record> list = new ArrayList<>();
+        list.add(new Record().set("customer_id",receivables.getInt("customer_id")).set("customer_name",receivables.getStr("customer_name")));
+        receivables.set("customer_id",list);
+        list = new ArrayList<>();
+        list.add(new Record().set("contract_id", receivables.getStr("contract_id")).set("contract_num", receivables.getStr("contract_num")));
+        receivables.set("contract_id",list);
+        return adminFieldService.queryUpdateField(7,receivables);
+    }
+
+    /**
      * @author zxy
      * 查询回款自定义字段(修改)
      */
-    public List<Record> queryField(Integer receivablesId) {
-        List<Record> fieldList = new ArrayList<>();
-        Record record = Db.findFirst("select * from receivablesview where receivables_id = ?", receivablesId);
-        String[] settingArr = new String[]{};
-        fieldUtil.getFixedField(fieldList, "number", "回款编号", record.getStr("number"), "number", settingArr, 1);
-        List<Record> customerList = new ArrayList<>();
-        Record customer = new Record();
-        customerList.add(customer.set("customerId", record.getInt("customer_id")).set("customerName", record.getStr("customer_name")));
-        fieldUtil.getFixedField(fieldList, "customerId", "客户名称", customerList, "customer", settingArr, 1);
-
-        customerList = new ArrayList<>();
-        customer = new Record();
-        customerList.add(customer.set("contractId", record.getStr("contract_id")).set("contract_num", record.getStr("contract_num")));
-        fieldUtil.getFixedField(fieldList, "contractId", "合同编号", customerList, "contract", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "returnTime", "回款日期", DateUtil.formatDate(record.get("return_time")), "date", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "money", "回款金额", record.getStr("money"), "floatnumber", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "planId", "期数", record.getInt("plan_id"), "receivables_plan", settingArr, 0);
-        fieldUtil.getFixedField(fieldList, "remark", "备注", record.getStr("remark"), "textarea", settingArr, 0);
-        fieldList.addAll(adminFieldService.queryByBatchId(record.getStr("batch_id")));
-        return fieldList;
-    }
+//    public List<Record> queryField(Integer receivablesId) {
+//        List<Record> fieldList = new ArrayList<>();
+//        Record record = Db.findFirst("select * from receivablesview where receivables_id = ?", receivablesId);
+//        String[] settingArr = new String[]{};
+//        fieldUtil.getFixedField(fieldList, "number", "回款编号", record.getStr("number"), "number", settingArr, 1);
+//        List<Record> customerList = new ArrayList<>();
+//        Record customer = new Record();
+//        customerList.add(customer.set("customerId", record.getInt("customer_id")).set("customerName", record.getStr("customer_name")));
+//        fieldUtil.getFixedField(fieldList, "customerId", "客户名称", customerList, "customer", settingArr, 1);
+//        customerList = new ArrayList<>();
+//        customer = new Record();
+//        customerList.add(customer.set("contractId", record.getStr("contract_id")).set("contract_num", record.getStr("contract_num")));
+//        fieldUtil.getFixedField(fieldList, "contractId", "合同编号", customerList, "contract", settingArr, 1);
+//        fieldUtil.getFixedField(fieldList, "returnTime", "回款日期", DateUtil.formatDate(record.get("return_time")), "date", settingArr, 1);
+//        fieldUtil.getFixedField(fieldList, "money", "回款金额", record.getStr("money"), "floatnumber", settingArr, 1);
+//        fieldUtil.getFixedField(fieldList, "planId", "期数", record.getInt("plan_id"), "receivables_plan", settingArr, 0);
+//        fieldUtil.getFixedField(fieldList, "remark", "备注", record.getStr("remark"), "textarea", settingArr, 0);
+//        fieldList.addAll(adminFieldService.queryByBatchId(record.getStr("batch_id")));
+//        return fieldList;
+//    }
 
     /**
      * 根据条件查询回款

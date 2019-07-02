@@ -1,5 +1,6 @@
 package com.kakarote.crm9.erp.bi.service;
 
+import cn.hutool.core.util.StrUtil;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
@@ -7,21 +8,29 @@ import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.erp.bi.common.BiTimeUtil;
 import com.kakarote.crm9.utils.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BiFunnelService {
     @Inject
     BiTimeUtil biTimeUtil;
 
-
+    /**
+     * 销售漏斗
+     * @author zxy
+     */
     public R sellFunnel(Integer deptId, Long userId, String type, String startTime, String endTime,Integer typeId){
         Record record = new Record();
         record.set("deptId",deptId).set("userId",userId).set("type",type).set("startTime",startTime).set("endTime",endTime);
         biTimeUtil.analyzeType(record);
+        List<Record> list = new ArrayList<>();
         String userIds = record.getStr("userIds");
+        if (StrUtil.isEmpty(userIds)){
+            return R.ok().put("data",list);
+        }
         String[] userIdss = userIds.split(",");
         Integer ststus = biTimeUtil.analyzeType(type);
-        List<Record> list = Db.find(Db.getSqlPara("bi.funnel.sellFunnel",
+        list = Db.find(Db.getSqlPara("bi.funnel.sellFunnel",
                 Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
                         set("endTime",endTime).set("typeId",typeId)));
         return R.ok().put("data",list);
@@ -37,6 +46,10 @@ public class BiFunnelService {
         Integer cycleNum = record.getInt("cycleNum");
         String sqlDateFormat = record.getStr("sqlDateFormat");
         String userIds = record.getStr("userIds");
+        List<Record> list = new ArrayList<>();
+        if (StrUtil.isEmpty(userIds)){
+            return R.ok().put("data",list);
+        }
         Integer beginTime = record.getInt("beginTime");
         StringBuffer sqlStringBuffer = new StringBuffer();
         for (int i=1; i <= cycleNum;i++){
@@ -57,9 +70,13 @@ public class BiFunnelService {
         record.set("deptId",deptId).set("userId",userId).set("type",type).set("startTime",startTime).set("endTime",endTime);
         biTimeUtil.analyzeType(record);
         String userIds = record.getStr("userIds");
+        List<Record> list = new ArrayList<>();
+        if (StrUtil.isEmpty(userIds)){
+            return R.ok().put("data",list);
+        }
         String[] userIdss = userIds.split(",");
         Integer ststus = biTimeUtil.analyzeType(type);
-        List<Record> list = Db.find(Db.getSqlPara("bi.funnel.sellFunnelList",
+       list = Db.find(Db.getSqlPara("bi.funnel.sellFunnelList",
                 Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
                         set("endTime",endTime)));
         return R.ok().put("data",list);
@@ -75,6 +92,10 @@ public class BiFunnelService {
         Integer cycleNum = record.getInt("cycleNum");
         String sqlDateFormat = record.getStr("sqlDateFormat");
         String userIds = record.getStr("userIds");
+        List<Record> list = new ArrayList<>();
+        if (StrUtil.isEmpty(userIds)){
+            return R.ok().put("data",list);
+        }
         Integer beginTime = record.getInt("beginTime");
         StringBuffer sqlStringBuffer = new StringBuffer();
         for (int i=1; i <= cycleNum;i++){

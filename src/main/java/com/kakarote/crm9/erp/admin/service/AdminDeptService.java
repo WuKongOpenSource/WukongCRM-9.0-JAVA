@@ -9,10 +9,8 @@ import com.kakarote.crm9.utils.R;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class AdminDeptService {
     public R setDept(AdminDept adminDept) {
@@ -90,10 +88,9 @@ public class AdminDeptService {
                 adminDepts.addAll(queryDeptByParentUser(userId, BaseConstant.AUTH_DATA_RECURSION_NUM));
             }
         }
-        HashSet<Record> hashSet=new HashSet<>(adminDepts);
-        adminDepts.clear();
-        adminDepts.addAll(hashSet);
-        return adminDepts;
+        ArrayList<Record> records = new ArrayList<>();
+        adminDepts.stream().collect(Collectors.groupingBy(record -> record.getInt("id"))).forEach((k,v)->records.add(v.get(0)));
+        return records;
     }
 
     public List<Record> queryDeptByParentDept(Integer deptId,Integer deepness){

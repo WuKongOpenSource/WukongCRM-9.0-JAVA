@@ -1,7 +1,9 @@
 package com.kakarote.crm9.erp.oa.controller;
 
+import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.service.OaCommentService;
 import com.kakarote.crm9.erp.work.entity.TaskComment;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
@@ -17,6 +19,10 @@ public class OaCommentController extends Controller{
      * @param comment 评论对象
      */
     public void setComment(@Para("") TaskComment comment){
+        if(comment.getType() == 1){
+            boolean oaAuth = AuthUtil.isOaAuth(OaEnum.TASK_TYPE_KEY.getTypes(), comment.getTypeId());
+            if(oaAuth){renderJson(R.noAuth());return;}
+        }
         renderJson(commentService.setComment(comment));
     }
 
@@ -35,6 +41,10 @@ public class OaCommentController extends Controller{
     public void queryCommentList(){
         String typeId = getPara("typeId");
         String type = getPara("type");
+        if("1".equals(type)){
+            boolean oaAuth = AuthUtil.isOaAuth(OaEnum.TASK_TYPE_KEY.getTypes(), Integer.valueOf(typeId));
+            if(oaAuth){renderJson(R.noAuth());return;}
+        }
         renderJson(R.ok().put("data",commentService.queryCommentList(typeId,type)));
     }
 }

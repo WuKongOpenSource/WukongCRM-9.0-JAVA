@@ -5,6 +5,7 @@
                      @on-handle="listHeadHandle"
                      @on-search="crmSearch"
                      main-title="新建客户"
+                     @on-export="exportInfos"
                      :isSeas="true"
                      crm-type="customer">
     </c-r-m-list-head>

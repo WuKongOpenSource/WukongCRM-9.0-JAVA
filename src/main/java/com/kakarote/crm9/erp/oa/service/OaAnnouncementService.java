@@ -1,6 +1,7 @@
 package com.kakarote.crm9.erp.oa.service;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminRole;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
@@ -18,6 +19,7 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.utils.TagUtil;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -98,6 +100,11 @@ public class OaAnnouncementService {
         for (Record r: page.getList()) {
             r.set("is_update",status);
             r.set("is_delete",status);
+            if (r.getStr("read_user_ids")!=null){
+                r.set("is_read",r.getStr("read_user_ids").contains("," + BaseUtil.getUserId().intValue() + ",") ? 1 : 0);
+            }else {
+                r.set("is_read",0);
+            }
         }
         Map<String,Object> map = new HashMap<>();
         map.put("totalRow",page.getTotalRow());
@@ -107,5 +114,13 @@ public class OaAnnouncementService {
         map.put("list",page.getList());
         map.put("is_save",status);
         return R.ok().put("data",map);
+    }
+
+    public void readAnnouncement(Integer announcementId) {
+        OaAnnouncement oaAnnouncement = OaAnnouncement.dao.findById(announcementId);
+        HashSet<String> hashSet = new HashSet<>(StrUtil.splitTrim(oaAnnouncement.getReadUserIds(), ","));
+        hashSet.add(BaseUtil.getUser().getUserId().toString());
+        oaAnnouncement.setReadUserIds("," + String.join(",", hashSet) + ",");
+        oaAnnouncement.update();
     }
 }

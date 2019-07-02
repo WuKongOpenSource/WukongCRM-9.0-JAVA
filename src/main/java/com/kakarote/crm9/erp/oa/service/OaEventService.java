@@ -11,6 +11,7 @@ import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
 import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
 import com.kakarote.crm9.erp.oa.entity.OaEventRelation;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.kakarote.crm9.utils.TagUtil;
@@ -68,7 +69,7 @@ public class OaEventService {
         AdminUser user = BaseUtil.getUser();
         return Db.tx(() -> {
             oaEvent.save();
-            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),oaActionRecordService.getJoinIds(user.getDeptId(),""));
+            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),"");
             oaEventRelation.setEventId(oaEvent.getEventId());
             oaEventRelation.save();
             return true;
@@ -96,7 +97,7 @@ public class OaEventService {
         AdminUser user = BaseUtil.getUser();
         return Db.tx(() -> {
             oaEvent.update();
-            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),2,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),oaActionRecordService.getJoinIds(user.getDeptId(),""));
+            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),2,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),"");
             oaEventRelation.setEventId(oaEvent.getEventId());
             Record eventRelation= Db.findFirst("select eventrelation_id from 72crm_oa_event_relation where event_id = ?",oaEvent.getEventId());
             oaEventRelation.setEventrelationId(eventRelation.getInt("eventrelation_id"));
@@ -120,6 +121,9 @@ public class OaEventService {
      */
     public R queryEventRelation(BasePageRequest<OaEventRelation> basePageRequest){
         OaEventRelation relation = basePageRequest.getData();
+        if(AuthUtil.oaAnth(relation.toRecord())){
+            return R.noAuth();
+        }
         Page<Record> recordPage = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("oa.event.queryEventRelation", Kv.by("businessIds", relation.getBusinessIds()).set("contactsIds", relation.getContactsIds()).set("contractIds", relation.getContractIds()).set("customerIds", relation.getCustomerIds())));
         for (Record record : recordPage.getList()){
             record.set("createUser",Kv.by("user_id",record.get("create_user_id")).set("realname",record.get("realname")).set("img",record.get("img")));

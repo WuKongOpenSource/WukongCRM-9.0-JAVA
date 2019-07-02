@@ -4,6 +4,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Aop;
+import com.jfinal.json.Json;
 import com.jfinal.plugin.activerecord.Page;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
@@ -55,6 +57,7 @@ public class AdminSceneService {
         } else if (2 == label) {
             String[] dealStatusArr = new String[]{"未成交", "已成交"};
             fieldUtil.add("customer_name", "客户名称", "text", settingArr)
+                    .add("mobile", "手机", "text", settingArr)
                     .add("telephone", "电话", "text", settingArr)
                     .add("website", "网址", "text", settingArr)
                     .add("next_time", "下次联系时间", "datetime", settingArr)
@@ -93,7 +96,7 @@ public class AdminSceneService {
         } else if (5 == label) {
             fieldUtil.add("business_name", "商机名称", "text", settingArr)
                     .add("customer_name", "客户名称", "customer", settingArr)
-                    .add("type_id", "商机状态组", "business_type", crmBusinessService.queryBusinessStatusOptions())
+                    .add("type_id", "商机状态组", "business_type", crmBusinessService.queryBusinessStatusOptions("condition"))
                     .add("money", "商机金额", "floatnumber", settingArr)
                     .add("deal_date", "预计成交日期", "datetime", settingArr)
                     .add("remark", "备注", "text", settingArr)
@@ -148,7 +151,7 @@ public class AdminSceneService {
             return R.error("场景label不符合要求！");
         }
         recordList = fieldUtil.getRecordList();
-        List<Record> records = adminFieldService.list(label.toString());
+        List<Record> records = adminFieldService.customFieldList(label.toString());
         if (recordList != null && records != null) {
             for (Record r : records){
                 r.set("field_name",r.getStr("name"));
@@ -384,7 +387,22 @@ public class AdminSceneService {
             String condition = jsonObject.getString("condition");
             String value = jsonObject.getString("value");
             String formType = jsonObject.getString("formType");
-            if (StrUtil.isNotEmpty(value) || StrUtil.isNotEmpty(jsonObject.getString("start")) || StrUtil.isNotEmpty(jsonObject.getString("end")) || "business_type".equals(jsonObject.getString("formType"))) {
+            if ("business_type".equals(formType)) {
+                whereSb.append(" and ").append(jsonObject.getString("name")).append(" = ").append(jsonObject.getInteger("typeId"));
+                if (StrUtil.isNotEmpty(jsonObject.getString("statusId"))) {
+                    if ("win".equals(jsonObject.getString("statusId"))){
+                        whereSb.append(" and is_end = 1");
+                    }else if ("lose".equals(jsonObject.getString("statusId"))){
+                        whereSb.append(" and is_end = 2");
+                    }else if ("invalid".equals(jsonObject.getString("statusId"))){
+                        whereSb.append(" and is_end = 3");
+                    }else {
+                        whereSb.append(" and status_id = ").append(jsonObject.getString("statusId"));
+                    }
+                }
+                continue;
+            }
+            if (StrUtil.isNotEmpty(value) || StrUtil.isNotEmpty(jsonObject.getString("start")) || StrUtil.isNotEmpty(jsonObject.getString("end"))) {
                 if ("takePart".equals(condition)) {
                     whereSb.append(" and (ro_user_id like '%,").append(value).append(",%' or rw_user_id like '%,").append(value).append(",%')");
                 } else {
@@ -417,12 +435,6 @@ public class AdminSceneService {
                     }
                     if ("date".equals(formType)) {
                         whereSb.append(" between '").append(jsonObject.getString("startDate")).append("' and '").append(jsonObject.getString("endDate")).append("'");
-                    }
-                    if ("business_type".equals(formType)) {
-                        whereSb.append(" = ").append(jsonObject.getInteger("typeId"));
-                        if (jsonObject.getInteger("statusId") != null) {
-                            whereSb.append(" and status_id = ").append(jsonObject.getInteger("statusId"));
-                        }
                     }
                 }
             }
@@ -505,7 +517,7 @@ public class AdminSceneService {
         }
         Long userId=BaseUtil.getUserId();
         if(!type.equals(8)&&!type.equals(4)&& !BaseConstant.SUPER_ADMIN_USER_ID.equals(userId)){
-            List<Long> longs=new AdminUserService().queryUserByAuth(userId);
+            List<Long> longs= Aop.get(AdminUserService.class).queryUserByAuth(userId);
             if(longs!=null&&longs.size()>0){
                 from += " and owner_user_id in (" + StrUtil.join(",", longs) + ")";
                 if(type.equals(2)||type.equals(6)||type.equals(5)){
@@ -518,9 +530,9 @@ public class AdminSceneService {
             return R.ok().put("data", Db.find("select * " + from));
         }
         if (2 == type || 8 == type) {
-            Integer configType = Db.queryInt("select type from 72crm_admin_customer_setting");
+            Integer configType = Db.queryInt("select status from 72crm_admin_config where name = 'customerPoolSetting'");
             if (1 == configType && 2 == type) {
-                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select * , (TO_DAYS(update_time) + (SELECT followup_day FROM 72crm_admin_customer_setting) - TO_DAYS(NOW())) as pool_day ,(select count(*) from 72crm_crm_business as a where a.customer_id = " + viewName + ".customer_id) as business_count", from));
+                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select * , (TO_DAYS(update_time) + CAST((SELECT value FROM 72crm_admin_config WHERE name= 'customerPoolSettingFollowupDays') as UNSIGNED) - TO_DAYS(NOW())) as pool_day ,(select count(*) from 72crm_crm_business as a where a.customer_id = " + viewName + ".customer_id) as business_count", from));
             } else {
                 return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),"select *,(select count(*) from 72crm_crm_business as a where a.customer_id = " + viewName + ".customer_id) as business_count", from));
             }
@@ -528,14 +540,29 @@ public class AdminSceneService {
         }
         Page<Record> recordPage = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select *", from);
         if (type == 5){
+            recordPage.getList().forEach(record -> {
+                if (record.getInt("is_end") == 1){
+                    record.set("status_name","赢单");
+                }else if (record.getInt("is_end") == 2){
+                    record.set("status_name","输单");
+                }else if (record.getInt("is_end") == 3){
+                    record.set("status_name","无效");
+                }
+            });
             setBusinessStatus(recordPage.getList());
+        }
+        if (6 == type){
+            Page<Record> page = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select *,IFNULL((select SUM(a.money) from 72crm_crm_receivables as a where a.contract_id = contractview.contract_id),0) as receivedMoney", from);
+            Record totalMoney = Db.findFirst("select SUM(money) as contractMoney,GROUP_CONCAT(contract_id) as contractIds "+from);
+            String receivedMoney = Db.queryStr("select SUM(money) from 72crm_crm_receivables where receivables_id in ("+totalMoney.getStr("contractIds")+")");
+            JSONObject jsonObject = JSONObject.parseObject(Json.getJson().toJson(page),JSONObject.class);
+            return R.ok().put("data",jsonObject.fluentPut("money",new JSONObject().fluentPut("contractMoney",totalMoney.getStr("contractMoney")!=null?totalMoney.getStr("contractMoney"):"0").fluentPut("receivedMoney",receivedMoney!=null?receivedMoney:"0")));
         }
         return R.ok().put("data",recordPage);
     }
 
     public void setBusinessStatus(List<Record> list){
-        list.forEach(
-                record -> {
+        list.forEach(record -> {
                     if (record.getInt("is_end") == 0){
                         Integer sortNum = Db.queryInt("select order_num from 72crm_crm_business_status where status_id = ?",record.getInt("status_id"));
                         Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;

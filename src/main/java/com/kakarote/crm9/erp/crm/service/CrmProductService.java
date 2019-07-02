@@ -13,6 +13,7 @@ import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmProduct;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.R;
@@ -25,8 +26,10 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class CrmProductService {
@@ -44,6 +47,9 @@ public class CrmProductService {
 
     @Inject
     private AdminSceneService adminSceneService;
+
+    @Inject
+    private AuthUtil authUtil;
 
     /**
      * 分页条件查询产品
@@ -81,7 +87,6 @@ public class CrmProductService {
             crmRecordService.updateRecord(oldCrmProduct, crmProduct, CrmEnum.PRODUCT_TYPE_KEY.getTypes());
             crmProduct.setUpdateTime(DateUtil.date());
         }
-
         return crmProduct.update() ? R.ok() : R.error();
     }
 
@@ -89,8 +94,10 @@ public class CrmProductService {
      * 根据id查询产品
      */
     public R queryById(Integer id) {
+        if(!authUtil.dataAuth("product","product_id",id)){
+            return R.ok().put("data",new Record().set("dataAuth",0));
+        }
         Record record = Db.findFirst("select * from productview where product_id = ?", id);
-
         return R.ok().put("data", record);
     }
 
@@ -109,10 +116,8 @@ public class CrmProductService {
                 .set("产品编码", record.getStr("num"))
                 .set("标准价格", record.getStr("price"))
                 .set("产品描述", record.getStr("description"));
-        List<Record> fields = adminFieldService.list("4");
-        for (Record r:fields){
-            field.set(r.getStr("name"),record.getStr(r.getStr("name")));
-        }
+        List<Record> recordList = Db.find("select name,value from 72crm_admin_fieldv where batch_id = ?",record.getStr("batch_id"));
+        fieldList.addAll(recordList);
         return fieldList;
     }
 
@@ -120,6 +125,11 @@ public class CrmProductService {
      * 根据id删除产品
      */
     public R deleteById(Integer id) {
+        CrmProduct product = CrmProduct.dao.findById(id);
+        if (product != null) {
+            Db.delete("delete FROM 72crm_admin_fieldv where batch_id = ?",product.getBatchId());
+        }
+
         return CrmProduct.dao.deleteById(id) ? R.ok() : R.error();
     }
 
@@ -166,24 +176,37 @@ public class CrmProductService {
     }
 
     /**
-     * @author zxy
-     * 查询产品自定义字段(修改)
+     * @author wyq
+     * 查询编辑字段
      */
     public List<Record> queryField(Integer productId) {
-        List<Record> fieldList = new ArrayList<>();
-        Record record = Db.findFirst("select * from productview where product_id = ?", productId);
-        String[] settingArr = new String[]{};
-        fieldUtil.getFixedField(fieldList, "name", "产品名称", record.getStr("name"), "text", settingArr, 1);
-        List<Integer> list = crmProductCategoryService.queryId(null, record.getInt("category_id"));
+        Record product = Db.findFirst("select * from productview where product_id = ?",productId);
+        List<Integer> list = crmProductCategoryService.queryId(null, product.getInt("category_id"));
         Integer[] categoryIds = new Integer[list.size()];
         categoryIds = list.toArray(categoryIds);
-        fieldUtil.getFixedField(fieldList, "categoryId", "产品分类", categoryIds, "category", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "num", "产品编码", record.getStr("num"), "number", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "price", "价格", record.getStr("price"), "floatnumber", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "description", "产品描述", record.getStr("description"), "text", settingArr, 0);
-        fieldList.addAll(adminFieldService.queryByBatchId(record.getStr("batch_id")));
-        return fieldList;
+        product.set("category_id",categoryIds);
+        return adminFieldService.queryUpdateField(4,product);
     }
+
+//    /**
+//     * @author zxy
+//     * 查询产品自定义字段(修改)
+//     */
+//    public List<Record> queryField(Integer productId) {
+//        List<Record> fieldList = new ArrayList<>();
+//        Record record = Db.findFirst("select * from productview where product_id = ?", productId);
+//        String[] settingArr = new String[]{};
+//        fieldUtil.getFixedField(fieldList, "name", "产品名称", record.getStr("name"), "text", settingArr, 1);
+//        List<Integer> list = crmProductCategoryService.queryId(null, record.getInt("category_id"));
+//        Integer[] categoryIds = new Integer[list.size()];
+//        categoryIds = list.toArray(categoryIds);
+//        fieldUtil.getFixedField(fieldList, "categoryId", "产品分类", categoryIds, "category", settingArr, 1);
+//        fieldUtil.getFixedField(fieldList, "num", "产品编码", record.getStr("num"), "number", settingArr, 1);
+//        fieldUtil.getFixedField(fieldList, "price", "价格", record.getStr("price"), "floatnumber", settingArr, 1);
+//        fieldUtil.getFixedField(fieldList, "description", "产品描述", record.getStr("description"), "text", settingArr, 0);
+//        fieldList.addAll(adminFieldService.queryByBatchId(record.getStr("batch_id")));
+//        return fieldList;
+//    }
 
     /**
      * @author wyq
@@ -209,16 +232,17 @@ public class CrmProductService {
      */
     public R uploadExcel(UploadFile file, Integer repeatHandling, Integer ownerUserId) {
         ExcelReader reader = ExcelUtil.getReader(FileUtil.file(file.getUploadPath() + "\\" + file.getFileName()));
+        AdminFieldService adminFieldService = new AdminFieldService();
+        Kv kv = new Kv();
+        Integer errNum = 0;
         try {
             List<List<Object>> read = reader.read();
             List<Object> list = read.get(0);
-            AdminFieldService adminFieldService = new AdminFieldService();
-            Kv kv = new Kv();
             for (int i = 0; i < list.size(); i++) {
                 kv.set(list.get(i), i);
             }
-            List<Record> recordList = adminFieldService.list("4");
-            List<Record> fieldList = queryField();
+            List<Record> recordList = adminFieldService.customFieldList("4");
+            List<Record> fieldList = adminFieldService.queryAddField(4);
             fieldList.forEach(record -> {
                 if (record.getInt("is_null") == 1){
                     record.set("name",record.getStr("name")+"(*)");
@@ -229,18 +253,18 @@ public class CrmProductService {
                 return R.error("请使用最新导入模板");
             }
             if (read.size() > 1) {
-                R status;
                 JSONObject object = new JSONObject();
                 for (int i = 1; i < read.size(); i++) {
+                    errNum = i;
                     List<Object> productList = read.get(i);
                     if (productList.size() < list.size()) {
                         for (int j = productList.size() - 1; j < list.size(); j++) {
                             productList.add(null);
                         }
                     }
-                    String productName = productList.get(kv.getInt("产品名称(*)")).toString();
+                    String productName = productList.get(kv.getInt("产品名称(*)")!=null?kv.getInt("产品名称(*)"):kv.getInt("产品名称")).toString();
                     Integer number = Db.queryInt("select count(*) from 72crm_crm_product where name = ?", productName);
-                    Integer categoryId = Db.queryInt("select category_id from 72crm_crm_product_category where name = ?",productList.get(kv.getInt("产品分类(*)")));
+                    Integer categoryId = Db.queryInt("select category_id from 72crm_crm_product_category where name = ?",productList.get(kv.getInt("产品类型(*)")));
                     if (0 == number) {
                         object.fluentPut("entity", new JSONObject().fluentPut("name", productName)
                                 .fluentPut("num", productList.get(kv.getInt("产品编码(*)")))
@@ -269,14 +293,14 @@ public class CrmProductService {
                         jsonArray.add(JSONObject.parseObject(record.toJson()));
                     }
                     object.fluentPut("field", jsonArray);
-                    status = saveAndUpdate(object);
-                    if ("500".equals(status.get("code"))) {
-                        return R.error("第" + i + "行错误!");
-                    }
+                    saveAndUpdate(object);
                 }
             }
-        } catch (Exception e) {
+        }catch (Exception e) {
             e.printStackTrace();
+            if (errNum != 0){
+                return R.error("第" + (errNum+1) + "行错误!");
+            }
             return R.error();
         } finally {
             reader.close();

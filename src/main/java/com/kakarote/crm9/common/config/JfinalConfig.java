@@ -1,7 +1,9 @@
 package com.kakarote.crm9.common.config;
 
+import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.druid.wall.WallFilter;
+import com.jfinal.aop.Aop;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.druid.DruidConfig;
 import com.kakarote.crm9.common.config.json.ErpJsonFactory;
@@ -13,12 +15,12 @@ import com.kakarote.crm9.common.interceptor.AuthInterceptor;
 import com.kakarote.crm9.common.interceptor.ErpInterceptor;
 import com.kakarote.crm9.erp._MappingKit;
 import com.kakarote.crm9.erp.admin.common.AdminRouter;
+import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.bi.common.BiRouter;
 import com.kakarote.crm9.erp.crm.common.CrmDirective;
 import com.kakarote.crm9.erp.crm.common.CrmRouter;
 import com.kakarote.crm9.erp.oa.common.OaRouter;
 import com.kakarote.crm9.erp.work.common.WorkRouter;
-import com.kakarote.crm9.erp.work.cron.TaskCron;
 import com.jfinal.config.*;
 import com.jfinal.core.paragetter.ParaProcessorBuilder;
 import com.jfinal.kit.PathKit;
@@ -42,7 +44,6 @@ public class JfinalConfig extends JFinalConfig {
 
     public static Prop prop = PropKit.use("config/crm9-config.txt");
 
-
     /**
      * 配置常量
      */
@@ -50,8 +51,11 @@ public class JfinalConfig extends JFinalConfig {
     public void configConstant(Constants me) {
         me.setDevMode(prop.getBoolean("jfinal.devMode", true));
         me.setInjectDependency(true);
-        me.setBaseUploadPath(BaseConstant.UPLOAD_PATH);
-        me.setBaseDownloadPath(BaseConstant.UPLOAD_PATH);
+        //设置上传文件到哪个目录
+        if(ClassLoaderUtil.isPresent("com.jfinal.server.undertow.UndertowServer")){
+            me.setBaseUploadPath(BaseConstant.UPLOAD_PATH);
+            me.setBaseDownloadPath(BaseConstant.UPLOAD_PATH);
+        }
         me.setJsonFactory(new ErpJsonFactory());
         //限制上传100M
         me.setMaxPostSize(104857600);
@@ -71,7 +75,7 @@ public class JfinalConfig extends JFinalConfig {
 
     @Override
     public void configEngine(Engine me) {
-
+        me.addSharedMethod(new com.jfinal.kit.StrKit());
     }
 
     /**
@@ -104,6 +108,7 @@ public class JfinalConfig extends JFinalConfig {
         createRedisPlugin(me);
         //cron定时器
         me.add(new Cron4jPlugin(PropKit.use("config/cron4j.txt")));
+
         //model映射
         _MappingKit.mapping(arp);
     }
@@ -149,7 +154,16 @@ public class JfinalConfig extends JFinalConfig {
 
     @Override
     public void onStart() {
-
+        AdminFieldService adminFieldService=Aop.get(AdminFieldService.class);
+        adminFieldService.createView(1);
+        adminFieldService.createView(2);
+        adminFieldService.createView(3);
+        adminFieldService.createView(4);
+        adminFieldService.createView(5);
+        adminFieldService.createView(6);
+        adminFieldService.createView(7);
+        adminFieldService.createView(8);
+        adminFieldService.createView(10);
     }
 
     @Override

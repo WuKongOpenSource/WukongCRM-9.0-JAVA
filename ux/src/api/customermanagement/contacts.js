@@ -15,9 +15,12 @@ export function crmContactsSave(data) {
 // crm 列表
 export function crmContactsIndex(data) {
   return request({
-    url: 'CrmContacts/queryList',
+    url: 'CrmContacts/queryPageList',
     method: 'post',
-    data: data
+    data: data,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
   })
 }
 
@@ -135,3 +138,39 @@ export function crmContactsExcelImport(data) {
  *
  */
 export const crmContactsExcelDownloadURL = process.env.BASE_API + 'CrmContacts/downloadExcel'
+
+/**
+ * 查重
+ * @param {*} data
+ */
+export function crmContactsQueryListAPI(data) {
+  return request({
+    url: 'CrmContacts/queryList',
+    method: 'post',
+    data: data
+  })
+}
+
+/**
+ * 联系人关联商机
+ * @param {*} data
+ */
+export function crmContactsRelateBusinessAPI(data) {
+  return request({
+    url: 'CrmContacts/relateBusiness',
+    method: 'post',
+    data: data
+  })
+}
+
+/**
+ * 联系人取消关联商机
+ * @param {*} data
+ */
+export function crmContactsUnrelateBusinessAPI(data) {
+  return request({
+    url: 'CrmContacts/unrelateBusiness',
+    method: 'post',
+    data: data
+  })
+}

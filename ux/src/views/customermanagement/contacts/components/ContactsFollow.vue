@@ -67,6 +67,7 @@ import TaskLog from '../../components/followLog/TaskLog' // 任务日志列表
 import ScheduleLog from '../../components/followLog/ScheduleLog' // 日程日志列表
 import { crmContactsRecordSave } from '@/api/customermanagement/contacts'
 import { formatTimeToTimestamp } from '@/utils'
+import followLogType from '@/views/customermanagement/mixins/followLogType'
 
 export default {
   /** 联系人管理 的 联系人详情 的 跟进记录*/
@@ -79,6 +80,7 @@ export default {
     TaskLog,
     ScheduleLog
   },
+  mixins: [followLogType],
   props: {
     /** 模块ID */
     id: [String, Number],
@@ -92,14 +94,6 @@ export default {
   data() {
     return {
       sendLoading: false,
-      followTypes: [
-        { type: '打电话', name: '打电话' },
-        { type: '发邮件', name: '发邮件' },
-        { type: '发短信', name: '发短信' },
-        { type: '见面拜访', name: '见面拜访' },
-        { type: '活动', name: '活动' }
-      ],
-      followType: '打电话',
       /** 下次联系时间 */
       nextTime: '',
       /** 是否添加日程提醒 */

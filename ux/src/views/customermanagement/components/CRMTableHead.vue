@@ -98,8 +98,9 @@ import {
   crmCustomerLock,
   crmCustomerPutInPool,
   crmCustomerExcelExport,
+  crmCustomerPoolExcelExportAPI,
   crmCustomerDelete,
-  crmCustomerDistribute
+  crmCustomerReceive
 } from '@/api/customermanagement/customer'
 import {
   crmContactsDelete,
@@ -136,7 +137,7 @@ export default {
     SceneSet
   },
   computed: {
-    ...mapGetters(['crm'])
+    ...mapGetters(['crm', 'CRMConfig'])
   },
   data() {
     return {
@@ -258,8 +259,15 @@ export default {
         this.transferDialogShow = true
       } else if (type == 'export') {
         var params = {}
-        var request
-        if (this.crmType == 'customer') {
+        var request = null
+        if (this.isSeas) {
+          request = crmCustomerPoolExcelExportAPI
+          params.ids = this.selectionList
+            .map(function(item, index, array) {
+              return item.customerId
+            })
+            .join(',')
+        } else if (this.crmType == 'customer') {
           request = crmCustomerExcelExport
           params.ids = this.selectionList
             .map(function(item, index, array) {
@@ -453,7 +461,7 @@ export default {
         var customerId = this.selectionList.map(function(item, index, array) {
           return item.customerId
         })
-        crmCustomerDistribute({
+        crmCustomerReceive({
           ids: customerId.join(',')
         })
           .then(res => {
@@ -544,7 +552,11 @@ export default {
         ])
       } else if (this.crmType == 'customer') {
         if (this.isSeas) {
-          return this.forSelectionHandleItems(handleInfos, ['alloc', 'get'])
+          return this.forSelectionHandleItems(handleInfos, [
+            'alloc',
+            'get',
+            'export'
+          ])
         } else {
           return this.forSelectionHandleItems(handleInfos, [
             'transfer',
@@ -605,6 +617,9 @@ export default {
           ? false
           : this.crm[this.crmType].transform
       } else if (type == 'export') {
+        if (this.isSeas) {
+          return this.crm.pool.excelexport
+        }
         return this.crm[this.crmType].excelexport
       } else if (type == 'delete') {
         return this.crm[this.crmType].delete
@@ -613,16 +628,16 @@ export default {
         return this.crm[this.crmType].putinpool
       } else if (type == 'lock' || type == 'unlock') {
         // 锁定解锁(客户)
-        return this.crm[this.crmType].lock
+        return this.crm[this.crmType].lock && this.CRMConfig.customerConfig == 1
       } else if (type == 'add_user' || type == 'delete_user') {
         // 添加 移除团队成员
         return this.crm[this.crmType].teamsave
       } else if (type == 'alloc') {
         // 分配(公海)
-        return this.crm[this.crmType].distribute
+        return this.crm.pool.distribute
       } else if (type == 'get') {
         // 领取(公海)
-        return this.crm[this.crmType].receive
+        return this.crm.pool.receive
       } else if (type == 'start' || type == 'disable') {
         // 上架 下架(产品)
         return this.crm[this.crmType].status

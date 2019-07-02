@@ -11,6 +11,7 @@ public class CrmContacts extends BaseCrmContacts<CrmContacts> {
 
 	private String contactsIds;
 	private Integer newOwnerUserId;
+	private String customerName;
 
 	public String getContactsIds() {
 		return contactsIds;
@@ -26,5 +27,13 @@ public class CrmContacts extends BaseCrmContacts<CrmContacts> {
 
 	public void setNewOwnerUserId(Integer newOwnerUserId) {
 		this.newOwnerUserId = newOwnerUserId;
+	}
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
 	}
 }

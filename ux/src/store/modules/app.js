@@ -1,6 +1,9 @@
 import {
   adminSystemIndex
 } from '@/api/systemManagement/SystemConfig'
+import {
+  crmSettingConfigData
+} from '@/api/systemManagement/SystemCustomer'
 import Lockr from 'lockr'
 
 /** 记录 侧边索引 */
@@ -14,7 +17,9 @@ const app = {
     },
     navbar: {
       activeIndex: '' // 导航目前是第几个 个人中心需要
-    }
+    },
+    /** CRM配置信息 */
+    CRMConfig: {}
   },
 
   mutations: {
@@ -35,6 +40,9 @@ const app = {
       window.app.$i18n.locale = lang
       localStorage.setItem('lang', lang)
       window.location.reload()
+    },
+    SET_CRMCONFIG: (state, config) => {
+      state.CRMConfig = config
     }
   },
 
@@ -54,8 +62,23 @@ const app = {
           reject(error)
         })
       })
-    }
+    },
 
+    /**
+     * 获取客户管理配置
+     */
+    CRMSettingConfig({
+      commit
+    }) {
+      return new Promise((resolve, reject) => {
+        crmSettingConfigData().then(response => {
+          commit('SET_CRMCONFIG', response.data)
+          resolve(response)
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    }
   }
 }
 

@@ -32,12 +32,12 @@ export default {
             this.option = array
           } else if (
             settingList.length > 0 &&
-            settingList[0].status_id &&
+            settingList[0].statusId &&
             !settingList[0].value
           ) {
             // 商机阶段
             this.option = settingList.map((item, index, array) => {
-              item.value = item.status_id
+              item.value = item.statusId
               return item
             })
           } else {

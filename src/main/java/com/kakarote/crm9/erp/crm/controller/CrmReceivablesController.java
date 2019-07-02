@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.erp.admin.service.AdminSceneService;
 import com.kakarote.crm9.erp.crm.entity.CrmReceivables;
 import com.kakarote.crm9.erp.crm.service.CrmReceivablesService;
 import com.kakarote.crm9.utils.R;
@@ -16,6 +17,21 @@ public class CrmReceivablesController extends Controller {
 
     @Inject
     private CrmReceivablesService crmReceivablesService;
+
+    @Inject
+    private AdminSceneService adminSceneService;
+
+    /**
+     * @author wyq
+     * 查看列表页
+     */
+    @Permissions({"crm:receivables:index"})
+    public void queryPageList(BasePageRequest basePageRequest){
+        JSONObject jsonObject = basePageRequest.getJsonObject().fluentPut("type",7);
+        basePageRequest.setJsonObject(jsonObject);
+        renderJson(adminSceneService.filterConditionAndGetPageList(basePageRequest));
+    }
+
     /**@author zxy
      * 分页查询回款
      */

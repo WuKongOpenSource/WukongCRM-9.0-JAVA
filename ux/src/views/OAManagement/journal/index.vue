@@ -5,10 +5,15 @@
                @click="newBtn">写日志</el-button>
     <el-tabs v-model="activeName"
              @tab-click="tabClick">
-      <el-tab-pane :label="item.label"
-                   :name="item.key"
+      <el-tab-pane :name="item.key"
                    v-for="(item, index) in tabsData"
                    :key="index">
+        <el-badge slot="label"
+                  :hidden="item.key != '3' || messageOANum.logNum == 0"
+                  :max="99"
+                  :value="messageOANum.logNum">
+          <span>{{item.label}}</span>
+        </el-badge>
         <v-content id="journal-list-box"
                    :ref="'log-list' + item.key"
                    :activeName="activeName"
@@ -41,6 +46,7 @@
 <script>
 import VContent from './content'
 import newDialog from './newDialog'
+import { mapGetters } from 'vuex'
 import { objDeepCopy } from '@/utils'
 
 // API
@@ -93,6 +99,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['messageOANum']),
     byData() {
       return { '1': '', '2': '1', '3': '2', '4': '3' }[this.activeName] // 1:我发出的 2：我收到的 3：未读的
     }
@@ -364,5 +371,10 @@ export default {
       cursor: auto;
     }
   }
+}
+
+// 消息效果
+.el-badge /deep/ .el-badge__content.is-fixed {
+  top: 15px;
 }
 </style>

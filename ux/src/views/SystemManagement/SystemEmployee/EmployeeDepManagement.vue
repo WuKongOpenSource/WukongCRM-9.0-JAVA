@@ -188,6 +188,7 @@
                :visible.sync="resetPasswordVisible"
                width="30%"
                v-loading="loading"
+               :close-on-click-modal="false"
                :modal-append-to-body="false"
                :before-close="resetPasswordClose">
       <div class="el-password">
@@ -208,11 +209,46 @@
                    @click="passSubmit(passForm)">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 重置登录账号 -->
+    <el-dialog title="重置登录账号"
+               :visible.sync="resetUserNameVisible"
+               width="30%"
+               v-loading="loading"
+               :close-on-click-modal="false"
+               :modal-append-to-body="false"
+               :before-close="()=>{resetUserNameVisible = false}">
+      <div class="el-password">
+        <el-form ref="resetUserNameForm"
+                 :model="resetUserNameForm"
+                 :rules="dialogRules">
+          <el-form-item label="新账号（手机号）"
+                        prop="username">
+            <el-input v-model="resetUserNameForm.username"></el-input>
+          </el-form-item>
+          <el-form-item label="新密码"
+                        prop="password">
+            <el-input v-model="resetUserNameForm.password"
+                      type="password"></el-input>
+          </el-form-item>
+        </el-form>
+        <div class="tips"
+             style="margin-top: 20px;">重置登录帐号后，员工需用新账号登录。请及时告知员工，确保正常使用</div>
+      </div>
+      <span slot="footer"
+            class="dialog-footer">
+        <el-button @click="()=>{resetUserNameVisible = false}">取 消</el-button>
+        <el-button type="primary"
+                   @click="passUserNameSubmit(resetUserNameForm)">确 定</el-button>
+      </span>
+    </el-dialog>
+
     <!-- 新建和编辑 -->
     <el-dialog :title="dialogTitle"
                :visible.sync="employeeCreateDialog"
                v-if="employeeCreateDialog"
                width="60%"
+               :close-on-click-modal="false"
                :modal-append-to-body="true"
                v-loading="loading"
                :append-to-body="true"
@@ -229,6 +265,14 @@
                       :prop="item.field"
                       v-for="(item, index) in tableList"
                       :key="index">
+          <span slot="label">{{item.value}}</span>
+          <el-tooltip v-if="item.tips"
+                      slot="label"
+                      effect="dark"
+                      :content="item.tips"
+                      placement="top">
+            <i class="wukong wukong-help_tips"></i>
+          </el-tooltip>
           <template v-if="item.type == 'select'">
             <el-select v-model="formInline[item.field]"
                        filterable
@@ -259,7 +303,8 @@
             </el-select>
           </template>
           <el-input v-else
-                    v-model="formInline[item.field]"></el-input>
+                    v-model="formInline[item.field]"
+                    :disabled="dialogTitle == '编辑员工' && item.field == 'username'"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer"
@@ -280,6 +325,7 @@ import {
   usersAdd,
   roleList,
   adminUsersUpdatePwd,
+  adminUsersUsernameEditAPI,
   usersEditStatus
 } from '@/api/systemManagement/EmployeeDepManagement'
 import { usersList, depList } from '@/api/common' // 直属上级接口
@@ -372,7 +418,7 @@ export default {
       resetPasswordVisible: false,
       rules: {
         password: [
-          { required: true, message: '请输入旧密码', trigger: 'blur' },
+          { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 6, max: 12, message: '长度在 6 到 12 个字符', trigger: 'blur' }
         ],
         username: [
@@ -391,7 +437,7 @@ export default {
         username: [
           { required: true, message: '手机号码不能为空', trigger: 'blur' },
           {
-            pattern: /^1[3456789]\d{9}/,
+            pattern: /^1\d{10}/,
             message: '目前只支持中国大陆的手机号码',
             trigger: 'blur'
           }
@@ -407,6 +453,12 @@ export default {
           { required: true, message: '部门不能为空', trigger: 'change' }
         ],
         roleId: [{ required: true, message: '角色不能为空', trigger: 'change' }]
+      },
+      // 重置登录账号
+      resetUserNameVisible: false,
+      resetUserNameForm: {
+        username: '',
+        password: ''
       }
     }
   },
@@ -433,6 +485,11 @@ export default {
             name: '重置密码',
             type: 'reset',
             icon: require('@/assets/img/selection_reset.png')
+          },
+          {
+            name: '重置登录账号',
+            type: 'resetName',
+            icon: require('@/assets/img/section_reset_name.png')
           }
         ]
       }
@@ -470,7 +527,11 @@ export default {
         ]
       } else {
         return [
-          { field: 'username', value: '手机号（登录名）' },
+          {
+            field: 'username',
+            value: '手机号（登录名）',
+            tips: '如需修改登录名，请在列表勾选员工后进行操作'
+          },
           { field: 'realname', value: '姓名' },
           { field: 'sex', value: '性别', type: 'select' },
           { field: 'email', value: '邮箱' },
@@ -539,7 +600,7 @@ export default {
                   })
               : []
           } else if (element.field === 'parentId') {
-            detail.parentId = this.dialogData.parentId
+            detail.parentId = this.dialogData.parentId || ''
           } else if (element.field === 'deptId') {
             detail.deptId = this.dialogData.deptId
           } else {
@@ -667,6 +728,7 @@ export default {
                 this.$message.success('新增成功')
                 this.employeeCreateDialog = false
                 this.usersListFun()
+                this.getSelectUserList()
                 this.loading = false
               })
               .catch(() => {
@@ -683,6 +745,7 @@ export default {
                 this.employeeCreateDialog = false
                 this.$message.success('编辑成功')
                 this.usersListFun()
+                this.getSelectUserList()
                 this.loading = false
               })
               .catch(() => {
@@ -753,6 +816,8 @@ export default {
           })
       } else if (type === 'reset') {
         this.resetPasswordVisible = true
+      } else if (type === 'resetName') {
+        this.resetUserNameVisible = true
       } else if (type === 'edit') {
         this.dialogData = this.selectionList[0]
 
@@ -789,28 +854,60 @@ export default {
     },
     // 重置密码 -- 确定按钮
     passSubmit(val) {
-      var ids = []
-      if (this.selectionList.length > 0) {
-        ids = this.selectionList
-          .map(function(item, index, array) {
-            return item.userId
-          })
-          .join(',')
-      } else {
-        ids = this.dialogData.userId
-      }
-      val.userIds = ids
-      this.loading = true
-      adminUsersUpdatePwd(val)
-        .then(res => {
-          this.$message.success('重置成功')
-          this.resetPasswordClose()
-          this.loading = false
-        })
-        .catch(() => {
-          this.loading = false
-        })
+      this.$refs.passForm.validate(valid => {
+        if (valid) {
+          var ids = []
+          if (this.selectionList.length > 0) {
+            ids = this.selectionList
+              .map(function(item, index, array) {
+                return item.userId
+              })
+              .join(',')
+          } else {
+            ids = this.dialogData.userId
+          }
+          val.userIds = ids
+          this.loading = true
+          adminUsersUpdatePwd(val)
+            .then(res => {
+              this.$message.success('重置成功')
+              this.resetPasswordClose()
+              this.loading = false
+            })
+            .catch(() => {
+              this.loading = false
+            })
+        } else {
+          return false
+        }
+      })
     },
+    /**
+     * 重置登录账号
+     */
+    passUserNameSubmit(val) {
+      this.$refs.resetUserNameForm.validate(valid => {
+        if (valid) {
+          if (this.selectionList.length > 0) {
+            val.id = this.selectionList[0].id
+            this.loading = true
+            adminUsersUsernameEditAPI(val)
+              .then(res => {
+                this.$message.success('重置成功')
+                this.searchClick()
+                this.resetUserNameVisible = false
+                this.loading = false
+              })
+              .catch(() => {
+                this.loading = false
+              })
+          }
+        } else {
+          return false
+        }
+      })
+    },
+
     // 更改每页展示数量
     handleSizeChange(val) {
       this.pageSize = val
@@ -849,6 +946,7 @@ export default {
       this.loading = true
       usersList({ pageType: 0 })
         .then(res => {
+          this.optionsList['parentId'].list = []
           for (let i of res.data) {
             this.optionsList['parentId'].list.push({
               id: i.userId,
@@ -1188,6 +1286,35 @@ export default {
       margin-right: 5px;
     }
   }
+}
+
+// 提示
+// 提示标志
+.wukong-help_tips {
+  color: #999;
+  font-size: 14px;
+  margin-left: 3px;
+  cursor: pointer;
+}
+
+.wukong-help_tips:hover {
+  color: $xr-color-primary;
+}
+
+// 修改密码和修改登录名的样式
+.el-password {
+  .el-form-item {
+    margin-bottom: 5px;
+  }
+}
+
+.el-dialog__wrapper /deep/.el-dialog__body {
+  padding: 20px;
+}
+
+.tips {
+  font-size: 13px;
+  color: #999;
 }
 @import '../styles/table.scss';
 </style>

@@ -26,10 +26,7 @@ import com.kakarote.crm9.erp.crm.entity.CrmContract;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
 import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.*;
-import com.kakarote.crm9.utils.BaseUtil;
-import com.kakarote.crm9.utils.FieldUtil;
-import com.kakarote.crm9.utils.R;
-import com.kakarote.crm9.utils.TagUtil;
+import com.kakarote.crm9.utils.*;
 
 import java.util.*;
 
@@ -139,6 +136,10 @@ public class OaExamineService{
     public R setOaExamine(JSONObject jsonObject){
         AdminUser user = BaseUtil.getUser();
         OaExamine oaExamine = jsonObject.getObject("oaExamine", OaExamine.class);
+        boolean oaAuth = AuthUtil.isOaAuth(OaEnum.EXAMINE_TYPE_KEY.getTypes(), oaExamine.getExamineId());
+        if(oaAuth){
+            return R.noAuth();
+        }
         if (oaExamine.getStartTime() != null && oaExamine.getEndTime() != null){
             if(oaExamine.getStartTime().compareTo(oaExamine.getEndTime()) == 1){
                 return R.error("审批结束时间早于开始时间");
@@ -168,6 +169,7 @@ public class OaExamineService{
             Db.delete("delete from 72crm_oa_examine_relation where examine_id = ?", oaExamine.getExamineId());
             recordId = Db.queryInt("select  record_id from 72crm_oa_examine_record where examine_id = ? limit 1", oaExamine.getExamineId());
         }
+        oaExamine = new OaExamine().findById(oaExamine.getExamineId());
         OaExamineRecord oaExamineRecord = new OaExamineRecord();
         oaExamineRecord.setExamineId(oaExamine.getExamineId());
         oaExamineRecord.setExamineStepId(oaExamineStep.getStepId());
@@ -219,7 +221,7 @@ public class OaExamineService{
                     oaExamineLog.save();
             }
         }
-        oaActionRecordService.addRecord(oaExamine.getExamineId(), OaEnum.EXAMINE_TYPE_KEY.getTypes(), oaExamine.getUpdateTime() == null ? 1 : 2, oaActionRecordService.getJoinIds(user.getUserId().intValue(),TagUtil.fromString(checkUserIds)), oaActionRecordService.getJoinIds(user.getDeptId(),""));
+        oaActionRecordService.addRecord(oaExamine.getExamineId(), OaEnum.EXAMINE_TYPE_KEY.getTypes(), oaExamine.getUpdateTime() == null ? 1 : 2, oaActionRecordService.getJoinIds(user.getUserId().intValue(),TagUtil.fromString(checkUserIds)), "");
         if(jsonObject.get("oaExamineRelation") != null){
             OaExamineRelation oaExamineRelation = jsonObject.getObject("oaExamineRelation", OaExamineRelation.class);
             oaExamineRelation.setRId(null);
@@ -421,7 +423,7 @@ public class OaExamineService{
     }
 
     public R queryOaExamineInfo(String id){
-        Record oaExamineInfo = Db.findFirst("select a.*,b.title as category  from 72crm_oa_examine as a left join 72crm_oa_examine_category b on a.category_id = b.category_id  where a.examine_id = ? ", id);
+        Record oaExamineInfo = Db.findFirst("select a.*,b.title as category,b.type  from 72crm_oa_examine as a left join 72crm_oa_examine_category b on a.category_id = b.category_id  where a.examine_id = ? ", id);
         oaExamineInfo.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", oaExamineInfo.getInt("create_user_id")));
         String batchId = oaExamineInfo.getStr("batch_id");
         setRelation(oaExamineInfo);
@@ -438,17 +440,18 @@ public class OaExamineService{
     public R getField(String id){
         Record oaExamineInfo = Db.findFirst("select * from 72crm_oa_examine where examine_id = ?", id);
         String categoryId = oaExamineInfo.getStr("category_id");
+        OaExamineCategory oaExamineCategory = new OaExamineCategory().findById(categoryId);
         List<Record> examineTravelList = Db.find(Db.getSql("oa.examine.queryTravel"), oaExamineInfo.getInt("examine_id"));
         examineTravelList.forEach(record -> adminFileService.queryByBatchId(record.getStr("batchId"), record));
         List<Record> recordList = new ArrayList<>();
         FieldUtil fieldUtil = new FieldUtil(recordList);
         String[] arr = new String[0];
-        switch(categoryId){
-            case "1":
+        switch(oaExamineCategory.getType()){
+            case 1:
                 fieldUtil.oaFieldAdd("content", "审批内容", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
                         .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3);
                 break;
-            case "2":
+            case 2:
                 fieldUtil.oaFieldAdd("type_id", "请假类型", "select", new String[]{"年假", "事假", "病假", "产假", "调休", "婚假", "丧假", "其他"}, 1, 0, oaExamineInfo.get("type_id"), "", 3)
                         .oaFieldAdd("content", "审批内容", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
                         .oaFieldAdd("start_time", "开始时间", "datetime", arr, 1, 0, oaExamineInfo.get("start_time"), "", 3)
@@ -456,26 +459,26 @@ public class OaExamineService{
                         .oaFieldAdd("duration", "时长(天)", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getBigDecimal("duration")), "", 3)
                         .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3);
                 break;
-            case "3":
+            case 3:
                 fieldUtil.oaFieldAdd("content", "出差事由", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
                         .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3)
                         .oaFieldAdd("cause", "行程明细", "business_cause", arr, 1, 0, examineTravelList, "", 3)
                         .oaFieldAdd("duration", "时长(天)", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getBigDecimal("duration")), "", 3);
                 break;
-            case "4":
+            case 4:
                 fieldUtil.oaFieldAdd("content", "加班原因", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
                         .oaFieldAdd("start_time", "开始时间", "datetime", arr, 1, 0, oaExamineInfo.get("start_time"), "", 3)
                         .oaFieldAdd("end_time", "结束时间", "datetime", arr, 1, 0, oaExamineInfo.get("end_time"), "", 3)
                         .oaFieldAdd("duration", "加班总天数", "floatnumber", arr, 1, 0, oaExamineInfo.get("duration"), "", 3)
                         .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3);
                 break;
-            case "5":
+            case 5:
                 fieldUtil.oaFieldAdd("content", "差旅事由", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
                         .oaFieldAdd("cause", "费用明细", "examine_cause", arr, 1, 0, examineTravelList, "", 3)
                         .oaFieldAdd("money", "报销总金额", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getInt("money")), "", 3)
                         .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3);
                 break;
-            case "6":
+            case 6:
                 fieldUtil.oaFieldAdd("content", "借款事由", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
                         .oaFieldAdd("money", "借款金额（元）", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getInt("money")), "", 3)
                         .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3);
@@ -484,6 +487,11 @@ public class OaExamineService{
                 fieldUtil.oaFieldAdd("content", "审批事由", "textarea", arr, 1, 0, oaExamineInfo.get("content"), "", 1)
                         .oaFieldAdd("remark", "备注", "textarea", arr, 1, 0, oaExamineInfo.get("remark"), "", 1);
                 List<Record> recordList1 = adminFieldService.queryByBatchId(oaExamineInfo.getStr("batch_id"),10);
+                recordList1.forEach(field -> {
+                    if (field.getInt("type")==8 && StrUtil.isNotEmpty(field.getStr("value"))){
+                        field.set("value",Db.find("select * from 72crm_admin_file where batch_id = ?",field.getStr("value")));
+                    }
+                });
                 recordList.addAll(recordList1);
                 break;
         }
@@ -541,6 +549,7 @@ public class OaExamineService{
     @Before(Tx.class)
     public R deleteOaExamine(Integer oaExamineId){
         Integer recordId = Db.queryInt("select record_id from 72crm_oa_examine_record where examine_id  = ? limit 1", oaExamineId);
+        Db.delete("delete from `72crm_admin_fieldv` where batch_id = (select `72crm_oa_examine`.batch_id from `72crm_oa_examine` where examine_id = ?)",oaExamineId);
         Db.delete("delete from 72crm_oa_examine where examine_id = ?", oaExamineId);
         Db.delete("delete from 72crm_oa_examine_relation where examine_id = ?", oaExamineId);
         Db.delete("delete from 72crm_oa_examine_travel where examine_id = ?", oaExamineId);
@@ -731,6 +740,9 @@ public class OaExamineService{
 
     public R queryExamineRelation(BasePageRequest<OaExamineRelation> pageRequest){
         OaExamineRelation relation = pageRequest.getData();
+        if(AuthUtil.oaAnth(relation.toRecord())){
+            return R.noAuth();
+        }
         Page<Record> paginate = Db.paginate(pageRequest.getPage(), pageRequest.getLimit(), Db.getSqlPara("oa.examine.queryExamineRelation", Kv.by("businessIds", relation.getBusinessIds()).set("contactsIds", relation.getContactsIds()).set("contractIds", relation.getContractIds()).set("customerIds", relation.getCustomerIds())));
         transfer(paginate.getList());
         return R.ok().put("data", paginate);

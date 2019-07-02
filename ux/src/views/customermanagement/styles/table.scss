@@ -44,6 +44,18 @@
   height: 23px;
 }
 
+.el-table /deep/ .el-table__row.current-row {
+  td:first-child::before {
+    content: ' ';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #5383ED;
+  }
+}
+
 .el-table /deep/ tbody tr td {
   border-top-color: transparent;
   border-left-color: transparent;

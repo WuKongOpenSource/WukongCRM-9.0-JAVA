@@ -22,6 +22,10 @@ public class R extends LinkedHashMap<String, Object> implements Serializable {
 		return error(500, msg);
 	}
 
+	public static R noAuth() {
+		return error("没有权限");
+	}
+
 	public static R error(int code, String msg) {
 		R r = new R();
 		r.put("code", code);

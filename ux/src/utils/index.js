@@ -278,7 +278,7 @@ export function regexIsCRMMoneyNumber(nubmer) {
 
 /** 判断输入的是电话*/
 export function regexIsCRMMobile(mobile) {
-  var regex = /^1[3456789]\d{9}$/
+  var regex = /^(\+?0?\d{2,4}\-?)?\d{6,11}$/
   if (!regex.test(mobile)) {
     return false
   }

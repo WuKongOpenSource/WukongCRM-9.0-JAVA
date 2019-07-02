@@ -61,7 +61,7 @@ import {
   crmCustomerLock,
   crmCustomerPutInPool,
   crmCustomerDelete,
-  crmCustomerDistribute
+  crmCustomerReceive
 } from '@/api/customermanagement/customer'
 import { crmContactsDelete } from '@/api/customermanagement/contacts'
 import { crmBusinessDelete } from '@/api/customermanagement/business'
@@ -78,7 +78,7 @@ export default {
     AllocHandle
   },
   computed: {
-    ...mapGetters(['crm']),
+    ...mapGetters(['crm', 'CRMConfig']),
     crmIcon() {
       if (this.crmType === 'customer') {
         return require('@/assets/img/customer_detail.png')
@@ -109,7 +109,11 @@ export default {
     },
     // 展示转移
     showTransfer() {
-      if (this.crmType === 'receivables' || this.crmType === 'product' || this.isSeas) {
+      if (
+        this.crmType === 'receivables' ||
+        this.crmType === 'product' ||
+        this.isSeas
+      ) {
         return false
       }
       return this.crm[this.crmType].transfer
@@ -284,7 +288,7 @@ export default {
           .catch(() => {})
       } else if (type === 'get') {
         // 领取
-        crmCustomerDistribute({
+        crmCustomerReceive({
           ids: this.id
         })
           .then(res => {
@@ -367,7 +371,11 @@ export default {
         ])
       } else if (this.crmType == 'customer') {
         if (this.isSeas) {
-          return this.forSelectionHandleItems(handleInfos, ['alloc', 'get', 'delete'])
+          return this.forSelectionHandleItems(handleInfos, [
+            'alloc',
+            'get',
+            'delete'
+          ])
         } else {
           return this.forSelectionHandleItems(handleInfos, [
             'put_seas',
@@ -402,6 +410,9 @@ export default {
       } else if (type == 'transform') {
         return this.crm[this.crmType].transform
       } else if (type == 'export') {
+        if (this.isSeas) {
+          return this.crm.pool.excelexport
+        }
         return this.crm[this.crmType].excelexport
       } else if (type == 'delete') {
         return this.crm[this.crmType].delete
@@ -410,16 +421,16 @@ export default {
         return this.crm[this.crmType].putinpool
       } else if (type == 'lock' || type == 'unlock') {
         // 锁定解锁(客户)
-        return this.crm[this.crmType].lock
+        return this.crm[this.crmType].lock && this.CRMConfig.customerConfig == 1
       } else if (type == 'add_user' || type == 'delete_user') {
         // 添加 移除团队成员
         return this.crm[this.crmType].teamsave
       } else if (type == 'alloc') {
         // 分配(公海)
-        return this.crm[this.crmType].distribute
+        return this.crm.pool.distribute
       } else if (type == 'get') {
         // 领取(公海)
-        return this.crm[this.crmType].receive
+        return this.crm.pool.receive
       } else if (type == 'start' || type == 'disable') {
         // 上架 下架(产品)
         return this.crm[this.crmType].status

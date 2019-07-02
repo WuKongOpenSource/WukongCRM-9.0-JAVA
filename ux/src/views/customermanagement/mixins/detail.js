@@ -17,6 +17,9 @@ export default {
     ...mapGetters(['crm']),
     // 能否查看详情
     canShowDetail() {
+      if (this.detailData.dataAuth === 0) {
+        return false
+      }
       return this.crm && this.crm[this.crmType] && this.crm[this.crmType].read
     }
   },
@@ -47,6 +50,6 @@ export default {
     }
   },
 
-  deactivated: function () {}
+  deactivated: function () { }
 
 }

@@ -52,6 +52,7 @@ import {
 
 import { getDateFromTimestamp, timestampToFormatTime } from '@/utils'
 import moment from 'moment'
+
 export default {
   components: {
     createSchedule,
@@ -94,8 +95,14 @@ export default {
           _this.newText = '创建日程'
           _this.showDialog = true
           _this.formData = {
-            startTime: timestampToFormatTime(date._i, 'YYYY-MM-DD HH:mm:ss'),
-            endTime: timestampToFormatTime(date._i, 'YYYY-MM-DD HH:mm:ss')
+            startTime: timestampToFormatTime(
+              date._d.getTime(),
+              'YYYY-MM-DD HH:mm:ss'
+            ),
+            endTime: timestampToFormatTime(
+              date._d.getTime(),
+              'YYYY-MM-DD HH:mm:ss'
+            )
           }
         },
         // 点击显示详情

@@ -156,7 +156,6 @@ public class BiCustomerService {
         Record record = new Record();
         record.set("deptId",deptId).set("userId",userId).set("type",type).set("startTime",startTime).set("endTime",endTime);
         biTimeUtil.analyzeType(record);
-        Integer cycleNum = record.getInt("cycleNum");
         String sqlDateFormat = record.getStr("sqlDateFormat");
         String userIds = record.getStr("userIds");
         if (StrUtil.isEmpty(userIds)){

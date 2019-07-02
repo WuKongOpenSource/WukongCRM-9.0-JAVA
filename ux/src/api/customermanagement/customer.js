@@ -15,9 +15,12 @@ export function crmCustomerSave(data) {
 // crm 客户列表
 export function crmCustomerIndex(data) {
   return request({
-    url: 'CrmCustomer/queryList',
+    url: 'CrmCustomer/queryPageList',
     method: 'post',
-    data: data
+    data: data,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
   })
 }
 
@@ -33,9 +36,12 @@ export function crmCustomerDelete(data) {
 // crm 公海列表
 export function crmCustomerPool(data) {
   return request({
-    url: 'CrmCustomer/queryPageGH',
+    url: 'CrmCustomer/queryPoolPageList',
     method: 'post',
-    data: data
+    data: data,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
   })
 }
 
@@ -140,12 +146,38 @@ export function crmCustomerExcelImport(data) {
 export const crmCustomerExcelDownloadURL = process.env.BASE_API + 'CrmCustomer/downloadExcel'
 
 /**
+ * 公海导出
+ * @param {*} data
+ */
+export function crmCustomerPoolExcelExportAPI(data) {
+  return request({
+    url: 'CrmCustomer/poolBatchExportExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob',
+    timeout: 60000
+  })
+}
+
+export function crmCustomerPoolExcelAllExport(data) {
+  return request({
+    url: 'CrmCustomer/poolAllExportExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
+/**
  * 客户分配
  * @param {*} data
  */
 export function crmCustomerDistribute(data) {
   return request({
-    url: 'CrmCustomer/getCustomersByIds',
+    url: 'CrmCustomer/distributeByIds',
     method: 'post',
     data: data
   })
@@ -157,7 +189,7 @@ export function crmCustomerDistribute(data) {
  */
 export function crmCustomerReceive(data) {
   return request({
-    url: 'crm/customer/receive',
+    url: 'CrmCustomer/receiveByIds',
     method: 'post',
     data: data
   })
@@ -277,6 +309,31 @@ export function crmCustomerTeamMembers(data) {
 export function crmCustomerUpdateMembers(data) {
   return request({
     url: 'CrmCustomer/updateMembers',
+    method: 'post',
+    data: data
+  })
+}
+
+/**
+ * 查重
+ * @param {*} data
+ */
+export function crmCustomerQueryListAPI(data) {
+  return request({
+    url: 'CrmCustomer/queryList',
+    method: 'post',
+    data: data
+  })
+}
+
+/**
+ * 客户标记跟进
+ * @param {*} data
+ * id 客户IDs
+ */
+export function crmCustomerSetFollowAPI(data) {
+  return request({
+    url: 'CrmBackLog/setCustomerFollowup',
     method: 'post',
     data: data
   })

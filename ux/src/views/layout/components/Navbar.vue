@@ -30,7 +30,7 @@
              @click="handleClick('goout')"><i class="wukong wukong-goout"></i>退出登录</div>
         <div class="handel-item hr-top"
              style="pointer-events: none;"
-             :style="{'margin-bottom': manage ? '15px' : '0'}"><i class="wukong wukong-versions"></i>当前版本号V9.0</div>
+             :style="{'margin-bottom': manage ? '15px' : '0'}"><i class="wukong wukong-versions"></i>版本 V9.0.2.190628</div>
         <div v-if="manage"
              class="handel-box">
           <el-button @click="enterSystemSet()"

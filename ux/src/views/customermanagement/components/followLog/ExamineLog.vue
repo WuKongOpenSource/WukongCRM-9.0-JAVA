@@ -21,6 +21,7 @@
     <examine-create-view v-if="isCreate"
                          :categoryId="createInfo.categoryId"
                          :categoryTitle="createInfo.title"
+                         :type="createInfo.type"
                          :action="createAction"
                          @save-success="refreshList"
                          @hiden-view="isCreate=false"></examine-create-view>

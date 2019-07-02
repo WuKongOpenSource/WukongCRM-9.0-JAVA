@@ -64,6 +64,20 @@ export function adminUsersUpdatePwd(data) {
   })
 }
 
+/**
+ * 编辑登录名
+ * @param {*} data
+ * username
+ * password
+ * id
+ */
+export function adminUsersUsernameEditAPI(data) {
+  return request({
+    url: 'admin/users/usernameEdit',
+    method: 'post',
+    data: data
+  })
+}
 
 // 用户状态修改
 export function usersEditStatus(data) {

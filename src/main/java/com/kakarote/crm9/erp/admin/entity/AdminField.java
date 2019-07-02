@@ -11,16 +11,10 @@ import java.util.List;
 public class AdminField extends BaseAdminField<AdminField> {
 	public static final AdminField dao = new AdminField().dao();
 
-	private Integer fieldType;
+
 	private List<String> setting;
 
-	public Integer getFieldType() {
-		return fieldType;
-	}
 
-	public void setFieldType(Integer fieldType) {
-		this.fieldType = fieldType;
-	}
 
 	public List<String> getSetting() {
 		return setting;

@@ -49,10 +49,12 @@ public class OaExamineCategoryService{
             content.setIsNull(1);
             content.setUpdateTime(new Date());
             content.setOperating(1);
+            content.setFieldType(1);
             content.setExamineCategoryId(categoryId);
             content.save();
             content.setFieldId(null);
             content.setFieldName("remark");
+            content.setIsNull(0);
             content.setName("备注");
             content.save();
         }else{
@@ -133,13 +135,9 @@ public class OaExamineCategoryService{
     }
 
     public List<Record> queryField(Integer id){
-        List<Record> fieldList = new LinkedList<>();
-        Record record = Db.findFirst("select * from 72crm_oa_examine_category where category_id = ?", id);
-        String[] settingArr = new String[]{};
-        fieldUtil.getFixedField(fieldList, "title", "审批内容", record.getStr("title"), "text", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "remark", "备注", record.getStr("remark"), "text", settingArr, 0);
-        fieldList.addAll(adminFieldService.list("10", String.valueOf(id)));
-        return fieldList;
+        List<Record> list = Db.find("select * from `72crm_admin_field` where examine_category_id = ?", id);
+        adminFieldService.recordToFormType(list);
+        return list;
     }
 
     public List<Record> queryField(){

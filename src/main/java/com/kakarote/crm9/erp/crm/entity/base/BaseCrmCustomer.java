@@ -25,6 +25,14 @@ public abstract class BaseCrmCustomer<M extends BaseCrmCustomer<M>> extends Mode
 		return getStr("customer_name");
 	}
 
+	public void setFollowup(Integer followup) {
+		set("followup", followup);
+	}
+
+	public Integer getFollowup() {
+		return getInt("followup");
+	}
+
 	public void setIsLock(Integer isLock) {
 		set("is_lock", isLock);
 	}
@@ -47,6 +55,14 @@ public abstract class BaseCrmCustomer<M extends BaseCrmCustomer<M>> extends Mode
 
 	public String getDealStatus() {
 		return getStr("deal_status");
+	}
+
+	public void setMobile(String mobile){
+		set("mobile", mobile);
+	}
+
+	public String getMobile(){
+		return getStr("mobile");
 	}
 
 	public void setTelephone(String telephone){

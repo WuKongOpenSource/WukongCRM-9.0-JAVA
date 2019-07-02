@@ -89,4 +89,12 @@ public abstract class BaseOaAnnouncement<M extends BaseOaAnnouncement<M>> extend
 		return getStr("owner_user_ids");
 	}
 
+	public void setReadUserIds(String readUserIds) {
+		set("read_user_ids", readUserIds);
+	}
+
+	public String getReadUserIds() {
+		return getStr("read_user_ids");
+	}
+
 }

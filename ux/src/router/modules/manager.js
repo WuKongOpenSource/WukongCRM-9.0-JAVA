@@ -1,13 +1,66 @@
 /** 项目管理路由 */
 import Layout from '@/views/layout/managerLayout'
 
-const managerRouter = {
+/**
+ * 系统管理里的 客户管理
+ */
+const systemCustomerAuth = {
+  requiresAuth: true,
+  index: 1,
+  type: 'manage',
+  subType: 'crm'
+}
+
+const systemCustomerRouter = {
+  name: 'system-customer',
+  path: 'system-customer',
+  meta: {
+    title: '客户管理',
+    icon: 'customer',
+    ...systemCustomerAuth
+  },
+  children: [{
+    path: 'custom-field',
+    component: () => import('@/views/SystemManagement/SystemCustomer/customField'),
+    meta: {
+      title: '自定义字段设置',
+      ...systemCustomerAuth
+    }
+  }, {
+    path: 'customer',
+    component: () => import('@/views/SystemManagement/SystemCustomer/customer'),
+    meta: {
+      title: '客户公海规则设置',
+      ...systemCustomerAuth
+    }
+  }, {
+    path: 'biz-param',
+    component: () => import('@/views/SystemManagement/SystemCustomer/bizParam'),
+    meta: {
+      title: '业务参数设置',
+      ...systemCustomerAuth
+    }
+  }, {
+    path: 'biz-goals',
+    component: () => import('@/views/SystemManagement/SystemCustomer/bizGoals'),
+    meta: {
+      title: '业绩目标设置',
+      ...systemCustomerAuth
+    }
+  }]
+}
+
+/**
+ * 不包含children的路由
+ */
+const systemOtherRouter = {
   path: '/manager',
   component: Layout,
   redirect: '/manager/systemconfig',
   name: 'manager',
   hidden: true,
   meta: {
+    requiresAuth: true,
     title: '系统管理',
     index: 0,
     type: 'manage'
@@ -76,31 +129,41 @@ const managerRouter = {
         type: 'manage',
         subType: 'oa'
       }
-    },
-    {
-      name: 'system-customer',
-      path: 'system-customer',
-      component: () => import('@/views/SystemManagement/SystemCustomer/SystemCustomer'),
-      meta: {
-        requiresAuth: true,
-        title: '客户管理',
-        icon: 'customer',
-        index: 1,
-        type: 'manage',
-        subType: 'crm'
-      }
-    },
-    {
-      name: 'handlefield',
-      path: 'system-customer/handlefield/:type/:id/:label', // type customer contacts business contract money
-      component: () => import('@/views/SystemManagement/SystemCustomer/HandleField'),
-      meta: {
-        changeMenu: false, // 跳转不更改路径
-        menuSelct: 'system-customer'
-      },
-      hidden: true
     }
   ]
 }
 
-export default managerRouter
+const handlefieldRouter = {
+  name: 'handlefield',
+  path: 'custom-field/handlefield/:type/:id', // type customer contacts business contract money
+  component: () => import('@/views/SystemManagement/SystemCustomer/HandleField'),
+  meta: {
+    changeMenu: false, // 跳转不更改路径
+    menuSelct: 'system-customer'
+  },
+  hidden: true
+}
+
+export const managerRouter = {
+  path: '/manager',
+  component: Layout,
+  redirect: '/manager/systemconfig',
+  name: 'manager',
+  hidden: true,
+  meta: {
+    requiresAuth: true,
+    title: '系统管理',
+    index: 0,
+    type: 'manage'
+  },
+  children: [
+    ...systemOtherRouter.children,
+    ...systemCustomerRouter.children,
+    handlefieldRouter
+  ]
+}
+
+export const managerRouterMenu = [
+  ...systemOtherRouter.children,
+  systemCustomerRouter
+]

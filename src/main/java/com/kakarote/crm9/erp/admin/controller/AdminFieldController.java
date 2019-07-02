@@ -2,16 +2,20 @@ package com.kakarote.crm9.erp.admin.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
+import com.jfinal.ext.interceptor.POST;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldStyle;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.service.*;
 import com.kakarote.crm9.erp.oa.service.OaExamineCategoryService;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.R;
 
 import java.util.ArrayList;
@@ -69,6 +73,7 @@ public class AdminFieldController extends Controller {
     public void queryFields(){
         renderJson(adminFieldService.queryFields());
     }
+
     /**
      * @author zxy
      * 查询自定义字段列表
@@ -106,33 +111,17 @@ public class AdminFieldController extends Controller {
             if ("7".equals(label)){
                 recordList = crmReceivablesService.queryField(id);
             }
+            if ("8".equals(label)){
+                recordList = crmReceivablesPlanService.queryField(id);
+            }
             if("10".equals(label)){
-                recordList = adminFieldService.list("10",id.toString());
+                recordList = oaExamineCategoryService.queryField(id);
             }
         }else {
-            if ("1".equals(label)) {
-                recordList = crmLeadsService.queryField();
-            }
-            if ("2".equals(label)) {
-                recordList = crmCustomerService.queryField();
-            }
-            if ("3".equals(label)) {
-                recordList = crmContactsService.queryField();
-            }
-            if ("4".equals(label)) {
-                recordList = crmProductService.queryField();
-            }
-            if ("5".equals(label)) {
-                recordList = crmBusinessService.queryField();
-            }
-            if ("6".equals(label)) {
-                recordList = crmContractService.queryField();
-            }
-            if ("7".equals(label)) {
-                recordList = crmReceivablesService.queryField();
-            }
-            if ("9".equals(label)) {
+            if ("8".equals(label)){
                 recordList = crmReceivablesPlanService.queryField();
+            }else {
+                recordList = adminFieldService.queryAddField(Integer.valueOf(label));
             }
         }
         renderJson(R.ok().put("data",recordList));
@@ -146,6 +135,8 @@ public class AdminFieldController extends Controller {
      */
     public void information(@Para("types")Integer types,@Para("id")Integer id){
         List<Record> recordList;
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.getSign(types)), id);
+        if(auth){renderJson(R.noAuth()); return; }
         if (1 == types){
             recordList = crmLeadsService.information(id);
         }else if (2 == types){
@@ -163,7 +154,6 @@ public class AdminFieldController extends Controller {
         }else {
             recordList=new ArrayList<>();
         }
-
         renderJson(R.ok().put("data",recordList));
     }
     /**

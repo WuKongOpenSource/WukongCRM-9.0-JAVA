@@ -76,7 +76,24 @@ public class BaseUtil {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return BaseConstant.BASE_PATH;
+        HttpServletRequest request=getRequest();
+        /**
+         * TODO nginx反向代理下手动增加一个请求头 proxy_set_header proxy_url "代理映射路径";
+         * 如 location /api/ {
+         *     proxy_set_header proxy_url "api"
+         *     proxy_redirect off;
+         * 	   proxy_set_header Host $host:$server_port;
+         *     proxy_set_header X-Real-IP $remote_addr;
+         * 	   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+         * 	   proxy_set_header X-Forwarded-Proto  $scheme;
+         * 	   proxy_connect_timeout 60;
+         * 	   proxy_send_timeout 120;
+         * 	   proxy_read_timeout 120;
+         *     proxy_pass http://127.0.0.1:8080/;
+         *    }
+         */
+        String proxy=request.getHeader("proxy_url")!=null?"/"+request.getHeader("proxy_url"):"";
+        return "http://" + request.getServerName()+":"+ request.getServerPort()+ request.getContextPath()+proxy+"/";
     }
     public static String getLoginAddress(HttpServletRequest request){
         String ip = request.getHeader("x-forwarded-for");

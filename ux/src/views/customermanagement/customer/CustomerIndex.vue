@@ -79,7 +79,8 @@
             <div class="table-head-name">{{scope.column.label}}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="poolDay"
+        <el-table-column v-if="CRMConfig.customerConfig == 1"
+                         prop="poolDay"
                          show-overflow-tooltip
                          :resizable='false'
                          label="距进入公海天数"
@@ -128,6 +129,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import CRMAllDetail from '@/views/customermanagement/components/CRMAllDetail'
 import BusinessCheck from './components/BusinessCheck' // 相关商机
 import table from '../mixins/table'
@@ -145,7 +147,9 @@ export default {
       crmType: 'customer'
     }
   },
-  computed: {},
+  computed: {
+    ...mapGetters(['CRMConfig'])
+  },
   mounted() {},
   methods: {
     relativeBusinessClick(data) {
@@ -186,5 +190,13 @@ export default {
 @import '../styles/table.scss';
 .customer-lock {
   color: #f15e64;
+}
+
+.el-table /deep/ tbody tr td:nth-child(2) {
+  border-right-width: 0;
+}
+
+.el-table /deep/ tbody tr td:nth-child(3) {
+  border-right: 1px solid #e6e6e6;
 }
 </style>

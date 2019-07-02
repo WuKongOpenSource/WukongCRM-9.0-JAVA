@@ -25,3 +25,15 @@ export function noticeDelete(data) {
     data: data
   })
 }
+
+/**
+ * 公告设为已读
+ * @param {*} data
+ */
+export function noticeIsReadAPI(data) {
+  return request({
+    url: 'OaAnnouncement/readAnnouncement',
+    method: 'post',
+    data: data
+  })
+}

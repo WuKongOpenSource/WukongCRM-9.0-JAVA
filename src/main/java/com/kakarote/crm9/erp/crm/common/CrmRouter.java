@@ -18,5 +18,6 @@ public class CrmRouter extends Routes {
         add("/CrmRecord",CrmRecordController.class);
         add("/Crm/ReceivablesPlan",CrmReceivablesPlanController.class);
         add("/Crm/Instrument",InstrumentController.class);
+        add("/CrmBackLog",CrmBackLogController.class);
     }
 }

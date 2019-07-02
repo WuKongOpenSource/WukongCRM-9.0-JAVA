@@ -8,21 +8,35 @@ import CRMTableHead from '../components/CRMTableHead'
 import FieldsSet from '../components/fieldsManager/FieldsSet'
 import {
   filedGetTableField,
-  crmFieldColumnWidth,
-  crmMainIndex
+  crmFieldColumnWidth
 } from '@/api/customermanagement/common'
 import {
-  crmCustomerExcelAllExport
+  crmCustomerIndex,
+  crmCustomerPool,
+  crmCustomerExcelAllExport,
+  crmCustomerPoolExcelAllExport
 } from '@/api/customermanagement/customer'
 import {
+  crmLeadsIndex,
   crmLeadsExcelAllExport
 } from '@/api/customermanagement/clue'
 import {
+  crmContactsIndex,
   crmContactsExcelAllExport
 } from '@/api/customermanagement/contacts'
 import {
+  crmBusinessIndex
+} from '@/api/customermanagement/business'
+import {
+  crmContractIndex
+} from '@/api/customermanagement/contract'
+import {
+  crmProductIndex,
   crmProductExcelAllExport
 } from '@/api/customermanagement/product'
+import {
+  crmReceivablesIndex
+} from '@/api/customermanagement/money'
 
 export default {
   components: {
@@ -61,22 +75,17 @@ export default {
   },
 
   mounted() {
-    var self = this
     /** 控制table的高度 */
-    window.onresize = function () {
-      var offsetHei = document.documentElement.clientHeight
-      var removeHeight = Object.keys(self.filterObj).length > 0 ? 310 : 240
-      self.tableHeight = offsetHei - removeHeight
+    window.onresize = () => {
+      this.updateTableHeight()
     }
     // document.getElementById('crm-table').addEventListener('click', e => {
     //   e.stopPropagation()
     // })
-    if (this.crm[this.crmType].index) {
-      if (this.isSeas) {
-        this.getFieldList()
-      } else {
-        this.loading = true
-      }
+    if (this.isSeas && this.crm.pool.index) {
+      this.getFieldList()
+    } else if (this.crm[this.crmType].index) {
+      this.loading = true
     }
   },
 
@@ -84,6 +93,7 @@ export default {
     /** 获取列表数据 */
     getList() {
       this.loading = true
+      var crmIndexRequest = this.getIndexRequest()
       var params = {
         page: this.currentPage,
         limit: this.pageSize,
@@ -96,7 +106,7 @@ export default {
       if (this.filterObj && Object.keys(this.filterObj).length > 0) {
         params.data = this.filterObj
       }
-      crmMainIndex(params)
+      crmIndexRequest(params)
         .then(res => {
           if (this.crmType === 'customer') {
             this.list = res.data.list.map(element => {
@@ -104,6 +114,10 @@ export default {
               return element
             })
           } else {
+            if (this.crmType === 'contract') {
+              // 合同列表展示金额信息
+              this.moneyData = res.data.money
+            }
             this.list = res.data.list
           }
 
@@ -114,6 +128,28 @@ export default {
         .catch(() => {
           this.loading = false
         })
+    },
+    /** 获取列表请求 */
+    getIndexRequest() {
+      if (this.crmType === 'leads') {
+        return crmLeadsIndex
+      } else if (this.crmType === 'customer') {
+        if (this.isSeas) {
+          return crmCustomerPool
+        } else {
+          return crmCustomerIndex
+        }
+      } else if (this.crmType === 'contacts') {
+        return crmContactsIndex
+      } else if (this.crmType === 'business') {
+        return crmBusinessIndex
+      } else if (this.crmType === 'contract') {
+        return crmContractIndex
+      } else if (this.crmType === 'product') {
+        return crmProductIndex
+      } else if (this.crmType === 'receivables') {
+        return crmReceivablesIndex
+      }
     },
     /** 获取字段 */
     getFieldList() {
@@ -176,33 +212,45 @@ export default {
         return // 多选布局不能点击
       }
       if (this.crmType === 'leads') {
-        this.rowID = row.leadsId
-        this.showDview = true
+        if (column.property === 'leadsName') {
+          this.rowID = row.leadsId
+          this.showDview = true
+        } else {
+          this.showDview = false
+        }
       } else if (this.crmType === 'customer') {
         if (column.property === 'businessCheck' && row.businessCount > 0) {
           return // 列表查看商机不展示详情
         }
-        this.rowID = row.customerId
-        this.rowType = 'customer'
-        this.showDview = true
+        if (column.property === 'customerName') {
+          this.rowID = row.customerId
+          this.rowType = 'customer'
+          this.showDview = true
+        } else {
+          this.showDview = false
+        }
       } else if (this.crmType === 'contacts') {
         if (column.property === 'customerName') {
           this.rowID = row.customerId
           this.rowType = 'customer'
-        } else {
+        } else if (column.property === 'name') {
           this.rowID = row.contactsId
           this.rowType = 'contacts'
+          this.showDview = true
+        } else {
+          this.showDview = false
         }
-        this.showDview = true
       } else if (this.crmType === 'business') {
         if (column.property === 'customerName') {
           this.rowID = row.customerId
           this.rowType = 'customer'
-        } else {
+        } else if (column.property === 'businessName') {
           this.rowID = row.businessId
           this.rowType = 'business'
+          this.showDview = true
+        } else {
+          this.showDview = false
         }
-        this.showDview = true
       } else if (this.crmType === 'contract') {
         if (column.property === 'customerName') {
           this.rowID = row.customerId
@@ -213,14 +261,20 @@ export default {
         } else if (column.property === 'contactsName') {
           this.rowID = row.contactsId
           this.rowType = 'contacts'
-        } else {
+        } else if (column.property === 'num') {
           this.rowID = row.contractId
           this.rowType = 'contract'
+          this.showDview = true
+        } else {
+          this.showDview = false
         }
-        this.showDview = true
       } else if (this.crmType === 'product') {
-        this.rowID = row.productId
-        this.showDview = true
+        if (column.property === 'name') {
+          this.rowID = row.productId
+          this.showDview = true
+        } else {
+          this.showDview = false
+        }
       } else if (this.crmType === 'receivables') {
         if (column.property === 'customerName') {
           this.rowID = row.customerId
@@ -228,11 +282,13 @@ export default {
         } else if (column.property === 'contractNum') {
           this.rowID = row.contractId
           this.rowType = 'contract'
-        } else {
+        } else if (column.property === 'number') {
           this.rowID = row.receivablesId
           this.rowType = 'receivables'
+          this.showDview = true
+        } else {
+          this.showDview = false
         }
-        this.showDview = true
       }
     },
     /**
@@ -250,12 +306,19 @@ export default {
       if (this.filterObj && Object.keys(this.filterObj).length > 0) {
         params.data = this.filterObj
       }
-      var request = {
-        customer: crmCustomerExcelAllExport,
-        leads: crmLeadsExcelAllExport,
-        contacts: crmContactsExcelAllExport,
-        product: crmProductExcelAllExport
-      }[this.crmType]
+      let request
+      // 公海的请求
+      if (this.isSeas) {
+        request = crmCustomerPoolExcelAllExport
+      } else {
+        request = {
+          customer: crmCustomerExcelAllExport,
+          leads: crmLeadsExcelAllExport,
+          contacts: crmContactsExcelAllExport,
+          product: crmProductExcelAllExport
+        }[this.crmType]
+      }
+
       request(params)
         .then(res => {
           var blob = new Blob([res.data], {
@@ -281,6 +344,7 @@ export default {
       var offsetHei = document.documentElement.clientHeight
       var removeHeight = Object.keys(this.filterObj).length > 0 ? 310 : 240
       this.tableHeight = offsetHei - removeHeight
+      this.currentPage = 1
       this.getList()
     },
     /** 场景操作 */
@@ -398,6 +462,15 @@ export default {
       }
       return ''
     },
+
+    /**
+     * 更新表高
+     */
+    updateTableHeight() {
+      var offsetHei = document.documentElement.clientHeight
+      var removeHeight = Object.keys(this.filterObj).length > 0 ? 310 : 240
+      this.tableHeight = offsetHei - removeHeight
+    }
   },
 
   beforeDestroy() { }

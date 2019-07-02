@@ -3,7 +3,6 @@ package com.kakarote.crm9.erp.admin.service;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
@@ -140,12 +139,14 @@ public class AdminUserService {
      */
     public List<Long> queryChileUserIds(Long userId,Integer deepness) {
         List<Long> query = Db.query("select user_id from 72crm_admin_user where parent_id = ?", userId);
-        if (query.size() != 0 && deepness > 0) {
-            int size = query.size();
-            for (int i = 0; i < size; i++) {
+        if (deepness > 0) {
+            for (int i = 0,size=query.size(); i < size; i++) {
                 query.addAll(queryChileUserIds(query.get(i),deepness-1));
             }
         }
+        HashSet<Long> set=new HashSet<>(query);
+        query.clear();
+        query.addAll(set);
         return query;
     }
 
@@ -271,6 +272,7 @@ public class AdminUserService {
             if (list.contains(4)) {
                 List<Record> records = adminDeptService.queryDeptByParentDept(adminUser.getDeptId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
                 List<Integer> deptIds = new ArrayList<>();
+                deptIds.add(adminUser.getDeptId());
                 records.forEach(record -> {
                     deptIds.add(record.getInt("id"));
                 });
@@ -339,6 +341,33 @@ public class AdminUserService {
         }
         return deptIds;
     }
+
+
+    /**
+     * 修改用户账号功能
+     * @param id 用户ID
+     * @param username 新的用户名
+     * @param password 新的密码
+     * @return 操作状态
+     */
+    @Before(Tx.class)
+    public R usernameEdit(Integer id,String username, String password){
+        AdminUser adminUser=AdminUser.dao.findById(id);
+        if(adminUser==null){
+            return R.error("用户不存在！");
+        }
+        if(adminUser.getUsername().equals(username)){
+            return R.error("账号不能和原账号相同");
+        }
+        Integer count = Db.queryInt("select count(*) from 72crm_admin_user where username = ?", username);
+        if (count > 0) {
+            return R.error("手机号重复！");
+        }
+        adminUser.setUsername(username);
+        adminUser.setPassword(BaseUtil.sign(username+password,adminUser.getSalt()));
+        return R.isSuccess(adminUser.update());
+    }
+
     private String getUserIds(String deptIds,String userIds){
         List<Record> allUsers = Db.find("select * from 72crm_admin_user where dept_id   NOT in ( ? ) and user_id in (?)", deptIds, userIds);
         userIds = null;
