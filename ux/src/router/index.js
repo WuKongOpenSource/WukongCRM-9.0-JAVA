@@ -8,6 +8,7 @@ Vue.use(Router)
 
 import workbenchRouter from './modules/workbench'
 import customerRouter from './modules/customer'
+import projectRouter from './modules/project/index'
 import { managerRouter } from './modules/manager'
 import personRouter from './modules/person'
 import { biRouter } from './modules/business'
@@ -40,6 +41,7 @@ export const constantRouterMap = [{
     hidden: true
   },
   workbenchRouter,
+  projectRouter,
   personRouter,
   {
     path: '/',

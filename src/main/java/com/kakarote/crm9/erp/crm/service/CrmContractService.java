@@ -128,7 +128,7 @@ public class CrmContractService {
     public R saveAndUpdate(JSONObject jsonObject) {
         CrmContract crmContract = jsonObject.getObject("entity", CrmContract.class);
         String batchId = StrUtil.isNotEmpty(crmContract.getBatchId()) ? crmContract.getBatchId() : IdUtil.simpleUUID();
-
+        crmRecordService.updateRecord(jsonObject.getJSONArray("field"), batchId);
         adminFieldService.save(jsonObject.getJSONArray("field"), batchId);
         boolean flag;
         if (crmContract.getContractId() == null) {
@@ -153,6 +153,7 @@ public class CrmContractService {
                 crmContract.setExamineRecordId(map.get("id"));
             }
             flag = crmContract.save();
+            crmRecordService.addRecord(crmContract.getContractId(),CrmEnum.CONTRACT_TYPE_KEY.getTypes());
         } else {
             CrmContract contract = CrmContract.dao.findById(crmContract.getContractId());
             if (contract.getCheckStatus() != 4 && contract.getCheckStatus() != 3) {
@@ -166,6 +167,7 @@ public class CrmContractService {
             }
             crmContract.setCheckStatus(0);
             crmContract.setUpdateTime(DateUtil.date());
+            crmRecordService.updateRecord(new CrmContract().dao().findById(crmContract.getContractId()), crmContract, CrmEnum.CONTRACT_TYPE_KEY.getTypes());
             flag = crmContract.update();
         }
         JSONArray jsonArray = jsonObject.getJSONArray("product");
@@ -409,7 +411,7 @@ public class CrmContractService {
      * 查询编辑字段
      */
     public List<Record> queryField(Integer contractId) {
-        Record contract = Db.findFirst("select * from contractview where contacts_id = ?",contractId);
+        Record contract = Db.findFirst("select * from contractview where contract_id = ?",contractId);
         List<Record> list = new ArrayList<>();
         list.add(new Record().set("customer_id",contract.getInt("customer_id")).set("customer_name",contract.getStr("customer_name")));
         contract.set("customer_id",list);
@@ -576,6 +578,9 @@ public class CrmContractService {
      */
     @Before(Tx.class)
     public R setContractConfig(Integer status,Integer contractDay){
+        if (status == 1 && contractDay == null){
+            return R.error("contractDay不能为空");
+        }
         Integer number = Db.update(Db.getSqlPara("crm.contract.setContractConfig",Kv.by("status",status).set("contractDay",contractDay)));
         if (0 == number){
             AdminConfig adminConfig = new AdminConfig();

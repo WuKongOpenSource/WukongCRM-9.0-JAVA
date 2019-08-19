@@ -4,6 +4,7 @@
     <el-input class="sc-container"
               :placeholder="placeholder"
               v-model="inputContent"
+              @input="inputChange"
               @keyup.enter.native="searchInput">
       <el-button slot="append"
                  @click.native="searchInput"
@@ -95,7 +96,8 @@ export default {
     isSeas: {
       type: Boolean,
       default: false
-    }
+    },
+    search: String
   },
   mounted() {
     // 线索和客户判断更多操作
@@ -125,6 +127,9 @@ export default {
       this.createCRMType = this.crmType
       this.createActionInfo = { type: 'save' }
       this.isCreate = !this.isCreate
+    },
+    inputChange() {
+      this.$emit('update:search', this.inputContent)
     },
     // 进行搜索操作
     searchInput() {

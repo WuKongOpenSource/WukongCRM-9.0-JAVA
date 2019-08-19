@@ -233,7 +233,6 @@ public class CrmContractController extends Controller {
      * 修改合同到期提醒设置
      */
     @NotNullValidate(value = "status",message = "status不能为空")
-    @NotNullValidate(value = "contractDay",message = "contractDay不能为空")
     public void setContractConfig(@Para("status") Integer status,@Para("contractDay") Integer contractDay){
         renderJson(crmContractService.setContractConfig(status,contractDay));
     }

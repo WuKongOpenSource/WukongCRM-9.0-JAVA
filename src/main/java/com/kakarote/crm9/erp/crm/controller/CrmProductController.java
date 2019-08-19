@@ -201,9 +201,6 @@ public class CrmProductController extends Controller {
             }else {
                 cell.setCellValue(record.getStr("name"));
             }
-            if ("产品类型".equals(record.getStr("name"))){
-                setting = categoryList.toArray(new String[categoryList.size()]);
-            }
             if (setting.length != 0){
                 CellRangeAddressList regions = new CellRangeAddressList(0, Integer.MAX_VALUE, i, i);
                 DVConstraint constraint = DVConstraint.createExplicitListConstraint(setting);

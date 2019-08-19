@@ -1,5 +1,7 @@
 package com.kakarote.crm9.erp.oa.service;
 
+import com.jfinal.aop.Before;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.erp.work.entity.TaskComment;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
@@ -29,7 +31,9 @@ public class OaCommentService{
         return bol ? R.ok().put("data",comment) : R.error();
     }
 
+    @Before(Tx.class)
     public R deleteComment(Integer commentId){
+        Db.delete("delete from `72crm_task_comment` where main_id = ?",commentId);
         return new TaskComment ().dao ().deleteById ( commentId )?R.ok ():R.error ();
     }
 

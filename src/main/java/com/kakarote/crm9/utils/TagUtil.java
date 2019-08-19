@@ -3,6 +3,7 @@ package com.kakarote.crm9.utils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,7 +25,9 @@ public class TagUtil{
         return tag;
     }
 
-    public static String fromSet(Set<Integer> tag){
+
+
+    public static String fromSet(Collection<Integer> tag){
         if(CollectionUtil.isEmpty(tag)){
             return "";
         }

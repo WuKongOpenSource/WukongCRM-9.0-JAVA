@@ -2,6 +2,7 @@
   <div>
     <c-r-m-list-head title="商机管理"
                      placeholder="请输入商机名称"
+                     :search.sync="search"
                      @on-handle="listHeadHandle"
                      @on-search="crmSearch"
                      main-title="新建商机"

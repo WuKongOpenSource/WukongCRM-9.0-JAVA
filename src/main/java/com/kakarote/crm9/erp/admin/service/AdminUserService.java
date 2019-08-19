@@ -165,14 +165,9 @@ public class AdminUserService {
     }
 
     public R queryListName(String name) {
-
-        StringBuffer sql = new StringBuffer("select  au.realname,au.mobile,au.post as postName ,ad.name as deptName from 72crm_admin_user as au\n" + "LEFT JOIN 72crm_admin_dept as ad on au.dept_id = ad.dept_id");
-        if (name != null && !"".equals(name)) {
-            sql.append(" where au.realname like '%").append(name).append("%'");
-        }
-        List<Record> records = Db.find(sql.toString());
+        List<Record> users = Db.find(Db.getSqlPara("admin.user.queryUserByRealName", Kv.by("name", name)));
         Sort sort = new Sort();
-        Map<String, List<Record>> map = sort.sort(records);
+        Map<String, List<Record>> map = sort.sort(users);
         return R.ok().put("data", map);
     }
 
@@ -209,20 +204,12 @@ public class AdminUserService {
      * 根据部门查询用户id
      */
     public String queryUserIdsByDept(String deptIds) {
-        if (null == deptIds) {
+        if (StrUtil.isEmpty(deptIds)) {
             return null;
         }
-        String sql = "select user_id from 72crm_admin_user where dept_id in (" + deptIds + ")";
-        List<Record> records = Db.find(sql);
-        StringBuffer userIds = new StringBuffer();
-        records.forEach(record -> {
-            if (userIds.length() == 0) {
-                userIds.append(record.getInt("user_id"));
-            } else {
-                userIds.append(",").append(record.getInt("user_id"));
-            }
-        });
-        return userIds.toString();
+        SqlPara sqlPara=Db.getSqlPara("admin.user.queryUserIdByDeptId",Kv.by("deptIds",deptIds));
+        List<Long> users=Db.query(sqlPara.getSql(),sqlPara.getPara());
+        return StrUtil.join(",",users);
     }
 
     public R queryAllUserList() {

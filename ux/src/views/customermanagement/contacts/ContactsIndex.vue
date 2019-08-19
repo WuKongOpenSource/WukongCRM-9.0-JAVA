@@ -2,6 +2,7 @@
   <div>
     <c-r-m-list-head title="联系人管理"
                      placeholder="请输入联系人姓名/手机/电话"
+                     :search.sync="search"
                      @on-handle="listHeadHandle"
                      @on-search="crmSearch"
                      main-title="新建联系人"

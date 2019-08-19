@@ -19,7 +19,6 @@ public class _MappingKit {
 		arp.addMapping("72crm_admin_field_sort", "field_id", AdminFieldSort.class);
 		arp.addMapping("72crm_admin_field_style", "id", AdminFieldStyle.class);
 		arp.addMapping("72crm_admin_fieldv", "id", AdminFieldv.class);
-
 		arp.addMapping("72crm_admin_file", "file_id", AdminFile.class);
 		arp.addMapping("72crm_admin_menu", "menu_id", AdminMenu.class);
 		arp.addMapping("72crm_admin_record", "record_id", AdminRecord.class);
@@ -64,10 +63,10 @@ public class _MappingKit {
 		arp.addMapping("72crm_task_comment", "comment_id", TaskComment.class);
 		arp.addMapping("72crm_task_relation", "r_id", TaskRelation.class);
 		arp.addMapping("72crm_work", "work_id", Work.class);
-		arp.addMapping("72crm_work_relation", "r_id", WorkRelation.class);
 		arp.addMapping("72crm_work_task_class", "class_id", WorkTaskClass.class);
-		arp.addMapping("72crm_work_task_lable", "lable_id", WorkTaskLable.class);
+		arp.addMapping("72crm_work_task_label", "label_id", WorkTaskLabel.class);
 		arp.addMapping("72crm_work_task_log", "log_id", WorkTaskLog.class);
+		arp.addMapping("72crm_work_user", "id", WorkUser.class);
 		arp.addMapping("72crm_crm_business_change", "change_id", CrmBusinessChange.class);
 	}
 }

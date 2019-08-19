@@ -7,6 +7,7 @@ import com.jfinal.aop.Inject;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.constant.BaseConstant;
+import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminUserService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 
@@ -38,6 +39,7 @@ public class AuthUtil {
             userIdList.addAll(Db.query("select user_id from 72crm_admin_user where dept_id = ?",deptId));
         }else if (dataAuth.contains(2)){
             userIdList.addAll(adminUserService.queryChileUserIds(BaseUtil.getUserId(),BaseConstant.AUTH_DATA_RECURSION_NUM));
+            userIdList.add(BaseUtil.getUserId());
         }else if (dataAuth.contains(1)){
             userIdList.add(BaseUtil.getUserId());
         }
@@ -123,7 +125,17 @@ public class AuthUtil {
         if(!"72crm_task".equals(tablePara.get("tableName"))){
             authSql.append(tablePara.get("tableName")).append(" where ").append(tablePara.get("tableId")).append(" = ").append(id).append(" and create_user_id = ").append(userId);
         }else {
-            authSql.append(tablePara.get("tableName")).append(" where ").append(tablePara.get("tableId")).append(" = ").append(id).append(" and (create_user_id = ").append(userId).append(" or owner_user_id like CONCAT('%,','" + userId + "',',%')" ).append(" or main_user_id = ").append(userId).append(")");
+            List<Long> childIdList = Aop.get(AdminUserService.class).queryChileUserIds(userId, 20);
+            authSql.append(tablePara.get("tableName")).append(" where ").append(tablePara.get("tableId")).append(" = ").append(id);
+            if(childIdList != null && childIdList.size()>0){
+                authSql.append(" and (").append(" (owner_user_id like CONCAT('%,','" + userId + "',',%')" ).append(" or main_user_id = ").append(userId).append(") ");
+                childIdList.forEach(childId->{
+                    authSql.append(" or (owner_user_id like CONCAT('%,','" + childId + "',',%')" ).append(" or main_user_id = ").append(childId).append(") ");
+                });
+                authSql.append(") ");
+            }else {
+                authSql.append(" and ").append(" (owner_user_id like CONCAT('%,','" + userId + "',',%')" ).append(" or main_user_id = ").append(userId).append(") ");
+            }
         }
         return Db.queryInt(authSql.toString()) == 0;
     }
@@ -155,6 +167,30 @@ public class AuthUtil {
                 return null;
         }
         return tableParaMap;
+    }
+
+
+    public static boolean isWorkAdmin(){
+        if(BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID)){
+           return true;
+        }else {
+            return BaseUtil.getUser().getRoles().contains(BaseConstant.WORK_ADMIN_ROLE_ID) || BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID);
+        }
+    }
+
+    public static  boolean isWorkAuth(String workId,String realm){
+        AdminUser user = BaseUtil.getUser();
+        Integer roleId = Db.queryInt("select role_id from `72crm_work_user` where work_id = ? and user_id = ?", workId, user.getUserId());
+        //判断是否是超级管理员、项目管理员
+        if(user.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) || user.getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID) ||user.getRoles().contains(BaseConstant.WORK_ADMIN_ROLE_ID) || (roleId != null&&roleId.equals(BaseConstant.SMALL_WORK_ADMIN_ROLE_ID))){
+            return true;
+        }else {
+            List<String>  realmData= Db.query(Db.getSql("work.queryRealmByRoleId"), roleId);
+            if(realmData == null || realmData.size() == 0){
+                return false;
+            }
+            return realmData.contains(realm);
+        }
     }
 
 }

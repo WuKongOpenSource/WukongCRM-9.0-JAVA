@@ -46,7 +46,7 @@
             and  TO_DAYS(ccb.create_time) >= TO_DAYS(#para(startTime))
             and  TO_DAYS(ccb.create_time) <= TO_DAYS(#para(endTime))
           #end
-          GROUP BY ccbs.`name`
+          GROUP BY ccbs.`name`,ccbs.order_num,ccb.type_id
     #end
     #sql ("sellFunnelSum")
       SELECT IFNULL(SUM(ccb.money),0) as money

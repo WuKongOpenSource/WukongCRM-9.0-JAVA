@@ -2,11 +2,10 @@ package com.kakarote.crm9.erp.admin.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.jfinal.aop.Before;
+import com.jfinal.aop.Clear;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
-import com.jfinal.ext.interceptor.POST;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
@@ -167,6 +166,7 @@ public class AdminFieldController extends Controller {
      * @author zhangzhiwei
      * 验证字段数据
      */
+    @Clear
     @NotNullValidate(value = "val",message = "字段校验参数错误")
     @NotNullValidate(value = "types",message = "字段校验参数错误")
     @NotNullValidate(value = "name",message = "字段校验参数错误")

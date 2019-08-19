@@ -2,11 +2,13 @@ package com.kakarote.crm9.erp.admin.service;
 
 import cn.hutool.core.util.ReUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminMenu;
 import com.kakarote.crm9.erp.admin.entity.AdminRole;
+import com.kakarote.crm9.erp.admin.entity.AdminRoleMenu;
 import com.kakarote.crm9.erp.admin.entity.AdminUserRole;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Before;
@@ -171,6 +173,19 @@ public class AdminRoleService {
 
     /**
      * @author wyq
+     * 删除
+     */
+    @Before(Tx.class)
+    public boolean deleteWorkRole(Integer roleId) {
+        Db.delete(Db.getSql("admin.role.deleteRole"), roleId);
+        Db.delete(Db.getSql("admin.role.deleteRoleMenu"), roleId);
+        Db.update("update `72crm_work_user` set role_id = ? where role_id = ?",BaseConstant.SMALL_WORK_EDIT_ROLE_ID,roleId);
+        return true;
+    }
+
+
+    /**
+     * @author wyq
      * 复制
      */
     @Before(Tx.class)
@@ -276,5 +291,44 @@ public class AdminRoleService {
                 name = "自定义角色";
         }
         return name;
+    }
+
+    /**
+     * 项目管理角色列表
+     * @author wyq
+     */
+    public R queryProjectRoleList(){
+        List<Record> roleList = Db.find("select * from 72crm_admin_role where role_type in (5,6) and is_hidden = 1");
+        roleList.forEach(record -> {
+            List<Integer> rules = Db.query("select menu_id from 72crm_admin_role_menu where role_id = ?",record.getInt("role_id"));
+            record.set("rules",rules);
+        });
+        return R.ok().put("data",roleList);
+    }
+
+    public R setWorkRole(JSONObject jsonObject){
+        boolean bol;
+        Integer roleId = jsonObject.getInteger("roleId");
+        String roleName = jsonObject.getString("roleName");
+        String remark = jsonObject.getString("remark");
+        JSONArray rules = jsonObject.getJSONArray("rules");
+        AdminRole adminRole = new AdminRole();
+        adminRole.setRoleName(roleName);
+        adminRole.setRoleType(6);
+        adminRole.setRemark(remark);
+        if(roleId == null){
+            bol = adminRole.save();
+        }else {
+            adminRole.setRoleId(roleId);
+            Db.delete("delete from `72crm_admin_role_menu` where role_id = ?",roleId);
+            bol = adminRole.update();
+        }
+        rules.forEach(menuId->{
+            AdminRoleMenu adminRoleMenu = new AdminRoleMenu();
+            adminRoleMenu.setRoleId(adminRole.getRoleId());
+            adminRoleMenu.setMenuId((Integer) menuId);
+            adminRoleMenu.save();
+        });
+        return bol?R.ok():R.error();
     }
 }

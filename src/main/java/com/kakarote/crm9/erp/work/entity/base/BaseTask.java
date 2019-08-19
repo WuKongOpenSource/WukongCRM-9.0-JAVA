@@ -81,12 +81,12 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		return getInt("class_id");
 	}
 
-	public void setLableId(String lableId) {
-		set("lable_id", lableId);
+	public void setLabelId(String labelId) {
+		set("label_id", labelId);
 	}
 
-	public String getLableId() {
-		return getStr("lable_id");
+	public String getLabelId() {
+		return getStr("label_id");
 	}
 
 	public void setDescription(String description) {
@@ -117,7 +117,7 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 		set("stop_time", stopTime);
 	}
 
-	public java.lang.String getStopTime() {
+	public java.util.Date getStopTime() {
 		return get("stop_time");
 	}
 
@@ -199,6 +199,14 @@ public abstract class BaseTask<M extends BaseTask<M>> extends Model<M> implement
 
 	public String getBatchId() {
 		return getStr("batch_id");
+	}
+
+	public void setIsArchive(Integer isArchive) {
+		set("is_archive", isArchive);
+	}
+
+	public Integer getIsArchive() {
+		return getInt("is_archive");
 	}
 
 }

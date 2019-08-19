@@ -152,7 +152,7 @@ public class CrmProductService {
         } else {
             a = "上架";
         }
-        StringBuilder sqlfield = new StringBuilder("update 72crm_admin_field set value = '" + a + "' where name = '是否上下架' and batch_id in ( ");
+        StringBuilder sqlfield = new StringBuilder("update 72crm_admin_fieldv set value = '" + a + "' where name = '是否上下架' and batch_id in ( ");
         sqlfield.append(batchIds.toString());
         sqlfield.append(" )");
         int f = Db.update(sqlfield.toString());
@@ -238,11 +238,10 @@ public class CrmProductService {
         try {
             List<List<Object>> read = reader.read();
             List<Object> list = read.get(0);
-            for (int i = 0; i < list.size(); i++) {
-                kv.set(list.get(i), i);
-            }
             List<Record> recordList = adminFieldService.customFieldList("4");
+            recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
             List<Record> fieldList = adminFieldService.queryAddField(4);
+            fieldList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
             fieldList.forEach(record -> {
                 if (record.getInt("is_null") == 1){
                     record.set("name",record.getStr("name")+"(*)");
@@ -251,6 +250,11 @@ public class CrmProductService {
             List<String> nameList = fieldList.stream().map(record -> record.getStr("name")).collect(Collectors.toList());
             if (nameList.size() != list.size() || !nameList.containsAll(list)){
                 return R.error("请使用最新导入模板");
+            }
+            Kv nameMap = new Kv();
+            fieldList.forEach(record -> nameMap.set(record.getStr("name"),record.getStr("field_name")));
+            for (int i = 0; i < list.size(); i++) {
+                kv.set(nameMap.get(list.get(i)), i);
             }
             if (read.size() > 1) {
                 JSONObject object = new JSONObject();
@@ -262,26 +266,29 @@ public class CrmProductService {
                             productList.add(null);
                         }
                     }
-                    String productName = productList.get(kv.getInt("产品名称(*)")!=null?kv.getInt("产品名称(*)"):kv.getInt("产品名称")).toString();
+                    String productName = productList.get(kv.getInt("name")).toString();
                     Integer number = Db.queryInt("select count(*) from 72crm_crm_product where name = ?", productName);
                     Integer categoryId = Db.queryInt("select category_id from 72crm_crm_product_category where name = ?",productList.get(kv.getInt("产品类型(*)")));
+                    if (categoryId == null){
+                        return R.error("第"+errNum+1+"行填写的产品类型不存在");
+                    }
                     if (0 == number) {
                         object.fluentPut("entity", new JSONObject().fluentPut("name", productName)
-                                .fluentPut("num", productList.get(kv.getInt("产品编码(*)")))
-                                .fluentPut("unit", productList.get(kv.getInt("单位")))
-                                .fluentPut("price", productList.get(kv.getInt("价格(*)")))
+                                .fluentPut("num", productList.get(kv.getInt("num")))
+                                .fluentPut("unit", productList.get(kv.getInt("unit")))
+                                .fluentPut("price", productList.get(kv.getInt("price")))
                                 .fluentPut("category_id", categoryId)
-                                .fluentPut("description", productList.get(kv.getInt("产品描述")))
+                                .fluentPut("description", productList.get(kv.getInt("description")))
                                 .fluentPut("owner_user_id", ownerUserId));
                     } else if (number > 0 && repeatHandling == 1) {
                         Record product = Db.findFirst("select product_id,batch_id from 72crm_crm_product where name = ?", productName);
                         object.fluentPut("entity", new JSONObject().fluentPut("product_id", product.getInt("product_id"))
                                 .fluentPut("name", productName)
-                                .fluentPut("num", productList.get(kv.getInt("产品编码(*)")))
-                                .fluentPut("unit", productList.get(kv.getInt("单位")))
-                                .fluentPut("price", productList.get(kv.getInt("价格(*)")))
+                                .fluentPut("num", productList.get(kv.getInt("num")))
+                                .fluentPut("unit", productList.get(kv.getInt("unit")))
+                                .fluentPut("price", productList.get(kv.getInt("price")))
                                 .fluentPut("category_id", categoryId)
-                                .fluentPut("description", productList.get(kv.getInt("产品描述")))
+                                .fluentPut("description", productList.get(kv.getInt("description")))
                                 .fluentPut("owner_user_id", ownerUserId)
                                 .fluentPut("batch_id", product.getStr("batch_id")));
                     } else if (number > 0 && repeatHandling == 2) {

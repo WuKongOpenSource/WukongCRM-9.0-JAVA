@@ -201,7 +201,7 @@ public class CrmContactsService {
             Record record =new Record();
             idsList.add(record.set("contacts_id",Integer.valueOf(id)));
         }
-        List<String> batchIdList = Db.query("select batch_id from 72crm_crm_contacts where contacts_id in ("+contactsIds+")");
+        List<Record> batchIdList = Db.find(Db.getSqlPara("crm.contact.queryBatchIdByIds",Kv.by("ids",idsArr)));
         return Db.tx(() ->{
             Db.batch(Db.getSql("crm.contact.deleteByIds"),"contacts_id",idsList,100);
             Db.batch("delete from 72crm_admin_fieldv where batch_id = ?","batch_id",batchIdList,100);
@@ -380,11 +380,10 @@ public class CrmContactsService {
         try {
             List<List<Object>> read = reader.read();
             List<Object> list = read.get(0);
-            for (int i = 0; i < list.size(); i++) {
-                kv.set(list.get(i), i);
-            }
             List<Record> recordList = adminFieldService.customFieldList("3");
+            recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
             List<Record> fieldList = adminFieldService.queryAddField(3);
+            fieldList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
             fieldList.forEach(record -> {
                 if (record.getInt("is_null") == 1){
                     record.set("name",record.getStr("name")+"(*)");
@@ -393,6 +392,11 @@ public class CrmContactsService {
             List<String> nameList = fieldList.stream().map(record -> record.getStr("name")).collect(Collectors.toList());
             if (nameList.size() != list.size() || !nameList.containsAll(list)){
                 return R.error("请使用最新导入模板");
+            }
+            Kv nameMap = new Kv();
+            fieldList.forEach(record -> nameMap.set(record.getStr("name"),record.getStr("field_name")));
+            for (int i = 0; i < list.size(); i++) {
+                kv.set(nameMap.get(list.get(i)), i);
             }
             if (read.size() > 1) {
                 JSONObject object = new JSONObject();
@@ -404,22 +408,33 @@ public class CrmContactsService {
                             contactsList.add(null);
                         }
                     }
-                    String contactsName = contactsList.get(kv.getInt("姓名(*)")).toString();
-                    String telephone = contactsList.get(kv.getInt("电话"))!=null?contactsList.get(kv.getInt("电话")).toString():null;
-                    String mobile = contactsList.get(kv.getInt("手机"))!=null?contactsList.get(kv.getInt("手机")).toString():null;
+                    String contactsName = contactsList.get(kv.getInt("name")).toString();
+                    Object telephoneObeject = contactsList.get(kv.getInt("telephone"));
+                    String telephone = null;
+                    if (telephoneObeject != null){
+                        telephone = telephoneObeject.toString();
+                    }
+                    Object mobileObject = contactsList.get(kv.getInt("mobile"));
+                    String mobile = null;
+                    if (mobileObject != null){
+                        mobile = mobileObject.toString();
+                    }
                     Record  repeatField= Db.findFirst(Db.getSqlPara("crm.contact.queryRepeatFieldNumber",Kv.by("contactsName",contactsName).set("telephone",telephone).set("mobile",mobile)));
                     Integer number = repeatField.getInt("number");
-                    Integer customerId = Db.queryInt("select customer_id from 72crm_crm_customer where customer_name = ?",contactsList.get(kv.getInt("客户名称(*)")!=null?kv.getInt("客户名称(*)"):kv.getInt("客户名称")));
+                    Integer customerId = Db.queryInt("select customer_id from 72crm_crm_customer where customer_name = ?",contactsList.get(kv.getInt("customer_id")));
+                    if (customerId == null){
+                        return R.error("第"+errNum+1+"行填写的客户不存在");
+                    }
                     if (0 == number) {
                         object.fluentPut("entity", new JSONObject().fluentPut("name", contactsName)
                                 .fluentPut("customer_id",customerId)
-                                .fluentPut("telephone", contactsList.get(kv.getInt("电话")))
-                                .fluentPut("mobile", contactsList.get(kv.getInt("手机")))
-                                .fluentPut("email",contactsList.get(kv.getInt("电子邮箱")))
-                                .fluentPut("post",contactsList.get(kv.getInt("职务")))
-                                .fluentPut("address", contactsList.get(kv.getInt("地址")))
-                                .fluentPut("next_time", contactsList.get(kv.getInt("下次联系时间")))
-                                .fluentPut("remark", contactsList.get(kv.getInt("备注")))
+                                .fluentPut("telephone", telephone)
+                                .fluentPut("mobile", mobile)
+                                .fluentPut("email",contactsList.get(kv.getInt("email")))
+                                .fluentPut("post",contactsList.get(kv.getInt("post")))
+                                .fluentPut("address", contactsList.get(kv.getInt("address")))
+                                .fluentPut("next_time", contactsList.get(kv.getInt("next_time")))
+                                .fluentPut("remark", contactsList.get(kv.getInt("remark")))
                                 .fluentPut("owner_user_id", ownerUserId));
                     } else if (number == 1 && repeatHandling == 1) {
                         if (repeatHandling == 1){
@@ -429,11 +444,11 @@ public class CrmContactsService {
                                     .fluentPut("customer_id",customerId)
                                     .fluentPut("telephone", telephone)
                                     .fluentPut("mobile", mobile)
-                                    .fluentPut("email",contactsList.get(kv.getInt("电子邮箱")))
-                                    .fluentPut("post",contactsList.get(kv.getInt("职务")))
-                                    .fluentPut("address", contactsList.get(kv.getInt("地址")))
-                                    .fluentPut("next_time", contactsList.get(kv.getInt("下次联系时间")))
-                                    .fluentPut("remark", contactsList.get(kv.getInt("备注")))
+                                    .fluentPut("email",contactsList.get(kv.getInt("email")))
+                                    .fluentPut("post",contactsList.get(kv.getInt("post")))
+                                    .fluentPut("address", contactsList.get(kv.getInt("address")))
+                                    .fluentPut("next_time", contactsList.get(kv.getInt("next_time")))
+                                    .fluentPut("remark", contactsList.get(kv.getInt("remark")))
                                     .fluentPut("owner_user_id", ownerUserId)
                                     .fluentPut("batch_id", contacts.getStr("batch_id")));
                         }

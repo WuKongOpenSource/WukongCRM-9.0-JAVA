@@ -34,6 +34,7 @@ import com.jfinal.plugin.druid.DruidStatViewHandler;
 import com.jfinal.plugin.redis.RedisPlugin;
 import com.jfinal.render.RenderManager;
 import com.jfinal.template.Engine;
+import com.kakarote.crm9.erp.work.service.WorkService;
 
 import java.io.File;
 
@@ -164,6 +165,8 @@ public class JfinalConfig extends JFinalConfig {
         adminFieldService.createView(7);
         adminFieldService.createView(8);
         adminFieldService.createView(10);
+        WorkService workService= Aop.get(WorkService.class);
+        workService.initialization();
     }
 
     @Override

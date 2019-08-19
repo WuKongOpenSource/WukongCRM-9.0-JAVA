@@ -54,6 +54,11 @@ public class OaLogService {
             userIds = Db.query("SELECT user_id FROM `72crm_admin_user` where user_id != ? ",user.getUserId());
         }else {
             userIds = new AdminUserService().queryUserByParentUser(user.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
+            if (object.containsKey("createUserId")) {
+                if(!userIds.contains(Long.valueOf(object.getInteger("createUserId")))){
+                    return new Page<>();
+                }
+            }
         }
         if (by == 1) {
             kv.set("create_user_id", user.getUserId());

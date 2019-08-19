@@ -142,7 +142,7 @@
                         :style="{'background': item.color ? item.color : '#ccc'}"
                         v-for="(item, index) in taskData.labelList"
                         :key="index">
-                    {{item.lableName}}
+                    {{item.labelName}}
                   </span>
                 </template>
                 <div class="add-tag">
@@ -225,6 +225,7 @@
                       </div>
                       <div v-photo="item"
                            v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
+                           :key="item.img"
                            class="div-photo item-img"></div>
                     </el-tooltip>
                     <img src="@/assets/img/delete_task.png"
@@ -379,6 +380,7 @@
                 <div class="footer-img">
                   <div v-photo="userInfo"
                        v-lazy:background-image="$options.filters.filterUserLazyImg(userInfo.img)"
+                       :key="userInfo.img"
                        class="div-photo"></div>
                 </div>
                 <div class="comments-con">
@@ -735,7 +737,7 @@ export default {
       this.taskData.checked = val
       editTask({
         taskId: this.id,
-        type: this.taskData.checked ? 1 : 2
+        status: this.taskData.checked ? 5 : 1
       })
         .then(res => {
           this.$emit('on-handle', {
@@ -963,7 +965,7 @@ export default {
           // val.substring(5)
           this.$emit('on-handle', {
             type: 'change-stop-time',
-            value: new Date(val).getTime() / 1000,
+            value: val,
             index: this.detailIndex
           })
         })

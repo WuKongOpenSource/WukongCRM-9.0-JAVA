@@ -2,6 +2,7 @@
   <div>
     <c-r-m-list-head title="线索管理"
                      placeholder="请输入线索名称/手机/电话"
+                     :search.sync="search"
                      @on-handle="listHeadHandle"
                      @on-search="crmSearch"
                      main-title="新建线索"

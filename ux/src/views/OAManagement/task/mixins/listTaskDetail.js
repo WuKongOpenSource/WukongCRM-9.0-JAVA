@@ -33,7 +33,7 @@ export default {
         } else if (data.type == 'delete') {
           this.list.splice(data.index, 1)
         } else if (data.type == 'change-stop-time') {
-          let stopTime = parseInt(data.value) + 86399
+          let stopTime = new Date(data.value).getTime() / 1000 + 86399
           if (stopTime > new Date(new Date()).getTime() / 1000) {
             this.list[data.index].isEnd = false
           } else {
@@ -52,7 +52,7 @@ export default {
             this.list[data.index].commentCount = commentCount - 1
           }
         } else if (data.type == 'change-sub-task') {
-          this.list[data.index].childAllCount = data.value.subdonecount
+          this.list[data.index].childWCCount = data.value.subdonecount
           this.list[data.index].childAllCount = data.value.allcount
         }
       }

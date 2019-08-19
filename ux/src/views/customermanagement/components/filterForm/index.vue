@@ -311,17 +311,21 @@ export default {
           formItem.statusOption = []
           formItem.typeId = ''
           formItem.statusId = ''
+          formItem.value = ''
         } else if (
           formItem.formType == 'select' ||
           formItem.formType == 'checkStatus'
         ) {
           formItem.setting = obj.setting || []
+          formItem.value = ''
         } else if (
           formItem.formType === 'date' ||
           formItem.formType === 'datetime' ||
           formItem.formType === 'user'
         ) {
           formItem.value = []
+        } else {
+          formItem.value = ''
         }
       }
 

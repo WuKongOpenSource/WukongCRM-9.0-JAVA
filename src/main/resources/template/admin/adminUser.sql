@@ -47,12 +47,15 @@
       )
     #end
     #sql("queryUserByRealName")
-    select   au.realname,au.mobile,au.post as postName ,ad.name as deptName from 72crm_admin_user as au
-    LEFT JOIN 72crm_admin_dept as ad on au.dept_id = ad.dept_id
-    where au.dept_id = #para(deptId)
-        #if(name)
-          and au.realname like concat('%', #para(name), '%')
-        #end
+      select   au.realname,au.mobile,au.post as postName ,ad.name as deptName from 72crm_admin_user as au
+      LEFT JOIN 72crm_admin_dept as ad on au.dept_id = ad.dept_id
+      where 1=1
+      #if(deptId!=null&&deptId!="")
+        and au.dept_id = #para(deptId)
+      #end
+      #if(name!=null&&name!="")
+        and au.realname like concat('%', #para(name), '%')
+      #end
     #end
     #sql("queryUserCustomer")
          SELECT sau.realname,

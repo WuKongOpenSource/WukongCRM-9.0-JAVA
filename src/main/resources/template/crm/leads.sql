@@ -62,4 +62,12 @@
         #end
     ) order by update_time desc
     #end
+
+    #sql ("queryBatchIdByIds")
+    select batch_id from 72crm_crm_leads where leads_id in (
+        #for(i:ids)
+          #(for.index > 0 ? "," : "")#para(i)
+        #end
+    )
+    #end
 #end

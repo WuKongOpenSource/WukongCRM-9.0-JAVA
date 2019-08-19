@@ -1,10 +1,10 @@
 #namespace("admin.field")
     #sql ("queryAddField")
-    select field_id,field_name,name,type,options,is_null,"" as value,field_type from 72crm_admin_field where label = ? order by sorting
+    select field_id,field_name,name,type,input_tips,options,is_unique,is_null,"" as value,field_type from 72crm_admin_field where label = ? order by sorting
     #end
 
     #sql ("queryUpdateField")
-    select a.field_id,a.field_name,b.name,b.value,a.type,a.options,a.is_null,a.field_type,a.sorting
+    select a.field_id,a.field_name,b.name,b.value,a.type,a.input_tips,a.options,a.is_unique,a.is_null,a.field_type,a.sorting
     from 72crm_admin_field as a left join 72crm_admin_fieldv as b on a.field_id = b.field_id
     where a.label = ?
     #end
@@ -89,7 +89,7 @@
     #end
 
     #sql ("customerFieldList")
-    select field_id,field_name,name,type from 72crm_admin_field where field_type = 0 and label = ?
+    select field_id,field_name,name,type,options from 72crm_admin_field where field_type = 0 and label = ?
     #end
 
     #sql("list")
@@ -144,7 +144,7 @@
     #sql("queryFieldIsExist")
       SELECT COUNT(*)
       FROM 72crm_admin_field as a inner join 72crm_admin_fieldv as b on a.field_id = b.field_id
-      WHERE a.label=#para(types) and a.name=#para(name) and b.value=#para(val)
+      WHERE a.label=#para(types) and a.name=#para(fieldName) and b.value=#para(val)
     #end
 
     #sql ("queryListHead")
@@ -189,24 +189,24 @@
      create or replace view receivablesview as select a.*,b.realname as create_user_name,c.realname as owner_user_name,d.customer_name,e.name as contract_name,e.num as contract_num,f.num as plan_num,z.* from 72crm_crm_receivables as a left join 72crm_admin_user as b on a.create_user_id = b.user_id left join 72crm_admin_user as c on a.owner_user_id = c.user_id left join 72crm_crm_customer as d on a.customer_id = d.customer_id left join 72crm_crm_contract as e on a.contract_id = e.contract_id left join 72crm_crm_receivables_plan as f on a.plan_id = f.plan_id left join fieldreceivablesview as z on a.batch_id = z.field_batch_id
    #end
    #sql ("fieldleadsview")
-     create or replace view fieldleadsview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
+     create or replace view fieldleadsview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d on `a`.`field_id` = `d`.`field_id` %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
    #end
    #sql ("fieldcustomerview")
-     create or replace view fieldcustomerview  as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
+     create or replace view fieldcustomerview  as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d on `a`.`field_id` = `d`.`field_id` %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
    #end
    #sql ("fieldcontactsview")
-     create or replace view fieldcontactsview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field d %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
+     create or replace view fieldcontactsview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field d on `a`.`field_id` = `d`.`field_id` %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
    #end
    #sql ("fieldproductview")
-     create or replace view fieldproductview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
+     create or replace view fieldproductview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d on `a`.`field_id` = `d`.`field_id` %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
    #end
    #sql ("fieldbusinessview")
-     create or replace view fieldbusinessview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d %s where d.label = %s and a.batch_id is not null and a.batch_id != ''and d.field_type = 0 group by a.batch_id
+     create or replace view fieldbusinessview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d on `a`.`field_id` = `d`.`field_id` %s where d.label = %s and a.batch_id is not null and a.batch_id != ''and d.field_type = 0 group by a.batch_id
    #end
    #sql ("fieldcontractview")
-     create or replace view fieldcontractview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
+     create or replace view fieldcontractview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d on `a`.`field_id` = `d`.`field_id` %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
    #end
    #sql ("fieldreceivablesview")
-     create or replace view fieldreceivablesview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
+     create or replace view fieldreceivablesview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d on `a`.`field_id` = `d`.`field_id` %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
    #end
 #end

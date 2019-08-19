@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.jfinal.aop.Before;
+import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
@@ -15,13 +16,18 @@ import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.erp.admin.entity.*;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
+import com.kakarote.crm9.utils.ParamsUtil;
 import com.kakarote.crm9.utils.R;
 
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 
 public class AdminFieldService {
+    @Inject
+    private ParamsUtil paramsUtil;
 
     /**
      * @author wyq
@@ -121,7 +127,11 @@ public class AdminFieldService {
             entity.set("label", label);
             if (entity.getFieldId() != null) {
                 entity.update();
-                Db.update(Db.getSqlPara("admin.field.updateFieldSortName", entity));
+                if (entity.getFieldType() == 0){
+                    Db.update(Db.getSqlPara("admin.field.updateFieldSortName", entity));
+                }else if (entity.getFieldType() == 1){
+                    Db.update("update 72crm_admin_field_sort set name = ? where field_id = ?",entity.getName(),entity.getFieldId());
+                }
             } else {
                 entity.save();
             }
@@ -137,8 +147,56 @@ public class AdminFieldService {
     }
 
     public R verify(Kv kv) {
-        SqlPara sqlPara = Db.getSqlPara("admin.field.queryFieldIsExist", kv);
-        return Db.queryInt(sqlPara.getSql(), sqlPara.getPara()) > 0 ? R.error("参数校验错误").put("error", kv.getStr("name") + "：参数唯一") : R.ok();
+        Integer number = 0;
+        if ("0".equals(kv.get("fieldType"))){
+            SqlPara sqlPara = Db.getSqlPara("admin.field.queryFieldIsExist", kv);
+            number = Db.queryInt(sqlPara.getSql(),sqlPara.getPara());
+        }else {
+            String type = kv.getStr("types");
+            String tableName;
+            String primaryKey;
+            switch (type) {
+                case "1":
+                    tableName = "leads";
+                    primaryKey = "leads_id";
+                    break;
+                case "2":
+                    tableName = "customer";
+                    primaryKey = "customer_id";
+                    break;
+                case "3":
+                    tableName = "contacts";
+                    primaryKey = "contacts_id";
+                    break;
+                case "4":
+                    tableName = "product";
+                    primaryKey = "product_id";
+                    break;
+                case "5":
+                    tableName = "business";
+                    primaryKey = "business_id";
+                    break;
+                case "6":
+                    tableName = "contract";
+                    primaryKey = "contract_id";
+                    break;
+                case "7":
+                    tableName = "receivables";
+                    primaryKey = "receivables_id";
+                    break;
+                case "8":
+                    tableName = "receivables_plan";
+                    primaryKey = "plan_id";
+                    break;
+                default:
+                    return R.error("type不符合要求");
+            }
+            if (!paramsUtil.isValid(kv.getStr("fieldName"))){
+                return R.error("参数包含非法字段");
+            }
+            number = Db.queryInt("select count(*) from 72crm_crm_"+tableName+" where "+kv.getStr("fieldName")+" = ? and "+primaryKey+" != ?",kv.getStr("val"),kv.getStr("id")!=null?Integer.valueOf(kv.getStr("id")):0);
+        }
+        return number > 0 ? R.error("参数校验错误").put("error", kv.getStr("fieldName") + "：参数唯一") : R.ok();
     }
 
     /**
@@ -195,12 +253,12 @@ public class AdminFieldService {
             if (type == 10) {
                 sql.append(String.format("GROUP_CONCAT(if(a.name = '%s',b.realname,null)) AS `%s`,", name, name));
                 if (userJoin.length() == 0) {
-                    userJoin.append(" left join 72crm_admin_user b on find_in_set(dept_id,ifnull(value,0))");
+                    userJoin.append(" left join 72crm_admin_user b on find_in_set(user_id,ifnull(value,0))");
                 }
             } else if (type == 12) {
                 sql.append(String.format("GROUP_CONCAT(if(a.name = '%s',c.name,null)) AS `%s`,", name, name));
                 if (deptJoin.length() == 0) {
-                    deptJoin.append(" left join 72crm_admin_dept c on find_in_set(dept_id,ifnull(value,0))");
+                    deptJoin.append(" left join 72crm_admin_dept c on find_in_set(c.dept_id,ifnull(value,0))");
                 }
             } else {
                 sql.append(String.format("max(if(a.name = '%s',value, null)) AS `%s`,", name, name));
@@ -379,49 +437,6 @@ public class AdminFieldService {
             return recordList;
         }
         FieldUtil fieldUtil = new FieldUtil(recordList);
-        String[] arr = new String[0];
-        switch (categoryId) {
-            case "1":
-                fieldUtil.oaFieldAdd("content", "审批内容", "text", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, "", "", 3);
-                break;
-            case "2":
-                fieldUtil.oaFieldAdd("type_id", "请假类型", "select", new String[]{"年假", "事假", "病假", "产假", "调休", "婚假", "丧假", "其他"}, 1, 0, "", "", 3)
-                        .oaFieldAdd("content", "审批内容", "text", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("start_time", "开始时间", "datetime", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("end_time", "结束时间", "datetime", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("duration", "时长(天)", "floatnumber", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, "", "", 3);
-                break;
-            case "3":
-                fieldUtil.oaFieldAdd("content", "出差事由", "text", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, "", "", 3)
-                        .oaFieldAdd("cause", "行程明细", "business_cause", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("duration", "时长(天)", "floatnumber", arr, 1, 0, "", "", 3);
-                break;
-            case "4":
-                fieldUtil.oaFieldAdd("content", "加班原因", "text", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("start_time", "开始时间", "datetime", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("end_time", "结束时间", "datetime", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("duration", "加班总天数", "floatnumber", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, "", "", 3);
-                break;
-            case "5":
-                fieldUtil.oaFieldAdd("content", "差旅事由", "text", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("cause", "费用明细", "examine_cause", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("money", "报销总金额", "floatnumber", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, "", "", 3);
-                break;
-            case "6":
-                fieldUtil.oaFieldAdd("content", "借款事由", "text", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("money", "借款金额（元）", "floatnumber", arr, 1, 0, "", "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, "", "", 3);
-                break;
-            default:
-                List<Record> recordList1 = Db.find(Db.getSqlPara("admin.field.list1", Kv.by("label", label).set("categoryId", categoryId)));
-                recordToFormType(recordList1);
-                return recordList1;
-        }
         return fieldUtil.getRecordList();
     }
 
@@ -459,13 +474,15 @@ public class AdminFieldService {
         }
         AdminFieldStyle adminFleldStyle = AdminFieldStyle.dao.findFirst(AdminFieldStyle.dao.getSql("admin.field.queryFieldStyle"), type, kv.getStr("field"), BaseUtil.getUser().getUserId());
         if (adminFleldStyle != null) {
-            adminFleldStyle.setStyle(Integer.valueOf(kv.getStr("width")));
+            // TODO 列表宽度舍弃小数点
+            adminFleldStyle.setStyle(new BigDecimal(kv.getStr("width")).intValue());
             adminFleldStyle.update();
         } else {
             adminFleldStyle = new AdminFieldStyle();
             adminFleldStyle.setType(type);
             adminFleldStyle.setCreateTime(new Date());
-            adminFleldStyle.setStyle(Integer.valueOf(kv.getStr("width")));
+            // TODO 列表宽度舍弃小数点
+            adminFleldStyle.setStyle(new BigDecimal(kv.getStr("width")).intValue());
             adminFleldStyle.setFieldName(kv.getStr("field"));
             adminFleldStyle.setUserId(BaseUtil.getUser().getUserId());
             adminFleldStyle.save();
@@ -490,56 +507,41 @@ public class AdminFieldService {
         if (0 == number) {
             List<Record> fieldList;
             if (adminFieldSort.getLabel() == 8){
-                fieldList = customFieldList("2");
+                fieldList = list("2");
             }else {
-                fieldList = customFieldList(adminFieldSort.getLabel().toString());
+                fieldList = list(adminFieldSort.getLabel().toString());
             }
             List<AdminFieldSort> sortList = new LinkedList<>();
             FieldUtil fieldUtil = new FieldUtil(sortList, userId, adminFieldSort.getLabel());
-            if (1 == adminFieldSort.getLabel()) {
-                fieldUtil.add("leadsName", "线索名称").add("telephone", "电话").add("mobile", "手机")
-                        .add("updateTime", "更新时间").add("createTime", "创建时间").add("ownerUserName", "负责人")
-                        .add("address", "地址").add("nextTime", "下次联系时间").add("remark", "备注")
-                        .add("createUserName", "创建人");
-            } else if (2 == adminFieldSort.getLabel() || 8 == adminFieldSort.getLabel()) {
-                fieldUtil.add("customerName", "客户名称").add("dealStatus", "成交状态").add("telephone", "电话")
-                        .add("website", "网址").add("nextTime", "下次联系时间").add("createUserName", "创建人")
-                        .add("updateTime", "更新时间").add("createTime", "创建时间").add("ownerUserName", "负责人")
-                        .add("remark", "备注");
-            } else if (3 == adminFieldSort.getLabel()) {
-                fieldUtil.add("name", "姓名").add("customerName", "客户名称").add("mobile", "手机")
-                        .add("telephone", "电话").add("email", "电子邮箱").add("post", "职务")
-                        .add("address", "地址").add("nextTime", "下次联系时间").add("remark", "备注")
-                        .add("createUserName", "创建人").add("updateTime", "更新时间").add("createTime", "创建时间")
-                        .add("ownerUserName", "负责人");
-            } else if (4 == adminFieldSort.getLabel()) {
-                fieldUtil.add("name", "产品名称").add("num", "产品编码").add("categoryName", "产品类别")
-                        .add("price", "标准价格").add("description", "产品描述").add("createUserName", "创建人")
-                        .add("updateTime", "更新时间").add("createTime", "创建时间").add("ownerUserName", "负责人");
-            } else if (5 == adminFieldSort.getLabel()) {
-                fieldUtil.add("businessName", "商机名称").add("customerName", "客户名称").add("typeName", "商机状态组")
-                        .add("statusName", "商机阶段").add("money", "商机金额").add("dealDate", "预计成交日期")
-                        .add("remark", "备注").add("createUserName", "创建人").add("updateTime", "更新时间")
-                        .add("createTime", "创建时间").add("createUserName", "创建人");
-            } else if (6 == adminFieldSort.getLabel()) {
-                fieldUtil.add("num", "合同编号").add("name", "合同名称").add("customerName", "客户名称")
-                        .add("businessName", "商机名称").add("orderDate", "下单时间").add("money", "合同金额")
-                        .add("startTime", "合同开始时间").add("endTime", "合同结束时间").add("contactsName", "客户签约人")
-                        .add("companyUserName", "公司签约人").add("remark", "备注").add("createUserName", "创建人")
-                        .add("updateTime", "更新时间").add("createTime", "创建时间").add("ownerUserName", "负责人");
-            } else if (7 == adminFieldSort.getLabel()) {
-                fieldUtil.add("number", "回款编号").add("customerName", "客户名称").add("contractNum", "合同编号")
-                        .add("returnTime", "回款日期").add("money", "回款金额").add("planNum", "期数")
-                        .add("remark", "备注").add("createUserName", "创建人").add("updateTime", "更新时间")
-                        .add("createTime", "创建时间").add("ownerUserName", "负责人");
-            } else {
-                return null;
-            }
             if (null != fieldList) {
                 for (Record record : fieldList) {
-                    fieldUtil.add(record.getStr("name"), record.getStr("name"), record.getInt("field_id"));
+                    fieldUtil.add(record.getStr("field_name"), record.getStr("name"), record.getInt("field_id"));
                 }
             }
+            if (5 == adminFieldSort.getLabel()) {
+                fieldUtil.add("typeName", "商机状态组").add("statusName", "商机阶段");
+            }
+            fieldUtil.add("updateTime", "更新时间").add("createTime", "创建时间")
+                    .add("ownerUserName", "负责人").add("createUserName", "创建人");
+            fieldUtil.getAdminFieldSortList().forEach(fieldSort -> {
+                String fieldName = StrUtil.toCamelCase(fieldSort.getFieldName());
+                fieldSort.setFieldName(fieldName);
+                if ("customerId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("customerName");
+                } else if ("categoryId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("categoryName");
+                } else if ("contactsId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("contactsName");
+                } else if ("companyUserId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("companyUserName");
+                } else if ("businessId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("businessName");
+                } else if ("contractId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("contractNum");
+                } else if ("planId".equals(fieldSort.getFieldName())){
+                    fieldSort.setFieldName("planNum");
+                }
+            });
             sortList = fieldUtil.getAdminFieldSortList();
             for (int i = 0; i < sortList.size(); i++) {
                 AdminFieldSort newUserFieldSort = sortList.get(i);

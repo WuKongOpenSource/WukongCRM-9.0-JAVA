@@ -4,6 +4,7 @@
       <div class="log-items">
         <follow-record-cell v-for="(item, index) in list"
                             :item="item"
+                            :index="index"
                             :crmType="crmType"
                             :key="index"
                             @on-handle="cellHandle"></follow-record-cell>

@@ -770,7 +770,7 @@ export default {
         case 'status':
           usersEditStatus({
             userIds: this.dialogData.userId,
-            status: this.dialogData.status === 1 ? 0 : 1
+            status: this.dialogData.status === 0 ? 1 : 0
           }).then(res => {
             this.employeeDetailDialog = false
             this.$message.success('修改成功')

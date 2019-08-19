@@ -1,6 +1,7 @@
 package com.kakarote.crm9.erp.admin.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.erp.admin.entity.AdminRole;
 import com.kakarote.crm9.erp.admin.entity.AdminUserRole;
@@ -96,6 +97,15 @@ public class AdminRoleController extends Controller {
 
     /**
      * @author wyq
+     * @param roleId 角色项目管理角色id
+     * 删除
+     */
+    public void deleteWorkRole(@Para("roleId")Integer roleId){
+        renderJson(adminRoleService.deleteWorkRole(roleId) ? R.ok() : R.error());
+    }
+
+    /**
+     * @author wyq
      * 关联员工
      */
     public void relatedUser(@Para("")AdminUserRole adminUserRole){
@@ -108,5 +118,23 @@ public class AdminRoleController extends Controller {
      */
     public void unbindingUser(@Para("") AdminUserRole adminUserRole){
         renderJson(adminRoleService.unbindingUser(adminUserRole));
+    }
+
+    /**
+     * 项目管理角色列表
+     * @author wyq
+     */
+    public void queryProjectRoleList(){
+        renderJson(adminRoleService.queryProjectRoleList());
+    }
+
+
+    /**
+     * 设置项目管理角色
+     * @author wyq
+     */
+    public void setWorkRole(){
+        JSONObject jsonObject = JSON.parseObject(getRawData());
+        renderJson(adminRoleService.setWorkRole(jsonObject));
     }
 }

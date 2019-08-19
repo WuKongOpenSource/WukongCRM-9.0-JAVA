@@ -229,7 +229,7 @@ export default {
   computed: {
     /** 简报信息 */
     gaugeOptions() {
-      return [{ label: '回款金额', value: 1 }, { label: '合同金额', value: 2 }]
+      return [{ label: '回款金额', value: 2 }, { label: '合同金额', value: 1 }]
     }
   },
   mounted() {

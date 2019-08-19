@@ -9,7 +9,7 @@ taskCron.class=com.kakarote.crm9.erp.work.cron.TaskCron
 taskCron.daemon=true
 taskCron.enable=true
 
-biCustomerCron.cron=0 14 * * *
+biCustomerCron.cron=0 23 * * *
 biCustomerCron.class=com.kakarote.crm9.erp.bi.cron.BiCustomerCron
 biCustomerCron.daemon=true
 biCustomerCron.enable=true

@@ -79,7 +79,11 @@
         </div>
         <div class="checked-content">
           <div class="checked-top">
-            <span class="title">已选择员工({{userSelectCount }}) 部门 ({{depSelectCount}})</span>
+            <span class="title">已选择</span>
+            <span v-if="!closeUser"
+                  class="title">员工 ({{userSelectCount}})</span>
+            <span v-if="!closeDep"
+                  class="title">部门 ({{depSelectCount}})</span>
             <el-button type="text"
                        class="rt"
                        @click="emptyClick">清空</el-button>
@@ -207,7 +211,9 @@ export default {
     closeDep: {
       type: Boolean,
       default: false
-    }
+    },
+    userRequest: Function,
+    userParams: Object
   },
   methods: {
     initInfo() {
@@ -324,7 +330,15 @@ export default {
      */
     getUserList() {
       this.userLoading = true
-      usersList({ pageType: 0 })
+      let request = usersList
+      let params = {}
+      if (this.userRequest) {
+        request = this.userRequest
+        params = this.userParams || {}
+      } else {
+        params = { pageType: 0 }
+      }
+      request(params)
         .then(res => {
           this.userList = res.data.map(item => {
             item.type = 'user'

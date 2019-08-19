@@ -112,7 +112,8 @@ export default {
     crmType: {
       type: String,
       default: ''
-    }
+    },
+    index: [String, Number]
   },
   data() {
     return {

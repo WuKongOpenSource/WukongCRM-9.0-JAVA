@@ -82,7 +82,7 @@ public class AdminExamineRecordService {
                     //如果是负责人主管审批 获取主管ID
                     Record r = Db.findFirst(Db.getSql("admin.examineLog.queryUserByUserId"), ownerUserId);
                     if (r == null || r.getLong("user_id") == null){
-                        examineLog.setExamineUser(Long.valueOf(BaseConstant.SUPER_ADMIN_USER_ID));
+                        examineLog.setExamineUser(BaseConstant.SUPER_ADMIN_USER_ID);
                     }else {
                     examineLog.setExamineUser(r.getLong("user_id"));}
                     examineLog.setRecordId(examineRecord.getRecordId());

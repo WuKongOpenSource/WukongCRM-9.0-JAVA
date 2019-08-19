@@ -1,5 +1,6 @@
 package com.kakarote.crm9.erp.bi.service;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jfinal.aop.Inject;
 import com.jfinal.plugin.activerecord.Db;
@@ -7,6 +8,7 @@ import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.erp.bi.common.BiTimeUtil;
 import com.kakarote.crm9.utils.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -383,6 +385,9 @@ public class BiCustomerService {
         Integer beginTime = record.getInt("beginTime");
         Integer finalTime = record.getInt("finalTime");
         List<Record> productList = Db.find("select product_id,name from 72crm_crm_product");
+        if (CollectionUtil.isEmpty(productList)){
+            return R.ok().put("data",new ArrayList<>());
+        }
         StringBuffer sqlStringBuffer = new StringBuffer();
         for (int i=1; i <= productList.size();i++){
             sqlStringBuffer.append("select '").append(productList.get(i-1).getStr("name")).append("' as productName,IFNULL(AVG(TIMESTAMPDIFF(DAY,a.create_time,b.order_date)),0)" +

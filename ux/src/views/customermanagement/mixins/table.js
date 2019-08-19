@@ -233,6 +233,7 @@ export default {
         if (column.property === 'customerName') {
           this.rowID = row.customerId
           this.rowType = 'customer'
+          this.showDview = true
         } else if (column.property === 'name') {
           this.rowID = row.contactsId
           this.rowType = 'contacts'
@@ -244,6 +245,7 @@ export default {
         if (column.property === 'customerName') {
           this.rowID = row.customerId
           this.rowType = 'customer'
+          this.showDview = true
         } else if (column.property === 'businessName') {
           this.rowID = row.businessId
           this.rowType = 'business'
@@ -255,12 +257,15 @@ export default {
         if (column.property === 'customerName') {
           this.rowID = row.customerId
           this.rowType = 'customer'
+          this.showDview = true
         } else if (column.property === 'businessName') {
           this.rowID = row.businessId
           this.rowType = 'business'
+          this.showDview = true
         } else if (column.property === 'contactsName') {
           this.rowID = row.contactsId
           this.rowType = 'contacts'
+          this.showDview = true
         } else if (column.property === 'num') {
           this.rowID = row.contractId
           this.rowType = 'contract'
@@ -279,9 +284,11 @@ export default {
         if (column.property === 'customerName') {
           this.rowID = row.customerId
           this.rowType = 'customer'
+          this.showDview = true
         } else if (column.property === 'contractNum') {
           this.rowID = row.contractId
           this.rowType = 'contract'
+          this.showDview = true
         } else if (column.property === 'number') {
           this.rowID = row.receivablesId
           this.rowType = 'receivables'

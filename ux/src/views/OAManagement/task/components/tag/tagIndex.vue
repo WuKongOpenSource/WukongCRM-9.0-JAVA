@@ -145,7 +145,7 @@ export default {
     },
     // 标签管理 -- 编辑
     editBtn(val) {
-      this.editTagId = val.lableId
+      this.editTagId = val.labelId
       this.newTagTitle = '编辑标签'
       this.tagContent = 3
       this.bgColorProps = val.color
@@ -161,23 +161,23 @@ export default {
       // 标签点击关联页面
       let labelIds = values.filter(item => {
         if (value.check) {
-          return item.check && item.lableId != value.lableId
+          return item.check && item.labelId != value.labelId
         } else {
-          return item.check || item.lableId == value.lableId
+          return item.check || item.labelId == value.labelId
         }
       })
       if (value.check) {
         editTask({
           taskId: this.taskData.taskId,
-          lableId: labelIds
+          labelId: labelIds
             .map(item => {
-              return item.lableId
+              return item.labelId
             })
             .join(',')
         }).then(res => {
           let list = this.taskData.labelList
           for (let item in list) {
-            if (value.lableId == list[item].lableId) {
+            if (value.labelId == list[item].labelId) {
               list.splice(item, 1)
               break
             }
@@ -187,20 +187,20 @@ export default {
       } else {
         editTask({
           taskId: this.taskData.taskId,
-          lableId: labelIds
+          labelId: labelIds
             .map(item => {
-              return item.lableId
+              return item.labelId
             })
             .join(',')
         }).then(res => {
           value.check = true
-          value.lableName = value.name
+          value.labelName = value.name
           this.taskData.labelList.push(value)
         })
       }
       // value.check = value.check ? false : true
       for (let item in values) {
-        if (values[item].lableId == value.lableId) {
+        if (values[item].labelId == value.labelId) {
           document.getElementsByClassName('tag-list')[item].style.background =
             '#F7F8FA'
         } else {
@@ -234,11 +234,11 @@ export default {
       } else {
         editTagAPI({
           name: val,
-          lableId: this.editTagId,
+          labelId: this.editTagId,
           color: color
         }).then(res => {
           for (let item of _this.editTagList) {
-            if (item.lableId == _this.editTagId) {
+            if (item.labelId == _this.editTagId) {
               item.name = val
               item.color = color
             }
@@ -281,10 +281,10 @@ export default {
           this.tagShow = true
           this.managementTag()
           deleteTagAPI({
-            lableId: val.lableId
+            labelId: val.labelId
           }).then(res => {
             for (let i in this.editTagList) {
-              if (this.editTagList[i].lableId == val.lableId) {
+              if (this.editTagList[i].labelId == val.labelId) {
                 this.editTagList.splice(i, 1)
               }
             }
@@ -309,7 +309,7 @@ export default {
         for (let item of res.data) {
           if (this.taskData.labelList) {
             for (let i of this.taskData.labelList) {
-              if (i.lableId == item.lableId) {
+              if (i.labelId == item.labelId) {
                 item.check = true
                 break
               } else {

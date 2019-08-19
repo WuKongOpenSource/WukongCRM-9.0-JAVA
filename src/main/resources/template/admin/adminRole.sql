@@ -23,7 +23,7 @@
     #end
 
     #sql ("getRoleListByRoleType")
-      select role_id as id ,role_name as title,role_name as remark,data_type as type,status,role_type as pid from 72crm_admin_role WHERE role_type=?
+      select role_id as id ,role_name as title,role_name as remark,data_type as type,status,role_type as pid,label from 72crm_admin_role WHERE role_type=? and is_hidden = 1
     #end
 
     #sql ("getRoleMenu")

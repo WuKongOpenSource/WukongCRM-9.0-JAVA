@@ -67,6 +67,7 @@ export default {
       type: String,
       default: 'default' //返回全部  crm_contract crm_receivables oa_examine 合同审核人自选列表
     },
+    infoRequest: Function,
     /** 请求辅助参数 */
     infoParams: {
       type: Object,
@@ -110,7 +111,9 @@ export default {
         })
     },
     getRequest() {
-      if (this.infoType === 'default') {
+      if (this.infoRequest) {
+        return this.infoRequest
+      } else if (this.infoType === 'default') {
         return usersList
       } else if (
         this.infoType === 'crm_contract' ||

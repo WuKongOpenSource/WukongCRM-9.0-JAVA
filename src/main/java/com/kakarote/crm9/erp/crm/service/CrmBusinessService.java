@@ -224,7 +224,7 @@ public class CrmBusinessService {
             Record record = new Record();
             idsList.add(record.set("business_id", Integer.valueOf(id)));
         }
-        List<String> batchIdList = Db.query("select batch_id from 72crm_crm_business where business_id in ("+businessIds+")");
+        List<Record> batchIdList = Db.find(Db.getSqlPara("crm.business.queryBatchIdByIds",Kv.by("ids",idsArr)));
         return Db.tx(() -> {
             Db.batch(Db.getSql("crm.business.deleteByIds"), "business_id", idsList, 100);
             Db.batch("delete from 72crm_admin_fieldv where batch_id = ?","batch_id",batchIdList,100);

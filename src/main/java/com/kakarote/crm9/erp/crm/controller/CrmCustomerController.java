@@ -5,6 +5,7 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
@@ -352,14 +353,6 @@ public class CrmCustomerController extends Controller {
     }
 
     /**
-     * @author HJP
-     * 员工客户分析
-     */
-    public void getUserCustomerAnalysis(BasePageRequest<AdminUser> basePageRequest){
-        renderJson(crmCustomerService.getUserCustomerAnalysis(basePageRequest));
-    }
-
-    /**
      * @author wyq
      * 客户批量导出
      */
@@ -413,12 +406,15 @@ public class CrmCustomerController extends Controller {
         ExcelWriter writer = ExcelUtil.getWriter();
         AdminFieldService adminFieldService = new AdminFieldService();
         List<Record> fieldList = adminFieldService.customFieldList("2");
-        writer.addHeaderAlias("customer_name","客户名称");
-        writer.addHeaderAlias("telephone","电话");
-        writer.addHeaderAlias("mobile","手机");
-        writer.addHeaderAlias("website","网址");
-        writer.addHeaderAlias("next_time","下次联系时间");
-        writer.addHeaderAlias("deal_status","成交状态");
+        List<Record> customerFields = adminFieldService.list("2");
+        Kv kv = new Kv();
+        customerFields.forEach(customerField -> kv.set(customerField.getStr("field_name"),customerField.getStr("name")));
+        writer.addHeaderAlias("customer_name",kv.getStr("customer_name"));
+        writer.addHeaderAlias("telephone",kv.getStr("telephone"));
+        writer.addHeaderAlias("mobile",kv.getStr("mobile"));
+        writer.addHeaderAlias("website",kv.getStr("website"));
+        writer.addHeaderAlias("next_time",kv.getStr("next_time"));
+        writer.addHeaderAlias("deal_status",kv.getStr("deal_status"));
         writer.addHeaderAlias("create_user_name","创建人");
         writer.addHeaderAlias("owner_user_name","负责人");
         writer.addHeaderAlias("address","省市区");
@@ -428,7 +424,7 @@ public class CrmCustomerController extends Controller {
         writer.addHeaderAlias("lat","地理位置维度");
         writer.addHeaderAlias("create_time","创建时间");
         writer.addHeaderAlias("update_time","更新时间");
-        writer.addHeaderAlias("remark","备注");
+        writer.addHeaderAlias("remark",kv.getStr("remark"));
         for (Record field:fieldList){
             writer.addHeaderAlias(field.getStr("name"),field.getStr("name"));
         }

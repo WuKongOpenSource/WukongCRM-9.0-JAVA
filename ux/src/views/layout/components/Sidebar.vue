@@ -17,7 +17,8 @@
                class="button-name">{{createButtonTitle}}</div>
           <div v-show="!buttonNameCollapse"
                class="button-line"></div>
-          <i class="button-mark" :class="createButtonIcon"></i>
+          <i class="button-mark"
+             :class="createButtonIcon"></i>
         </div>
       </el-popover>
     </div>
@@ -39,7 +40,7 @@
                         :class="{'menu-item-select': activeIndex == item.path}">
             <i class="wukong"
                :class="'wukong-' + item.meta.icon"
-               :style="{ 'color': activeIndex == item.path ? activeTextColor : textColor}"></i>
+               :style="{ 'color': activeIndex == item.path ? activeTextColor : textColor, fontSize: item.meta.fontSize || '16px'}"></i>
             <span slot="title">{{item.meta.title}}</span>
             <el-badge v-if="item.meta.num && item.meta.num > 0"
                       :max="99"
@@ -52,7 +53,8 @@
           <template slot="title"
                     v-if="!item.hidden">
             <i class="wukong"
-               :class="'wukong-' + item.meta.icon"></i>
+               :class="'wukong-' + item.meta.icon"
+               :style="{fontSize: item.meta.fontSize || '16px'}"></i>
             <span slot="title">{{item.meta.title}}</span>
           </template>
           <router-link v-for="(subitem, subindex) in item.children"

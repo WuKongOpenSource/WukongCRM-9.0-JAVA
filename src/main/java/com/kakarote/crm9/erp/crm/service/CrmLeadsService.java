@@ -149,7 +149,7 @@ public class CrmLeadsService {
             Record record = new Record();
             idsList.add(record.set("leads_id", Integer.valueOf(id)));
         }
-        List<String> batchIdList = Db.query("select batch_id from 72crm_crm_leads where leads_id in ("+leadsIds+")");
+        List<Record> batchIdList = Db.find(Db.getSqlPara("crm.leads.queryBatchIdByIds",Kv.by("ids",idsArr)));
         return Db.tx(() -> {
             Db.batch(Db.getSql("crm.leads.deleteByIds"), "leads_id", idsList, 100);
             Db.batch("delete from 72crm_admin_fieldv where batch_id = ?","batch_id",batchIdList,100);
@@ -237,9 +237,17 @@ public class CrmLeadsService {
             Db.update("update 72crm_crm_leads set is_transform = 1,update_time = ?,customer_id = ? where leads_id = ?",
                     DateUtil.date(), crmCustomer.getCustomerId(), Integer.valueOf(leadsId));
             List<AdminRecord> adminRecordList = AdminRecord.dao.find("select * from 72crm_admin_record where types = 'crm_leads' and types_id = ?",Integer.valueOf(leadsId));
+            List<AdminFile> adminFileList = new ArrayList<>();
             if (adminRecordList.size() != 0){
                 adminRecordList.forEach(adminRecord -> {
-                    adminRecord.setBatchId(customerBatchId);
+                    List<AdminFile> leadsRecordFiles = AdminFile.dao.find("select * from 72crm_admin_file where batch_id = ?",adminRecord.getBatchId());
+                    String customerRecordBatchId = IdUtil.simpleUUID();
+                    leadsRecordFiles.forEach(adminFile -> {
+                        adminFile.setBatchId(customerRecordBatchId);
+                        adminFile.setFileId(null);
+                    });
+                    adminFileList.addAll(leadsRecordFiles);
+                    adminRecord.setBatchId(customerRecordBatchId);
                     adminRecord.setRecordId(null);
                     adminRecord.setTypes("crm_customer");
                     adminRecord.setTypesId(crmCustomer.getCustomerId());
@@ -247,14 +255,15 @@ public class CrmLeadsService {
                 });
                 Db.batchSave(adminRecordList,100);
             }
-            List<AdminFile> adminFileList = AdminFile.dao.find("select * from 72crm_admin_file where batch_id = ?",crmLeads.getStr("batch_id"));
-            if (adminFileList.size() != 0){
-                adminFileList.forEach(adminFile -> {
+            List<AdminFile> fileList = AdminFile.dao.find("select * from 72crm_admin_file where batch_id = ?",crmLeads.getStr("batch_id"));
+            if (fileList.size() != 0){
+                fileList.forEach(adminFile -> {
                     adminFile.setBatchId(customerBatchId);
                     adminFile.setFileId(null);
                 });
-                Db.batchSave(adminFileList,100);
             }
+            adminFileList.addAll(fileList);
+            Db.batchSave(adminFileList,100);
         }
         return R.ok();
     }
@@ -372,11 +381,10 @@ public class CrmLeadsService {
         try {
             List<List<Object>> read = reader.read();
             List<Object> list = read.get(0);
-            for (int i = 0; i < list.size(); i++) {
-                kv.set(list.get(i), i);
-            }
             List<Record> recordList = adminFieldService.customFieldList("1");
+            recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
             List<Record> fieldList = adminFieldService.queryAddField(1);
+            fieldList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
             fieldList.forEach(record -> {
                 if (record.getInt("is_null") == 1){
                     record.set("name",record.getStr("name")+"(*)");
@@ -385,6 +393,11 @@ public class CrmLeadsService {
             List<String> nameList = fieldList.stream().map(record -> record.getStr("name")).collect(Collectors.toList());
             if (nameList.size() != list.size() || !nameList.containsAll(list)){
                 return R.error("请使用最新导入模板");
+            }
+            Kv nameMap = new Kv();
+            fieldList.forEach(record -> nameMap.set(record.getStr("name"),record.getStr("field_name")));
+            for (int i = 0; i < list.size(); i++) {
+                kv.set(nameMap.get(list.get(i)), i);
             }
             if (read.size() > 1) {
                 JSONObject object = new JSONObject();
@@ -396,25 +409,25 @@ public class CrmLeadsService {
                             leadsList.add(null);
                         }
                     }
-                    String leadsName = leadsList.get(kv.getInt("线索名称(*)")).toString();
+                    String leadsName = leadsList.get(kv.getInt("leads_name")).toString();
                     Integer number = Db.queryInt("select count(*) from 72crm_crm_leads where leads_name = ?", leadsName);
                     if (0 == number) {
                         object.fluentPut("entity", new JSONObject().fluentPut("leads_name", leadsName)
-                                .fluentPut("telephone", leadsList.get(kv.getInt("电话")))
-                                .fluentPut("mobile", leadsList.get(kv.getInt("手机")))
-                                .fluentPut("address", leadsList.get(kv.getInt("地址")))
-                                .fluentPut("next_time", leadsList.get(kv.getInt("下次联系时间")))
-                                .fluentPut("remark", leadsList.get(kv.getInt("备注")))
+                                .fluentPut("telephone", leadsList.get(kv.getInt("telephone")))
+                                .fluentPut("mobile", leadsList.get(kv.getInt("mobile")))
+                                .fluentPut("address", leadsList.get(kv.getInt("address")))
+                                .fluentPut("next_time", leadsList.get(kv.getInt("next_time")))
+                                .fluentPut("remark", leadsList.get(kv.getInt("remark")))
                                 .fluentPut("owner_user_id", ownerUserId));
                     } else if (number > 0 && repeatHandling == 1) {
                         Record leads = Db.findFirst("select leads_id,batch_id from 72crm_crm_leads where leads_name = ?", leadsName);
                         object.fluentPut("entity", new JSONObject().fluentPut("leads_id", leads.getInt("leads_id"))
                                 .fluentPut("leads_name", leadsName)
-                                .fluentPut("telephone", leadsList.get(kv.getInt("电话")))
-                                .fluentPut("mobile", leadsList.get(kv.getInt("手机")))
-                                .fluentPut("address", leadsList.get(kv.getInt("地址")))
-                                .fluentPut("next_time", leadsList.get(kv.getInt("下次联系时间")))
-                                .fluentPut("remark", leadsList.get(kv.getInt("备注")))
+                                .fluentPut("telephone", leadsList.get(kv.getInt("telephone")))
+                                .fluentPut("mobile", leadsList.get(kv.getInt("mobile")))
+                                .fluentPut("address", leadsList.get(kv.getInt("address")))
+                                .fluentPut("next_time", leadsList.get(kv.getInt("next_time")))
+                                .fluentPut("remark", leadsList.get(kv.getInt("remark")))
                                 .fluentPut("owner_user_id", ownerUserId)
                                 .fluentPut("batch_id", leads.getStr("batch_id")));
                     } else if (number > 0 && repeatHandling == 2) {

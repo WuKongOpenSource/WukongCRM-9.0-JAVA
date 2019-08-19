@@ -94,17 +94,21 @@ public class OaActionRecordService {
             Integer recordType = record.getInt("type");
             if (recordType.equals(OaEnum.LOG_TYPE_KEY.getTypes())) {
                 info = Db.findFirst(Db.getSqlPara("oa.log.queryList", Kv.by("logId", actionId)));
-                oaLogService.queryLogDetail(info, BaseUtil.getUser().getUserId());
+                if (info!=null){
+                    oaLogService.queryLogDetail(info, BaseUtil.getUser().getUserId());
+                }
             } else if (recordType.equals(OaEnum.EXAMINE_TYPE_KEY.getTypes())) {
                 info = Db.findFirst("select content as title from 72crm_oa_examine where examine_id = ?", actionId);
             } else if (recordType.equals(OaEnum.TASK_TYPE_KEY.getTypes())) {
                 info = Db.findFirst("select name as title from 72crm_task where task_id = ?", actionId);
             } else if (recordType.equals(OaEnum.EVENT_TYPE_KEY.getTypes())) {
                 info = Db.findFirst("select title  from 72crm_oa_event where event_id = ?", actionId);
-                Record first = Db.findFirst(Db.getSql("oa.event.queryById"), actionId);
-                first.remove("type");
-                oaEventService.queryRelateList(first);
-                info.setColumns(first);
+                if (info!=null){
+                    Record first = Db.findFirst(Db.getSql("oa.event.queryById"), actionId);
+                    first.remove("type");
+                    oaEventService.queryRelateList(first);
+                    info.setColumns(first);
+                }
             } else if (recordType.equals(OaEnum.ANNOUNCEMENT_TYPE_KEY.getTypes())) {
                 info = Db.findFirst("select title,content as annContent from 72crm_oa_announcement where announcement_id = ?", actionId);
             }
@@ -127,7 +131,7 @@ public class OaActionRecordService {
         int nowMonth = dateTime.month();
         StringBuilder sql = new StringBuilder();
         do {
-            sql.append(" select (select '").append(dateTime.toSqlDate()).append("' )as date,if(count(*)>0,1,0) as status from 72crm_oa_event where (create_user_id = ").append(userId).append(" or owner_user_ids like concat('%',").append(userId).append(",'%')) and '").append(dateTime.toSqlDate()).append("' between start_time and end_time ").append("union all");
+            sql.append(" select (select '").append(dateTime.toSqlDate()).append("' )as date,if(count(*)>0,1,0) as status from 72crm_oa_event where (create_user_id = ").append(userId).append(" or owner_user_ids like concat('%',").append(userId).append(",'%')) and '").append(dateTime.toSqlDate()).append("' between date_format(start_time,'%Y-%m-%d') and date_format(end_time,'%Y-%m-%d') ").append("union all");
             dateTime = DateUtil.offsetDay(dateTime, 1);
         } while (dateTime.month() == nowMonth);
         sql.delete(sql.length() - 9, sql.length());
@@ -137,7 +141,7 @@ public class OaActionRecordService {
 
     public R queryEventByDay(String day) {
         Long userId = BaseUtil.getUser().getUserId();
-        List<Record> recordList = Db.find("select title,date_format(start_time,'%Y-%d-%m') as start_time ,date_format(end_time,'%Y-%d-%m') as end_time ,owner_user_ids from 72crm_oa_event where  (create_user_id = ? or owner_user_ids like concat('%', ?, '%')) and  ? between start_time and end_time", userId, userId,day);
+        List<Record> recordList = Db.find("select title,date_format(start_time,'%Y-%d-%m') as start_time ,date_format(end_time,'%Y-%d-%m') as end_time ,owner_user_ids from 72crm_oa_event where  (create_user_id = ? or owner_user_ids like concat('%', ?, '%')) and  ? between date_format(start_time,'%Y-%m-%d') and date_format(end_time,'%Y-%m-%d')", userId, userId,day);
 
         recordList.forEach(record -> {
             StringBuilder realnames = new StringBuilder();

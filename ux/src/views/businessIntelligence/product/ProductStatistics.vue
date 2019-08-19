@@ -24,15 +24,15 @@
         </el-table-column>
       </el-table>
     </div>
-    <contract-detail v-if="showContractview"
+    <contract-detail v-if="showContractview && rowID"
                      :id="rowID"
                      @hide-view="showContractview=false"
                      class="d-view"></contract-detail>
-    <customer-detail v-if="showCustomerView"
+    <customer-detail v-if="showCustomerView && rowID"
                      :id="rowID"
                      @hide-view="showCustomerView=false"
                      class="d-view"></customer-detail>
-    <product-detail v-if="showProductview"
+    <product-detail v-if="showProductview && rowID"
                     :id="rowID"
                     @hide-view="showProductview=false"
                     class="d-view"></product-detail>

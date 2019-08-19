@@ -255,9 +255,6 @@ public class CrmContactsController extends Controller {
             }else {
                 cell.setCellValue(record.getStr("name"));
             }
-            if ("客户名称".equals(record.getStr("name"))){
-                setting = customerList.toArray(new String[customerList.size()]);
-            }
             if (setting.length != 0){
                 // 生成下拉列表
                 CellRangeAddressList regions = new CellRangeAddressList(0, Integer.MAX_VALUE, i, i);

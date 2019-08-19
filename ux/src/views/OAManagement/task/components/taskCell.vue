@@ -30,14 +30,14 @@
                :key="j"
                class="item-label">
             <span class="k-name"
-                  :style="{'background': k.color}">{{k.lableName}}</span>
+                  :style="{'background': k.color}">{{k.labelName}}</span>
           </div>
         </template>
         <template v-else>
           <span class="k-name"
-                :style="{'background': data.labelList[0].color}">{{data.labelList[0].lableName}}</span>
+                :style="{'background': data.labelList[0].color}">{{data.labelList[0].labelName}}</span>
           <span class="k-name"
-                :style="{'background': data.labelList[1].color}">{{data.labelList[1].lableName}}</span>
+                :style="{'background': data.labelList[1].color}">{{data.labelList[1].labelName}}</span>
           <el-tooltip placement="top"
                       effect="light"
                       popper-class="tooltip-change-border task-tooltip">
@@ -51,7 +51,7 @@
                 <span v-if="j >= 2"
                       class="k-name"
                       :style="{'background': k.color || '#ccc'}"
-                      style="border-radius: 3px; color: #FFF; padding: 3px 10px;">{{k.lableName}}</span>
+                      style="border-radius: 3px; color: #FFF; padding: 3px 10px;">{{k.labelName}}</span>
               </div>
             </div>
             <span class="color-label-more">

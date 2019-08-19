@@ -415,79 +415,37 @@ public class InstrumentService {
         Integer cycleNum = record.getInt("cycleNum");
         String sqlDateFormat = record.getStr("sqlDateFormat");
         Integer beginTime = record.getInt("beginTime");
-        StringBuffer sqlStringBuffer = new StringBuffer();
+        List<Record> recordList = new ArrayList<>();
         for (int i=1; i <= cycleNum;i++){
-            sqlStringBuffer.append("select '").append(beginTime).
-                    append("' as type , IFNULL(SUM(money),0) as contractMoneys, (SELECT  IFNULL(SUM(money),0) FROM 72crm_crm_receivables WHERE DATE_FORMAT( return_time, '")
-                    .append(sqlDateFormat).append("' ) = '").append(beginTime).append("' and check_status = 2 AND owner_user_id in ( ").append(userIds).append(" )) as receivablesMoneys ").
-                    append("  FROM 72crm_crm_contract as ccco where DATE_FORMAT( ccco.order_date, '").append(sqlDateFormat).append("') = '").
-                    append(beginTime).append("'  and ccco.check_status = 2 AND owner_user_id in (").append(userIds).append(")");
-            if (i != cycleNum){
-                sqlStringBuffer.append(" union all ");
-            }
+            recordList.addAll(Db.find(Db.getSqlPara("bi.base.salesTrend",Kv.by("beginTime",beginTime).set("sqlDateFormat",sqlDateFormat).set("userIds",userIds))));
             beginTime = biTimeUtil.estimateTime(beginTime);
         }
-        List<Record> recordList = Db.find(sqlStringBuffer.toString());
+
         Integer ststus = biTimeUtil.analyzeType(type);
-        Record totlaContractMoney = Db.findFirst(Db.getSqlPara("crm.Instrument.queryContractMoeny",
-                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
-                        set("endTime",endTime)));
-        Record totlaReceivablesMoney = Db.findFirst(Db.getSqlPara("crm.Instrument.queryReceivablesMoeny",
-                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
-                        set("endTime",endTime)));
+        Record totlaContractMoney = Db.findFirst(Db.getSqlPara("crm.Instrument.queryContractMoeny", Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).set("endTime",endTime)));
+        Record totlaReceivablesMoney = Db.findFirst(Db.getSqlPara("crm.Instrument.queryReceivablesMoeny",Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).set("endTime",endTime)));
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("list",recordList);
-        if (totlaContractMoney != null){
-            jsonObject.put("totlaContractMoney",totlaContractMoney.getBigDecimal("money"));
-        }else {
-            jsonObject.put("totlaContractMoney",0);
-        }
-        if (totlaReceivablesMoney != null){
-            jsonObject.put("totlaReceivablesMoney",totlaReceivablesMoney.getBigDecimal("money"));
-        }else {
-            jsonObject.put("totlaReceivablesMoney",0);
-        }
+        jsonObject.put("totlaContractMoney",totlaContractMoney != null?totlaContractMoney.getBigDecimal("money"):0);
+        jsonObject.put("totlaReceivablesMoney",totlaReceivablesMoney != null?totlaReceivablesMoney.getBigDecimal("money"):0);
         return R.ok().put("data",jsonObject);
     }
 
-    public R sellFunnel(  String type,String userIds, String startTime, String endTime,Integer typeId){
+    public R sellFunnel(String type,String userIds, String startTime, String endTime,Integer typeId){
         String[] userIdss = userIds.split(",");
         Record record = new Record();
         record.set("type",type).set("startTime",startTime).set("endTime",endTime);
         biTimeUtil.analyzeType(record);
         Integer ststus = biTimeUtil.analyzeType(type);
-        List<Record> list = Db.find(Db.getSqlPara("bi.funnel.sellFunnel",
-                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
-                        set("endTime",endTime).set("typeId",typeId)));
-        Record sum_money = Db.findFirst(Db.getSqlPara("bi.funnel.sellFunnelSum",
-                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
-                        set("endTime",endTime).set("typeId",typeId)));
-        Record sum_shu = Db.findFirst(Db.getSqlPara("bi.funnel.sellFunnelSum",
-                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
-                        set("endTime",endTime).set("typeId",typeId).set("isEnd",2)));
-        Record sum_ying = Db.findFirst(Db.getSqlPara("bi.funnel.sellFunnelSum",
-                Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).
-                        set("endTime",endTime).set("typeId",typeId).set("isEnd",1)));
+        List<Record> list = Db.find(Db.getSqlPara("bi.funnel.sellFunnel", Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).set("endTime",endTime).set("typeId",typeId)));
+        Record sum_money = Db.findFirst(Db.getSqlPara("bi.funnel.sellFunnelSum", Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).set("endTime",endTime).set("typeId",typeId)));
+        Record sum_shu = Db.findFirst(Db.getSqlPara("bi.funnel.sellFunnelSum", Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).set("endTime",endTime).set("typeId",typeId).set("isEnd",2)));
+        Record sum_ying = Db.findFirst(Db.getSqlPara("bi.funnel.sellFunnelSum", Kv.by("userIds",userIdss).set("type",ststus).set("startTime",startTime).set("endTime",endTime).set("typeId",typeId).set("isEnd",1)));
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("list",list);
-        if (sum_money != null){
-            jsonObject.put("sum_money",sum_money.getBigDecimal("money"));
-        }else {
-            jsonObject.put("sum_money",0);
-        }
-        if (sum_shu != null){
-            jsonObject.put("sum_shu",sum_shu.getBigDecimal("money"));
-        }else {
-            jsonObject.put("sum_shu",0);
-        }
-        if (sum_ying != null){
-            jsonObject.put("sum_ying",sum_ying.getBigDecimal("money"));
-        }else {
-            jsonObject.put("sum_ying",0);
-        }
-
-
-
+        jsonObject.put("sum_money",sum_money != null?sum_money.getBigDecimal("money"):0);
+        jsonObject.put("sum_shu",sum_shu != null?sum_shu.getBigDecimal("money"):0);
+        jsonObject.put("sum_ying",sum_ying != null?sum_ying.getBigDecimal("money"):0);
         return R.ok().put("data",jsonObject);
     }
 

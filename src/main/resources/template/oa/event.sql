@@ -4,7 +4,7 @@
     from 72crm_oa_event as a left join 72crm_oa_event_relation as b on a.event_id = b.event_id
     left join 72crm_admin_user as c on a.create_user_id = c.user_id
     left join 72crm_admin_user as d on FIND_IN_SET(d.user_id,IFNULL(a.owner_user_ids, 0))
-    where start_time < ? and end_time > ? and (a.create_user_id = ? or a.owner_user_ids like CONCAT('%',?,'%')) group by a.event_id
+    where start_time < ? and end_time > ? and (a.create_user_id = ? or a.owner_user_ids like CONCAT('%',?,'%')) group by a.event_id,b.eventrelation_id
     #end
 
     #sql("queryById")
@@ -82,6 +82,6 @@
     #if(customerIds)
       or b.customer_ids like concat('%,',#para(customerIds),',%')
     #end
-    group by a.event_id
+    group by a.event_id,b.eventrelation_id
    #end
 #end

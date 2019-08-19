@@ -17,6 +17,6 @@
     order by a.create_time desc
   #end
   #sql("queryTask")
-    select task_id,name,create_time,stop_time,priority from 72crm_task where ishidden = 0 and (create_user_id = #para(userId) or main_user_id = #para(userId) or owner_user_id like concat('%',#para(userId),'%')) and pid = 0 order by create_time desc
+    select task_id,name,create_time,stop_time,priority from 72crm_task where ishidden = 0 and ( main_user_id = #para(userId) or owner_user_id like concat('%',#para(userId),'%')) and pid = 0 order by create_time desc
   #end
 #end

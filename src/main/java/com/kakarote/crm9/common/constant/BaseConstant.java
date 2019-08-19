@@ -1,5 +1,6 @@
 package com.kakarote.crm9.common.constant;
 
+import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.utils.BaseUtil;
 
 import java.io.Serializable;
@@ -11,7 +12,7 @@ public class BaseConstant implements Serializable {
 
     public static final String NAME = "72CRM";
 
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "1.3.0";
 
     private static final long serialVersionUID = 1L;
     /**
@@ -24,7 +25,7 @@ public class BaseConstant implements Serializable {
     /**
      * 角色类型列表
      */
-    public static final Integer[] ROLE_TYPES = {1, 2, 3, 4, 5, 0};
+    public static final Integer[] ROLE_TYPES = {1, 2, 3, 4, 0};
 
     /**
      * 超级管理员的roleId
@@ -44,5 +45,19 @@ public class BaseConstant implements Serializable {
      * 用户登录错误缓存key
      */
     public static final String USER_LOGIN_ERROR_KEY = "LOGIN_ERROR_USER_";
+
+    /**
+     * 项目管理员角色ID
+     */
+    public static  Integer WORK_ADMIN_ROLE_ID;
+    /**
+     * 每个项目管理员角色ID
+     */
+    public static  Integer SMALL_WORK_ADMIN_ROLE_ID;
+
+    /**
+     * 每个项目编辑角色ID
+     */
+    public static  Integer SMALL_WORK_EDIT_ROLE_ID;
 
 }

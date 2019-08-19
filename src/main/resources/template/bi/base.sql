@@ -199,4 +199,7 @@
     union all
     select '十二月' as month,IFNULL(december,0) as achievement,(select IFNULL(SUM(money),0) from 72crm_crm_receivables where owner_user_id = #para(userId) and DATE_FORMAT(return_time,'%Y%m') = CONCAT(#para(year),'12') and check_status = 2) as receivables,IFNULL(ROUND((select IFNULL(SUM(money),0) from 72crm_crm_receivables where owner_user_id = #para(userId) and DATE_FORMAT(return_time,'%Y%m') = CONCAT(#para(year),'12') and check_status = 2)/IFNULL(december,0)*100,2),0) as rate from 72crm_crm_achievement where obj_id = #para(userId) and type = 3 and year = #para(year)
   #end
+  #sql("salesTrend")
+    select #para(beginTime) as type,IFNULL(SUM(money),0) as contractMoneys, (SELECT IFNULL(SUM(money),0) FROM 72crm_crm_receivables WHERE DATE_FORMAT( return_time,#para(sqlDateFormat) ) = #para(beginTime)  and check_status = 2 AND owner_user_id in (#for(x:userIds) #(for.index == 0 ? "" : ",") #para(x) #end)) as receivablesMoneys FROM 72crm_crm_contract as ccco where DATE_FORMAT(ccco.order_date,#para(sqlDateFormat))=#para(beginTime) and ccco.check_status = 2 AND owner_user_id in (#for(x:userIds) #(for.index == 0 ? "" : ",") #para(x) #end)
+  #end
 #end

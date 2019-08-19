@@ -345,7 +345,7 @@ CREATE TABLE `72crm_admin_menu` (
   `realm` varchar(127) DEFAULT '' COMMENT '链接地址',
   `menu_type` int(1) DEFAULT NULL COMMENT '菜单类型  1目录 2 菜单 3 按钮 4特殊',
   `sort` int(4) unsigned DEFAULT '0' COMMENT '排序（同级有效）',
-  `status` tinyint(4) DEFAULT '1' COMMENT '状态 1 启用 0 禁用',
+  `status` int(4) DEFAULT '1' COMMENT '状态 1 启用 0 禁用',
   `remarks` varchar(255) DEFAULT NULL COMMENT '菜单说明',
   PRIMARY KEY (`menu_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='后台菜单表';
@@ -457,6 +457,20 @@ INSERT INTO `72crm_admin_menu` VALUES ('128', '127', '查看列表', 'index', '3
 INSERT INTO `72crm_admin_menu` VALUES ('129', '127', '分配', 'distribute', '3', '1', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('130', '127', '领取', 'receive', '3', '1', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('131', '127', '导出', 'excelexport', '3', '1', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('132', '1', '公海管理', 'pool', '1', '4', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('133', '132', '查看列表', 'index', '3', '1', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('134', '132', '分配', 'distribute', '3', '1', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('135', '132', '领取', 'receive', '3', '1', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('136', '132', '导出', 'excelexport', '3', '1', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('137', '0', '项目管理', 'work', '0', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('138', '137', '任务', 'task', '1', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('139', '138', '创建', 'save', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('140', '137', '任务列表', 'taskClass', '1', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('141', '140', '新建任务列表', 'save', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('142', '140', '编辑任务列表', 'update', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('143', '140', '删除任务列表', 'delete', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('144', '137', '项目', 'work', '1', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('145', '144', '项目设置', 'update', '3', '0', '1', null);
 
 -- ----------------------------
 -- Table structure for 72crm_admin_record
@@ -490,28 +504,33 @@ DROP TABLE IF EXISTS `72crm_admin_role`;
 CREATE TABLE `72crm_admin_role` (
   `role_id` int(11) NOT NULL AUTO_INCREMENT,
   `role_name` varchar(32) DEFAULT NULL COMMENT '名称',
-  `role_type` int(1) DEFAULT NULL COMMENT '0、自定义角色1、管理角色 2、客户管理角色 3、人事角色 4、财务角色 5、项目角色',
+  `role_type` int(1) DEFAULT NULL COMMENT '0、自定义角色1、管理角色 2、客户管理角色 3、人事角色 4、财务角色 5、项目角色 6、项目自定义角色',
   `remark` varchar(100) DEFAULT NULL COMMENT '备注',
-  `status` tinyint(3) DEFAULT '1' COMMENT '1 启用 0 禁用',
-  `data_type` tinyint(1) NOT NULL DEFAULT '5' COMMENT '数据权限 1、本人，2、本人及下属，3、本部门，4、本部门及下属部门，5、全部 ',
+  `status` int(3) DEFAULT '1' COMMENT '1 启用 0 禁用',
+  `data_type` int(1) NOT NULL DEFAULT '5' COMMENT '数据权限 1、本人，2、本人及下属，3、本部门，4、本部门及下属部门，5、全部 ',
+  `is_hidden` int(1) NOT NULL DEFAULT '1' COMMENT '0 隐藏 1 不隐藏',
+  `label` int(2) DEFAULT NULL COMMENT '1 系统项目管理员角色 2 项目管理角色 3 项目编辑角色 4 项目只读角色',
   PRIMARY KEY (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='角色表';
+) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8 COMMENT='角色表';
 
 -- ----------------------------
 -- Records of 72crm_admin_role
 -- ----------------------------
-INSERT INTO `72crm_admin_role` VALUES ('1', '超级管理员', '1', '备注', '1', '5');
-INSERT INTO `72crm_admin_role` VALUES ('2', '系统设置管理员', '1', null, '1', '2');
-INSERT INTO `72crm_admin_role` VALUES ('3', '部门与员工管理员', '1', null, '1', '5');
-INSERT INTO `72crm_admin_role` VALUES ('4', '审批流管理员', '1', null, '1', '5');
-INSERT INTO `72crm_admin_role` VALUES ('5', '工作台管理员', '1', null, '1', '5');
-INSERT INTO `72crm_admin_role` VALUES ('6', '客户管理员', '1', null, '1', '5');
-INSERT INTO `72crm_admin_role` VALUES ('7', '公告管理员', '1', null, '1', '5');
-INSERT INTO `72crm_admin_role` VALUES ('8', '销售经理角色', '2', null, '1', '5');
-INSERT INTO `72crm_admin_role` VALUES ('9', '行政管理', '3', null, '1', '1');
-INSERT INTO `72crm_admin_role` VALUES ('10', '财务角色', '4', null, '1', '1');
-INSERT INTO `72crm_admin_role` VALUES ('11', '技术研发', '5', null, '1', '1');
-INSERT INTO `72crm_admin_role` VALUES ('12', '销售员角色', '2', null, '1', '5');
+INSERT INTO `72crm_admin_role` VALUES ('1', '超级管理员', '1', '备注', '1', '5', '1', null);
+INSERT INTO `72crm_admin_role` VALUES ('2', '系统设置管理员', '1', null, '1', '2', '1', null);
+INSERT INTO `72crm_admin_role` VALUES ('3', '部门与员工管理员', '1', null, '1', '5', '1', null);
+INSERT INTO `72crm_admin_role` VALUES ('4', '审批流管理员', '1', null, '1', '5', '1', null);
+INSERT INTO `72crm_admin_role` VALUES ('5', '工作台管理员', '1', null, '1', '5', '1', null);
+INSERT INTO `72crm_admin_role` VALUES ('6', '客户管理员', '1', null, '1', '5', '1', null);
+INSERT INTO `72crm_admin_role` VALUES ('7', '公告管理员', '1', null, '1', '5', '1', null);
+INSERT INTO `72crm_admin_role` VALUES ('8', '销售经理角色', '2', null, '1', '2', '1', null);
+INSERT INTO `72crm_admin_role` VALUES ('9', '行政管理', '3', null, '1', '1', '1', null);
+INSERT INTO `72crm_admin_role` VALUES ('10', '财务角色', '4', null, '1', '1', '1', null);
+INSERT INTO `72crm_admin_role` VALUES ('11', '销售员角色', '2', null, '1', '2', '1', null);
+INSERT INTO `72crm_admin_role` VALUES ('12', '项目管理员', '1', null, '1', '5', '1', '1');
+INSERT INTO `72crm_admin_role` VALUES ('13', '管理', '5', '', '1', '5', '0', '2');
+INSERT INTO `72crm_admin_role` VALUES ('14', '编辑', '5', null, '1', '5', '1', '3');
+INSERT INTO `72crm_admin_role` VALUES ('15', '只读', '5', null, '1', '5', '1', '4');
 
 -- ----------------------------
 -- Table structure for 72crm_admin_role_menu
@@ -523,6 +542,11 @@ CREATE TABLE `72crm_admin_role_menu` (
   `menu_id` int(11) NOT NULL COMMENT '菜单ID',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色菜单对应关系表';
+
+INSERT INTO `72crm_admin_role_menu` VALUES (null, '14', '139');
+INSERT INTO `72crm_admin_role_menu` VALUES (null, '14', '141');
+INSERT INTO `72crm_admin_role_menu` VALUES (null, '14', '142');
+INSERT INTO `72crm_admin_role_menu` VALUES (null, '14', '143');
 
 -- ----------------------------
 -- Records of 72crm_admin_role_menu
@@ -539,8 +563,8 @@ CREATE TABLE `72crm_admin_scene` (
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
   `sort` int(5) NOT NULL COMMENT '排序ID',
   `data` text NOT NULL COMMENT '属性值',
-  `is_hide` tinyint(1) NOT NULL COMMENT '1隐藏',
-  `is_system` tinyint(1) NOT NULL COMMENT '1系统0自定义',
+  `is_hide` int(1) NOT NULL COMMENT '1隐藏',
+  `is_system` int(1) NOT NULL COMMENT '1系统0自定义',
   `bydata` varchar(50) DEFAULT NULL COMMENT '系统参数',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
@@ -583,10 +607,10 @@ CREATE TABLE `72crm_admin_user` (
   `num` varchar(100) DEFAULT NULL COMMENT '员工编号',
   `mobile` varchar(20) NOT NULL COMMENT '手机号',
   `email` varchar(50) DEFAULT NULL COMMENT '邮箱',
-  `sex` tinyint(1) DEFAULT NULL COMMENT '0 未选择 1 男 2 女 ',
+  `sex` int(1) DEFAULT NULL COMMENT '0 未选择 1 男 2 女 ',
   `dept_id` int(11) DEFAULT NULL COMMENT '部门',
   `post` varchar(50) DEFAULT NULL COMMENT '岗位',
-  `status` tinyint(3) DEFAULT '2' COMMENT '状态,0禁用,1正常,2未激活',
+  `status` int(3) DEFAULT '2' COMMENT '状态,0禁用,1正常,2未激活',
   `parent_id` bigint(20) DEFAULT '0' COMMENT '直属上级ID',
   `last_login_time` datetime DEFAULT NULL COMMENT '最后登录时间',
   `last_login_ip` varchar(30) DEFAULT NULL COMMENT '最后登录IP 注意兼容IPV6',
@@ -597,8 +621,6 @@ CREATE TABLE `72crm_admin_user` (
 -- Records of 72crm_admin_user
 -- ----------------------------
 INSERT INTO `72crm_admin_user` VALUES ('3', 'admin', '51a10f3b4724642d6987d90510e6edf5', '7d65f7cbc0ce4a259d741ae0ef33730c', '', '2019-02-13 15:43:26', 'admin', '390823685766627', '12312341234', null, null, '1', '1', '1', '0', '2019-07-02 09:12:06', '127.0.0.1');
-INSERT INTO `72crm_admin_user` VALUES ('4', '12345678911', '01fd2abcddd35be7a5f35b74f3683160', '5ebba1cefc0e464987ffd16d036cddbc', null, '2019-06-27 10:00:07', '小明', '403292466348945', '12345678911', null, null, '1', null, '1', '0', '2019-06-29 15:27:14', '0:0:0:0:0:0:0:1');
-INSERT INTO `72crm_admin_user` VALUES ('5', '12345678912', '3b039b6d64d555c465cca63a61ee4c98', '0187e3c32ee74592b2d64a159ebe4f8e', null, '2019-06-27 10:02:17', '梨花', '231877451669111', '12345678912', null, null, '1', null, '1', '0', '2019-06-29 17:10:20', '127.0.0.1');
 
 -- ----------------------------
 -- Table structure for 72crm_admin_user_role
@@ -615,13 +637,6 @@ CREATE TABLE `72crm_admin_user_role` (
 -- Records of 72crm_admin_user_role
 -- ----------------------------
 INSERT INTO `72crm_admin_user_role` VALUES (null, '3', '1');
-INSERT INTO `72crm_admin_user_role` VALUES (null, '4', '4');
-INSERT INTO `72crm_admin_user_role` VALUES (null, '4', '5');
-INSERT INTO `72crm_admin_user_role` VALUES (null, '5', '2');
-INSERT INTO `72crm_admin_user_role` VALUES (null, '5', '3');
-INSERT INTO `72crm_admin_user_role` VALUES (null, '5', '4');
-INSERT INTO `72crm_admin_user_role` VALUES (null, '5', '5');
-INSERT INTO `72crm_admin_user_role` VALUES (null, '5', '6');
 
 -- ----------------------------
 -- Table structure for 72crm_crm_achievement
@@ -630,7 +645,7 @@ DROP TABLE IF EXISTS `72crm_crm_achievement`;
 CREATE TABLE `72crm_crm_achievement` (
   `achievement_id` int(11) NOT NULL AUTO_INCREMENT,
   `obj_id` int(11) DEFAULT NULL COMMENT '对象ID',
-  `type` tinyint(2) DEFAULT '0' COMMENT '1公司2部门3员工',
+  `type` int(2) DEFAULT '0' COMMENT '1公司2部门3员工',
   `year` varchar(20) DEFAULT NULL COMMENT '年',
   `january` decimal(18,2) DEFAULT '0.00' COMMENT '一月',
   `february` decimal(18,2) DEFAULT '0.00' COMMENT '二月',
@@ -644,7 +659,7 @@ CREATE TABLE `72crm_crm_achievement` (
   `october` decimal(18,2) DEFAULT '0.00' COMMENT '十月',
   `november` decimal(18,2) DEFAULT '0.00' COMMENT '十一月',
   `december` decimal(18,2) DEFAULT '0.00' COMMENT '十二月',
-  `status` tinyint(2) DEFAULT NULL COMMENT '1销售（目标）2回款（目标）',
+  `status` int(2) DEFAULT NULL COMMENT '1销售（目标）2回款（目标）',
   `yeartarget` decimal(18,2) DEFAULT '0.00' COMMENT '年目标',
   PRIMARY KEY (`achievement_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='业绩目标';
@@ -4229,7 +4244,7 @@ CREATE TABLE `72crm_crm_business` (
   `batch_id` varchar(32) DEFAULT NULL COMMENT '批次 比如附件批次',
   `ro_user_id` longtext CHARACTER SET utf8mb4 NOT NULL COMMENT '只读权限',
   `rw_user_id` longtext NOT NULL COMMENT '读写权限',
-  `is_end` tinyint(4) NOT NULL DEFAULT '0' COMMENT '1赢单2输单3无效',
+  `is_end` int(4) NOT NULL DEFAULT '0' COMMENT '1赢单2输单3无效',
   `status_remark` varchar(500) DEFAULT '',
   PRIMARY KEY (`business_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='商机表';
@@ -4285,7 +4300,7 @@ CREATE TABLE `72crm_crm_business_status` (
   `type_id` int(11) NOT NULL COMMENT '商机状态类别ID',
   `name` varchar(50) NOT NULL COMMENT '标识',
   `rate` varchar(20) DEFAULT NULL COMMENT '赢单率',
-  `order_num` tinyint(4) DEFAULT NULL COMMENT '排序',
+  `order_num` int(4) DEFAULT NULL COMMENT '排序',
   PRIMARY KEY (`status_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='商机状态';
 
@@ -4307,7 +4322,7 @@ CREATE TABLE `72crm_crm_business_type` (
   `create_user_id` int(11) NOT NULL COMMENT '创建人ID',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1启用0禁用',
+  `status` int(1) NOT NULL DEFAULT '1' COMMENT '1启用0禁用',
   PRIMARY KEY (`type_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='商机状态组类别';
 
@@ -4423,7 +4438,7 @@ CREATE TABLE `72crm_crm_customer` (
   `customer_id` int(11) NOT NULL AUTO_INCREMENT,
   `customer_name` varchar(255) NOT NULL COMMENT '客户名称',
   `followup` int(11) DEFAULT NULL COMMENT '跟进状态 0未跟进1已跟进',
-  `is_lock` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1锁定',
+  `is_lock` int(1) NOT NULL DEFAULT '0' COMMENT '1锁定',
   `next_time` datetime DEFAULT NULL COMMENT '下次联系时间',
   `deal_status` varchar(100) DEFAULT '未成交' COMMENT '成交状态',
   `mobile` varchar(255) DEFAULT NULL COMMENT '手机',
@@ -4471,7 +4486,7 @@ CREATE TABLE `72crm_crm_customer_stats` (
 DROP TABLE IF EXISTS `72crm_crm_leads`;
 CREATE TABLE `72crm_crm_leads` (
   `leads_id` int(11) NOT NULL AUTO_INCREMENT,
-  `is_transform` tinyint(1) DEFAULT '0' COMMENT '1已转化 0 未转化',
+  `is_transform` int(1) DEFAULT '0' COMMENT '1已转化 0 未转化',
   `followup` int(11) DEFAULT NULL COMMENT '跟进状态 0未跟进1已跟进',
   `leads_name` varchar(255) NOT NULL COMMENT '线索名称',
   `customer_id` int(11) DEFAULT NULL COMMENT '客户id',
@@ -4588,11 +4603,11 @@ CREATE TABLE `72crm_crm_receivables_plan` (
   `plan_id` int(11) NOT NULL AUTO_INCREMENT,
   `num` varchar(100) DEFAULT NULL COMMENT '期数',
   `receivables_id` int(11) DEFAULT NULL COMMENT '回款ID',
-  `status` tinyint(4) DEFAULT NULL COMMENT '1完成 0 未完成',
+  `status` int(4) DEFAULT NULL COMMENT '1完成 0 未完成',
   `money` decimal(18,2) DEFAULT NULL COMMENT '计划回款金额',
   `return_date` datetime DEFAULT NULL COMMENT '计划回款日期',
   `return_type` varchar(255) DEFAULT NULL COMMENT '计划回款方式',
-  `remind` tinyint(4) DEFAULT NULL COMMENT '提前几天提醒',
+  `remind` int(4) DEFAULT NULL COMMENT '提前几天提醒',
   `remind_date` datetime DEFAULT NULL COMMENT '提醒日期',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
   `create_user_id` int(11) NOT NULL COMMENT '创建人ID',
@@ -4670,7 +4685,7 @@ CREATE TABLE `72crm_oa_event` (
   `address` varchar(100) DEFAULT NULL COMMENT '地点',
   `remark` varchar(100) DEFAULT NULL COMMENT '备注',
   `color` varchar(15) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '颜色',
-  `remind_type` tinyint(11) DEFAULT NULL COMMENT '提醒时间0准时提醒 1：5分钟前 2：15分钟前 3：30分钟前 4：一个小时前 5：两个小时前 6：一天前 7：两天前 8：一周前',
+  `remind_type` int(11) DEFAULT NULL COMMENT '提醒时间0准时提醒 1：5分钟前 2：15分钟前 3：30分钟前 4：一个小时前 5：两个小时前 6：一天前 7：两天前 8：一周前',
   PRIMARY KEY (`event_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='日程表';
 
@@ -4707,7 +4722,7 @@ CREATE TABLE `72crm_oa_event_relation` (
   `contacts_ids` varchar(200) DEFAULT NULL COMMENT '联系人IDs',
   `business_ids` varchar(200) DEFAULT NULL COMMENT '商机IDs',
   `contract_ids` varchar(200) DEFAULT NULL COMMENT '合同IDs',
-  `status` tinyint(2) DEFAULT '0' COMMENT '状态1可用',
+  `status` int(2) DEFAULT '0' COMMENT '状态1可用',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   PRIMARY KEY (`eventrelation_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='日程关联业务表';
@@ -4751,14 +4766,14 @@ CREATE TABLE `72crm_oa_examine_category` (
   `remarks` varchar(500) DEFAULT NULL COMMENT '描述',
   `type` int(1) DEFAULT '0' COMMENT '1 普通审批 2 请假审批 3 出差审批 4 加班审批 5 差旅报销 6 借款申请 0 自定义审批',
   `create_user_id` int(10) DEFAULT NULL COMMENT '创建人ID',
-  `status` tinyint(1) DEFAULT '1' COMMENT '1启用，0禁用',
-  `is_sys` tinyint(1) DEFAULT NULL COMMENT '1为系统类型，不能删除',
-  `examine_type` tinyint(1) DEFAULT NULL COMMENT '1固定2自选',
+  `status` int(1) DEFAULT '1' COMMENT '1启用，0禁用',
+  `is_sys` int(1) DEFAULT NULL COMMENT '1为系统类型，不能删除',
+  `examine_type` int(1) DEFAULT NULL COMMENT '1固定2自选',
   `user_ids` varchar(500) DEFAULT NULL COMMENT '可见范围（员工）',
   `dept_ids` varchar(500) DEFAULT NULL COMMENT '可见范围（部门）',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `is_deleted` tinyint(1) DEFAULT '0' COMMENT '1已删除',
+  `is_deleted` int(1) DEFAULT '0' COMMENT '1已删除',
   `delete_time` datetime DEFAULT NULL COMMENT '删除时间',
   `delete_user_id` int(11) DEFAULT NULL COMMENT '删除人ID',
   PRIMARY KEY (`category_id`)
@@ -4827,7 +4842,7 @@ CREATE TABLE `72crm_oa_examine_relation` (
   `contacts_ids` varchar(20) DEFAULT NULL COMMENT '联系人IDs',
   `business_ids` varchar(20) DEFAULT NULL COMMENT '商机IDs',
   `contract_ids` varchar(20) DEFAULT NULL COMMENT '合同IDs',
-  `status` tinyint(2) DEFAULT '1' COMMENT '状态1可用',
+  `status` int(2) DEFAULT '1' COMMENT '状态1可用',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`r_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='审批关联业务表';
@@ -4889,7 +4904,7 @@ INSERT INTO `72crm_oa_examine_travel` VALUES ('2', '8', 'aa', '2019-07-01 00:00:
 DROP TABLE IF EXISTS `72crm_oa_log`;
 CREATE TABLE `72crm_oa_log` (
   `log_id` int(11) NOT NULL AUTO_INCREMENT,
-  `category_id` tinyint(2) NOT NULL DEFAULT '1' COMMENT '日志类型（1日报，2周报，3月报）',
+  `category_id` int(2) NOT NULL DEFAULT '1' COMMENT '日志类型（1日报，2周报，3月报）',
   `title` varchar(50) DEFAULT NULL COMMENT '日志标题',
   `content` text COMMENT '日志内容',
   `tomorrow` varchar(1000) DEFAULT NULL COMMENT '明日工作内容',
@@ -4919,7 +4934,7 @@ CREATE TABLE `72crm_oa_log_relation` (
   `contacts_ids` varchar(512) DEFAULT NULL COMMENT '联系人IDs',
   `business_ids` varchar(512) DEFAULT NULL COMMENT '商机IDs',
   `contract_ids` varchar(512) DEFAULT NULL COMMENT '合同IDs',
-  `status` tinyint(2) DEFAULT NULL COMMENT '状态1可用',
+  `status` int(2) DEFAULT NULL COMMENT '状态1可用',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`r_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='日志关联业务表';
@@ -4940,23 +4955,24 @@ CREATE TABLE `72crm_task` (
   `owner_user_id` varchar(255) DEFAULT NULL COMMENT '团队成员ID',
   `create_time` datetime DEFAULT NULL COMMENT '新建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `status` tinyint(2) DEFAULT '1' COMMENT '完成状态 1正在进行2延期3归档 5结束',
+  `status` int(2) DEFAULT '1' COMMENT '完成状态 1正在进行2延期3归档 5结束',
   `class_id` int(5) DEFAULT '0' COMMENT '分类id',
-  `lable_id` varchar(255) DEFAULT NULL COMMENT '标签 ,号拼接',
+  `label_id` varchar(255) DEFAULT NULL COMMENT '标签 ,号拼接',
   `description` text COMMENT '描述',
   `pid` int(11) DEFAULT '0' COMMENT '上级ID',
   `start_time` datetime DEFAULT NULL COMMENT '开始时间',
   `stop_time` datetime DEFAULT NULL COMMENT '结束时间',
-  `priority` tinyint(2) DEFAULT NULL COMMENT '优先级 从大到小 3高 2中 1低',
+  `priority` int(2) DEFAULT NULL COMMENT '优先级 从大到小 3高 2中 1低',
   `work_id` int(11) DEFAULT '0' COMMENT '项目ID',
-  `is_top` tinyint(2) DEFAULT '0' COMMENT '工作台展示 0收件箱 1今天要做，2下一步要做，3以后要做',
-  `is_open` tinyint(2) DEFAULT '1' COMMENT '是否公开',
-  `order_num` tinyint(4) DEFAULT NULL COMMENT '排序ID',
-  `top_order_num` tinyint(4) DEFAULT NULL COMMENT '我的任务排序ID',
+  `is_top` int(2) DEFAULT '0' COMMENT '工作台展示 0收件箱 1今天要做，2下一步要做，3以后要做',
+  `is_open` int(2) DEFAULT '1' COMMENT '是否公开',
+  `order_num`  int(4) NULL DEFAULT 999 COMMENT '排序ID' ,
+  `top_order_num`  int(4) NULL DEFAULT 999 COMMENT '我的任务排序ID' ,
   `archive_time` datetime DEFAULT NULL COMMENT '归档时间',
-  `ishidden` tinyint(2) DEFAULT '0' COMMENT '是否删除 0 未删除 1 删除',
+  `ishidden` int(2) DEFAULT '0' COMMENT '是否删除 0 未删除 1 删除',
   `hidden_time` datetime DEFAULT NULL COMMENT '删除时间',
   `batch_id` varchar(50) DEFAULT NULL COMMENT '批次',
+  `is_archive` int(2) DEFAULT '0' COMMENT '1归档',
   PRIMARY KEY (`task_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='任务表';
 
@@ -4975,10 +4991,10 @@ CREATE TABLE `72crm_task_comment` (
   `create_time` datetime DEFAULT NULL COMMENT '新建时间',
   `main_id` int(11) DEFAULT '0' COMMENT '主评论的id',
   `pid` int(11) DEFAULT '0' COMMENT '回复对象ID',
-  `status` tinyint(2) DEFAULT '1' COMMENT '状态 ',
+  `status` int(2) DEFAULT '1' COMMENT '状态 ',
   `type_id` int(11) DEFAULT '0' COMMENT '评论项目任务ID 或评论其他模块ID',
   `favour` int(7) DEFAULT '0' COMMENT '赞',
-  `type` tinyint(2) DEFAULT '0' COMMENT '评论分类 1：任务评论  2：日志评论',
+  `type` int(2) DEFAULT '0' COMMENT '评论分类 1：任务评论  2：日志评论',
   PRIMARY KEY (`comment_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='任务评论表';
 
@@ -4997,7 +5013,7 @@ CREATE TABLE `72crm_task_relation` (
   `contacts_ids` varchar(50) DEFAULT NULL COMMENT '联系人IDs',
   `business_ids` varchar(50) DEFAULT NULL COMMENT '商机IDs',
   `contract_ids` varchar(50) DEFAULT NULL COMMENT '合同IDs',
-  `status` tinyint(2) DEFAULT NULL COMMENT '状态1可用',
+  `status` int(2) DEFAULT NULL COMMENT '状态1可用',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`r_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='任务关联业务表';
@@ -5013,12 +5029,12 @@ DROP TABLE IF EXISTS `72crm_work`;
 CREATE TABLE `72crm_work` (
   `work_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '项目ID',
   `name` varchar(50) DEFAULT NULL COMMENT '项目名字',
-  `status` tinyint(2) DEFAULT '1' COMMENT '状态 1启用 3归档 2 删除',
+  `status` int(2) DEFAULT '1' COMMENT '状态 1启用 3归档 2 删除',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `create_user_id` bigint(20) DEFAULT NULL COMMENT '创建人ID',
   `description` text CHARACTER SET utf8 COLLATE utf8_bin COMMENT '描述',
   `color` varchar(15) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '颜色',
-  `is_open` tinyint(2) DEFAULT '1' COMMENT '是否所有人可见 1 是 0 否',
+  `is_open` int(2) DEFAULT '1' COMMENT '是否所有人可见 1 是 0 否',
   `owner_user_id` varchar(50) DEFAULT NULL COMMENT '项目成员',
   `archive_time` datetime DEFAULT NULL COMMENT '归档时间',
   `delete_time` datetime DEFAULT NULL COMMENT '删除时间',
@@ -5031,24 +5047,6 @@ CREATE TABLE `72crm_work` (
 -- ----------------------------
 
 -- ----------------------------
--- Table structure for 72crm_work_relation
--- ----------------------------
-DROP TABLE IF EXISTS `72crm_work_relation`;
-CREATE TABLE `72crm_work_relation` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '项目关联业务表',
-  `work_id` int(11) DEFAULT NULL COMMENT '项目ID',
-  `relation_id` int(11) DEFAULT NULL COMMENT '关联ID',
-  `relation_type` int(1) DEFAULT NULL COMMENT '关联类型  1 客户 2 联系人 3 商机 4 合同',
-  `status` tinyint(2) DEFAULT '1' COMMENT '状态 1 可用',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='项目关联业务表';
-
--- ----------------------------
--- Records of 72crm_work_relation
--- ----------------------------
-
--- ----------------------------
 -- Table structure for 72crm_work_task_class
 -- ----------------------------
 DROP TABLE IF EXISTS `72crm_work_task_class`;
@@ -5057,9 +5055,9 @@ CREATE TABLE `72crm_work_task_class` (
   `name` varchar(50) DEFAULT NULL COMMENT '分类名',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `create_user_id` int(11) DEFAULT NULL COMMENT '创建人ID',
-  `status` tinyint(2) DEFAULT '0' COMMENT '状态1正常',
+  `status` int(2) DEFAULT '0' COMMENT '状态1正常',
   `work_id` int(11) DEFAULT NULL COMMENT '项目ID',
-  `order_num` tinyint(4) DEFAULT NULL COMMENT '排序',
+  `order_num` int(4) DEFAULT NULL COMMENT '排序',
   PRIMARY KEY (`class_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='任务分类表';
 
@@ -5070,19 +5068,19 @@ CREATE TABLE `72crm_work_task_class` (
 -- ----------------------------
 -- Table structure for 72crm_work_task_lable
 -- ----------------------------
-DROP TABLE IF EXISTS `72crm_work_task_lable`;
-CREATE TABLE `72crm_work_task_lable` (
-  `lable_id` int(11) NOT NULL AUTO_INCREMENT,
+DROP TABLE IF EXISTS `72crm_work_task_label`;
+CREATE TABLE `72crm_work_task_label` (
+  `label_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) DEFAULT NULL COMMENT '标签名',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `create_user_id` int(11) DEFAULT NULL COMMENT '创建人ID',
-  `status` tinyint(2) DEFAULT '0' COMMENT '状态',
+  `status` int(2) DEFAULT '0' COMMENT '状态',
   `color` varchar(15) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '颜色',
-  PRIMARY KEY (`lable_id`)
+  PRIMARY KEY (`label_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='任务标签表';
 
 -- ----------------------------
--- Records of 72crm_work_task_lable
+-- Records of 72crm_work_task_label
 -- ----------------------------
 
 -- ----------------------------
@@ -5094,7 +5092,7 @@ CREATE TABLE `72crm_work_task_log` (
   `user_id` int(11) NOT NULL COMMENT '操作人ID',
   `content` varchar(255) DEFAULT NULL COMMENT '内容',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `status` tinyint(2) DEFAULT '0' COMMENT '状态 4删除',
+  `status` int(2) DEFAULT '0' COMMENT '状态 4删除',
   `task_id` int(11) DEFAULT '0' COMMENT '任务ID',
   `work_id` int(11) DEFAULT '0' COMMENT '项目ID',
   PRIMARY KEY (`log_id`)
@@ -5104,87 +5102,16 @@ CREATE TABLE `72crm_work_task_log` (
 -- Records of 72crm_work_task_log
 -- ----------------------------
 
+SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
--- View structure for fieldbusinessview
+-- Table structure for 72crm_work_user
 -- ----------------------------
-DROP VIEW IF EXISTS `fieldbusinessview`;
-CREATE SQL SECURITY DEFINER VIEW `fieldbusinessview` AS select `a`.`batch_id` AS `field_batch_id` from (`72crm_admin_fieldv` `a` join `72crm_admin_field` `d`) where ((`d`.`label` = 5) and (`a`.`batch_id` is not null) and (`a`.`batch_id` <> '') and (`d`.`field_type` = 0)) group by `a`.`batch_id` ;
-
--- ----------------------------
--- View structure for fieldcontactsview
--- ----------------------------
-DROP VIEW IF EXISTS `fieldcontactsview`;
-CREATE SQL SECURITY DEFINER VIEW `fieldcontactsview` AS select max(if((`a`.`name` = '备注'),`a`.`value`,NULL)) AS `备注`,max(if((`a`.`name` = '是否关键决策人'),`a`.`value`,NULL)) AS `是否关键决策人`,`a`.`batch_id` AS `field_batch_id` from (`72crm_admin_fieldv` `a` join `72crm_admin_field` `d`) where ((`d`.`label` = 3) and (`a`.`batch_id` is not null) and (`a`.`batch_id` <> '') and (`d`.`field_type` = 0)) group by `a`.`batch_id` ;
-
--- ----------------------------
--- View structure for fieldcontractview
--- ----------------------------
-DROP VIEW IF EXISTS `fieldcontractview`;
-CREATE SQL SECURITY DEFINER VIEW `fieldcontractview` AS select `a`.`batch_id` AS `field_batch_id` from (`72crm_admin_fieldv` `a` join `72crm_admin_field` `d`) where ((`d`.`label` = 6) and (`a`.`batch_id` is not null) and (`a`.`batch_id` <> '') and (`d`.`field_type` = 0)) group by `a`.`batch_id` ;
-
--- ----------------------------
--- View structure for fieldcustomerview
--- ----------------------------
-DROP VIEW IF EXISTS `fieldcustomerview`;
-CREATE SQL SECURITY DEFINER VIEW `fieldcustomerview` AS select max(if((`a`.`name` = '客户来源'),`a`.`value`,NULL)) AS `客户来源`,max(if((`a`.`name` = '客户行业'),`a`.`value`,NULL)) AS `客户行业`,max(if((`a`.`name` = '客户级别'),`a`.`value`,NULL)) AS `客户级别`,`a`.`batch_id` AS `field_batch_id` from (`72crm_admin_fieldv` `a` join `72crm_admin_field` `d`) where ((`d`.`label` = 2) and (`a`.`batch_id` is not null) and (`a`.`batch_id` <> '') and (`d`.`field_type` = 0)) group by `a`.`batch_id` ;
-
--- ----------------------------
--- View structure for fieldleadsview
--- ----------------------------
-DROP VIEW IF EXISTS `fieldleadsview`;
-CREATE SQL SECURITY DEFINER VIEW `fieldleadsview` AS select max(if((`a`.`name` = '线索来源'),`a`.`value`,NULL)) AS `线索来源`,max(if((`a`.`name` = '客户行业'),`a`.`value`,NULL)) AS `客户行业`,max(if((`a`.`name` = '客户级别'),`a`.`value`,NULL)) AS `客户级别`,`a`.`batch_id` AS `field_batch_id` from (`72crm_admin_fieldv` `a` join `72crm_admin_field` `d`) where ((`d`.`label` = 1) and (`a`.`batch_id` is not null) and (`a`.`batch_id` <> '') and (`d`.`field_type` = 0)) group by `a`.`batch_id` ;
-
--- ----------------------------
--- View structure for fieldproductview
--- ----------------------------
-DROP VIEW IF EXISTS `fieldproductview`;
-CREATE SQL SECURITY DEFINER VIEW `fieldproductview` AS select max(if((`a`.`name` = '是否上下架'),`a`.`value`,NULL)) AS `是否上下架`,max(if((`a`.`name` = '单位'),`a`.`value`,NULL)) AS `单位`,`a`.`batch_id` AS `field_batch_id` from (`72crm_admin_fieldv` `a` join `72crm_admin_field` `d`) where ((`d`.`label` = 4) and (`a`.`batch_id` is not null) and (`a`.`batch_id` <> '') and (`d`.`field_type` = 0)) group by `a`.`batch_id` ;
-
--- ----------------------------
--- View structure for fieldreceivablesview
--- ----------------------------
-DROP VIEW IF EXISTS `fieldreceivablesview`;
-CREATE SQL SECURITY DEFINER VIEW `fieldreceivablesview` AS select max(if((`a`.`name` = '回款方式'),`a`.`value`,NULL)) AS `回款方式`,`a`.`batch_id` AS `field_batch_id` from (`72crm_admin_fieldv` `a` join `72crm_admin_field` `d`) where ((`d`.`label` = 7) and (`a`.`batch_id` is not null) and (`a`.`batch_id` <> '') and (`d`.`field_type` = 0)) group by `a`.`batch_id` ;
-
--- ----------------------------
--- View structure for businessview
--- ----------------------------
-DROP VIEW IF EXISTS `businessview`;
-CREATE SQL SECURITY DEFINER VIEW `businessview` AS select `a`.`business_id` AS `business_id`,`a`.`type_id` AS `type_id`,`a`.`status_id` AS `status_id`,`a`.`next_time` AS `next_time`,`a`.`customer_id` AS `customer_id`,`a`.`deal_date` AS `deal_date`,`a`.`business_name` AS `business_name`,`a`.`money` AS `money`,`a`.`discount_rate` AS `discount_rate`,`a`.`remark` AS `remark`,`a`.`create_user_id` AS `create_user_id`,`a`.`owner_user_id` AS `owner_user_id`,`a`.`create_time` AS `create_time`,`a`.`update_time` AS `update_time`,`a`.`batch_id` AS `batch_id`,`a`.`ro_user_id` AS `ro_user_id`,`a`.`rw_user_id` AS `rw_user_id`,`a`.`is_end` AS `is_end`,`a`.`status_remark` AS `status_remark`,`b`.`realname` AS `create_user_name`,`c`.`realname` AS `owner_user_name`,`d`.`customer_name` AS `customer_name`,`e`.`name` AS `type_name`,`f`.`name` AS `status_name`,`z`.`field_batch_id` AS `field_batch_id` from ((((((`72crm_crm_business` `a` left join `72crm_admin_user` `b` on((`a`.`create_user_id` = `b`.`user_id`))) left join `72crm_admin_user` `c` on((`a`.`owner_user_id` = `c`.`user_id`))) left join `72crm_crm_customer` `d` on((`a`.`customer_id` = `d`.`customer_id`))) left join `72crm_crm_business_type` `e` on((`a`.`type_id` = `e`.`type_id`))) left join `72crm_crm_business_status` `f` on((`a`.`status_id` = `f`.`status_id`))) left join `fieldbusinessview` `z` on((convert(`a`.`batch_id` using utf8mb4) = `z`.`field_batch_id`))) ;
-
--- ----------------------------
--- View structure for contactsview
--- ----------------------------
-DROP VIEW IF EXISTS `contactsview`;
-CREATE SQL SECURITY DEFINER VIEW `contactsview` AS select `a`.`contacts_id` AS `contacts_id`,`a`.`name` AS `name`,`a`.`next_time` AS `next_time`,`a`.`mobile` AS `mobile`,`a`.`telephone` AS `telephone`,`a`.`email` AS `email`,`a`.`post` AS `post`,`a`.`customer_id` AS `customer_id`,`a`.`address` AS `address`,`a`.`remark` AS `remark`,`a`.`create_user_id` AS `create_user_id`,`a`.`owner_user_id` AS `owner_user_id`,`a`.`create_time` AS `create_time`,`a`.`update_time` AS `update_time`,`a`.`batch_id` AS `batch_id`,`a`.`name` AS `contacts_name`,`b`.`realname` AS `create_user_name`,`c`.`realname` AS `owner_user_name`,`d`.`customer_name` AS `customer_name`,`z`.`备注` AS `备注`,`z`.`是否关键决策人` AS `是否关键决策人`,`z`.`field_batch_id` AS `field_batch_id` from ((((`72crm_crm_contacts` `a` left join `72crm_admin_user` `b` on((`a`.`create_user_id` = `b`.`user_id`))) left join `72crm_admin_user` `c` on((`a`.`owner_user_id` = `c`.`user_id`))) left join `72crm_crm_customer` `d` on((`a`.`customer_id` = `d`.`customer_id`))) left join `fieldcontactsview` `z` on((convert(`a`.`batch_id` using utf8mb4) = `z`.`field_batch_id`))) ;
-
--- ----------------------------
--- View structure for contractview
--- ----------------------------
-DROP VIEW IF EXISTS `contractview`;
-CREATE SQL SECURITY DEFINER VIEW `contractview` AS select `a`.`contract_id` AS `contract_id`,`a`.`name` AS `name`,`a`.`customer_id` AS `customer_id`,`a`.`business_id` AS `business_id`,`a`.`check_status` AS `check_status`,`a`.`examine_record_id` AS `examine_record_id`,`a`.`order_date` AS `order_date`,`a`.`create_user_id` AS `create_user_id`,`a`.`owner_user_id` AS `owner_user_id`,`a`.`create_time` AS `create_time`,`a`.`update_time` AS `update_time`,`a`.`num` AS `num`,`a`.`start_time` AS `start_time`,`a`.`end_time` AS `end_time`,`a`.`money` AS `money`,`a`.`discount_rate` AS `discount_rate`,`a`.`types` AS `types`,`a`.`payment_type` AS `payment_type`,`a`.`batch_id` AS `batch_id`,`a`.`ro_user_id` AS `ro_user_id`,`a`.`rw_user_id` AS `rw_user_id`,`a`.`contacts_id` AS `contacts_id`,`a`.`remark` AS `remark`,`a`.`company_user_id` AS `company_user_id`,`b`.`realname` AS `create_user_name`,`c`.`realname` AS `owner_user_name`,`d`.`customer_name` AS `customer_name`,`e`.`business_name` AS `business_name`,`f`.`name` AS `contacts_name`,`g`.`realname` AS `company_user_name`,`z`.`field_batch_id` AS `field_batch_id` from (((((((`72crm_crm_contract` `a` left join `72crm_admin_user` `b` on((`a`.`create_user_id` = `b`.`user_id`))) left join `72crm_admin_user` `c` on((`a`.`owner_user_id` = `c`.`user_id`))) left join `72crm_crm_customer` `d` on((`a`.`customer_id` = `d`.`customer_id`))) left join `72crm_crm_business` `e` on((`a`.`business_id` = `e`.`business_id`))) left join `72crm_crm_contacts` `f` on((`a`.`contacts_id` = `f`.`contacts_id`))) left join `72crm_admin_user` `g` on((`a`.`company_user_id` = `g`.`user_id`))) left join `fieldcontractview` `z` on((convert(`a`.`batch_id` using utf8mb4) = `z`.`field_batch_id`))) ;
-
--- ----------------------------
--- View structure for customerview
--- ----------------------------
-DROP VIEW IF EXISTS `customerview`;
-CREATE SQL SECURITY DEFINER VIEW `customerview` AS select `a`.`customer_id` AS `customer_id`,`a`.`customer_name` AS `customer_name`,`a`.`followup` AS `followup`,`a`.`is_lock` AS `is_lock`,`a`.`next_time` AS `next_time`,`a`.`deal_status` AS `deal_status`,`a`.`mobile` AS `mobile`,`a`.`telephone` AS `telephone`,`a`.`website` AS `website`,`a`.`remark` AS `remark`,`a`.`create_user_id` AS `create_user_id`,`a`.`owner_user_id` AS `owner_user_id`,`a`.`ro_user_id` AS `ro_user_id`,`a`.`rw_user_id` AS `rw_user_id`,`a`.`address` AS `address`,`a`.`location` AS `location`,`a`.`detail_address` AS `detail_address`,`a`.`lng` AS `lng`,`a`.`lat` AS `lat`,`a`.`create_time` AS `create_time`,`a`.`update_time` AS `update_time`,`a`.`batch_id` AS `batch_id`,`b`.`realname` AS `create_user_name`,`c`.`realname` AS `owner_user_name`,`z`.`客户来源` AS `客户来源`,`z`.`客户行业` AS `客户行业`,`z`.`客户级别` AS `客户级别`,`z`.`field_batch_id` AS `field_batch_id` from (((`72crm_crm_customer` `a` left join `72crm_admin_user` `b` on((`a`.`create_user_id` = `b`.`user_id`))) left join `72crm_admin_user` `c` on((`a`.`owner_user_id` = `c`.`user_id`))) left join `fieldcustomerview` `z` on((convert(`a`.`batch_id` using utf8mb4) = `z`.`field_batch_id`))) ;
-
--- ----------------------------
--- View structure for leadsview
--- ----------------------------
-DROP VIEW IF EXISTS `leadsview`;
-CREATE SQL SECURITY DEFINER VIEW `leadsview` AS select `a`.`leads_id` AS `leads_id`,`a`.`is_transform` AS `is_transform`,`a`.`followup` AS `followup`,`a`.`leads_name` AS `leads_name`,`a`.`customer_id` AS `customer_id`,`a`.`next_time` AS `next_time`,`a`.`telephone` AS `telephone`,`a`.`mobile` AS `mobile`,`a`.`address` AS `address`,`a`.`remark` AS `remark`,`a`.`create_user_id` AS `create_user_id`,`a`.`owner_user_id` AS `owner_user_id`,`a`.`create_time` AS `create_time`,`a`.`update_time` AS `update_time`,`a`.`batch_id` AS `batch_id`,`b`.`realname` AS `create_user_name`,`c`.`realname` AS `owner_user_name`,`z`.`线索来源` AS `线索来源`,`z`.`客户行业` AS `客户行业`,`z`.`客户级别` AS `客户级别`,`z`.`field_batch_id` AS `field_batch_id` from (((`72crm_crm_leads` `a` left join `72crm_admin_user` `b` on((`a`.`create_user_id` = `b`.`user_id`))) left join `72crm_admin_user` `c` on((`a`.`owner_user_id` = `c`.`user_id`))) left join `fieldleadsview` `z` on((convert(`a`.`batch_id` using utf8mb4) = `z`.`field_batch_id`))) ;
-
--- ----------------------------
--- View structure for productview
--- ----------------------------
-DROP VIEW IF EXISTS `productview`;
-CREATE SQL SECURITY DEFINER VIEW `productview` AS select `a`.`product_id` AS `product_id`,`a`.`name` AS `name`,`a`.`num` AS `num`,`a`.`unit` AS `unit`,`a`.`price` AS `price`,`a`.`status` AS `status`,`a`.`category_id` AS `category_id`,`a`.`description` AS `description`,`a`.`create_user_id` AS `create_user_id`,`a`.`owner_user_id` AS `owner_user_id`,`a`.`create_time` AS `create_time`,`a`.`update_time` AS `update_time`,`a`.`batch_id` AS `batch_id`,`b`.`realname` AS `create_user_name`,`c`.`realname` AS `owner_user_name`,`d`.`name` AS `category_name`,`z`.`是否上下架` AS `是否上下架`,`z`.`单位` AS `单位`,`z`.`field_batch_id` AS `field_batch_id` from ((((`72crm_crm_product` `a` left join `72crm_admin_user` `b` on((`a`.`create_user_id` = `b`.`user_id`))) left join `72crm_admin_user` `c` on((`a`.`owner_user_id` = `c`.`user_id`))) left join `72crm_crm_product_category` `d` on((`a`.`category_id` = `d`.`category_id`))) left join `fieldproductview` `z` on((convert(`a`.`batch_id` using utf8mb4) = `z`.`field_batch_id`))) ;
-
--- ----------------------------
--- View structure for receivablesview
--- ----------------------------
-DROP VIEW IF EXISTS `receivablesview`;
-CREATE SQL SECURITY DEFINER VIEW `receivablesview` AS select `a`.`receivables_id` AS `receivables_id`,`a`.`number` AS `number`,`a`.`plan_id` AS `plan_id`,`a`.`customer_id` AS `customer_id`,`a`.`contract_id` AS `contract_id`,`a`.`check_status` AS `check_status`,`a`.`examine_record_id` AS `examine_record_id`,`a`.`return_time` AS `return_time`,`a`.`return_type` AS `return_type`,`a`.`money` AS `money`,`a`.`remark` AS `remark`,`a`.`create_user_id` AS `create_user_id`,`a`.`owner_user_id` AS `owner_user_id`,`a`.`create_time` AS `create_time`,`a`.`update_time` AS `update_time`,`a`.`remarks` AS `remarks`,`a`.`batch_id` AS `batch_id`,`b`.`realname` AS `create_user_name`,`c`.`realname` AS `owner_user_name`,`d`.`customer_name` AS `customer_name`,`e`.`name` AS `contract_name`,`e`.`num` AS `contract_num`,`f`.`num` AS `plan_num`,`z`.`回款方式` AS `回款方式`,`z`.`field_batch_id` AS `field_batch_id` from ((((((`72crm_crm_receivables` `a` left join `72crm_admin_user` `b` on((`a`.`create_user_id` = `b`.`user_id`))) left join `72crm_admin_user` `c` on((`a`.`owner_user_id` = `c`.`user_id`))) left join `72crm_crm_customer` `d` on((`a`.`customer_id` = `d`.`customer_id`))) left join `72crm_crm_contract` `e` on((`a`.`contract_id` = `e`.`contract_id`))) left join `72crm_crm_receivables_plan` `f` on((`a`.`plan_id` = `f`.`plan_id`))) left join `fieldreceivablesview` `z` on((convert(`a`.`batch_id` using utf8mb4) = `z`.`field_batch_id`))) ;
+DROP TABLE IF EXISTS `72crm_work_user`;
+CREATE TABLE `72crm_work_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `work_id` int(11) NOT NULL COMMENT '项目ID',
+  `user_id` int(11) NOT NULL COMMENT '成员ID',
+  `role_id` int(11) NOT NULL COMMENT '角色ID',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='项目成员表';

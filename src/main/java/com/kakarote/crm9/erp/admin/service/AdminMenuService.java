@@ -42,6 +42,18 @@ public class AdminMenuService {
      */
     public List<AdminMenu> getAllMenuList(Integer parentId,Integer deepness){
         List<AdminMenu> adminMenus=AdminMenu.dao.find(Db.getSql("admin.menu.queryMenuByParentId"),parentId);
+        adminMenus.removeIf(adminMenu -> "work".equals(adminMenu.getRealm()));
+        if (deepness != 0){
+            adminMenus.forEach(adminMenu -> {
+                if(!adminMenu.getMenuType().equals(3)){
+                    adminMenu.put("childMenu",getAllMenuList(adminMenu.getMenuId(),deepness-1));
+                }
+            });
+        }
+        return adminMenus;
+    }
+    public List<AdminMenu> getWorkMenuList(Integer parentId,Integer deepness){
+        List<AdminMenu> adminMenus=AdminMenu.dao.find(Db.getSql("admin.menu.queryMenuByParentId"),parentId);
         if (deepness != 0){
             adminMenus.forEach(adminMenu -> {
                 if(!adminMenu.getMenuType().equals(3)){

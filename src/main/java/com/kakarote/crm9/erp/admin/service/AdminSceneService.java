@@ -14,6 +14,7 @@ import com.kakarote.crm9.erp.admin.entity.AdminSceneDefault;
 import com.kakarote.crm9.erp.crm.service.CrmBusinessService;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
+import com.kakarote.crm9.utils.ParamsUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
@@ -35,6 +36,8 @@ public class AdminSceneService {
     @Inject
     private CrmBusinessService crmBusinessService;
 
+    @Inject
+    private ParamsUtil paramsUtil;
     /**
      * @author wyq
      * 查询场景字段
@@ -167,6 +170,9 @@ public class AdminSceneService {
      */
     @Before(Tx.class)
     public R addScene(AdminScene adminScene) {
+        if (!paramsUtil.isValid(adminScene.getData())){
+            return R.error("参数包含非法字段");
+        }
         Long userId = BaseUtil.getUser().getUserId();
         adminScene.setIsHide(0).setSort(99999).setIsSystem(0).setCreateTime(DateUtil.date()).setUserId(userId);
         adminScene.save();
@@ -276,9 +282,6 @@ public class AdminSceneService {
                 systemScene.setName("全部回款").save();
                 systemScene.setSceneId(null).setName("我负责的回款").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的回款").setData(subOwnerObject.toString()).save();
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.fluentPut("ro_user_id", new JSONObject().fluentPut("name", "ro_user_id").fluentPut("condition", "takePart").fluentPut("value", userId));
-                systemScene.setSceneId(null).setName("我参与的回款").setData(jsonObject.toString()).save();
             }
         }
         return R.ok().put("data", Db.find(Db.getSql("admin.scene.queryScene"), type, userId));
@@ -374,95 +377,7 @@ public class AdminSceneService {
      * Crm列表页查询
      */
     public R getCrmPageList(BasePageRequest basePageRequest) {
-        JSONObject data = basePageRequest.getJsonObject().getJSONObject("data");
-        List<JSONObject> jsonObjectList = new ArrayList<>();
-        if (data != null) {
-            data.forEach((k, v) -> {
-                jsonObjectList.add(JSON.parseObject(v.toString()));
-            });
-        }
         Integer type = basePageRequest.getJsonObject().getInteger("type");
-        StringBuffer whereSb = new StringBuffer(" where 1=1");
-        for (JSONObject jsonObject : jsonObjectList) {
-            String condition = jsonObject.getString("condition");
-            String value = jsonObject.getString("value");
-            String formType = jsonObject.getString("formType");
-            if ("business_type".equals(formType)) {
-                whereSb.append(" and ").append(jsonObject.getString("name")).append(" = ").append(jsonObject.getInteger("typeId"));
-                if (StrUtil.isNotEmpty(jsonObject.getString("statusId"))) {
-                    if ("win".equals(jsonObject.getString("statusId"))){
-                        whereSb.append(" and is_end = 1");
-                    }else if ("lose".equals(jsonObject.getString("statusId"))){
-                        whereSb.append(" and is_end = 2");
-                    }else if ("invalid".equals(jsonObject.getString("statusId"))){
-                        whereSb.append(" and is_end = 3");
-                    }else {
-                        whereSb.append(" and status_id = ").append(jsonObject.getString("statusId"));
-                    }
-                }
-                continue;
-            }
-            if (StrUtil.isNotEmpty(value) || StrUtil.isNotEmpty(jsonObject.getString("start")) || StrUtil.isNotEmpty(jsonObject.getString("end"))) {
-                if ("takePart".equals(condition)) {
-                    whereSb.append(" and (ro_user_id like '%,").append(value).append(",%' or rw_user_id like '%,").append(value).append(",%')");
-                } else {
-                    whereSb.append(" and ").append(jsonObject.getString("name"));
-                    if ("is".equals(condition)) {
-                        whereSb.append(" = '").append(value).append("'");
-                    } else if ("isNot".equals(condition)) {
-                        whereSb.append(" != '").append(value).append("'");
-                    } else if ("contains".equals(condition)) {
-                        whereSb.append(" like '%").append(value).append("%'");
-                    } else if ("notContains".equals(condition)) {
-                        whereSb.append(" not like '%").append(value).append("%'");
-                    } else if ("isNull".equals(condition)) {
-                        whereSb.append(" is null");
-                    } else if ("isNotNull".equals(condition)) {
-                        whereSb.append(" is not null");
-                    } else if ("gt".equals(condition)) {
-                        whereSb.append(" > ").append(value);
-                    } else if ("egt".equals(condition)) {
-                        whereSb.append(" >= ").append(value);
-                    } else if ("lt".equals(condition)) {
-                        whereSb.append(" < ").append(value);
-                    } else if ("elt".equals(condition)) {
-                        whereSb.append(" <= ").append(value);
-                    } else if ("in".equals(condition)) {
-                        whereSb.append(" in (").append(value).append(")");
-                    }
-                    if ("datetime".equals(formType)) {
-                        whereSb.append(" between '").append(jsonObject.getString("start")).append("' and '").append(jsonObject.getString("end")).append("'");
-                    }
-                    if ("date".equals(formType)) {
-                        whereSb.append(" between '").append(jsonObject.getString("startDate")).append("' and '").append(jsonObject.getString("endDate")).append("'");
-                    }
-                }
-            }
-        }
-        String search = basePageRequest.getJsonObject().getString("search");
-        if (StrUtil.isNotEmpty(search)) {
-            if (!isValid(search)){
-                return R.error("参数包含非法字段");
-            }
-            if (type == 1){
-                whereSb.append(" and (leads_name like '%").append(search).append("%' or telephone like '%")
-                        .append(search).append("%' or mobile like '%").append(search).append("%')");
-            }else if (type == 2 || type == 8){
-                whereSb.append(" and (customer_name like '%").append(search).append("%' or telephone like '%")
-                        .append(search).append("%')");
-            }else if (type == 3){
-                whereSb.append(" and (name like '%").append(search).append("%' or telephone like '%")
-                        .append(search).append("%' or mobile like '%").append(search).append("%')");
-            }else if (type == 4 || type == 6){
-                whereSb.append(" and (name like '%").append(search).append("%')");
-            }else if (type == 5){
-                whereSb.append(" and (business_name like '%").append(search).append("%')");
-            }else if (type == 7){
-                whereSb.append(" and (number like '%").append(search).append("%')");
-            }else {
-                return R.error("type不符合要求");
-            }
-        }
         String viewName;
         switch (type) {
             case 1:
@@ -492,14 +407,111 @@ public class AdminSceneService {
             default:
                 return R.error("type不符合要求");
         }
+        JSONObject data = basePageRequest.getJsonObject().getJSONObject("data");
+        List<JSONObject> jsonObjectList = new ArrayList<>();
+        if (data != null) {
+            data.forEach((k, v) -> jsonObjectList.add(JSON.parseObject(v.toString())));
+        }
+        StringBuilder conditions = new StringBuilder(" where 1=1");
+        for (JSONObject jsonObject : jsonObjectList) {
+            String condition = jsonObject.getString("condition");
+            String value = jsonObject.getString("value");
+            String name  = jsonObject.getString("name");
+            if (!paramsUtil.isValid(name)){
+                return R.error("参数包含非法字段");
+            }
+            if (StrUtil.isNotEmpty(value)&&!paramsUtil.isValid(value)){
+                return R.error("参数包含非法字段");
+            }
+            if (StrUtil.isNotEmpty(jsonObject.getString("start"))&&!paramsUtil.isValid(jsonObject.getString("start"))){
+                return R.error("参数包含非法字段");
+            }
+            if (StrUtil.isNotEmpty(jsonObject.getString("end"))&&!paramsUtil.isValid(jsonObject.getString("end"))){
+                return R.error("参数包含非法字段");
+            }
+            String formType = jsonObject.getString("formType");
+            if ("business_type".equals(formType)) {
+                conditions.append(" and ").append(name).append(" = ").append(jsonObject.getInteger("typeId"));
+                if (StrUtil.isNotEmpty(jsonObject.getString("statusId"))) {
+                    if ("win".equals(jsonObject.getString("statusId"))){
+                        conditions.append(" and is_end = 1");
+                    }else if ("lose".equals(jsonObject.getString("statusId"))){
+                        conditions.append(" and is_end = 2");
+                    }else if ("invalid".equals(jsonObject.getString("statusId"))){
+                        conditions.append(" and is_end = 3");
+                    }else {
+                        conditions.append(" and status_id = ").append(jsonObject.getString("statusId"));
+                    }
+                }
+                continue;
+            }
+            if (StrUtil.isNotEmpty(value) || StrUtil.isNotEmpty(jsonObject.getString("start")) || StrUtil.isNotEmpty(jsonObject.getString("end"))) {
+                if ("takePart".equals(condition)) {
+                    conditions.append(" and (ro_user_id like '%,").append(value).append(",%' or rw_user_id like '%,").append(value).append(",%')");
+                } else {
+                    conditions.append(" and ").append(jsonObject.getString("name"));
+                    if ("is".equals(condition)) {
+                        conditions.append(" = '").append(value).append("'");
+                    } else if ("isNot".equals(condition)) {
+                        conditions.append(" != '").append(value).append("'");
+                    } else if ("contains".equals(condition)) {
+                        conditions.append(" like '%").append(value).append("%'");
+                    } else if ("notContains".equals(condition)) {
+                        conditions.append(" not like '%").append(value).append("%'");
+                    } else if ("isNull".equals(condition)) {
+                        conditions.append(" is null");
+                    } else if ("isNotNull".equals(condition)) {
+                        conditions.append(" is not null");
+                    } else if ("gt".equals(condition)) {
+                        conditions.append(" > ").append(value);
+                    } else if ("egt".equals(condition)) {
+                        conditions.append(" >= ").append(value);
+                    } else if ("lt".equals(condition)) {
+                        conditions.append(" < ").append(value);
+                    } else if ("elt".equals(condition)) {
+                        conditions.append(" <= ").append(value);
+                    } else if ("in".equals(condition)) {
+                        conditions.append(" in (").append(value).append(")");
+                    }
+                    if ("datetime".equals(formType)) {
+                        conditions.append(" between '").append(jsonObject.getString("start")).append("' and '").append(jsonObject.getString("end")).append("'");
+                    }
+                    if ("date".equals(formType)) {
+                        conditions.append(" between '").append(jsonObject.getString("startDate")).append("' and '").append(jsonObject.getString("endDate")).append("'");
+                    }
+                }
+            }
+        }
+        String search = basePageRequest.getJsonObject().getString("search");
+        if (StrUtil.isNotEmpty(search)) {
+            if (!paramsUtil.isValid(search)){
+                return R.error("参数包含非法字段");
+            }
+            if (type == 1){
+                conditions.append(" and (leads_name like '%").append(search).append("%' or telephone like '%")
+                        .append(search).append("%' or mobile like '%").append(search).append("%')");
+            }else if (type == 2 || type == 8){
+                conditions.append(" and (customer_name like '%").append(search).append("%' or telephone like '%")
+                        .append(search).append("%')");
+            }else if (type == 3){
+                conditions.append(" and (name like '%").append(search).append("%' or telephone like '%")
+                        .append(search).append("%' or mobile like '%").append(search).append("%')");
+            }else if (type == 4 || type == 6){
+                conditions.append(" and (name like '%").append(search).append("%')");
+            }else if (type == 5){
+                conditions.append(" and (business_name like '%").append(search).append("%')");
+            }else{
+                conditions.append(" and (number like '%").append(search).append("%')");
+            }
+        }
+
         String sortField = basePageRequest.getJsonObject().getString("sortField");
         String orderNum = basePageRequest.getJsonObject().getString("order");
-        String from;
         if (StrUtil.isEmpty(sortField) || StrUtil.isEmpty(orderNum)){
             sortField = "update_time";
             orderNum = "desc";
         }else {
-            if (!isValid(sortField)){
+            if (!paramsUtil.isValid(sortField)){
                 return R.error("参数包含非法字段");
             }
             if ("2".equals(orderNum)){
@@ -508,37 +520,44 @@ public class AdminSceneService {
                 orderNum = "desc";
             }
         }
+
         if (2 == type) {
-            from = "from " + viewName + whereSb.toString() + " and owner_user_id is not null";
+            conditions.append(" and owner_user_id is not null");
         } else if (8 == type) {
-            from = "from " + viewName + whereSb.toString() + " and owner_user_id is null";
-        } else {
-            from = "from " + viewName + whereSb.toString() ;
+            conditions.append(" and owner_user_id is null");
         }
         Long userId=BaseUtil.getUserId();
         if(!type.equals(8)&&!type.equals(4)&& !BaseConstant.SUPER_ADMIN_USER_ID.equals(userId)){
             List<Long> longs= Aop.get(AdminUserService.class).queryUserByAuth(userId);
             if(longs!=null&&longs.size()>0){
-                from += " and owner_user_id in (" + StrUtil.join(",", longs) + ")";
+                conditions.append(" and owner_user_id in (").append(StrUtil.join(",", longs)).append(")");
                 if(type.equals(2)||type.equals(6)||type.equals(5)){
-                    from += " or ro_user_id like CONCAT('%,','" + userId + "',',%')" + " or rw_user_id like CONCAT('%,','" + userId + "',',%')";
+                    conditions.append(" or ro_user_id like CONCAT('%,','").append(userId).append("',',%')").append(" or rw_user_id like CONCAT('%,','").append(userId).append("',',%')");
                 }
             }
         }
-        from = from + " order by " + viewName + "." + sortField + " " + orderNum;
+        conditions.insert(0," from "+viewName);
+        conditions.append(" order by ").append(viewName).append(".").append(sortField).append(" ").append(orderNum);
         if (StrUtil.isNotEmpty(basePageRequest.getJsonObject().getString("excel"))) {
-            return R.ok().put("data", Db.find("select * " + from));
+            return R.ok().put("data", Db.find("select * " + conditions.toString()));
         }
         if (2 == type || 8 == type) {
             Integer configType = Db.queryInt("select status from 72crm_admin_config where name = 'customerPoolSetting'");
             if (1 == configType && 2 == type) {
-                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select * , (TO_DAYS(update_time) + CAST((SELECT value FROM 72crm_admin_config WHERE name= 'customerPoolSettingFollowupDays') as UNSIGNED) - TO_DAYS(NOW())) as pool_day ,(select count(*) from 72crm_crm_business as a where a.customer_id = " + viewName + ".customer_id) as business_count", from));
+                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),Db.getSql("admin.scene.getCustomerPageList"),conditions.toString()));
             } else {
-                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),"select *,(select count(*) from 72crm_crm_business as a where a.customer_id = " + viewName + ".customer_id) as business_count", from));
+                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),"select *,(select count(*) from 72crm_crm_business as a where a.customer_id = " + viewName + ".customer_id) as business_count",conditions.toString()));
             }
 
+        }else if (6 == type){
+            Record totalMoney = Db.findFirst("select SUM(money) as contractMoney,GROUP_CONCAT(contract_id) as contractIds "+conditions.toString());
+            Page<Record> page = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),"select *,IFNULL((select SUM(a.money) from 72crm_crm_receivables as a where a.contract_id = contractview.contract_id),0) as receivedMoney",conditions.toString());
+
+            String receivedMoney = Db.queryStr("select SUM(money) from 72crm_crm_receivables where receivables_id in ("+totalMoney.getStr("contractIds")+")");
+            JSONObject jsonObject = JSONObject.parseObject(Json.getJson().toJson(page),JSONObject.class);
+            return R.ok().put("data",jsonObject.fluentPut("money",new JSONObject().fluentPut("contractMoney",totalMoney.getStr("contractMoney")!=null?totalMoney.getStr("contractMoney"):"0").fluentPut("receivedMoney",receivedMoney!=null?receivedMoney:"0")));
         }
-        Page<Record> recordPage = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select *", from);
+        Page<Record> recordPage = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),"select *",conditions.toString());
         if (type == 5){
             recordPage.getList().forEach(record -> {
                 if (record.getInt("is_end") == 1){
@@ -551,13 +570,6 @@ public class AdminSceneService {
             });
             setBusinessStatus(recordPage.getList());
         }
-        if (6 == type){
-            Page<Record> page = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), "select *,IFNULL((select SUM(a.money) from 72crm_crm_receivables as a where a.contract_id = contractview.contract_id),0) as receivedMoney", from);
-            Record totalMoney = Db.findFirst("select SUM(money) as contractMoney,GROUP_CONCAT(contract_id) as contractIds "+from);
-            String receivedMoney = Db.queryStr("select SUM(money) from 72crm_crm_receivables where receivables_id in ("+totalMoney.getStr("contractIds")+")");
-            JSONObject jsonObject = JSONObject.parseObject(Json.getJson().toJson(page),JSONObject.class);
-            return R.ok().put("data",jsonObject.fluentPut("money",new JSONObject().fluentPut("contractMoney",totalMoney.getStr("contractMoney")!=null?totalMoney.getStr("contractMoney"):"0").fluentPut("receivedMoney",receivedMoney!=null?receivedMoney:"0")));
-        }
         return R.ok().put("data",recordPage);
     }
 
@@ -565,29 +577,17 @@ public class AdminSceneService {
         list.forEach(record -> {
                     if (record.getInt("is_end") == 0){
                         Integer sortNum = Db.queryInt("select order_num from 72crm_crm_business_status where status_id = ?",record.getInt("status_id"));
-                        Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
+                        int totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
                         record.set("progressBar",sortNum+"/"+totalStatsNum);
                     }else if (record.getInt("is_end") == 1){
-                        Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
+                        int totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
                         record.set("progressBar",totalStatsNum+"/"+totalStatsNum);
                     }else if (record.getInt("is_end") == 2){
-                        Integer totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
+                        int totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
                         record.set("progressBar","0/"+totalStatsNum);
                     }else if (record.getInt("is_end") == 3){
                         record.set("progressBar","0/0");
                     }
                 });
-    }
-
-    private boolean isValid(String param){
-        String reg = "(?:')|(?:--)|(/\\*(?:.|[\\n\\r])*?\\*/)|"
-                + "(\\b(select|update|union|and|or|delete|insert|trancate|char|into|substr|ascii|declare|exec|count|master|into|drop|execute)\\b)";
-
-        Pattern sqlPattern = Pattern.compile(reg, Pattern.CASE_INSENSITIVE);
-
-        if (sqlPattern.matcher(param).find()) {
-            return false;
-        }
-        return true;
     }
 }

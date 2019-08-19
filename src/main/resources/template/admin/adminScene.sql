@@ -33,4 +33,13 @@
        #end
     ) and type = #para(type) and user_id = #para(userId)
     #end
+
+    #sql ("getCustomerPageList")
+    select *,
+    (TO_DAYS(
+      IFNULL((SELECT car.create_time FROM 72crm_admin_record as car where car.types = 'crm_customer' and car.types_id = customerview.customer_id ORDER BY car.create_time DESC LIMIT 1),create_time))
+      + CAST((SELECT value FROM 72crm_admin_config WHERE name= 'customerPoolSettingFollowupDays') as SIGNED) - TO_DAYS(NOW())
+    ) as pool_day,
+    (select count(*) from 72crm_crm_business as a where a.customer_id = customerview.customer_id) as business_count
+    #end
 #end

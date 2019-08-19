@@ -129,13 +129,26 @@ const systemOtherRouter = {
         type: 'manage',
         subType: 'oa'
       }
+    },
+    {
+      name: 'project',
+      path: 'project', // 项目管理
+      component: () => import('@/views/SystemManagement/project'),
+      meta: {
+        requiresAuth: true,
+        title: '项目管理',
+        icon: 'project',
+        index: 1,
+        type: 'manage',
+        subType: 'oa'
+      }
     }
   ]
 }
 
 const handlefieldRouter = {
   name: 'handlefield',
-  path: 'custom-field/handlefield/:type/:id', // type customer contacts business contract money
+  path: 'custom-field/handlefield/:type/:id:label', // type customer contacts business contract money
   component: () => import('@/views/SystemManagement/SystemCustomer/HandleField'),
   meta: {
     changeMenu: false, // 跳转不更改路径

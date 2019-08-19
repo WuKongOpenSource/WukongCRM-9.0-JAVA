@@ -166,9 +166,11 @@ export default {
       })
         .then(() => {
           let params = { taskId: this.taskID }
+          let tempRelatedListData = objDeepCopy(this.relatedListData)
+          tempRelatedListData[field].splice(index, 1)
           for (let index = 0; index < this.showTypes.length; index++) {
             const typeItem = this.showTypes[index]
-            let typeArray = this.relatedListData[typeItem] || []
+            let typeArray = tempRelatedListData[typeItem] || []
             params[typeItem + 'Ids'] = typeArray
               .map(aItem => {
                 return aItem[typeItem + 'Id']

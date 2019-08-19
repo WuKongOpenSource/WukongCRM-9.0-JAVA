@@ -23,11 +23,13 @@ public class Sort {
         List<Record> arraylist = new ArrayList<>();
         String[] alphatableb =
                 {
-                        "A", "B", "C", "D", "E", "F", "G", "H", "I",
+                        "#","A", "B", "C", "D", "E", "F", "G", "H", "I",
                         "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
                 };
         for(String a:alphatableb){
             for(int i=0;i<list.size();i++){//为了排序都返回大写字母
+                String name = list.get(i).getStr("realname");
+                String s = String2AlphaFirst(list.get(i).getStr("realname"),Letter_flag_capital);
                 if(a.equals(String2AlphaFirst(list.get(i).getStr("realname"),Letter_flag_capital))){
                     arraylist.add(list.get(i));
                 }
@@ -35,7 +37,6 @@ public class Sort {
             if (arraylist.size() != 0){
                 map.put(a,arraylist);
             }
-
             arraylist=new ArrayList<Record>();
         }
         return map;
@@ -85,7 +86,7 @@ public class Sort {
         { return ch;}
         int gb = gbValue(ch);
         if (gb < table[0])
-        {  return '0';}
+        {  return '#';}
 
         int i;
         for (i = 0; i < 26; ++i) {

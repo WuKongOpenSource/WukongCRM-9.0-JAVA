@@ -9,7 +9,7 @@
   select a.realname,b.name as deptName,
   (select count(type_id) from 72crm_crm_owner_record where DATE_FORMAT(create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime) and type = 8 and pre_owner_user_id = a.user_id) as putInNum,
   (select count(type_id) from 72crm_crm_owner_record where DATE_FORMAT(create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime) and type = 8 and post_owner_user_id = a.user_id) as receiveNum,
-  IFNULL((select c.customer_num from 72crm_crm_customer_stats as c where DATE_FORMAT(create_time,#para(sqlDateFormat)) = #para(beginTime) and c.user_id = a.user_id),0) as customerNum
+  IFNULL((select c.customer_num from 72crm_crm_customer_stats as c where DATE_FORMAT(create_time,#para(sqlDateFormat)) = #para(beginTime) and c.user_id = a.user_id limit 1),0) as customerNum
   from 72crm_admin_user as a left join 72crm_admin_dept as b on a.dept_id = b.dept_id
   where b.dept_id = #para(deptId)
     #if(userId)

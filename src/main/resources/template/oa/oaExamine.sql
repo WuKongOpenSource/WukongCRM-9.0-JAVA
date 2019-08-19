@@ -12,7 +12,7 @@
     #if(startTime!=null && endTime!=null)
     and a.create_time between #para(startTime) and  #para(endTime)
     #end
-    group by a.examine_id    order by  a.create_time desc
+    group by a.examine_id,b.record_id order by  a.create_time desc
   #end
   #sql("myOaExamine")
     select a.*,b.examine_status,b.record_id,b.examine_step_id,c.category_id,c.title as categoryTitle  from 72crm_oa_examine a  left join  72crm_oa_examine_record b on a.examine_id = b.examine_id left join 72crm_oa_examine_category c on a.category_id = c.category_id left join 72crm_oa_examine_log d on d.record_id = b.record_id
@@ -29,7 +29,7 @@
       #if(startTime!=null && endTime!=null)
       and a.create_time between #para(startTime) and  #para(endTime)
       #end
-    group by a.examine_id order by  a.create_time desc
+    group by a.examine_id,b.examine_status,b.record_id order by  a.create_time desc
   #end
   #sql("examineCheck")
       select * from 72crm_oa_examine_check where  is_checked = 1

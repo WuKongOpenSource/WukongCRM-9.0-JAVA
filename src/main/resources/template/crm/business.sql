@@ -93,4 +93,11 @@
     update 72crm_crm_business set rw_user_id = replace(rw_user_id,?,','),ro_user_id = replace(ro_user_id,?,',') where business_id = ?
     #end
 
+    #sql ("queryBatchIdByIds")
+    select batch_id from 72crm_crm_business where business_id in (
+        #for(i:ids)
+          #(for.index > 0 ? "," : "")#para(i)
+        #end
+    )
+    #end
 #end

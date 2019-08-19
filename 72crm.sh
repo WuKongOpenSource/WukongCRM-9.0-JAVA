@@ -22,7 +22,8 @@ fi
 
 # 生成 class path 值
 
-APP_BASE_PATH="./"
+APP_BASE_PATH=$(cd `dirname $0`; pwd)
+
 CP=${APP_BASE_PATH}/config:${APP_BASE_PATH}/lib/*
 
 function start()

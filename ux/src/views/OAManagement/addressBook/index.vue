@@ -63,11 +63,44 @@ export default {
       addresslist({
         search: this.userInput
       }).then(res => {
-        for (let item in res.data) {
-          this.staffData.push({
-            letter: item,
-            list: res.data[item]
-          })
+        let words = [
+          '#',
+          'A',
+          'B',
+          'C',
+          'D',
+          'E',
+          'F',
+          'G',
+          'H',
+          'I',
+          'J',
+          'K',
+          'L',
+          'M',
+          'N',
+          'O',
+          'P',
+          'Q',
+          'R',
+          'S',
+          'T',
+          'U',
+          'V',
+          'W',
+          'X',
+          'Y',
+          'Z'
+        ]
+        
+        for (let key of words) {
+          let list = res.data[key]
+          if (list) {
+            this.staffData.push({
+              letter: key,
+              list: list
+            })
+          }
         }
         this.staffLoading = false
       })

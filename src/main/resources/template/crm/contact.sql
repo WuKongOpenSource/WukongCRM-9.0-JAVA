@@ -103,4 +103,12 @@
       or mobile = #para(mobile)
       #end
     #end
+
+    #sql ("queryBatchIdByIds")
+    select batch_id from 72crm_crm_contacts where contacts_id in (
+        #for(i:ids)
+          #(for.index > 0 ? "," : "")#para(i)
+        #end
+    )
+    #end
 #end
