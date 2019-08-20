@@ -7,7 +7,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.jfinal.core.paragetter.Para;
 import com.jfinal.kit.Prop;
 import com.jfinal.kit.PropKit;
-import com.jfinal.plugin.redis.Cache;
+import com.kakarote.crm9.common.config.redis.Redis;
+import com.kakarote.crm9.common.config.redis.RedisManager;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminRoleService;
@@ -18,7 +19,6 @@ import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
-import com.jfinal.plugin.redis.Redis;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -35,10 +35,11 @@ import java.util.Set;
 @Clear
 public class AdminLoginController extends Controller{
 
+
     @Inject
     private AdminRoleService adminRoleService;
 
-    public static Prop prop = PropKit.use("config/crm9-config.txt");
+    public final static Prop prop = PropKit.use("config/crm9-config.txt");
 
     public void index(){
         redirect("/index.html");
@@ -52,7 +53,7 @@ public class AdminLoginController extends Controller{
      */
     public void login(@Para("username") String username, @Para("password") String password){
         String key = BaseConstant.USER_LOGIN_ERROR_KEY + username;
-        Cache redis = Redis.use();
+        Redis redis= RedisManager.getRedis();
         long beforeTime = System.currentTimeMillis() - 60 * 5 * 1000;
         if(redis.exists(key)){
             if(redis.zcount(key, beforeTime, System.currentTimeMillis()) >= 5){
@@ -87,9 +88,9 @@ public class AdminLoginController extends Controller{
             user.setLastLoginTime(new Date());
             user.update();
             user.setRoles(adminRoleService.queryRoleIdsByUserId(user.getUserId()));
-            Redis.use().setex(token, 360000, user);
+            redis.setex(token, 3600, user);
             user.remove("password", "salt");
-            setCookie("Admin-Token", token, 360000);
+            //setCookie("Admin-Token", token, 3600*24,true);
             renderJson(R.ok().put("Admin-Token", token).put("user", user).put("auth", adminRoleService.auth(user.getUserId())));
         }else{
             Log.getLog(getClass()).warn("用户登录失败");
@@ -105,7 +106,7 @@ public class AdminLoginController extends Controller{
     public void logout(){
         String token = BaseUtil.getToken(getRequest());
         if(! StrUtil.isEmpty(token)){
-            Redis.use().del(token);
+            RedisManager.getRedis().del(token);
             removeCookie("Admin-Token");
         }
         renderJson(R.ok());
@@ -114,6 +115,7 @@ public class AdminLoginController extends Controller{
     public void version(){
         renderJson(R.ok().put("name", BaseConstant.NAME).put("version", BaseConstant.VERSION));
     }
+
 
     public void ping(){
         List<String> arrays = new ArrayList<>();
@@ -130,13 +132,13 @@ public class AdminLoginController extends Controller{
                 try{
                     connection.close();
                 }catch(SQLException e){
-                    e.printStackTrace();
+                    Log.getLog(getClass()).error("",e);
                 }
             }
 
         }
         try{
-            String ping = Redis.use().ping();
+            String ping = RedisManager.getRedis().ping();
             if("PONG".equals(ping)){
                 arrays.add("Redis配置成功");
             }else{
@@ -146,35 +148,5 @@ public class AdminLoginController extends Controller{
             arrays.add("Redis配置失败");
         }
         renderJson(R.ok().put("data", arrays));
-    }
-
-    /**
-     * @author wyq
-     * 接入钉钉
-     */
-    public void dingLogin(String code){
-        String appkey = prop.get("appkey");
-        String appSecert = prop.get("appSecret");
-        String tokenJson = HttpUtil.get("https://oapi.dingtalk.com/gettoken?appkey=" + appkey + "&appsecret=" + appSecert);
-        String accessToken = JSONObject.parseObject(tokenJson).getString("access_token");
-        String userJson = HttpUtil.get("https://oapi.dingtalk.com/user/getuserinfo?access_token=" + accessToken + "&code=" + code);
-        String userId = JSONObject.parseObject(userJson).getString("userid");
-        String userInfo = HttpUtil.get("https://oapi.dingtalk.com/user/get?access_token=" + accessToken + "&userid=" + userId);
-        String mobile = JSONObject.parseObject(userInfo).getString("mobile");
-        Integer isUser = Db.queryInt("select count(*) from 72crm_admin_user where mobile = ?", mobile);
-        if(isUser > 0){
-            AdminUser user = AdminUser.dao.findFirst(Db.getSql("admin.user.queryByUserName"), mobile.trim());
-            String token = IdUtil.simpleUUID();
-            user.setLastLoginIp(BaseUtil.getLoginAddress(getRequest()));
-            user.setLastLoginTime(new Date());
-            user.update();
-            user.setRoles(adminRoleService.queryRoleIdsByUserId(user.getUserId()));
-            Redis.use().setex(token, 360000, user);
-            user.remove("password", "salt");
-            setCookie("Admin-Token", token, 360000);
-            renderJson(R.ok().put("Admin-Token", token).put("user", user).put("auth", adminRoleService.auth(user.getUserId())));
-        }else{
-            renderJson(R.error("账户不存在"));
-        }
     }
 }

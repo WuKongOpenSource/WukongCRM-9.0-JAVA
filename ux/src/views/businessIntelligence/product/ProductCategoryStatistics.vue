@@ -74,6 +74,7 @@ export default {
         },
         legend: {
           orient: 'vertical',
+          type: 'scroll',
           x: 'left',
           data: []
         },

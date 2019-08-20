@@ -41,7 +41,22 @@
         and examine_category_id=#para(categoryId)
       #end
     #end
-
+    #sql("deleteByFieldValue")
+      DELETE FROM 72crm_admin_fieldv WHERE field_id in
+      (
+      SELECT field_id FROM 72crm_admin_field WHERE field_id not in
+      (
+        #for(i:ids)
+           #(for.index > 0 ? "," : "") #para(i)
+        #end
+      )
+      and (operating = '0' or operating = '2')
+      and label=#para(label)
+      #if(label==10)
+        and examine_category_id=#para(categoryId)
+      #end
+      )
+    #end
     #sql ("updateFieldByParentId")
     update 72crm_admin_field
     set
@@ -93,16 +108,9 @@
     #end
 
     #sql("list")
-      SELECT field_id,field_name,name,type,label,remark,input_tips,max_length,default_value,is_unique,is_null,options,operating,update_time,examine_category_id,field_type FROM 72crm_admin_field WHERE label=#para(label)
+      SELECT field_id,field_name,name,type,label,remark,input_tips,max_length,default_value,is_unique,is_null,options,operating,update_time,examine_category_id,field_type,relevant FROM 72crm_admin_field WHERE label=#para(label)
       #if(categoryId)
         and examine_category_id=#para(categoryId)
-      #end
-      ORDER BY sorting asc
-    #end
-    #sql("list1")
-      SELECT field_id,field_name,name,type,label,remark,input_tips,max_length,default_value,is_unique,is_null,options,operating,update_time,examine_category_id,field_type FROM 72crm_admin_field WHERE label=#para(label)
-      #if(categoryId)
-           and examine_category_id=#para(categoryId)
       #end
       ORDER BY sorting asc
     #end
@@ -208,5 +216,9 @@
    #end
    #sql ("fieldreceivablesview")
      create or replace view fieldreceivablesview as select %s batch_id as field_batch_id from 72crm_admin_fieldv as a inner join 72crm_admin_field as d on `a`.`field_id` = `d`.`field_id` %s where d.label = %s and a.batch_id is not null and a.batch_id != '' and d.field_type = 0 group by a.batch_id
+   #end
+
+   #sql ("queryCustomField")
+   select a.name,a.value,b.type from 72crm_admin_fieldv as a left join 72crm_admin_field as b on a.field_id = b.field_id where batch_id = ?
    #end
 #end

@@ -14,8 +14,10 @@
             <flexbox-item :span="1/2"
                           class="jianbao-icon-container"
                           v-for="(item, index) in jianbaoItems"
-                          :key="index">
-              <flexbox class="jianbao-icon-content">
+                          :key="index"
+                          @click.native="reportClick(item)">
+              <flexbox class="jianbao-icon-content"
+                       :style="{cursor: item.type ? 'pointer':'auto'}">
                 <img class="jianbao-icon"
                      :src="item.icon" />
                 <div class="jianbao-title">{{item.title}}</div>
@@ -127,6 +129,15 @@
         </div>
       </flexbox-item>
     </flexbox>
+
+    <!-- 销售简报列表 -->
+    <report-list v-if="showReportList"
+                 :title="reportData.title"
+                 :placeholder="reportData.placeholder"
+                 :crmType="reportData.crmType"
+                 :request="reportData.request"
+                 :params="reportData.params"
+                 @hide="showReportList = false"></report-list>
   </div>
 </template>
 
@@ -136,15 +147,20 @@ import {
   crmIndexIndex,
   crmIndexAchievementData,
   crmIndexFunnel,
-  crmIndexSaletrend
+  crmIndexSaletrend,
+  crmIndexIndexListAPI
 } from '@/api/customermanagement/workbench'
 import { crmBusinessStatusList } from '@/api/customermanagement/business'
 import { formatTimeToTimestamp } from '@/utils'
 import moment from 'moment'
+import ReportList from './reportList'
 
 export default {
   /** 客户管理下的工作台-仪表盘 */
   name: 'customer-dash',
+  components: {
+    ReportList
+  },
   data() {
     return {
       /** 销售简报 */
@@ -154,45 +170,66 @@ export default {
           title: '新增客户',
           icon: require('@/assets/img/c_curomer.png'),
           field: 'customerCount',
+          type: 'customer',
+          label: 2, // 0为变化的商机 2为客户 3为联系人 5为商机 6为合同 7为回款
           value: 0
         },
         {
           title: '新增联系人',
           icon: require('@/assets/img/c_contact.png'),
           field: 'contactsCount',
+          type: 'contacts',
+          label: 3,
           value: 0
         },
         {
           title: '新增商机',
           icon: require('@/assets/img/c_business.png'),
           field: 'businessCount',
+          type: 'business',
+          label: 5,
           value: 0
         },
         {
           title: '阶段变化的商机',
           icon: require('@/assets/img/jd_business.png'),
           field: 'recordStatusCount',
+          type: 'business_status',
+          label: 0,
           value: 0
         },
         {
           title: '新增合同',
           icon: require('@/assets/img/c_contract.png'),
           field: 'contractCount',
+          type: 'contract',
+          label: 6,
           value: 0
         },
         {
           title: '新增跟进记录',
           icon: require('@/assets/img/c_log.png'),
           field: 'recordCount',
+          type: '',
           value: 0
         },
         {
           title: '新增回款',
           icon: require('@/assets/img/c_receivables.png'),
           field: 'receivablesCount',
+          type: 'receivables',
+          label: 7,
           value: 0
         }
       ],
+      showReportList: false,
+      reportData: {
+        title: '',
+        placeholder: '',
+        crmType: '',
+        request: null,
+        params: null
+      },
       /** 业绩指标 */
       gaugeLoading: false,
       gaugeSelectValue: 2,
@@ -263,6 +300,29 @@ export default {
           this.jianbaoLoading = false
         })
     },
+
+    /**
+     * 销售简报查看
+     */
+    reportClick(item) {
+      if (item.type) {
+        this.reportData.title = `销售简报-${item.title}`
+        this.reportData.placeholder = {
+          customer: '请输入客户名称/手机/电话',
+          contacts: '请输入联系人姓名/手机/电话',
+          business: '请输入商机名称',
+          business_status: '请输入商机名称',
+          contract: '请输入合同名称',
+          receivables: '请输入回款编号'
+        }[item.type]
+        this.reportData.crmType = item.type
+        this.reportData.request = crmIndexIndexListAPI
+        this.reportData.params = this.getBaseParams()
+        this.reportData.params.label = item.label
+        this.showReportList = true
+      }
+    },
+
     getBaseParams() {
       let params = {
         userIds: this.data.users
@@ -653,7 +713,6 @@ export default {
   padding: 8px 8px;
   background-color: #f2f2f5;
   border-radius: 3px;
-  // cursor: pointer;
   .jianbao-icon {
     display: block;
     width: 23px;

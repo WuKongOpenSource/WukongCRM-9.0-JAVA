@@ -66,19 +66,23 @@
 import { mapGetters } from 'vuex'
 import {
   crmCustomerExcelImport,
-  crmCustomerExcelDownloadURL
+  crmCustomerExcelDownloadURL,
+  crmCustomerDownloadExcelAPI
 } from '@/api/customermanagement/customer'
 import {
   crmLeadsExcelImport,
-  crmLeadsExcelDownloadURL
+  crmLeadsExcelDownloadURL,
+  crmLeadsDownloadExcelAPI
 } from '@/api/customermanagement/clue'
 import {
   crmContactsExcelImport,
-  crmContactsExcelDownloadURL
+  crmContactsExcelDownloadURL,
+  crmContactsDownloadExcelAPI
 } from '@/api/customermanagement/contacts'
 import {
   crmProductExcelImport,
-  crmProductExcelDownloadURL
+  crmProductExcelDownloadURL,
+  crmProductDownloadExcelAPI
 } from '@/api/customermanagement/product'
 import { XhUserCell } from '@/components/CreateCom'
 import { Loading } from 'element-ui'
@@ -171,17 +175,30 @@ export default {
     },
     // 下载模板操作
     download() {
-      var a = document.createElement('a')
-      a.href = {
-        customer: crmCustomerExcelDownloadURL,
-        leads: crmLeadsExcelDownloadURL,
-        contacts: crmContactsExcelDownloadURL,
-        product: crmProductExcelDownloadURL
+      const request = {
+        customer: crmCustomerDownloadExcelAPI,
+        leads: crmLeadsDownloadExcelAPI,
+        contacts: crmContactsDownloadExcelAPI,
+        product: crmProductDownloadExcelAPI
       }[this.crmType]
-      a.target = '_black'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
+      request()
+        .then(res => {
+          var blob = new Blob([res.data], {
+            type: 'application/vnd.ms-excel;charset=utf-8'
+          })
+          var downloadElement = document.createElement('a')
+          var href = window.URL.createObjectURL(blob) //创建下载的链接
+          downloadElement.href = href
+          downloadElement.download =
+            decodeURI(
+              res.headers['content-disposition'].split('filename=')[1]
+            ) || '' //下载后文件名
+          document.body.appendChild(downloadElement)
+          downloadElement.click() //点击下载
+          document.body.removeChild(downloadElement) //下载完成移除元素
+          window.URL.revokeObjectURL(href) //释放掉blob对象
+        })
+        .catch(() => {})
     },
     // 选择文件
     selectFile() {

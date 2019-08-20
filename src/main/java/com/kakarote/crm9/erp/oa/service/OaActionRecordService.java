@@ -141,7 +141,7 @@ public class OaActionRecordService {
 
     public R queryEventByDay(String day) {
         Long userId = BaseUtil.getUser().getUserId();
-        List<Record> recordList = Db.find("select title,date_format(start_time,'%Y-%d-%m') as start_time ,date_format(end_time,'%Y-%d-%m') as end_time ,owner_user_ids from 72crm_oa_event where  (create_user_id = ? or owner_user_ids like concat('%', ?, '%')) and  ? between date_format(start_time,'%Y-%m-%d') and date_format(end_time,'%Y-%m-%d')", userId, userId,day);
+        List<Record> recordList = Db.find("select event_id,title,date_format(start_time,'%Y-%m-%d') as start_time ,date_format(end_time,'%Y-%m-%d') as end_time ,owner_user_ids from 72crm_oa_event where  (create_user_id = ? or owner_user_ids like concat('%', ?, '%')) and  ? between date_format(start_time,'%Y-%m-%d') and date_format(end_time,'%Y-%m-%d')", userId, userId,day);
 
         recordList.forEach(record -> {
             StringBuilder realnames = new StringBuilder();

@@ -15,7 +15,7 @@
     group by a.examine_id,b.record_id order by  a.create_time desc
   #end
   #sql("myOaExamine")
-    select a.*,b.examine_status,b.record_id,b.examine_step_id,c.category_id,c.title as categoryTitle  from 72crm_oa_examine a  left join  72crm_oa_examine_record b on a.examine_id = b.examine_id left join 72crm_oa_examine_category c on a.category_id = c.category_id left join 72crm_oa_examine_log d on d.record_id = b.record_id
+    select a.*,b.examine_status,b.record_id as examine_record_id,b.examine_step_id,c.category_id,c.title as categoryTitle  from 72crm_oa_examine a  left join  72crm_oa_examine_record b on a.examine_id = b.examine_id left join 72crm_oa_examine_category c on a.category_id = c.category_id left join 72crm_oa_examine_log d on d.record_id = b.record_id
     where 1 = 1
       #if(categoryId!=null&&categoryId!="")
       and a.category_id = #para(categoryId)
@@ -29,7 +29,14 @@
       #if(startTime!=null && endTime!=null)
       and a.create_time between #para(startTime) and  #para(endTime)
       #end
-    group by a.examine_id,b.examine_status,b.record_id order by  a.create_time desc
+    group by a.examine_id,b.examine_status,b.record_id
+     #if(status==1)
+      order by  a.create_time desc
+     #end
+     #if(status==2)
+      order by  d.examine_time desc
+     #end
+
   #end
   #sql("examineCheck")
       select * from 72crm_oa_examine_check where  is_checked = 1
@@ -158,5 +165,13 @@
              else is_deleted = 0 and status = 1
         end
    #end
-
+   #sql("queryExamineById")
+      select a.*,b.title as category,b.type,c.examine_status  from 72crm_oa_examine as a left join 72crm_oa_examine_category b on a.category_id = b.category_id left join `72crm_oa_examine_record` c on a.examine_id = c.examine_id where a.examine_id = ?
+   #end
+  #sql("queryFieldByBatchId")
+    select a.field_id,a.field_name,a.name,a.type,a.input_tips,a.options,a.is_unique,a.is_null,b.value,a.field_type from 72crm_admin_field a left join `72crm_admin_fieldv` b on a.field_id = b.field_id where a.examine_category_id = ? and b.batch_id = ? order by sorting
+  #end
+  #sql("queryExamineCategoryByType")
+    SELECT * FROM 72crm_oa_examine_category WHERE type= ? limit 0,1
+  #end
 #end

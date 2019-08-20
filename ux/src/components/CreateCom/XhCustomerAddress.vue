@@ -21,10 +21,12 @@
     </flexbox-item>
     <flexbox-item>
       <div class="area-title">省/市/区</div>
-      <v-distpicker @selected="onAddressSelected"
-                    :province="addressSelect.province"
+      <v-distpicker :province="addressSelect.province"
                     :city="addressSelect.city"
-                    :area="addressSelect.area"></v-distpicker>
+                    :area="addressSelect.area"
+                    @province="selectProvince"
+                    @city="selectCity"
+                    @area="selectArea"></v-distpicker>
     </flexbox-item>
   </flexbox>
 </template>
@@ -166,37 +168,18 @@ export default {
       this.map.addOverlay(new BMap.Marker(point))
     },
     /** 区域选择 */
-    onAddressSelected(data) {
-      this.addressSelect.province = data.province.value
-      this.addressSelect.city = data.city.value
-      this.addressSelect.area = data.area.value
+    selectProvince(value) {
+      this.addressSelect.province = value.value
       this.valueChange()
-      // this.areaSelectMap(data)
     },
-    // /** 区域选择地图 区域选择  不影响 定位 */
-    // areaSelectMap(data) {
-    //   if (this.canExecute) {
-    //     this.canExecute = false
-    //     this.searchInput =
-    //       data.province.value + data.city.value + data.area.value
-
-    //     this.detailAddress = this.searchInput
-    //     // 创建地址解析器实例
-    //     var myGeo = new BMap.Geocoder()
-    //     // 将地址解析结果显示在地图上，并调整地图视野
-    //     var self = this
-    //     myGeo.getPoint(this.searchInput, function(point) {
-    //       if (point) {
-    //         // self.map.centerAndZoom(point, 14)
-    //         self.addMarkerLabel(point)
-    //       }
-    //     })
-
-    //     setTimeout(() => {
-    //       self.canExecute = true
-    //     }, 500)
-    //   }
-    // },
+    selectCity(value) {
+      this.addressSelect.city = value.value
+      this.valueChange()
+    },
+    selectArea(value) {
+      this.addressSelect.area = value.value
+      this.valueChange()
+    },
     /** 地图选择区域 */
     mapSelectArea(data) {
       if (this.canExecute) {

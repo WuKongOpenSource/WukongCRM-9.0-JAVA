@@ -1,13 +1,14 @@
 package com.kakarote.crm9.erp.crm.service;
 
 import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Inject;
+import com.jfinal.plugin.activerecord.Page;
+import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.bi.common.BiTimeUtil;
+import com.kakarote.crm9.utils.ParamsUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
@@ -53,6 +54,48 @@ public class InstrumentService {
         return R.error();
     }
 
+    /**
+     * @author zhang
+     * 销售简报的数据查看详情
+     */
+    public Page<Record> queryBulletinInfo(BasePageRequest basePageRequest,String userIds, String type, Integer label) {
+        Record record = new Record().set("type", type);
+        biTimeUtil.analyzeType(record);
+        String viewName;
+        switch (label) {
+            case 2:
+                viewName = "customerview";break;
+            case 3:
+                viewName = "contactsview";break;
+            case 5:
+                viewName = "businessview";break;
+            case 6:
+                viewName = "contractview";break;
+            case 7:
+                viewName = "receivablesview";break;
+            case 0:
+                viewName = "businessview";record.set("tn",true);break;
+            default:
+                return new Page<>();
+        }
+        record.set("userIds",userIds.split(",")).set("viewName",viewName);
+        String sortField=basePageRequest.getJsonObject().getString("sortField");
+        if(!ParamsUtil.isValid(sortField)){
+            return new Page<>();
+        }
+        if(StrUtil.isEmpty(sortField)){
+            sortField="update_time";
+        }
+        Integer order=basePageRequest.getJsonObject().getInteger("order");
+        if(order==null||(order!=1&&order!=2)){
+            order=1;
+        }
+        String orderType=order==1?"desc":"asc";
+        record.set("sortField",sortField);
+        record.set("orderType",orderType);
+        return Db.paginate(basePageRequest.getPage(),basePageRequest.getLimit(),Db.getSqlPara("crm.Instrument.queryBulletinInfo",record));
+
+    }
 
     /**
      * 业绩指标
@@ -75,7 +118,7 @@ public class InstrumentService {
                 startTime = r.getStr("startTime");
                 endTime = r.getStr("endTime");
             }
-        //status 1 回款 2.合同
+        //status 1 合同 2.回款
         Record record = Db.findFirst(Db.getSqlPara("crm.Instrument.queryMoneys", Kv.by("startTime", startTime).set("endTime", endTime).set("userIds", allUsetIdss)));
         if (record == null) {
             return R.ok().put("data", new Record().set("contractMoneys", 0).set("receivablesMoneys", 0).set("achievementMoneys", 0).set("proportion", 0));
@@ -247,9 +290,9 @@ public class InstrumentService {
         if (money.compareTo(new BigDecimal(0)) == 0) {
             record.set("proportion", 0);
         } else {
-            if (status == 1) {
+            if (status == 2) {
                 record.set("proportion", new BigDecimal(record.getStr("receivablesMoneys")).multiply(new BigDecimal(100)).divide(money, 2, BigDecimal.ROUND_HALF_UP));
-            } else if (status == 2) {
+            } else if (status == 1) {
                 record.set("proportion", new BigDecimal(record.getStr("contractMoneys")).multiply(new BigDecimal(100)).divide(money, 2, BigDecimal.ROUND_HALF_UP));
             }
         }

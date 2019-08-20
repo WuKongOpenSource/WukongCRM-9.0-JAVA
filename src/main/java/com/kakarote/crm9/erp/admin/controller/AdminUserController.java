@@ -1,7 +1,9 @@
 package com.kakarote.crm9.erp.admin.controller;
 
 import com.kakarote.crm9.common.annotation.NotNullValidate;
+import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.common.config.redis.RedisManager;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.admin.service.AdminUserService;
@@ -10,7 +12,6 @@ import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
-import com.jfinal.plugin.redis.Redis;
 import com.jfinal.upload.UploadFile;
 
 /**
@@ -29,6 +30,7 @@ public class AdminUserController extends Controller {
      * 设置系统用户
      * @param adminUser
      */
+    @Permissions("manage:user")
     public void setUser(@Para("") AdminUser adminUser){
         renderJson(adminUserService.setUser(adminUser,getPara("roleIds")));
     }
@@ -37,6 +39,7 @@ public class AdminUserController extends Controller {
      * @author hmb
      * 更新状态
      */
+    @Permissions("manage:user")
     public void setUserStatus(){
         String ids = getPara("userIds");
         String status = getPara("status");
@@ -57,6 +60,7 @@ public class AdminUserController extends Controller {
      * @author hmb
      * 重置密码
      */
+    @Permissions("manage:user")
     public void resetPassword(){
         String ids = getPara("userIds");
         String pwd = getPara("password");
@@ -67,6 +71,7 @@ public class AdminUserController extends Controller {
      * @author hmb
      * 查询上级列表
      */
+    @Permissions("manage:user")
     public void querySuperior(){
         String realName = getPara("realName");
         renderJson(adminUserService.querySuperior(realName));
@@ -76,6 +81,7 @@ public class AdminUserController extends Controller {
      * 查询所用用户列表
      * @author hmb
      */
+    @Permissions("manage:user")
     public void queryAllUserList(){
         renderJson(adminUserService.queryAllUserList());
     }
@@ -115,7 +121,6 @@ public class AdminUserController extends Controller {
         }
         renderJson(R.error("修改头像失败"));
     }
-
     public void updatePassword(){
         String oldPass=getPara("oldPwd");
         String newPass=getPara("newPwd");
@@ -127,7 +132,7 @@ public class AdminUserController extends Controller {
         adminUser.setPassword(newPass);
         boolean b=adminUserService.updateUser(adminUser);
         if(b){
-            Redis.use().del(BaseUtil.getToken());
+            RedisManager.getRedis().del(BaseUtil.getToken());
             removeCookie("Admin-Token");
         }
         renderJson(R.isSuccess(b));
@@ -147,6 +152,7 @@ public class AdminUserController extends Controller {
      * @param username 用户新账号
      * @param password 用户新密码
      */
+    @Permissions("manage:user")
     @NotNullValidate(value = "username",message = "账号不能为空")
     @NotNullValidate(value = "password",message = "密码不能为空")
     @NotNullValidate("id")
@@ -154,7 +160,6 @@ public class AdminUserController extends Controller {
         renderJson(adminUserService.usernameEdit(id,username,password));
 
     }
-
     public void queryUserByDeptId(@Para("deptId")Integer deptId){
         renderJson(R.ok().put("data",adminUserService.queryUserByDeptId(deptId)));;
     }

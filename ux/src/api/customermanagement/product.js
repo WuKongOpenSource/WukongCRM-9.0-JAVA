@@ -98,3 +98,11 @@ export function crmProductExcelImport(data) {
  *
  */
 export const crmProductExcelDownloadURL = process.env.BASE_API + 'CrmProduct/downloadExcel'
+export function crmProductDownloadExcelAPI(data) {
+  return request({
+    url: 'CrmProduct/downloadExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob'
+  })
+}

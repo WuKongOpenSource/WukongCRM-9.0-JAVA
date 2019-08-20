@@ -8,6 +8,7 @@ import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.log.Log;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldv;
@@ -32,6 +33,7 @@ import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
+
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -114,7 +116,8 @@ public class CrmLeadsService {
         field.set("线索名称", crmLeads.getLeadsName()).set("电话", crmLeads.getMobile())
                 .set("手机", crmLeads.getTelephone()).set("下次联系时间", DateUtil.formatDateTime(crmLeads.getNextTime()))
                 .set("地址", crmLeads.getAddress()).set("备注", crmLeads.getRemark());
-        List<Record> recordList = Db.find("select name,value from 72crm_admin_fieldv where batch_id = ?",crmLeads.getBatchId());
+        List<Record> recordList = Db.find(Db.getSql("admin.field.queryCustomField"),crmLeads.getBatchId());
+        fieldUtil.handleType(recordList);
         fieldList.addAll(recordList);
         return fieldList;
     }
@@ -124,9 +127,6 @@ public class CrmLeadsService {
      * 根据线索id查询
      */
     public Record queryById(Integer leadsId) {
-        if(!authUtil.dataAuth("leads","leads_id",leadsId)){
-            return new Record().set("dataAuth",0);
-        }
         return Db.findFirst(Db.getSql("crm.leads.queryById"), leadsId);
     }
 
@@ -182,7 +182,7 @@ public class CrmLeadsService {
             if (1 == crmLeads.getInt("is_transform")) {
                 return R.error("已转化线索不能再次转化");
             }
-            List<Record> leadsFields = Db.find("select name,value from 72crm_admin_fieldv where batch_id = ?",crmLeads.getStr("batch_id"));
+            List<Record> leadsFields = adminFieldService.list("1");
             CrmCustomer crmCustomer = new CrmCustomer();
             crmCustomer.setCustomerName(crmLeads.getStr("leads_name"));
             crmCustomer.setIsLock(0);
@@ -204,35 +204,50 @@ public class CrmLeadsService {
             crmCustomer.setRemark("");
             String customerBatchId = IdUtil.simpleUUID();
             crmCustomer.setBatchId(customerBatchId);
-            crmCustomer.save();
-            crmRecordService.addConversionCustomerRecord(crmCustomer.getCustomerId(), CrmEnum.CUSTOMER_TYPE_KEY.getTypes(), crmCustomer.getCustomerName());
-            List<AdminField> customerFields = AdminField.dao.find("select field_id,name from 72crm_admin_field where label = 2 and field_type = 0");
+            List<AdminField> customerFields = AdminField.dao.find("select field_id,name,field_name,field_type from 72crm_admin_field where label = '2'");
             List<AdminFieldv> adminFieldvList = new ArrayList<>();
-            customerFields.forEach(customerField ->{
-                leadsFields.forEach(leadsFIeld ->{
+            for (Record leadsFIeld : leadsFields) {
+                for (AdminField customerField : customerFields) {
+                    if(leadsFIeld.get("relevant")!=null&&customerField.getFieldId().equals(leadsFIeld.get("relevant"))){
+                        if(customerField.getFieldType().equals(1)){
+                            crmCustomer.set(customerField.getFieldName(),crmLeads.get(leadsFIeld.get("field_name")));
+                        }else {
+                            AdminFieldv adminFieldv = new AdminFieldv();
+                            adminFieldv.setValue(crmLeads.get(leadsFIeld.get("name")));
+                            adminFieldv.setFieldId(customerField.getFieldId());
+                            adminFieldv.setName(customerField.getName());
+                            adminFieldvList.add(adminFieldv);
+                        }
+                        continue;
+                    }
+                    if(!customerField.getFieldType().equals(0)){
+                        continue;
+                    }
                     if ("客户来源".equals(customerField.getName()) && "线索来源".equals(leadsFIeld.getStr("name"))){
                         AdminFieldv adminFieldv = new AdminFieldv();
-                        adminFieldv.setValue(leadsFIeld.getStr("value"));
+                        adminFieldv.setValue(crmLeads.get(leadsFIeld.get("name")));
                         adminFieldv.setFieldId(customerField.getFieldId());
                         adminFieldv.setName(customerField.getName());
                         adminFieldvList.add(adminFieldv);
                     }
                     if ("客户行业".equals(customerField.getName()) && "客户行业".equals(leadsFIeld.getStr("name"))){
                         AdminFieldv adminFieldv = new AdminFieldv();
-                        adminFieldv.setValue(leadsFIeld.getStr("value"));
+                        adminFieldv.setValue(crmLeads.get(leadsFIeld.get("name")));
                         adminFieldv.setFieldId(customerField.getFieldId());
                         adminFieldv.setName(customerField.getName());
                         adminFieldvList.add(adminFieldv);
                     }
                     if ("客户级别".equals(customerField.getName()) && "客户级别".equals(leadsFIeld.getStr("name"))){
                         AdminFieldv adminFieldv = new AdminFieldv();
-                        adminFieldv.setValue(leadsFIeld.getStr("value"));
+                        adminFieldv.setValue(crmLeads.get(leadsFIeld.get("name")));
                         adminFieldv.setFieldId(customerField.getFieldId());
                         adminFieldv.setName(customerField.getName());
                         adminFieldvList.add(adminFieldv);
                     }
-                });
-            });
+                };
+            };
+            crmCustomer.save();
+            crmRecordService.addConversionCustomerRecord(crmCustomer.getCustomerId(), CrmEnum.CUSTOMER_TYPE_KEY.getTypes(), crmCustomer.getCustomerName());
             adminFieldService.save(adminFieldvList, customerBatchId);
             Db.update("update 72crm_crm_leads set is_transform = 1,update_time = ?,customer_id = ? where leads_id = ?",
                     DateUtil.date(), crmCustomer.getCustomerId(), Integer.valueOf(leadsId));
@@ -270,51 +285,11 @@ public class CrmLeadsService {
 
     /**
      * @author wyq
-     * 查询新增字段
-     */
-    public List<Record> queryField() {
-        List<Record> fieldList = new LinkedList<>();
-        String[] settingArr = new String[]{};
-        List<Record> fixedFieldList = adminFieldService.list("1");
-        List<String> filterList = new LinkedList<>();
-        filterList.add("线索来源");
-        filterList.add("客户级别");
-        filterList.add("客户行业");
-        List list = fixedFieldList.stream().filter((Record record) -> filterList.contains(record.getStr("name"))).collect(Collectors.toList());
-        fieldUtil.getFixedField(fieldList, "leadsName", "线索名称", "", "text", settingArr, 1);
-        fieldList.add((Record) list.get(0));
-        fieldUtil.getFixedField(fieldList, "telephone", "电话", "", "text", settingArr, 0);
-        fieldUtil.getFixedField(fieldList, "mobile", "手机", "", "mobile", settingArr, 0);
-        fieldList.add((Record) list.get(1));
-        fieldList.add((Record) list.get(2));
-        fieldUtil.getFixedField(fieldList, "address", "地址", "", "text", settingArr, 0);
-        fieldUtil.getFixedField(fieldList, "nextTime", "下次联系时间", "", "datetime", settingArr, 0);
-        fieldUtil.getFixedField(fieldList, "remark", "备注", "", "text", settingArr, 0);
-        fieldList.addAll(fixedFieldList);
-        List endList = fieldList.stream().distinct().collect(Collectors.toList());
-        return endList;
-    }
-
-    /**
-     * @author wyq
      * 查询编辑字段
      */
     public List<Record> queryField(Integer leadsId) {
         Record leads = Db.findFirst("select * from leadsview where leads_id = ?",leadsId);
         return adminFieldService.queryUpdateField(1,leads);
-//        List<Record> fieldList = new LinkedList<>();
-//        Record leads = Db.findFirst("select * from leadsview where leads_id = ?", leadsId);
-//        String[] settingArr = new String[]{};
-//        List<Record> fixedFieldList = adminFieldService.queryByBatchId(leads.getStr("batch_id"));
-//        fieldUtil.getFixedField(fieldList, "leadsName", "线索名称", leads.getStr("leads_name"), "text", settingArr, 1);
-//        fieldUtil.getFixedField(fieldList, "telephone", "电话", leads.getStr("telephone"), "text", settingArr, 0);
-//        fieldUtil.getFixedField(fieldList, "mobile", "手机", leads.getStr("mobile"), "mobile", settingArr, 0);
-//        fieldUtil.getFixedField(fieldList, "address", "地址", leads.getStr("address"), "text", settingArr, 0);
-//        fieldUtil.getFixedField(fieldList, "nextTime", "下次联系时间", DateUtil.formatDateTime(leads.get("next_time")), "datetime", settingArr, 0);
-//        fieldUtil.getFixedField(fieldList, "remark", "备注", leads.getStr("remark"), "text", settingArr, 0);
-//        fieldList.addAll(fixedFieldList);
-//        List<Record> endList = fieldList.stream().distinct().collect(Collectors.toList());
-//        return endList;
     }
 
     /**
@@ -380,7 +355,7 @@ public class CrmLeadsService {
         Integer errNum = 0;
         try {
             List<List<Object>> read = reader.read();
-            List<Object> list = read.get(0);
+            List<Object> list = read.get(1);
             List<Record> recordList = adminFieldService.customFieldList("1");
             recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
             List<Record> fieldList = adminFieldService.queryAddField(1);
@@ -399,9 +374,9 @@ public class CrmLeadsService {
             for (int i = 0; i < list.size(); i++) {
                 kv.set(nameMap.get(list.get(i)), i);
             }
-            if (read.size() > 1) {
+            if (read.size() > 2) {
                 JSONObject object = new JSONObject();
-                for (int i = 1; i < read.size(); i++) {
+                for (int i = 2; i < read.size(); i++) {
                     errNum = i;
                     List<Object> leadsList = read.get(i);
                     if (leadsList.size() < list.size()) {
@@ -444,7 +419,7 @@ public class CrmLeadsService {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.getLog(getClass()).error("",e);
             if (errNum != 0){
                 return R.error("第" + (errNum+1) + "行错误!");
             }

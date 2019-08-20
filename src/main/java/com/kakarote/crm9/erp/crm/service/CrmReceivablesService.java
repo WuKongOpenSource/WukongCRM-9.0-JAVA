@@ -137,9 +137,6 @@ public class CrmReceivablesService {
      * 根据id查询回款
      */
     public R queryById(Integer id) {
-        if(!authUtil.dataAuth("receivables","receivables_id",id)){
-            return R.ok().put("data",new Record().set("dataAuth",0));
-        }
         Record record = Db.findFirst(Db.getSqlPara("crm.receivables.queryReceivablesById", Kv.by("id", id)));
         return R.ok().put("data", record);
     }
@@ -161,7 +158,8 @@ public class CrmReceivablesService {
                 .set("回款金额", record.getStr("money"))
                 .set("期数", record.getStr("plan_num"))
                 .set("备注", record.getStr("remark"));
-        List<Record> recordList = Db.find("select name,value from 72crm_admin_fieldv where batch_id = ?",record.getStr("batch_id"));
+        List<Record> recordList = Db.find(Db.getSql("admin.field.queryCustomField"),record.getStr("batch_id"));
+        fieldUtil.handleType(recordList);
         fieldList.addAll(recordList);
         return fieldList;
     }
@@ -189,24 +187,6 @@ public class CrmReceivablesService {
     }
 
     /**
-     * @author zxy
-     * 查询回款自定义字段(新增)
-     */
-    public List<Record> queryField() {
-        List<Record> fieldList = new ArrayList<>();
-        String[] settingArr = new String[]{};
-        fieldUtil.getFixedField(fieldList, "number", "回款编号", "", "number", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "customerId", "客户名称", "", "customer", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "contractId", "合同编号", "", "contract", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "returnTime", "回款日期", "", "date", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "money", "回款金额", "", "floatnumber", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "planId", "期数", "", "receivables_plan", settingArr, 0);
-        fieldUtil.getFixedField(fieldList, "remark", "备注", "", "textarea", settingArr, 0);
-        fieldList.addAll(adminFieldService.list("7"));
-        return fieldList;
-    }
-
-    /**
      * @author wyq
      * 查询编辑字段
      */
@@ -220,31 +200,6 @@ public class CrmReceivablesService {
         receivables.set("contract_id",list);
         return adminFieldService.queryUpdateField(7,receivables);
     }
-
-    /**
-     * @author zxy
-     * 查询回款自定义字段(修改)
-     */
-//    public List<Record> queryField(Integer receivablesId) {
-//        List<Record> fieldList = new ArrayList<>();
-//        Record record = Db.findFirst("select * from receivablesview where receivables_id = ?", receivablesId);
-//        String[] settingArr = new String[]{};
-//        fieldUtil.getFixedField(fieldList, "number", "回款编号", record.getStr("number"), "number", settingArr, 1);
-//        List<Record> customerList = new ArrayList<>();
-//        Record customer = new Record();
-//        customerList.add(customer.set("customerId", record.getInt("customer_id")).set("customerName", record.getStr("customer_name")));
-//        fieldUtil.getFixedField(fieldList, "customerId", "客户名称", customerList, "customer", settingArr, 1);
-//        customerList = new ArrayList<>();
-//        customer = new Record();
-//        customerList.add(customer.set("contractId", record.getStr("contract_id")).set("contract_num", record.getStr("contract_num")));
-//        fieldUtil.getFixedField(fieldList, "contractId", "合同编号", customerList, "contract", settingArr, 1);
-//        fieldUtil.getFixedField(fieldList, "returnTime", "回款日期", DateUtil.formatDate(record.get("return_time")), "date", settingArr, 1);
-//        fieldUtil.getFixedField(fieldList, "money", "回款金额", record.getStr("money"), "floatnumber", settingArr, 1);
-//        fieldUtil.getFixedField(fieldList, "planId", "期数", record.getInt("plan_id"), "receivables_plan", settingArr, 0);
-//        fieldUtil.getFixedField(fieldList, "remark", "备注", record.getStr("remark"), "textarea", settingArr, 0);
-//        fieldList.addAll(adminFieldService.queryByBatchId(record.getStr("batch_id")));
-//        return fieldList;
-//    }
 
     /**
      * 根据条件查询回款

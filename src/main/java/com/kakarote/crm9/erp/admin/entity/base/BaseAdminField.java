@@ -143,4 +143,12 @@ public abstract class BaseAdminField<M extends BaseAdminField<M>> extends Model<
 	public java.lang.Integer getFieldType() {
 		return getInt("field_type");
 	}
+
+	public void setRelevant(java.lang.Integer relevant) {
+		set("relevant", relevant);
+	}
+
+	public java.lang.Integer getRelevant() {
+		return getInt("relevant");
+	}
 }

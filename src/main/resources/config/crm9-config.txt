@@ -1,15 +1,5 @@
-﻿#数据库链接
+﻿#database
 mysql.jdbcUrl = jdbc:mysql://127.0.0.1:3306/crm9?characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull&tinyInt1isBit=false
 mysql.user = root
 mysql.password = 123456
 jfinal.devMode = false
-jfinal.redis=MainRedis
-#---------------------------------------------------------
-MainRedis.open = true
-MainRedis.host=127.0.0.1
-MainRedis.port=6379
-MainRedis.timeout=20000
-#没有密码直接留空或者将此行删除
-MainRedis.password=123456
-MainRedis.cacheName = 72crm
-MainRedis.database = 0

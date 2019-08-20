@@ -69,7 +69,10 @@ export function crmMessageFollowCustomerAPI(data) {
   return request({
     url: 'CrmBackLog/followCustomer',
     method: 'post',
-    data: data
+    data: data,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
   })
 }
 
@@ -96,7 +99,10 @@ export function crmMessagRemindreceivablesplanAPI(data) {
   return request({
     url: 'CrmBackLog/remindReceivables',
     method: 'post',
-    data: data
+    data: data,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
   })
 }
 

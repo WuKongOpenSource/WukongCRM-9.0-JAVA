@@ -1,14 +1,15 @@
 package com.kakarote.crm9.common.config;
 
 import cn.hutool.core.util.ClassLoaderUtil;
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.druid.wall.WallFilter;
 import com.jfinal.aop.Aop;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.druid.DruidConfig;
 import com.kakarote.crm9.common.config.json.ErpJsonFactory;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.common.config.paragetter.MapParaGetter;
 import com.kakarote.crm9.common.config.paragetter.PageParaGetter;
+import com.kakarote.crm9.common.config.redis.RedisPlugin;
 import com.kakarote.crm9.common.config.render.ErpRenderFactory;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.common.interceptor.AuthInterceptor;
@@ -31,19 +32,19 @@ import com.jfinal.plugin.activerecord.dialect.MysqlDialect;
 import com.jfinal.plugin.cron4j.Cron4jPlugin;
 import com.jfinal.plugin.druid.DruidPlugin;
 import com.jfinal.plugin.druid.DruidStatViewHandler;
-import com.jfinal.plugin.redis.RedisPlugin;
 import com.jfinal.render.RenderManager;
 import com.jfinal.template.Engine;
 import com.kakarote.crm9.erp.work.service.WorkService;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * API 引导式配置
  */
 public class JfinalConfig extends JFinalConfig {
 
-    public static Prop prop = PropKit.use("config/crm9-config.txt");
+    public final static Prop prop = PropKit.use("config/crm9-config.txt");
 
     /**
      * 配置常量
@@ -85,9 +86,9 @@ public class JfinalConfig extends JFinalConfig {
     @Override
     public void configPlugin(Plugins me) {
         ParaProcessorBuilder.me.regist(BasePageRequest.class, PageParaGetter.class, null);
+        ParaProcessorBuilder.me.regist(Map.class, MapParaGetter.class, null);
         // 配置 druid 数据库连接池插件
         DruidPlugin druidPlugin = createDruidPlugin();
-        druidPlugin.addFilter(new WallFilter());
         druidPlugin.setInitialSize(0);
         druidPlugin.setMinIdle(0);
         druidPlugin.setMaxActive(2000);
@@ -106,7 +107,8 @@ public class JfinalConfig extends JFinalConfig {
         //扫描sql模板
         getSqlTemplate(PathKit.getRootClassPath() + "/template", arp);
         //Redis以及缓存插件
-        createRedisPlugin(me);
+        RedisPlugin redisPlugin=new RedisPlugin();
+        me.add(redisPlugin);
         //cron定时器
         me.add(new Cron4jPlugin(PropKit.use("config/cron4j.txt")));
 
@@ -116,20 +118,6 @@ public class JfinalConfig extends JFinalConfig {
 
     public static DruidPlugin createDruidPlugin() {
         return new DruidPlugin(prop.get("mysql.jdbcUrl"), prop.get("mysql.user"), prop.get("mysql.password").trim()).setInitialSize(1).setMinIdle(1).setMaxActive(2000).setTimeBetweenEvictionRunsMillis(5000).setValidationQuery("select 1").setTimeBetweenEvictionRunsMillis(60000).setMinEvictableIdleTimeMillis(30000).setFilters("stat,wall");
-    }
-
-    private void createRedisPlugin(Plugins me) {
-        for (String configName : prop.get("jfinal.redis", "").split(",")) {
-            RedisPlugin redisPlugin;
-            if (prop.getBoolean(configName + ".open", false)) {
-                if (prop.containsKey(configName + ".password") && StrUtil.isNotEmpty(prop.get(configName + ".password"))) {
-                    redisPlugin = new RedisPlugin(prop.get(configName + ".cacheName").trim(), prop.get(configName + ".host").trim(), prop.getInt(configName + ".port", 6379), prop.getInt(configName + ".timeout", 20000), prop.get(configName + ".password", null),prop.getInt(configName+".database",0));
-                } else {
-                    redisPlugin = new RedisPlugin(prop.get(configName + ".cacheName").trim(), prop.get(configName + ".host").trim(), prop.getInt(configName + ".port", 6379), prop.getInt(configName + ".timeout", 20000));
-                }
-                me.add(redisPlugin);
-            }
-        }
     }
 
     /**

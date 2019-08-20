@@ -3,6 +3,7 @@ package com.kakarote.crm9.erp.admin.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
+import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.erp.admin.entity.AdminRole;
 import com.kakarote.crm9.erp.admin.entity.AdminUserRole;
 import com.kakarote.crm9.erp.admin.service.AdminRoleService;
@@ -23,6 +24,7 @@ public class AdminRoleController extends Controller {
      * @author wyq
      * 获取全部角色列表
      */
+    @Permissions("manage:permission")
     public void getAllRoleList(){
         renderJson(R.ok().put("data",adminRoleService.getAllRoleList()));
     }
@@ -32,6 +34,7 @@ public class AdminRoleController extends Controller {
      * @param roleType 角色类型
      * 根据角色类型查询关联员工
      */
+    @Permissions("manage:permission")
     public void getRoleUser(@Para("roleType")Integer roleType){
         renderJson(R.ok().put("data",adminRoleService.getRoleUser(roleType)));
     }
@@ -40,6 +43,7 @@ public class AdminRoleController extends Controller {
      * @author wyq
      * 新建
      */
+    @Permissions("manage:permission")
     @Before(Tx.class)
     public void add(@Para("")AdminRole adminRole){
         renderJson(adminRoleService.save(adminRole));
@@ -49,6 +53,7 @@ public class AdminRoleController extends Controller {
      * @author wyq
      * 编辑角色
      */
+    @Permissions("manage:permission")
     @NotNullValidate(value = "roleId",message = "角色id不能为空")
     @NotNullValidate(value = "roleName",message = "角色名称不能为空")
     public void update(@Para("")AdminRole adminRole){
@@ -64,6 +69,7 @@ public class AdminRoleController extends Controller {
      * 修改角色菜单
      * @author zhangzhiwei
      */
+    @Permissions("manage:permission")
     public void updateRoleMenu(){
         adminRoleService.updateRoleMenu(JSON.parseObject(getRawData()));
         renderJson(R.ok());
@@ -81,6 +87,7 @@ public class AdminRoleController extends Controller {
      * @param roleId 角色id
      * 复制
      */
+    @Permissions("manage:permission")
     public void copy(@Para("roleId")Integer roleId){
         adminRoleService.copy(roleId);
         renderJson(R.ok());
@@ -91,6 +98,7 @@ public class AdminRoleController extends Controller {
      * @param roleId 角色id
      * 删除
      */
+    @Permissions("manage:permission")
     public void delete(@Para("roleId")Integer roleId){
         renderJson(adminRoleService.delete(roleId) ? R.ok() : R.error());
     }
@@ -100,6 +108,7 @@ public class AdminRoleController extends Controller {
      * @param roleId 角色项目管理角色id
      * 删除
      */
+    @Permissions("manage:permission")
     public void deleteWorkRole(@Para("roleId")Integer roleId){
         renderJson(adminRoleService.deleteWorkRole(roleId) ? R.ok() : R.error());
     }
@@ -108,6 +117,7 @@ public class AdminRoleController extends Controller {
      * @author wyq
      * 关联员工
      */
+    @Permissions("manage:permission")
     public void relatedUser(@Para("")AdminUserRole adminUserRole){
         renderJson(adminRoleService.relatedUser(adminUserRole));
     }
@@ -116,6 +126,7 @@ public class AdminRoleController extends Controller {
      * @author wyq
      * 解除角色关联员工
      */
+    @Permissions("manage:permission")
     public void unbindingUser(@Para("") AdminUserRole adminUserRole){
         renderJson(adminRoleService.unbindingUser(adminUserRole));
     }
@@ -124,6 +135,7 @@ public class AdminRoleController extends Controller {
      * 项目管理角色列表
      * @author wyq
      */
+    @Permissions("manage:permission")
     public void queryProjectRoleList(){
         renderJson(adminRoleService.queryProjectRoleList());
     }
@@ -133,6 +145,7 @@ public class AdminRoleController extends Controller {
      * 设置项目管理角色
      * @author wyq
      */
+    @Permissions("manage:permission")
     public void setWorkRole(){
         JSONObject jsonObject = JSON.parseObject(getRawData());
         renderJson(adminRoleService.setWorkRole(jsonObject));

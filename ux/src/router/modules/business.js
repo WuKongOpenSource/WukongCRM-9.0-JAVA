@@ -347,6 +347,38 @@ const rankingRouter = {
   }]
 }
 
+// oa分析
+const oaAuth = {
+  requiresAuth: false,
+  index: 1,
+  type: 'bi',
+  subType: 'oa'
+}
+
+const oaRouter = {
+  path: 'oa',
+  meta: {
+    icon: 'oa_analysis',
+    title: '办公分析',
+    ...oaAuth
+  },
+  hidden: false,
+  children: [{
+    path: 'log', // 日志分析
+    component: () => import('@/views/businessIntelligence/oa/log'),
+    meta: {
+      title: '日志分析',
+      ...oaAuth
+    }
+  }, {
+    path: 'examine', // 审批分析
+    component: () => import('@/views/businessIntelligence/oa/examine'),
+    meta: {
+      title: '审批分析',
+      ...oaAuth
+    }
+  }]
+}
 
 
 const taskCompleteRouteItem = {
@@ -382,6 +414,7 @@ export const biRouter = {
     ...portrayalRouter.children,
     ...productRouter.children,
     ...rankingRouter.children,
+    ...oaRouter.children,
     taskCompleteRouteItem
   ]
 }
@@ -393,5 +426,6 @@ export const biRouterMenu = [
   portrayalRouterMenu,
   productRouter,
   rankingRouter,
+  oaRouter,
   taskCompleteRouteItem
 ]

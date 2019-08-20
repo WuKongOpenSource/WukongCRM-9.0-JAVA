@@ -4,9 +4,15 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.jfinal.aop.Aop;
+import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.SqlPara;
+import com.kakarote.crm9.common.constant.BaseConstant;
+import com.kakarote.crm9.erp.admin.service.AdminDeptService;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -55,6 +61,7 @@ public class BiTimeUtil {
                 cycleNum = (int)DateUtil.between(beginDate,endDate,DateUnit.DAY)+1;
             }else if ("week".equals(type)){
                 beginDate = DateUtil.beginOfWeek(DateUtil.date());
+                endDate = DateUtil.endOfWeek(DateUtil.date());
                 sqlDateFormat = "%Y%m%d";
                 dateFormat = "yyyyMMdd";
                 cycleNum = 7;
@@ -65,6 +72,8 @@ public class BiTimeUtil {
                 dateFormat = "yyyyMMdd";
                 cycleNum = 7;
             }else if ("today".equals(type)){
+                beginDate = DateUtil.beginOfDay(DateUtil.date());
+                endDate = DateUtil.endOfDay(DateUtil.date());
                 sqlDateFormat = "%Y%m%d";
                 dateFormat = "yyyyMMdd";
                 cycleNum = 1;
@@ -97,13 +106,20 @@ public class BiTimeUtil {
         }
         if (userId != null){
             userIds = userId.toString();
-        }else {
-            List<Long> userIdList = Db.query("select user_id from 72crm_admin_user where dept_id = ?",deptId);
+        }else if(deptId!=null){
+            List<Record> records = Aop.get(AdminDeptService.class).queryDeptByParentDept(deptId, BaseConstant.AUTH_DATA_RECURSION_NUM);
+            List<Integer> deptIds = new ArrayList<>();
+            deptIds.add(deptId);
+            records.forEach(dept ->deptIds.add(dept.getInt("id")));
+            SqlPara sqlPara = Db.getSqlPara("admin.user.queryUserIdByDeptId", Kv.by("deptIds", deptIds));
+            List<Long> userIdList =  Db.query(sqlPara.getSql(), sqlPara.getPara());
             userIds = CollectionUtil.join(userIdList,",");
+        }else {
+            userIds="";
         }
         Integer beginTime = Integer.valueOf(DateUtil.format(beginDate,dateFormat));
         Integer finalTime = Integer.valueOf(DateUtil.format(endDate,dateFormat));
-        record.set("sqlDateFormat",sqlDateFormat).set("cycleNum",cycleNum).set("userIds",userIds).set("beginTime",beginTime).set("finalTime",finalTime);
+        record.set("sqlDateFormat",sqlDateFormat).set("beginDate",beginDate).set("endDate",endDate).set("cycleNum",cycleNum).set("userIds",userIds).set("beginTime",beginTime).set("finalTime",finalTime);
         return record;
     }
 

@@ -66,11 +66,16 @@
     </el-select>
     <el-button @click.native="postFiltrateValue()"
                type="primary">搜索</el-button>
+    <slot></slot>
   </div>
 </template>
 
 <script type="text/javascript">
-import { adminStructuresSubIndex, userListByStructid,getUserByDeptId } from '@/api/common'
+import {
+  adminStructuresSubIndex,
+  userListByStructid,
+  getUserByDeptId
+} from '@/api/common'
 import { crmBusinessStatusList } from '@/api/customermanagement/business'
 import { productCategoryIndex } from '@/api/systemManagement/SystemCustomer'
 import timeTypeSelect from '@/components/timeTypeSelect'

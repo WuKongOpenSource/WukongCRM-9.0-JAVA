@@ -28,36 +28,16 @@
         </el-date-picker>
       </div>
     </div>
-    <div class="list-box"
-         :id="'examine-list-box' + this.by">
-      <examine-cell v-for="(item, index) in list"
-                    :key="index"
-                    :data="item"
-                    @on-handle="examineCellHandle"></examine-cell>
-      <p class="load">
+    <examine-section class="list-box"
+                     :id="'examine-list-box' + this.by"
+                     :list="list"
+                     @handle="searchBtn">
+      <p slot="load"
+         class="load">
         <el-button type="text"
                    :loading="loadMoreLoading">{{loadMoreLoading ? '加载更多' : '没有更多了'}}</el-button>
       </p>
-    </div>
-    <examine-detail v-if="showDview"
-                    :id="rowID"
-                    class="d-view"
-                    @on-examine-handle="searchBtn"
-                    @hide-view="showDview=false">
-    </examine-detail>
-    <c-r-m-all-detail :visible.sync="showRelatedDetail"
-                      :crmType="relatedCRMType"
-                      :listenerIDs="['workbench-main-container']"
-                      :noListenerIDs="['examine-list-box']"
-                      :id="relatedID"></c-r-m-all-detail>
-    <examine-handle :show="showExamineHandle"
-                    @close="showExamineHandle = false"
-                    @save="searchBtn"
-                    :id="rowID"
-                    :recordId="rowData.examineRecordId"
-                    :detail="rowData"
-                    examineType="oa_examine"
-                    status="4"></examine-handle>
+    </examine-section>
   </div>
 </template>
 
@@ -68,17 +48,11 @@ import {
   oaExamineDelete
 } from '@/api/oamanagement/examine'
 import { formatTimeToTimestamp } from '@/utils'
-import ExamineCell from './examineCell'
-import ExamineDetail from './examineDetail'
-import CRMAllDetail from '@/views/customermanagement/components/CRMAllDetail'
-import ExamineHandle from '@/components/Examine/ExamineHandle' // 审批操作理由
+import ExamineSection from './examineSection'
 
 export default {
   components: {
-    ExamineCell,
-    ExamineDetail,
-    CRMAllDetail,
-    ExamineHandle
+    ExamineSection
   },
   data() {
     return {
@@ -89,17 +63,7 @@ export default {
       list: [],
       // 判断是否发请求
       isPost: false,
-      page: 1,
-      /** 控制详情展示 */
-      rowID: '', // 行信息
-      rowData: {}, // 行全部信息
-      showDview: false,
-      // 相关详情的查看
-      relatedID: '',
-      relatedCRMType: '',
-      showRelatedDetail: false,
-      // 撤回操作
-      showExamineHandle: false
+      page: 1
     }
   },
   watch: {
@@ -136,23 +100,17 @@ export default {
   },
   mounted() {
     // 分批次加载
-    let self = this
-    let item = document.getElementById('examine-list-box' + this.by)
-    item.onscroll = function() {
-      let scrollTop = item.scrollTop
-      let windowHeight = item.clientHeight
-      let scrollHeight = item.scrollHeight //滚动条到底部的条件
-
-      if (
-        scrollTop + windowHeight == scrollHeight &&
-        self.loadMoreLoading == true
-      ) {
-        if (!self.isPost) {
-          self.isPost = true
-          self.page++
-          self.getList()
+    let dom = document.getElementById('examine-list-box' + this.by)
+    dom.onscroll = () => {
+      let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+      //滚动条到底部的条件
+      if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
+        if (!this.isPost) {
+          this.isPost = true
+          this.page++
+          this.getList()
         } else {
-          self.loadMoreLoading = false
+          this.loadMoreLoading = false
         }
       }
     }
@@ -210,51 +168,6 @@ export default {
       this.checkStatus = 'all'
       this.betweenTime = []
       this.$emit('reset')
-    },
-    examineCellHandle(data) {
-      // 编辑
-      if (data.type == 'edit') {
-        this.$emit('edit', data.data.item)
-        // 删除
-      } else if (data.type == 'delete') {
-        this.$confirm('确定删除?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            oaExamineDelete({
-              examineId: data.data.item.examineId
-            }).then(res => {
-              this.searchBtn()
-              this.$message({
-                type: 'success',
-                message: '删除成功!'
-              })
-            })
-          })
-          .catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除'
-            })
-          })
-        // 撤回
-      } else if (data.type == 'withdraw') {
-        this.rowID = data.data.item.examineId
-        this.rowData = data.data.item
-        this.showExamineHandle = true
-        // 详情
-      } else if (data.type == 'view') {
-        this.showRelatedDetail = false
-        this.rowID = data.data.item.examineId
-        this.showDview = true
-      } else if (data.type == 'related-detail') {
-        this.showDview = false
-        this.relatedID = data.data.item[data.data.type + 'Id']
-        this.relatedCRMType = data.data.type
-        this.showRelatedDetail = true
-      }
     }
   }
 }
@@ -302,13 +215,5 @@ export default {
     color: #ccc;
     cursor: auto;
   }
-}
-
-.d-view {
-  position: fixed;
-  width: 926px;
-  top: 60px;
-  bottom: 0px;
-  right: 0px;
 }
 </style>

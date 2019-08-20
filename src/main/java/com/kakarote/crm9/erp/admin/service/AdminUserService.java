@@ -4,6 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.common.config.redis.RedisManager;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.entity.AdminUserRole;
@@ -19,7 +20,6 @@ import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.SqlPara;
 import com.jfinal.plugin.activerecord.tx.Tx;
-import com.jfinal.plugin.redis.Redis;
 
 import java.util.*;
 
@@ -32,6 +32,7 @@ public class AdminUserService {
     @Before(Tx.class)
     public R setUser(AdminUser adminUser, String roleIds) {
         boolean bol;
+        updateScene(adminUser);
         if (adminUser.getUserId() == null) {
             Integer count = Db.queryInt("select count(*) from 72crm_admin_user where username = ?", adminUser.getUsername());
             if (count > 0) {
@@ -78,6 +79,44 @@ public class AdminUserService {
         return R.isSuccess(bol);
     }
 
+    private void updateScene(AdminUser adminUser){
+        List<Long> ids = new ArrayList<>();
+        if (adminUser.getUserId() == null && adminUser.getParentId() != null){
+            ids.add(adminUser.getParentId());
+        }else if (adminUser.getUserId() != null){
+            AdminUser oldAdminUser = AdminUser.dao.findById(adminUser.getUserId());
+            if (oldAdminUser.getParentId() == null && adminUser.getParentId() != null){
+                ids.add(adminUser.getParentId());
+            }else if (oldAdminUser.getParentId() != null && !oldAdminUser.getParentId().equals(adminUser.getParentId())){
+                ids.add(oldAdminUser.getParentId());
+                ids.add(adminUser.getParentId());
+            }
+        }
+        if (ids.size() > 0){
+            HashSet<Long> idsSet = new HashSet<>();
+            ids.forEach(id -> idsSet.addAll(queryTopUserId(id,BaseConstant.AUTH_DATA_RECURSION_NUM)));
+            SqlPara sqlPara=Db.getSqlPara("admin.user.updateScene",Kv.by("ids",idsSet));
+            Db.delete(sqlPara.getSql(),sqlPara.getPara());
+        }
+    }
+
+    /**
+     * @author wyq
+     * 查询上级id
+     * @param userId
+     */
+    private List<Long> queryTopUserId(Long userId,Integer deepness){
+        List<Long> arrUsers=new ArrayList<>();
+        if (deepness-- > 0){
+            AdminUser adminUser=AdminUser.dao.findById(userId);
+            if(adminUser.getParentId() != null && !adminUser.getParentId().equals(0L)){
+                arrUsers.addAll(queryTopUserId(adminUser.getParentId(),deepness));
+            }
+            arrUsers.add(adminUser.getUserId());
+        }
+        return arrUsers;
+    }
+
     /**
      * 重置用户信息
      *
@@ -86,7 +125,8 @@ public class AdminUserService {
     public AdminUser resetUser() {
         AdminUser adminUser = AdminUser.dao.findFirst(Db.getSql("admin.user.queryUserByUserId"), BaseUtil.getUserId());
         adminUser.setRoles(adminRoleService.queryRoleIdsByUserId(adminUser.getUserId()));
-        Redis.use().setex(BaseUtil.getToken(), 360000, adminUser);
+        RedisManager.getRedis().setex(BaseUtil.getToken(), 360000, adminUser);
+        adminUser.remove("password", "salt");
         return adminUser;
     }
 
@@ -242,7 +282,13 @@ public class AdminUserService {
         return adminUser.update();
     }
 
-    public List<Long> queryUserByAuth(Long userId) {
+    /**
+     * 查询当前用户权限 用于菜单展示 FFF
+     * @param userId 用户id
+     * @param realm 当前操作的菜单 链接地址
+     * @return
+     */
+    public List<Long> queryUserByAuth(Long userId,String realm) {
         List<Long> adminUsers = new ArrayList<>();
         //查询用户数据权限，从高到低排序
         List<Integer> list = Db.query(Db.getSql("admin.role.queryDataTypeByUserId"), userId);
@@ -251,26 +297,96 @@ public class AdminUserService {
             adminUsers.add(userId);
             return adminUsers;
         }
-        //拥有最高数据权限
-        if (list.contains(5)) {
-            return null;
-        } else {
-            AdminUser adminUser = AdminUser.dao.findById(userId);
-            if (list.contains(4)) {
-                List<Record> records = adminDeptService.queryDeptByParentDept(adminUser.getDeptId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
-                List<Integer> deptIds = new ArrayList<>();
-                deptIds.add(adminUser.getDeptId());
-                records.forEach(record -> {
-                    deptIds.add(record.getInt("id"));
-                });
-                SqlPara sqlPara = Db.getSqlPara("admin.user.queryUserIdByDeptId", Kv.by("deptIds", deptIds));
-                adminUsers.addAll(Db.query(sqlPara.getSql(), sqlPara.getPara()));
+        //只要上面list的长度不为0 那么这个也不会为0
+        List<Record> userRoleList=Db.find(Db.getSqlPara("admin.role.queryUserRoleListByUserId",Kv.by("userId",userId).set("realm",realm)));
+        if(list.size()==1&&userRoleList.size()==1){//如果为1的话 验证是否有最高权限，否则及有多个权限
+            //拥有最高数据权限
+            if (list.contains(5)) {
+                return null;
+            } else {
+                AdminUser adminUser = AdminUser.dao.findById(userId);
+                if (list.contains(4)) {
+                    List<Record> records = adminDeptService.queryDeptByParentDept(adminUser.getDeptId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
+                    List<Integer> deptIds = new ArrayList<>();
+                    deptIds.add(adminUser.getDeptId());
+                    records.forEach(record -> deptIds.add(record.getInt("id")));
+                    SqlPara sqlPara = Db.getSqlPara("admin.user.queryUserIdByDeptId", Kv.by("deptIds", deptIds));
+                    adminUsers.addAll(Db.query(sqlPara.getSql(), sqlPara.getPara()));
+                } else if(list.contains(3)){
+                    queryUserByDeptId(adminUser.getDeptId()).forEach(record -> adminUsers.add(record.getLong("id")));
+                }
+
+                if (list.contains(2)) {
+                    adminUsers.addAll(queryUserByParentUser(adminUser.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM));
+                }
+                adminUsers.add(adminUser.getUserId());
             }
-            if (list.contains(2)) {
-                adminUsers.addAll(queryUserByParentUser(adminUser.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM));
+        }else{//多个权限
+            if(realm!=null&&!"".equals(realm)) {
+                AdminUser adminUser = AdminUser.dao.findById(userId);
+                for (Record r:userRoleList) {//如果有多个权限 验证当前用户是否对当前管理 是否为本人操作
+                    if(r.getStr("realm").equals(realm)&&r.getStr("data_type").equals("1")){//当前操作的管理链接地址
+                        adminUsers.add(userId);
+                        HashSet<Long> hashSet = new HashSet<>(adminUsers);
+                        adminUsers.clear();
+                        adminUsers.addAll(hashSet);
+                        return adminUsers;
+                    }else if(r.getStr("realm").equals(realm)&&r.getStr("data_type").equals("2")){//本人及其
+                        adminUsers.addAll(queryUserByParentUser(adminUser.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM));
+                        adminUsers.add(userId);
+                        HashSet<Long> hashSet = new HashSet<>(adminUsers);
+                        adminUsers.clear();
+                        adminUsers.addAll(hashSet);
+                        return adminUsers;
+                    }else if(r.getStr("realm").equals(realm)&&r.getStr("data_type").equals("3")){//本部门
+                        queryUserByDeptId(adminUser.getDeptId()).forEach(record -> adminUsers.add(record.getLong("id")));
+                        adminUsers.add(userId);
+                        HashSet<Long> hashSet = new HashSet<>(adminUsers);
+                        adminUsers.clear();
+                        adminUsers.addAll(hashSet);
+                        return adminUsers;
+                    }else if(r.getStr("realm").equals(realm)&&r.getStr("data_type").equals("4")){//本部门及下属部门
+                        List<Record> records = adminDeptService.queryDeptByParentDept(adminUser.getDeptId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
+                        List<Integer> deptIds = new ArrayList<>();
+                        deptIds.add(adminUser.getDeptId());
+                        records.forEach(record -> {
+                            deptIds.add(record.getInt("id"));
+                        });
+                        SqlPara sqlPara = Db.getSqlPara("admin.user.queryUserIdByDeptId", Kv.by("deptIds", deptIds));
+                        adminUsers.addAll(Db.query(sqlPara.getSql(), sqlPara.getPara()));
+                        adminUsers.add(userId);
+                        HashSet<Long> hashSet = new HashSet<>(adminUsers);
+                        adminUsers.clear();
+                        adminUsers.addAll(hashSet);
+                        return adminUsers;
+                    }else if(r.getStr("realm").equals(realm)&&r.getStr("data_type").equals("5")){//全部
+                        return null;
+                    }
+                }
+            }else{
+                if (list.contains(5)) {
+                    return null;
+                } else {
+                    AdminUser adminUser = AdminUser.dao.findById(userId);
+                    if (list.contains(4)) {
+                        List<Record> records = adminDeptService.queryDeptByParentDept(adminUser.getDeptId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
+                        List<Integer> deptIds = new ArrayList<>();
+                        deptIds.add(adminUser.getDeptId());
+                        records.forEach(record -> deptIds.add(record.getInt("id")));
+                        SqlPara sqlPara = Db.getSqlPara("admin.user.queryUserIdByDeptId", Kv.by("deptIds", deptIds));
+                        adminUsers.addAll(Db.query(sqlPara.getSql(), sqlPara.getPara()));
+                    } else if(list.contains(3)){
+                        queryUserByDeptId(adminUser.getDeptId()).forEach(record -> adminUsers.add(record.getLong("id")));
+                    }
+
+                    if (list.contains(2)) {
+                        adminUsers.addAll(queryUserByParentUser(adminUser.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM));
+                    }
+                    adminUsers.add(adminUser.getUserId());
+                }
             }
-            adminUsers.add(adminUser.getUserId());
         }
+
         adminUsers.add(userId);
         HashSet<Long> hashSet = new HashSet<>(adminUsers);
         adminUsers.clear();

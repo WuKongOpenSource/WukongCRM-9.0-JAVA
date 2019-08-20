@@ -10,6 +10,8 @@
                       crm-type="product"
                       v-if="showSelectView"
                       :radio="false"
+                      :show="showPopover"
+                      :selectedData="selectedData"
                       @close="showPopover=false"
                       @changeCheckout="selectInfos"></crm-relative>
         <el-button slot="reference"
@@ -92,6 +94,9 @@ export default {
   watch: {
     dataValue: function(value) {
       this.refreshProductList()
+    },
+    productList() {
+      this.selectedData = { product: this.productList || [] }
     }
   },
   data() {
@@ -100,7 +105,8 @@ export default {
       showSelectView: false, // 内容
       productList: [],
       totalPrice: 0,
-      discountRate: 0
+      discountRate: 0,
+      selectedData: { product: [] }
     }
   },
   props: {},
@@ -112,22 +118,26 @@ export default {
      * 刷新数据
      */
     refreshProductList() {
-      this.productList = this.dataValue.product
-      this.totalPrice = this.dataValue.totalPrice
-      this.discountRate = this.dataValue.discountRate
+      this.productList = this.dataValue.product || []
+      this.totalPrice = this.dataValue.totalPrice || 0
+      this.discountRate = this.dataValue.discountRate || 0
     },
     /** 选中 */
     selectInfos(data) {
       if (data.data) {
-        let self = this
-        data.data.forEach(function(element) {
-          let obj = self.productList.find(item => {
+        let newSelects = []
+        data.data.forEach(element => {
+          let obj = this.productList.find(item => {
             return item.productId == element.productId
           })
-          if (!obj) {
-            self.productList.push(self.getShowItem(element))
+          if (obj) {
+            newSelects.push(obj)
+          } else {
+            newSelects.push(this.getShowItem(element))
           }
         })
+        this.productList = newSelects
+        this.calculateToal()
       }
     },
     getShowItem(data) {
@@ -167,7 +177,8 @@ export default {
     discountChange(data) {
       this.verifyNumberValue(data, 'discount')
       let item = data.row
-      let salesPrice = (item.price * (100.0 - parseFloat(item.discount || 0))) / 100.0
+      let salesPrice =
+        (item.price * (100.0 - parseFloat(item.discount || 0))) / 100.0
       salesPrice = salesPrice.toFixed(2)
       if (item.salesPrice !== salesPrice) {
         item.salesPrice = salesPrice
@@ -182,7 +193,8 @@ export default {
     // 计算总价
     calculateToal() {
       let totalPrice = this.getProductTotal()
-      totalPrice = (totalPrice * (100.0 - parseFloat(this.discountRate || 0))) / 100.0
+      totalPrice =
+        (totalPrice * (100.0 - parseFloat(this.discountRate || 0))) / 100.0
       this.totalPrice = totalPrice.toFixed(2)
       this.updateValue() // 传递数据给父组件
     },

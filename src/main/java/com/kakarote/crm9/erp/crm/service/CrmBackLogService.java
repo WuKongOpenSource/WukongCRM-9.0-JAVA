@@ -137,7 +137,10 @@ public class CrmBackLogService {
      * 标记客户为已跟进
      */
     public R setCustomerFollowup(String ids){
-        Db.update(Db.getSqlPara("crm.backLog.setCustomerFollowup",Kv.by("ids",ids)));
+        List<String> stringList=StrUtil.splitTrim(ids,",");
+        if(stringList.size()>0){
+            Db.update(Db.getSqlPara("crm.backLog.setCustomerFollowup",Kv.by("ids",stringList)));
+        }
         return R.ok();
     }
 
@@ -148,7 +151,7 @@ public class CrmBackLogService {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         Integer type = jsonObject.getInteger("type");
         Integer isSub = jsonObject.getInteger("isSub");
-        StringBuffer stringBuffer = new StringBuffer("from customerview as a where");
+        StringBuilder stringBuffer = new StringBuilder("from customerview as a where");
         if (type == 1){
             stringBuffer.append(" a.followup = 0");
         }else if (type == 2){
@@ -182,11 +185,11 @@ public class CrmBackLogService {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         Integer type = jsonObject.getInteger("type");
         Integer isSub = jsonObject.getInteger("isSub");
-        StringBuffer stringBuffer = new StringBuffer("select contract_id from 72crm_crm_contract as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id left join 72crm_admin_examine_log as c on b.record_id = c.record_id where ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and");
+        StringBuffer stringBuffer = new StringBuffer("select contract_id from 72crm_crm_contract as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id left join 72crm_admin_examine_log as c on b.record_id = c.record_id where c.is_recheck != 1 and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and");
         if (type == 1){
-            stringBuffer.append(" c.examine_status = 0");
+            stringBuffer.append(" a.check_status in (0,1)");
         }else if (type == 2){
-            stringBuffer.append(" c.examine_status in (1,2)");
+            stringBuffer.append(" a.check_status in (2,3)");
         }else {
             return R.error("type类型不正确");
         }
@@ -208,7 +211,9 @@ public class CrmBackLogService {
             Page<Record> page = Db.paginate(basePageRequest.getPage(),basePageRequest.getLimit(),"select *","from contractview as a where a.contract_id in ("+contractIds+")"+getConditionSql(data));
             return R.ok().put("data",page);
         }else {
-            return R.ok().put("data",new Page<>());
+            Page<Record> page = new Page<>();
+            page.setList(new ArrayList<>());
+            return R.ok().put("data",page);
         }
     }
 
@@ -219,11 +224,11 @@ public class CrmBackLogService {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         Integer type = jsonObject.getInteger("type");
         Integer isSub = jsonObject.getInteger("isSub");
-        StringBuffer stringBuffer = new StringBuffer("select receivables_id from 72crm_crm_receivables as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id left join 72crm_admin_examine_log as c on b.record_id = c.record_id where ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and");
+        StringBuilder stringBuffer = new StringBuilder("select receivables_id from 72crm_crm_receivables as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id left join 72crm_admin_examine_log as c on b.record_id = c.record_id where ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and");
         if (type == 1){
-            stringBuffer.append(" c.examine_status = 0");
+            stringBuffer.append(" a.check_status in (0,1)");
         }else if (type == 2){
-            stringBuffer.append(" c.examine_status in (1,2)");
+            stringBuffer.append(" a.check_status in (2,3)");
         }else {
             return R.error("type类型不正确");
         }
@@ -245,7 +250,9 @@ public class CrmBackLogService {
             Page<Record> page = Db.paginate(basePageRequest.getPage(),basePageRequest.getLimit(),"select *","from receivablesview as a where a.receivables_id in ("+contractIds+")"+getConditionSql(data));
             return R.ok().put("data",page);
         }else {
-            return R.ok().put("data",new Page<>());
+            Page<Record> page = new Page<>();
+            page.setList(new ArrayList<>());
+            return R.ok().put("data",new Page<Record>());
         }
     }
 

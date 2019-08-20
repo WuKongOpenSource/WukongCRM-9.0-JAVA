@@ -4,7 +4,7 @@
     #end
     #sql("queryUserList")
         select a.realname,a.username,a.user_id,a.sex,a.mobile,a.email,e.name as deptName,a.status,a.create_time,a.dept_id,
-       a.post,a.parent_id,
+       a.post,a.parent_id,a.img,
        (select b.realname from 72crm_admin_user b where b.user_id = a.parent_id) as parentName,
        (select group_concat(d.role_id) from 72crm_admin_user_role as c left join 72crm_admin_role as d on c.role_id = d.role_id where c.user_id = a.user_id) as roleId,
        (select group_concat(d.role_name) from 72crm_admin_user_role as c left join 72crm_admin_role as d on c.role_id = d.role_id where c.user_id = a.user_id) as roleName
@@ -83,5 +83,14 @@
     #end
     #sql("queryUserByDeptId")
       select user_id as id,realname from 72crm_admin_user where dept_id =?
+    #end
+
+    #sql ("updateScene")
+    delete from 72crm_admin_scene where user_id in (
+        #for(i:ids)
+          #(for.index == 0 ? "" : ",")
+              #para(i)
+        #end
+    )
     #end
 #end

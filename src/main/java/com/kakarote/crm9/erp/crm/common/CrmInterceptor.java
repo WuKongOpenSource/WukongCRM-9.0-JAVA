@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Interceptor;
 import com.jfinal.aop.Invocation;
 import com.jfinal.core.Controller;
+import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.crm.entity.*;
 import com.kakarote.crm9.utils.AuthUtil;
@@ -76,8 +77,14 @@ public class CrmInterceptor implements Interceptor {
                     }
                 }
                 if(flag){
-                    controller.renderJson(R.error("无权操作"));
-                    return;
+                    if("queryById".equals(split[2])){
+                        controller.renderJson(R.ok().put("data",new Record().set("dataAuth",0)));
+                        return ;
+                    }else {
+                        controller.renderJson(R.error("无权操作"));
+                        return;
+                    }
+
                 }
             }
         }

@@ -37,14 +37,14 @@
   select count(*)
   from 72crm_crm_contract as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id
   left join 72crm_admin_examine_log as c on b.record_id = c.record_id
-  where c.examine_user = ? and c.examine_status = 0 and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and c.is_recheck != 1
+  where c.examine_user = ? and a.check_status in (0,1) and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and c.is_recheck != 1
   #end
 
   #sql ("checkReceivablesNum")
   select count(*)
   from 72crm_crm_receivables as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id
   left join 72crm_admin_examine_log as c on b.record_id = c.record_id
-  where c.examine_user = ? and c.examine_status = 0 and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and c.is_recheck != 1
+  where c.examine_user = ? and a.check_status in (0,1) and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and c.is_recheck != 1
   #end
 
   #sql ("remindReceivablesPlanNum")

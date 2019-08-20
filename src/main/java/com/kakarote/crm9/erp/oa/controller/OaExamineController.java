@@ -40,9 +40,10 @@ public class OaExamineController extends Controller {
 
     public void getField(){
         String id = getPara("examineId");
+        Integer isDetail = getInt("isDetail");//1详情 2 编辑
         boolean oaAuth = AuthUtil.isOaAuth(- 1, Integer.valueOf(id));
         if(oaAuth){renderJson(R.noAuth());return;}
-        renderJson(oaExamineService.getField(id));
+        renderJson(oaExamineService.getField(id,isDetail));
     }
 
     /**

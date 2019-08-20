@@ -35,9 +35,6 @@ public class AdminSceneService {
 
     @Inject
     private CrmBusinessService crmBusinessService;
-
-    @Inject
-    private ParamsUtil paramsUtil;
     /**
      * @author wyq
      * 查询场景字段
@@ -65,13 +62,12 @@ public class AdminSceneService {
                     .add("website", "网址", "text", settingArr)
                     .add("next_time", "下次联系时间", "datetime", settingArr)
                     .add("remark", "备注", "text", settingArr)
-//                    .add("detail_address", "详细地址", "text", settingArr)
-                    .add("map_address","地区","map_address",settingArr)
                     .add("deal_status", "成交状态", "select", dealStatusArr)
                     .add("owner_user_id", "负责人", "user", settingArr)
                     .add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
-                    .add("create_time", "创建时间", "datetime", settingArr);
+                    .add("create_time", "创建时间", "datetime", settingArr)
+                    .add("address", "地区定位", "map_address", settingArr);
         } else if (3 == label) {
             fieldUtil.add("name", "姓名", "text", settingArr)
                     .add("customer_name", "客户名称", "customer", settingArr)
@@ -88,7 +84,7 @@ public class AdminSceneService {
                     .add("create_time", "创建时间", "datetime", settingArr);
         } else if (4 == label) {
             fieldUtil.add("name", "产品名称", "text", settingArr)
-                    .add("category_id", "产品分类", "category", settingArr)
+                    .add("category_id", "产品类别", "category", settingArr)
                     .add("num", "产品编码", "number", settingArr)
                     .add("price", "价格", "floatnumber", settingArr)
                     .add("description", "产品描述", "text", settingArr)
@@ -124,7 +120,7 @@ public class AdminSceneService {
                     .add("money", "合同金额", "floatnumber", settingArr)
                     .add("start_time", "合同开始时间", "datetime", settingArr)
                     .add("end_time", "合同结束时间", "datetime", settingArr)
-                    .add("contacts_id", "客户签约人", "contacts", settingArr)
+                    .add("contacts_name", "客户签约人", "contacts", settingArr)
                     .add("company_user_id", "公司签约人", "user", settingArr)
                     .add("remark", "备注", "number", settingArr)
                     .add("product", "产品", "product", settingArr)
@@ -170,9 +166,6 @@ public class AdminSceneService {
      */
     @Before(Tx.class)
     public R addScene(AdminScene adminScene) {
-        if (!paramsUtil.isValid(adminScene.getData())){
-            return R.error("参数包含非法字段");
-        }
         Long userId = BaseUtil.getUser().getUserId();
         adminScene.setIsHide(0).setSort(99999).setIsSystem(0).setCreateTime(DateUtil.date()).setUserId(userId);
         adminScene.save();
@@ -195,7 +188,7 @@ public class AdminSceneService {
             Db.update("update 72crm_admin_scene_default set scene_id = ? where user_id = ? and type = ?", adminScene.getSceneId(), userId, oldAdminScene.getType());
         }
         adminScene.setUserId(userId).setType(oldAdminScene.getType()).setSort(oldAdminScene.getSort()).setIsSystem(oldAdminScene.getIsSystem()).setUpdateTime(DateUtil.date());
-        return adminScene.update() ? R.ok() : R.error();
+        return R.isSuccess(adminScene.update());
     }
 
     /**
@@ -291,7 +284,7 @@ public class AdminSceneService {
      * 递归查询下属id
      */
     public String getSubUserId(Integer userId,Integer deepness) {
-        StringBuffer ids = new StringBuffer();
+        StringBuilder ids = new StringBuilder();
         if (deepness > 0){
             List<Long> list = Db.query("select user_id from 72crm_admin_user where parent_id = ?", userId);
             if (list != null && list.size() > 0) {
@@ -356,7 +349,7 @@ public class AdminSceneService {
             data = JSON.parseObject(AdminScene.dao.findById(sceneId).getData());
         }
         if (sceneId == null && jsonObject.getInteger("type") == 1){
-            data = new JSONObject().fluentPut("is_transform",new JSONObject().fluentPut("name","is_transform").fluentPut("condition","is").fluentPut("value","下架"));
+            data = new JSONObject().fluentPut("is_transform",new JSONObject().fluentPut("name","is_transform").fluentPut("condition","is").fluentPut("value","0"));
         }
         if (sceneId == null && jsonObject.getInteger("type") == 4){
             data = new JSONObject().fluentPut("是否上下架",new JSONObject().fluentPut("name","是否上下架").fluentPut("condition","is").fluentPut("value","上架"));
@@ -379,30 +372,40 @@ public class AdminSceneService {
     public R getCrmPageList(BasePageRequest basePageRequest) {
         Integer type = basePageRequest.getJsonObject().getInteger("type");
         String viewName;
+        //操作地址
+        String realm;
         switch (type) {
             case 1:
                 viewName = "leadsview";
+                realm="leads";
                 break;
             case 2:
                 viewName = "customerview";
+                realm="customer";
                 break;
             case 3:
                 viewName = "contactsview";
+                realm="contacts";
                 break;
             case 4:
                 viewName = "productview";
+                realm="product";
                 break;
             case 5:
                 viewName = "businessview";
+                realm="business";
                 break;
             case 6:
                 viewName = "contractview";
+                realm="contract";
                 break;
             case 7:
                 viewName = "receivablesview";
+                realm="receivables";
                 break;
             case 8:
                 viewName = "customerview";
+                realm="customer";
                 break;
             default:
                 return R.error("type不符合要求");
@@ -417,16 +420,16 @@ public class AdminSceneService {
             String condition = jsonObject.getString("condition");
             String value = jsonObject.getString("value");
             String name  = jsonObject.getString("name");
-            if (!paramsUtil.isValid(name)){
+            if (!ParamsUtil.isValid(name)){
                 return R.error("参数包含非法字段");
             }
-            if (StrUtil.isNotEmpty(value)&&!paramsUtil.isValid(value)){
+            if (StrUtil.isNotEmpty(value)&&!ParamsUtil.isValid(value)){
                 return R.error("参数包含非法字段");
             }
-            if (StrUtil.isNotEmpty(jsonObject.getString("start"))&&!paramsUtil.isValid(jsonObject.getString("start"))){
+            if (StrUtil.isNotEmpty(jsonObject.getString("start"))&&!ParamsUtil.isValid(jsonObject.getString("start"))){
                 return R.error("参数包含非法字段");
             }
-            if (StrUtil.isNotEmpty(jsonObject.getString("end"))&&!paramsUtil.isValid(jsonObject.getString("end"))){
+            if (StrUtil.isNotEmpty(jsonObject.getString("end"))&&!ParamsUtil.isValid(jsonObject.getString("end"))){
                 return R.error("参数包含非法字段");
             }
             String formType = jsonObject.getString("formType");
@@ -443,6 +446,10 @@ public class AdminSceneService {
                         conditions.append(" and status_id = ").append(jsonObject.getString("statusId"));
                     }
                 }
+                continue;
+            }else if ("map_address".equals(formType)){
+                String address = value.substring(0,value.length()-1);
+                conditions.append(" and ").append(name).append(" like '%").append(address).append("%'");
                 continue;
             }
             if (StrUtil.isNotEmpty(value) || StrUtil.isNotEmpty(jsonObject.getString("start")) || StrUtil.isNotEmpty(jsonObject.getString("end"))) {
@@ -484,7 +491,7 @@ public class AdminSceneService {
         }
         String search = basePageRequest.getJsonObject().getString("search");
         if (StrUtil.isNotEmpty(search)) {
-            if (!paramsUtil.isValid(search)){
+            if (!ParamsUtil.isValid(search)){
                 return R.error("参数包含非法字段");
             }
             if (type == 1){
@@ -504,23 +511,18 @@ public class AdminSceneService {
                 conditions.append(" and (number like '%").append(search).append("%')");
             }
         }
-
-        String sortField = basePageRequest.getJsonObject().getString("sortField");
+        String camelField = basePageRequest.getJsonObject().getString("sortField");
+        String sortField = StrUtil.toUnderlineCase(camelField);
         String orderNum = basePageRequest.getJsonObject().getString("order");
         if (StrUtil.isEmpty(sortField) || StrUtil.isEmpty(orderNum)){
             sortField = "update_time";
             orderNum = "desc";
         }else {
-            if (!paramsUtil.isValid(sortField)){
+            if (!ParamsUtil.isValid(sortField)){
                 return R.error("参数包含非法字段");
             }
-            if ("2".equals(orderNum)){
-                orderNum = "asc";
-            }else {
-                orderNum = "desc";
-            }
+            orderNum="2".equals(orderNum)?"asc":"desc";
         }
-
         if (2 == type) {
             conditions.append(" and owner_user_id is not null");
         } else if (8 == type) {
@@ -528,7 +530,7 @@ public class AdminSceneService {
         }
         Long userId=BaseUtil.getUserId();
         if(!type.equals(8)&&!type.equals(4)&& !BaseConstant.SUPER_ADMIN_USER_ID.equals(userId)){
-            List<Long> longs= Aop.get(AdminUserService.class).queryUserByAuth(userId);
+            List<Long> longs= Aop.get(AdminUserService.class).queryUserByAuth(userId,realm);
             if(longs!=null&&longs.size()>0){
                 conditions.append(" and owner_user_id in (").append(StrUtil.join(",", longs)).append(")");
                 if(type.equals(2)||type.equals(6)||type.equals(5)){
@@ -578,6 +580,9 @@ public class AdminSceneService {
                     if (record.getInt("is_end") == 0){
                         Integer sortNum = Db.queryInt("select order_num from 72crm_crm_business_status where status_id = ?",record.getInt("status_id"));
                         int totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;
+                        if(sortNum == null){
+                            sortNum = 0;
+                        }
                         record.set("progressBar",sortNum+"/"+totalStatsNum);
                     }else if (record.getInt("is_end") == 1){
                         int totalStatsNum = Db.queryInt("select count(*) from 72crm_crm_business_status where type_id = ?",record.getInt("type_id")) + 1;

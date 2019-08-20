@@ -189,7 +189,7 @@ export default {
       var params = {}
       params.label = this.label
       if (this.types === 'oa_examine') {
-        params.examineId = this.typesId
+        params.categoryId = this.typesId
       }
       customFieldList(params)
         .then(res => {

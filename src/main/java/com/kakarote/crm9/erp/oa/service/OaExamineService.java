@@ -46,20 +46,32 @@ public class OaExamineService{
     public R myInitiate(BasePageRequest<Void> request){
         JSONObject jsonObject = request.getJsonObject();
         Long userId = BaseUtil.getUser().getUserId();
-        Page<Record> recordList = Db.paginate(request.getPage(), request.getLimit(), Db.getSqlPara("oa.examine.myInitiate", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("checkStatus")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime"))));
-        transfer(recordList.getList());
-        return R.ok().put("data", recordList);
+        if(request.getPageType() == 0){
+            List<Record> recordList = Db.find(Db.getSqlPara("oa.examine.myInitiate", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("checkStatus")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime"))));
+            transfer(recordList);
+            return R.ok().put("data", recordList);
+        }else{
+            Page<Record> recordList = Db.paginate(request.getPage(), request.getLimit(), Db.getSqlPara("oa.examine.myInitiate", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("checkStatus")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime"))));
+            transfer(recordList.getList());
+            return R.ok().put("data", recordList);
+        }
     }
 
     public R myOaExamine(BasePageRequest<OaExamine> request){
         Long userId = BaseUtil.getUser().getUserId();
         JSONObject jsonObject = request.getJsonObject();
-        Page<Record> recordList = Db.paginate(request.getPage(), request.getLimit(), Db.getSqlPara("oa.examine.myOaExamine", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("status")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime"))));
-        transfer(recordList.getList());
-        return R.ok().put("data", recordList);
+        if(request.getPageType() == 0){
+            List<Record> recordList = Db.find(Db.getSqlPara("oa.examine.myOaExamine", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("status")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime"))));
+            transfer(recordList);
+            return R.ok().put("data", recordList);
+        }else{
+            Page<Record> recordList = Db.paginate(request.getPage(), request.getLimit(), Db.getSqlPara("oa.examine.myOaExamine", Kv.by("userId", userId).set("categoryId", jsonObject.getInteger("categoryId")).set("status", jsonObject.getInteger("status")).set("startTime", jsonObject.getDate("startTime")).set("endTime", jsonObject.getDate("endTime"))));
+            transfer(recordList.getList());
+            return R.ok().put("data", recordList);
+        }
     }
 
-    private void transfer(List<Record> recordList){
+    public void transfer(List<Record> recordList){
         recordList.forEach(record -> {
             setRelation(record);
             record.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", record.getInt("create_user_id")));
@@ -81,7 +93,7 @@ public class OaExamineService{
             }else{
                 permission.put("isDelete", 0);
             }
-            if(((userId.equals(BaseConstant.SUPER_ADMIN_USER_ID) || userId.equals(record.getInt("create_user_id"))) && (examineStatus == 0 || examineStatus == 3)) && examineStatus != 4){
+            if(((userId.equals(BaseConstant.SUPER_ADMIN_USER_ID) || userId.equals(record.getLong("create_user_id"))) && (examineStatus == 0 || examineStatus == 3)) && examineStatus != 4){
                 permission.put("isChecked", 1);
             }else{
                 permission.put("isChecked", 0);
@@ -140,14 +152,15 @@ public class OaExamineService{
         if(oaAuth){
             return R.noAuth();
         }
-        if (oaExamine.getStartTime() != null && oaExamine.getEndTime() != null){
-            if(oaExamine.getStartTime().compareTo(oaExamine.getEndTime()) == 1){
+        if(oaExamine.getStartTime() != null && oaExamine.getEndTime() != null){
+            if((oaExamine.getStartTime().compareTo(oaExamine.getEndTime())) == 1){
                 return R.error("审批结束时间早于开始时间");
             }
         }
         boolean bol;
         String batchId = StrUtil.isNotEmpty(oaExamine.getBatchId()) ? oaExamine.getBatchId() : IdUtil.simpleUUID();
         adminFieldService.save(jsonObject.getJSONArray("field"), batchId);
+        oaExamine.setBatchId(batchId);
         String checkUserIds = jsonObject.getString("checkUserId");
         Integer categoryId = oaExamine.getCategoryId();
         OaExamineCategory oaExamineCategory = OaExamineCategory.dao.findById(categoryId);
@@ -198,7 +211,7 @@ public class OaExamineService{
                 checkUserIds = oaExamineStep.getCheckUserId();
             }
         }
-        if("0".equals(checkUserIds) && ! oaExamine.getCreateUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID)){
+        if("0".equals(checkUserIds) && ! oaExamine.getCreateUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID.intValue())){
             checkUserIds = BaseConstant.SUPER_ADMIN_USER_ID + "";
         }
         if(StrUtil.isEmpty(checkUserIds)){
@@ -208,20 +221,20 @@ public class OaExamineService{
         }else{
             //添加审核日志
             for(Integer userId : TagUtil.toSet(checkUserIds)){
-                    OaExamineLog oaExamineLog = new OaExamineLog();
-                    oaExamineLog.setRecordId(oaExamineRecord.getRecordId());
-                    oaExamineLog.setOrderId(1);
-                    if(oaExamineStep.getStepId() != null){
-                        oaExamineLog.setExamineStepId(oaExamineStep.getStepId());
-                    }
-                    oaExamineLog.setExamineStatus(0);
-                    oaExamineLog.setCreateUser(user.getUserId());
-                    oaExamineLog.setCreateTime(new Date());
-                    oaExamineLog.setExamineUser(Long.valueOf(userId));
-                    oaExamineLog.save();
+                OaExamineLog oaExamineLog = new OaExamineLog();
+                oaExamineLog.setRecordId(oaExamineRecord.getRecordId());
+                oaExamineLog.setOrderId(1);
+                if(oaExamineStep.getStepId() != null){
+                    oaExamineLog.setExamineStepId(oaExamineStep.getStepId());
+                }
+                oaExamineLog.setExamineStatus(0);
+                oaExamineLog.setCreateUser(user.getUserId());
+                oaExamineLog.setCreateTime(new Date());
+                oaExamineLog.setExamineUser(Long.valueOf(userId));
+                oaExamineLog.save();
             }
         }
-        oaActionRecordService.addRecord(oaExamine.getExamineId(), OaEnum.EXAMINE_TYPE_KEY.getTypes(), oaExamine.getUpdateTime() == null ? 1 : 2, oaActionRecordService.getJoinIds(user.getUserId().intValue(),TagUtil.fromString(checkUserIds)), "");
+        oaActionRecordService.addRecord(oaExamine.getExamineId(), OaEnum.EXAMINE_TYPE_KEY.getTypes(), oaExamine.getUpdateTime() == null ? 1 : 2, oaActionRecordService.getJoinIds(user.getUserId().intValue(), TagUtil.fromString(checkUserIds)), "");
         if(jsonObject.get("oaExamineRelation") != null){
             OaExamineRelation oaExamineRelation = jsonObject.getObject("oaExamineRelation", OaExamineRelation.class);
             oaExamineRelation.setRId(null);
@@ -237,8 +250,8 @@ public class OaExamineService{
             JSONArray oaExamineRelation = jsonObject.getJSONArray("oaExamineTravelList");
             for(Object json : oaExamineRelation){
                 OaExamineTravel oaExamineTravel = TypeUtils.castToJavaBean(json, OaExamineTravel.class);
-                if (oaExamineTravel.getStartTime() != null && oaExamineTravel.getEndTime() != null){
-                    if(oaExamineTravel.getStartTime().compareTo(oaExamineTravel.getEndTime()) == 1){
+                if(oaExamineTravel.getStartTime() != null && oaExamineTravel.getEndTime() != null){
+                    if((oaExamineTravel.getStartTime().compareTo(oaExamineTravel.getEndTime())) == 1){
                         return R.error("差旅结束时间早于开始时间");
                     }
                 }
@@ -249,7 +262,6 @@ public class OaExamineService{
         }
         return bol ? R.ok() : R.error();
     }
-
 
 
     public R oaExamine(OaExamineLog nowadayExamineLog, Long nextUserId){
@@ -358,12 +370,12 @@ public class OaExamineService{
                     // List<AdminExamineLog> examineLogs = AdminExamineLog.dao.find(Db.getSql("admin.examineLog.queryNowadayExamineLogByRecordIdAndStepId"),examineRecord.getRecordId(),examineRecord.getExamineStepId());
                     //当前并签人员
                     for(Integer userId : TagUtil.toSet(examineStep.getCheckUserId())){
-                            AdminExamineLog examineLog = AdminExamineLog.dao.findFirst(Db.getSql("oa.examine.queryNowadayExamineLogByRecordIdAndStepId"), examineRecord.getRecordId(), examineRecord.getExamineStepId(), userId);
-                            if(examineLog.getExamineStatus() == 0){
-                                //并签未走完
-                                flag = false;
-                                break;
-                            }
+                        AdminExamineLog examineLog = AdminExamineLog.dao.findFirst(Db.getSql("oa.examine.queryNowadayExamineLogByRecordIdAndStepId"), examineRecord.getRecordId(), examineRecord.getExamineStepId(), userId);
+                        if(examineLog.getExamineStatus() == 0){
+                            //并签未走完
+                            flag = false;
+                            break;
+                        }
                     }
                     //并签未完成
                     if(! flag){
@@ -386,12 +398,12 @@ public class OaExamineService{
                             checkUserIds = nextExamineStep.getCheckUserId();
                         }
                     }
-                    if("0".equals(checkUserIds) && ! createUserId.equals(BaseConstant.SUPER_ADMIN_USER_ID)){
+                    if("0".equals(checkUserIds) && ! createUserId.equals(BaseConstant.SUPER_ADMIN_USER_ID.intValue())){
                         checkUserIds = BaseConstant.SUPER_ADMIN_USER_ID + "";
                     }
                 }
             }
-            if(((examineCategory.getExamineType() == 2 ) || (examineCategory.getExamineType() == 1 && flag))  && StrUtil.isEmpty(checkUserIds)){
+            if(((examineCategory.getExamineType() == 2) || (examineCategory.getExamineType() == 1 && flag)) && StrUtil.isEmpty(checkUserIds)){
                 //没有上级，审核通过
                 examineRecord.setExamineStatus(1);
             }else{
@@ -403,18 +415,18 @@ public class OaExamineService{
                 oaActionRecord.update();
                 //添加审核日志
                 for(Integer userId : TagUtil.toSet(checkUserIds)){
-                        OaExamineLog oaExamineLog = new OaExamineLog();
-                        oaExamineLog.setRecordId(examineRecord.getRecordId());
-                        oaExamineLog.setOrderId(nowadayExamineLog.getOrderId() + 1);
-                        if(nextExamineStep != null){
-                            oaExamineLog.setOrderId(nextExamineStep.getStepNum());
-                            oaExamineLog.setExamineStepId(nextExamineStep.getStepId());
-                        }
-                        oaExamineLog.setExamineStatus(0);
-                        oaExamineLog.setCreateUser(BaseUtil.getUser().getUserId());
-                        oaExamineLog.setCreateTime(new Date());
-                        oaExamineLog.setExamineUser(Long.valueOf(userId));
-                        oaExamineLog.save();
+                    OaExamineLog oaExamineLog = new OaExamineLog();
+                    oaExamineLog.setRecordId(examineRecord.getRecordId());
+                    oaExamineLog.setOrderId(nowadayExamineLog.getOrderId() + 1);
+                    if(nextExamineStep != null){
+                        oaExamineLog.setOrderId(nextExamineStep.getStepNum());
+                        oaExamineLog.setExamineStepId(nextExamineStep.getStepId());
+                    }
+                    oaExamineLog.setExamineStatus(0);
+                    oaExamineLog.setCreateUser(BaseUtil.getUser().getUserId());
+                    oaExamineLog.setCreateTime(new Date());
+                    oaExamineLog.setExamineUser(Long.valueOf(userId));
+                    oaExamineLog.save();
                 }
             }
 
@@ -423,7 +435,7 @@ public class OaExamineService{
     }
 
     public R queryOaExamineInfo(String id){
-        Record oaExamineInfo = Db.findFirst("select a.*,b.title as category,b.type  from 72crm_oa_examine as a left join 72crm_oa_examine_category b on a.category_id = b.category_id  where a.examine_id = ? ", id);
+        Record oaExamineInfo = Db.findFirst(Db.getSql("oa.examine.queryExamineById"), id);
         oaExamineInfo.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", oaExamineInfo.getInt("create_user_id")));
         String batchId = oaExamineInfo.getStr("batch_id");
         setRelation(oaExamineInfo);
@@ -437,7 +449,7 @@ public class OaExamineService{
         return R.ok().put("data", oaExamineInfo);
     }
 
-    public R getField(String id){
+    public R getField(String id, Integer isDetail){
         Record oaExamineInfo = Db.findFirst("select * from 72crm_oa_examine where examine_id = ?", id);
         String categoryId = oaExamineInfo.getStr("category_id");
         OaExamineCategory oaExamineCategory = new OaExamineCategory().findById(categoryId);
@@ -448,50 +460,47 @@ public class OaExamineService{
         String[] arr = new String[0];
         switch(oaExamineCategory.getType()){
             case 1:
-                fieldUtil.oaFieldAdd("content", "审批内容", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3);
+                fieldUtil.oaFieldAdd("content", "审批内容", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3, 1)
+                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3, 1);
                 break;
             case 2:
-                fieldUtil.oaFieldAdd("type_id", "请假类型", "select", new String[]{"年假", "事假", "病假", "产假", "调休", "婚假", "丧假", "其他"}, 1, 0, oaExamineInfo.get("type_id"), "", 3)
-                        .oaFieldAdd("content", "审批内容", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
-                        .oaFieldAdd("start_time", "开始时间", "datetime", arr, 1, 0, oaExamineInfo.get("start_time"), "", 3)
-                        .oaFieldAdd("end_time", "结束时间", "datetime", arr, 1, 0, oaExamineInfo.get("end_time"), "", 3)
-                        .oaFieldAdd("duration", "时长(天)", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getBigDecimal("duration")), "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3);
+                fieldUtil.oaFieldAdd("type_id", "请假类型", "select", new String[]{"年假", "事假", "病假", "产假", "调休", "婚假", "丧假", "其他"}, 1, 0, oaExamineInfo.get("type_id"), "", 3, 1)
+                        .oaFieldAdd("content", "审批内容", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3, 1)
+                        .oaFieldAdd("start_time", "开始时间", "datetime", arr, 1, 0, oaExamineInfo.get("start_time"), "", 3, 1)
+                        .oaFieldAdd("end_time", "结束时间", "datetime", arr, 1, 0, oaExamineInfo.get("end_time"), "", 3, 1)
+                        .oaFieldAdd("duration", "时长(天)", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getBigDecimal("duration")), "", 3, 1)
+                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3, 1);
                 break;
             case 3:
-                fieldUtil.oaFieldAdd("content", "出差事由", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3)
-                        .oaFieldAdd("cause", "行程明细", "business_cause", arr, 1, 0, examineTravelList, "", 3)
-                        .oaFieldAdd("duration", "时长(天)", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getBigDecimal("duration")), "", 3);
+                fieldUtil.oaFieldAdd("content", "出差事由", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3, 1)
+                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3, 1)
+                        .oaFieldAdd("cause", "行程明细", "business_cause", arr, 1, 0, examineTravelList, "", 3, 1)
+                        .oaFieldAdd("duration", "时长(天)", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getBigDecimal("duration")), "", 3, 1);
                 break;
             case 4:
-                fieldUtil.oaFieldAdd("content", "加班原因", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
-                        .oaFieldAdd("start_time", "开始时间", "datetime", arr, 1, 0, oaExamineInfo.get("start_time"), "", 3)
-                        .oaFieldAdd("end_time", "结束时间", "datetime", arr, 1, 0, oaExamineInfo.get("end_time"), "", 3)
-                        .oaFieldAdd("duration", "加班总天数", "floatnumber", arr, 1, 0, oaExamineInfo.get("duration"), "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3);
+                fieldUtil.oaFieldAdd("content", "加班原因", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3, 1)
+                        .oaFieldAdd("start_time", "开始时间", "datetime", arr, 1, 0, oaExamineInfo.get("start_time"), "", 3, 1)
+                        .oaFieldAdd("end_time", "结束时间", "datetime", arr, 1, 0, oaExamineInfo.get("end_time"), "", 3, 1)
+                        .oaFieldAdd("duration", "加班总天数", "floatnumber", arr, 1, 0, oaExamineInfo.get("duration"), "", 3, 1)
+                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3, 1);
                 break;
             case 5:
-                fieldUtil.oaFieldAdd("content", "差旅事由", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
-                        .oaFieldAdd("cause", "费用明细", "examine_cause", arr, 1, 0, examineTravelList, "", 3)
-                        .oaFieldAdd("money", "报销总金额", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getInt("money")), "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3);
+                fieldUtil.oaFieldAdd("content", "差旅事由", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3, 1)
+                        .oaFieldAdd("cause", "费用明细", "examine_cause", arr, 1, 0, examineTravelList, "", 3, 1)
+                        .oaFieldAdd("money", "报销总金额", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getInt("money")), "", 3, 1)
+                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3, 1);
                 break;
             case 6:
-                fieldUtil.oaFieldAdd("content", "借款事由", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3)
-                        .oaFieldAdd("money", "借款金额（元）", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getInt("money")), "", 3)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3);
+                fieldUtil.oaFieldAdd("content", "借款事由", "text", arr, 1, 0, oaExamineInfo.get("content"), "", 3, 1)
+                        .oaFieldAdd("money", "借款金额（元）", "floatnumber", arr, 1, 0, String.valueOf(oaExamineInfo.getInt("money")), "", 3, 1)
+                        .oaFieldAdd("remark", "备注", "textarea", arr, 0, 0, oaExamineInfo.get("remark"), "", 3, 1);
                 break;
             default:
-                fieldUtil.oaFieldAdd("content", "审批事由", "textarea", arr, 1, 0, oaExamineInfo.get("content"), "", 1)
-                        .oaFieldAdd("remark", "备注", "textarea", arr, 1, 0, oaExamineInfo.get("remark"), "", 1);
-                List<Record> recordList1 = adminFieldService.queryByBatchId(oaExamineInfo.getStr("batch_id"),10);
-                recordList1.forEach(field -> {
-                    if (field.getInt("type")==8 && StrUtil.isNotEmpty(field.getStr("value"))){
-                        field.set("value",Db.find("select * from 72crm_admin_file where batch_id = ?",field.getStr("value")));
-                    }
-                });
+                fieldUtil.oaFieldAdd("content", "审批事由", "textarea", arr, 1, 0, oaExamineInfo.get("content"), "", 1, 1)
+                        .oaFieldAdd("remark", "备注", "textarea", arr, 1, 0, oaExamineInfo.get("remark"), "", 1, 1);
+                List<Record> recordList1 = Db.find(Db.getSql("oa.examine.queryFieldByBatchId"), categoryId, oaExamineInfo.getStr("batch_id"));
+                adminFieldService.recordToFormType(recordList1);
+                adminFieldService.transferFieldList(recordList1, isDetail);
                 recordList.addAll(recordList1);
                 break;
         }
@@ -505,40 +514,40 @@ public class OaExamineService{
             List<CrmCustomer> customerList = new ArrayList<>();
             if(record.getStr("customer_ids") != null && ! record.getStr("customer_ids").isEmpty()){
                 for(Integer customerId : TagUtil.toSet(record.getStr("customer_ids"))){
-                        CrmCustomer crmCustomer = CrmCustomer.dao.findById(Integer.valueOf(customerId));
-                        if(crmCustomer != null){
-                            customerList.add(crmCustomer);
-                        }
+                    CrmCustomer crmCustomer = CrmCustomer.dao.findById(customerId);
+                    if(crmCustomer != null){
+                        customerList.add(crmCustomer);
+                    }
                 }
             }
             relationRecord.set("customerList", customerList);
             List<CrmContacts> contactsList = new ArrayList<>();
             if(record.getStr("contacts_ids") != null && ! record.getStr("contacts_ids").isEmpty()){
                 for(Integer contactsId : TagUtil.toSet(record.getStr("contacts_ids"))){
-                        CrmContacts crmContacts = CrmContacts.dao.findById(Integer.valueOf(contactsId));
-                        if(crmContacts != null){
-                            contactsList.add(crmContacts);
-                        }
+                    CrmContacts crmContacts = CrmContacts.dao.findById(contactsId);
+                    if(crmContacts != null){
+                        contactsList.add(crmContacts);
+                    }
                 }
             }
             relationRecord.set("contactsList", contactsList);
             List<CrmBusiness> businessList = new ArrayList<>();
             if(record.getStr("business_ids") != null && ! record.getStr("business_ids").isEmpty()){
                 for(Integer businessId : TagUtil.toSet(record.getStr("business_ids"))){
-                        CrmBusiness crmBusiness = CrmBusiness.dao.findById(Integer.valueOf(businessId));
-                        if(crmBusiness != null){
-                            businessList.add(crmBusiness);
-                        }
+                    CrmBusiness crmBusiness = CrmBusiness.dao.findById(Integer.valueOf(businessId));
+                    if(crmBusiness != null){
+                        businessList.add(crmBusiness);
+                    }
                 }
             }
             relationRecord.set("businessList", businessList);
             List<CrmContract> contractList = new ArrayList<>();
             if(record.getStr("contract_ids") != null && ! record.getStr("contract_ids").isEmpty()){
                 for(Integer contractId : TagUtil.toSet(record.getStr("contract_ids"))){
-                        CrmContract crmContract = CrmContract.dao.findById(Integer.valueOf(contractId));
-                        if(crmContract != null){
-                            contractList.add(crmContract);
-                        }
+                    CrmContract crmContract = CrmContract.dao.findById(Integer.valueOf(contractId));
+                    if(crmContract != null){
+                        contractList.add(crmContract);
+                    }
                 }
             }
             relationRecord.set("contractList", contractList);
@@ -549,7 +558,7 @@ public class OaExamineService{
     @Before(Tx.class)
     public R deleteOaExamine(Integer oaExamineId){
         Integer recordId = Db.queryInt("select record_id from 72crm_oa_examine_record where examine_id  = ? limit 1", oaExamineId);
-        Db.delete("delete from `72crm_admin_fieldv` where batch_id = (select `72crm_oa_examine`.batch_id from `72crm_oa_examine` where examine_id = ?)",oaExamineId);
+        Db.delete("delete from `72crm_admin_fieldv` where batch_id = (select `72crm_oa_examine`.batch_id from `72crm_oa_examine` where examine_id = ?)", oaExamineId);
         Db.delete("delete from 72crm_oa_examine where examine_id = ?", oaExamineId);
         Db.delete("delete from 72crm_oa_examine_relation where examine_id = ?", oaExamineId);
         Db.delete("delete from 72crm_oa_examine_travel where examine_id = ?", oaExamineId);
@@ -606,7 +615,7 @@ public class OaExamineService{
         Long auditUserId = BaseUtil.getUser().getUserId();
         //jsonObject.put("isRecheck",0);
         //判断是否有撤回权限
-        if((auditUserId.equals(examineRecord.getLong("create_user")) || auditUserId.equals(BaseConstant.SUPER_ADMIN_USER_ID)) && (examineStatus == 0 ||examineStatus == 3)){
+        if((auditUserId.equals(examineRecord.getLong("create_user")) || auditUserId.equals(BaseConstant.SUPER_ADMIN_USER_ID)) && (examineStatus == 0 || examineStatus == 3)){
             jsonObject.put("isRecheck", 1);
         }else{
             jsonObject.put("isRecheck", 0);
@@ -666,11 +675,11 @@ public class OaExamineService{
                                 if(record.getInt("examine_status") == 1){
                                     status = 1;
                                 }
-                                if (record.getInt("examine_status") == 2) {
+                                if(record.getInt("examine_status") == 2){
                                     i++;
                                 }
                             }
-                            if (i == logs.size()) {
+                            if(i == logs.size()){
                                 status = 2;
                             }
                         }
@@ -694,7 +703,7 @@ public class OaExamineService{
                         //该步骤还未审核
                         logs = new ArrayList<>();
                         for(Integer userId : TagUtil.toSet(step.getStr("check_user_id"))){
-                                logs.add(Db.findFirst(Db.getSql("oa.examine.queryUserByUserIdAndStatus"), userId));
+                            logs.add(Db.findFirst(Db.getSql("oa.examine.queryUserByUserIdAndStatus"), userId));
                         }
                         step.set("examine_status", 0);
                         step.set("userList", logs);
@@ -712,9 +721,12 @@ public class OaExamineService{
                         step.set("examine_status", 0);
                         //还未创建审核日志
                         //查询负责人主管的主管
-                        List<Record> r = Db.find(Db.getSql("oa.examine.queryUserByUserId"), Db.findFirst(Db.getSql("oa.examine.queryUserByUserId"), oaExamine.getCreateUserId()).getLong("user_id"));
-                        if(r == null && r.size() == 0){
-                            r = Db.find(Db.getSql("admin.examineLog.queryUserByUserIdAnd"), BaseConstant.SUPER_ADMIN_USER_ID);
+                        Record r = Db.findFirst(Db.getSql("oa.examine.queryUserByUserId"), Db.findFirst(Db.getSql("oa.examine.queryUserByUserId"), oaExamine.getCreateUserId()).getLong("user_id"));
+                        if(r != null && r.getInt("user_id") == null){
+                            r = null;
+                        }
+                        if(r == null){
+                            r = Db.findFirst(Db.getSql("admin.examineLog.queryUserByUserIdAnd"), BaseConstant.SUPER_ADMIN_USER_ID);
                         }
                         step.set("userList", r);
                     }

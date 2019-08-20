@@ -23,7 +23,7 @@
                         :key="index"
                         v-if="item.formType !== 'examine_cause' && item.formType !== 'business_cause'"
                         class="b-cell">
-            <flexbox v-if="item.formType === 'user'"
+            <!-- <flexbox v-if="item.formType === 'user'"
                      align="stretch"
                      class="b-cell-b">
               <div class="b-cell-name">{{item.name}}</div>
@@ -53,9 +53,9 @@
                   </div>
                 </flexbox>
               </div>
-            </flexbox>
+            </flexbox> -->
 
-            <flexbox v-else-if="item.formType === 'checkbox'"
+            <flexbox v-if="item.formType === 'checkbox'"
                      align="stretch"
                      class="b-cell-b">
               <div class="b-cell-name">{{item.name}}</div>
@@ -304,7 +304,8 @@ export default {
     getBaseInfo() {
       this.loading = true
       OaExamineGetField({
-        examineId: this.id
+        examineId: this.id,
+        isDetail: 1 // 1详情 2 编辑
       })
         .then(res => {
           var self = this

@@ -25,6 +25,14 @@ public class OaEventController extends Controller {
 
     /**
      * @author wyq
+     * 查询日程列表
+     */
+    public void queryById(@Para("eventId")Integer eventId){
+        renderJson(R.ok().put("data",oaEventService.queryById(eventId)));
+    }
+
+    /**
+     * @author wyq
      * 新增日程
      */
     public void add(@Para("")OaEvent oaEvent){

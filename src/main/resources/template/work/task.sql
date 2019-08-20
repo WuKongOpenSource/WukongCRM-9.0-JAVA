@@ -34,6 +34,70 @@
       (select count(*) from 72crm_task where pid = a.task_id and status = 5) as childWCCount,
       (select count(*) from 72crm_task where pid = a.task_id) as childAllCount,
       (select count(*) from 72crm_admin_file where batch_id = a.batch_id) as fileCount
-      from 72crm_task a where a.pid = 0 and a.ishidden = 0
+      from 72crm_task a
+      where a.pid = 0 and a.ishidden = 0
+      #if(type == null  || type == 0)
+        and ( a.main_user_id in (
+           #for(i : userIds)
+            #(for.index > 0 ? "," : "")#para(i)
+           #end
+        )
+          or a.create_user_id in (
+           #for(i : userIds)
+            #(for.index > 0 ? "," : "")#para(i)
+           #end
+          )
+          or (
+             #for(i : userIds)
+              #(for.index > 0 ? "or" : "")
+              a.owner_user_id like concat('%,', #para(i),',%')
+            #end
+          )
+        )
+      #end
+      #if(type == 1)
+       and  a.main_user_id in (
+           #for(i : userIds)
+            #(for.index > 0 ? "," : "")#para(i)
+           #end
+        )
+      #end
+      #if(type == 2)
+       and  a.create_user_id in (
+           #for(i : userIds)
+            #(for.index > 0 ? "," : "")#para(i)
+           #end
+        )
+      #end
+       #if(type == 3)
+       and   (
+             #for(i : userIds)
+              #(for.index > 0 ? "or" : "")
+              a.owner_user_id like concat('%,', #para(i),',%')
+            #end
+          )
+      #end
+      #if(status)
+       and a.status = #para(status)
+      #end
+      #if(priority)
+       and a.priority = #para(priority)
+      #end
+       #if(date == 1)
+      and TO_DAYS(a.stop_time) = TO_DAYS(now())
+      #end
+       #if(date == 2)
+       and to_days(NOW()) - TO_DAYS(a.stop_time) = -1
+      #end
+       #if(date == 3)
+       and to_days(NOW()) - TO_DAYS(a.stop_time) >= -7 and to_days(NOW()) - TO_DAYS(a.stop_time) <= 0
+      #end
+       #if(date == 4)
+       and to_days(NOW()) - TO_DAYS(a.stop_time) >= -30 and to_days(NOW()) - TO_DAYS(a.stop_time) <= 0
+      #end
+      #if(taskName)
+       and a.name like concat('%', #para(taskName),'%')
+      #end
+      order by a.create_time desc
   #end
 #end

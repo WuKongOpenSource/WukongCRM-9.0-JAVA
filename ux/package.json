@@ -15,7 +15,7 @@
     "axios": "0.18.0",
     "babel-polyfill": "^6.26.0",
     "echarts": "^4.2.0-rc.2",
-    "element-ui": "^2.8.2",
+    "element-ui": "2.8.2",
     "file-saver": "^2.0.1",
     "fullcalendar": "^3.9.0",
     "id-validator": "^1.3.0",

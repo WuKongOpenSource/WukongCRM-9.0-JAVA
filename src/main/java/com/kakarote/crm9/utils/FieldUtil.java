@@ -1,5 +1,7 @@
 package com.kakarote.crm9.utils;
 
+import cn.hutool.core.collection.CollectionUtil;
+import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
 import com.jfinal.plugin.activerecord.Record;
 
@@ -97,11 +99,25 @@ public class FieldUtil {
      * @param isUnique 是否验证 0否 1 是
      * @return
      */
-    public FieldUtil oaFieldAdd(String fieldName, String name, String formType, String[] settingArr, Integer isNull,Integer isUnique,Object value,String defaultValue,Integer operating){
+    public FieldUtil oaFieldAdd(String fieldName, String name, String formType, String[] settingArr, Integer isNull,Integer isUnique,Object value,String defaultValue,Integer operating,Integer fieldType){
         Record record = new Record();
-        record.set("fieldName",fieldName).set("name",name).set("formType",formType).set("setting",settingArr).set("isNull",isNull).set("isUnique",isUnique).set("value",value).set("defaultValue",defaultValue).set("operating",operating).set("maxLength",0);
+        record.set("fieldName",fieldName).set("name",name).set("formType",formType).set("setting",settingArr).set("isNull",isNull).set("isUnique",isUnique).set("value",value).set("defaultValue",defaultValue).set("operating",operating).set("maxLength",0).set("fieldType",fieldType);
         recordList.add(record);
         return this;
+    }
+
+    public void handleType(List<Record> recordList){
+        recordList.forEach(record -> {
+            if (record.getInt("type") == 8){
+                record.set("value", Db.find("select * from 72crm_admin_file where batch_id = ?",record.getStr("value")));
+            }else if (record.getInt("type") == 10){
+                List<String> userList = Db.query("select realname from 72crm_admin_user where find_in_set(user_id,ifnull(?,0))",record.getStr("value"));
+                record.set("value", CollectionUtil.join(userList,","));
+            }else if (record.getInt("type") == 12){
+                List<String> deptList = Db.query("select name from 72crm_admin_dept where find_in_set(dept_id,ifnull(?,0))",record.getStr("value"));
+                record.set("value", CollectionUtil.join(deptList,","));
+            }
+        });
     }
 
 }

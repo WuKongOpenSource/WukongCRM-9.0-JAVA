@@ -99,3 +99,10 @@
   font-size: 12px;
   margin: 0 auto;
 }
+
+.el-table /deep/ .sort-caret.ascending {
+  top: -6px;
+}
+.el-table /deep/ .caret-wrapper {
+  height: 24px;
+}

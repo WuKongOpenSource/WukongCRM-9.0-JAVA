@@ -44,4 +44,36 @@
     #sql("queryRoleIdsByUserId")
       SELECT role_id FROM 72crm_admin_user_role as a WHERE a.user_id=?
     #end
+     #sql("queryUserRoleListByUserId")
+        SELECT
+            k.data_type,
+            k.menu_id,
+            am.menu_name,
+            am.realm
+        FROM
+            (
+                SELECT
+                    t.*, arm.menu_id
+                FROM
+                    (
+                        SELECT DISTINCT
+                            a.data_type,
+                            a.role_name,
+                            a.role_id,
+                            b.user_id
+                        FROM
+                            72crm_admin_role AS a
+                        LEFT JOIN 72crm_admin_user_role AS b ON a.role_id = b.role_id
+                    ) t
+                LEFT JOIN 72crm_admin_role_menu arm ON t.role_id = arm.role_id
+            ) k
+        INNER JOIN 72crm_admin_menu am ON k.menu_id = am.menu_id
+        WHERE
+         k.user_id =#para(userId)
+         #if(realm)
+            and am.realm=#para(realm)
+         #end
+        ORDER BY
+            k.data_type DESC
+    #end
 #end

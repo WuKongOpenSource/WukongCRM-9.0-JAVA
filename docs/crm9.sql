@@ -12,7 +12,7 @@ CREATE TABLE `72crm_admin_config` (
   `value` varchar(255) DEFAULT NULL COMMENT '值',
   `description` varchar(255) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`setting_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='客户规则';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='客户规则';
 
 -- ----------------------------
 -- Records of 72crm_admin_config
@@ -36,7 +36,7 @@ CREATE TABLE `72crm_admin_dept` (
   `num` int(4) DEFAULT NULL COMMENT '排序 越大越靠后',
   `remark` varchar(64) DEFAULT '' COMMENT '部门备注',
   PRIMARY KEY (`dept_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='部门表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='部门表';
 
 -- ----------------------------
 -- Records of 72crm_admin_dept
@@ -66,8 +66,8 @@ CREATE TABLE `72crm_admin_examine` (
 -- ----------------------------
 -- Records of 72crm_admin_examine
 -- ----------------------------
-INSERT INTO `72crm_admin_examine` VALUES (null, '2', '1', '回款审批流程', null, null, '2019-05-11 16:27:35', '3', '2019-05-11 16:27:35', '3', '1', '');
-INSERT INTO `72crm_admin_examine` VALUES (null, '1', '1', '合同审批流程', null, null, '2019-05-11 16:27:11', '3', '2019-05-11 16:27:44', '3', '1', '说明');
+INSERT INTO `72crm_admin_examine` VALUES (null, '2', '2', '回款审批流程', null, null, '2019-05-11 16:27:35', '3', '2019-05-11 16:27:35', '3', '1', '');
+INSERT INTO `72crm_admin_examine` VALUES (null, '1', '2', '合同审批流程', null, null, '2019-05-11 16:27:11', '3', '2019-05-11 16:27:44', '3', '1', '说明');
 
 -- ----------------------------
 -- Table structure for 72crm_admin_examine_log
@@ -152,109 +152,110 @@ CREATE TABLE `72crm_admin_field` (
   `update_time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   `examine_category_id` int(11) DEFAULT NULL COMMENT '审批ID label为10需要',
   `field_type` int(2) NOT NULL DEFAULT '0' COMMENT '是否是自定义字段  0.自定义 1.固定',
+  `relevant` int(11) DEFAULT NULL COMMENT '只有线索需要，装换客户的自定义字段ID',
   PRIMARY KEY (`field_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='自定义字段表';
 
 -- ----------------------------
 -- Records of 72crm_admin_field
 -- ----------------------------
-INSERT INTO `72crm_admin_field` VALUES (null, 'leads_name', '线索名称', '1', '1', null, null, '255', '', '1', '1', '0', null, '1', '2019-07-02 09:10:19', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, '线索来源', '线索来源', '3', '1', null, null, null, '', '0', '0', '1', '促销,搜索引擎,广告,转介绍,线上注册,线上询价,预约上门,电话咨询,邮件咨询', '1', '2019-07-02 09:10:19', null, '0');
-INSERT INTO `72crm_admin_field` VALUES (null, 'telephone', '电话', '1', '1', null, null, '255', '', '0', '0', '2', null, '1', '2019-07-02 09:10:19', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'mobile', '手机', '7', '1', null, null, '255', '', '0', '0', '3', null, '1', '2019-07-02 09:10:19', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, '客户行业', '客户行业', '3', '1', null, null, null, '', '0', '0', '4', 'IT,金融业,房地产,商业服务,运输/物流,生产,政府,文化传媒', '1', '2019-07-02 09:10:19', null, '0');
-INSERT INTO `72crm_admin_field` VALUES (null, '客户级别', '客户级别', '3', '1', null, null, null, '', '0', '0', '5', 'A（重点客户）,B（普通客户）,C（非优先客户）', '1', '2019-07-02 09:10:19', null, '0');
-INSERT INTO `72crm_admin_field` VALUES (null, 'address', '地址', '1', '1', null, null, '255', '', '0', '0', '6', null, '1', '2019-07-02 09:10:19', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'next_time', '下次联系时间', '13', '1', null, null, null, '', '0', '0', '7', null, '1', '2019-07-02 09:10:19', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '1', '1', null, null, '255', '', '0', '0', '8', null, '1', '2019-07-02 09:10:19', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'customer_name', '客户名称', '1', '2', null, null, '255', '', '1', '1', '0', null, '1', '2019-07-02 09:10:41', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'mobile', '手机', '7', '2', null, null, '255', '', '0', '0', '1', null, '1', '2019-07-02 09:10:41', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'telephone', '电话', '1', '2', null, null, '255', '', '0', '0', '2', null, '1', '2019-07-02 09:10:41', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'website', '网址', '1', '2', null, null, '255', '', '0', '0', '6', null, '1', '2019-07-02 09:10:41', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'deal_status', '成交状态', '3', '2', null, null, null, '', '0', '1', '7', '未成交,已成交', '3', '2019-07-02 09:10:41', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'next_time', '下次联系时间', '13', '2', null, null, null, '', '0', '0', '8', null, '1', '2019-07-02 09:10:41', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '1', '2', null, null, '255', '', '0', '0', '9', null, '1', '2019-07-02 09:10:41', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, '客户级别', '客户级别', '3', '2', null, null, null, '', '0', '0', '5', 'A（重点客户）,B（普通客户）,C（非优先客户）', '1', '2019-07-02 09:10:41', null, '0');
-INSERT INTO `72crm_admin_field` VALUES (null, '客户来源', '客户来源', '3', '2', null, null, null, '', '0', '0', '3', '促销,搜索引擎,广告,转介绍,线上注册,线上询价,预约上门,陌拜,电话咨询,邮件咨询', '1', '2019-07-02 09:10:41', null, '0');
-INSERT INTO `72crm_admin_field` VALUES (null, '客户行业', '客户行业', '3', '2', null, null, null, '', '0', '0', '4', 'IT,金融业,房地产,商业服务,运输/物流,生产,政府,文化传媒', '1', '2019-07-02 09:10:41', null, '0');
-INSERT INTO `72crm_admin_field` VALUES (null, 'name', '姓名', '1', '3', null, null, '255', '', '0', '1', '0', null, '1', '2019-07-01 17:10:21', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'customer_id', '客户名称', '15', '3', null, null, null, '', '0', '0', '1', null, '3', '2019-07-01 17:13:28', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'mobile', '手机', '7', '3', null, null, '255', '', '0', '0', '2', null, '1', '2019-07-01 17:10:21', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'telephone', '电话', '1', '3', null, null, '255', '', '0', '0', '3', null, '1', '2019-07-01 17:10:21', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'email', '电子邮箱', '14', '3', null, null, '255', '', '0', '0', '4', null, '1', '2019-07-01 17:10:21', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'post', '职务', '1', '3', null, null, '255', '', '0', '0', '5', null, '1', '2019-07-01 17:10:21', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'address', '地址', '1', '3', null, null, '255', '', '0', '0', '6', null, '1', '2019-07-01 17:10:21', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'next_time', '下次联系时间', '13', '3', null, null, null, '', '0', '0', '7', null, '1', '2019-07-01 17:10:21', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, '备注', '备注', '1', '3', null, null, '255', '', '0', '0', '8', null, '1', '2019-07-01 17:10:21', null, '0');
-INSERT INTO `72crm_admin_field` VALUES (null, '是否关键决策人', '是否关键决策人', '3', '3', null, null, null, '', '0', '0', '9', '是,否', '3', '2019-07-01 17:10:21', null, '0');
-INSERT INTO `72crm_admin_field` VALUES (null, '性别', '性别', '3', '3', null, null, null, '', '0', '0', '10', '男,女', '3', '2019-07-01 17:10:21', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'name', '产品名称', '1', '4', null, null, '255', '', '0', '0', '0', null, '1', '2019-07-01 17:22:28', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'category_id', '产品类型', '19', '4', null, null, null, '', '0', '1', '1', null, '3', '2019-07-01 17:55:24', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'num', '产品编码', '5', '4', null, null, '255', '', '1', '1', '2', null, '1', '2019-07-01 17:22:28', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'price', '价格', '6', '4', null, null, '255', '', '0', '1', '3', null, '1', '2019-07-01 17:57:01', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'description', '产品描述', '1', '4', null, null, '255', '', '0', '0', '4', null, '1', '2019-07-01 17:22:28', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, '是否上下架', '是否上下架', '3', '4', null, null, null, '', '0', '1', '5', '上架,下架', '3', '2019-07-01 17:22:28', null, '0');
-INSERT INTO `72crm_admin_field` VALUES (null, '单位', '单位', '3', '4', null, null, null, '', '0', '0', '6', '个,块,只,把,枚,瓶,盒,台,吨,千克,米,箱,套', '1', '2019-07-01 17:22:28', null, '0');
-INSERT INTO `72crm_admin_field` VALUES (null, 'business_name', '商机名称', '1', '5', null, null, '255', '', '0', '0', '0', null, '3', '2019-07-01 17:10:31', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'customer_id', '客户名称', '15', '5', null, null, null, '', '0', '1', '1', null, '3', '2019-07-01 17:13:25', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'money', '商机金额', '6', '5', null, null, '255', '', '0', '0', '2', null, '1', '2019-07-01 17:10:31', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'deal_date', '预计成交日期', '13', '5', null, null, null, '', '0', '0', '3', null, '1', '2019-07-01 17:10:31', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '1', '5', null, null, '255', '', '0', '0', '4', null, '1', '2019-07-01 17:10:31', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'num', '合同编号', '5', '6', null, null, '255', '', '1', '1', '0', null, '1', '2019-07-01 17:10:34', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'name', '合同名称', '1', '6', null, null, '255', '', '0', '1', '1', null, '1', '2019-07-01 17:10:34', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'customer_id', '客户名称', '15', '6', null, null, null, '', '0', '1', '2', null, '3', '2019-07-01 17:22:49', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'business_id', '商机名称', '16', '6', null, null, null, '', '0', '0', '3', null, '3', '2019-07-01 17:22:57', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'order_date', '下单时间', '4', '6', null, null, null, '', '0', '0', '4', null, '1', '2019-07-01 17:10:34', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'money', '合同金额', '6', '6', null, null, '255', '', '0', '0', '5', null, '1', '2019-07-01 17:10:34', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'start_time', '合同开始时间', '4', '6', null, null, null, '', '0', '0', '6', null, '1', '2019-07-01 17:10:34', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'end_tme', '合同结束时间', '4', '6', null, null, null, '', '0', '0', '7', null, '1', '2019-07-01 17:10:34', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'contacts_id', '客户签约人', '17', '6', null, null, null, '', '0', '0', '8', null, '3', '2019-07-01 17:23:11', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'company_user_id', '公司签约人', '10', '6', null, null, null, '', '0', '0', '9', null, '3', '2019-07-01 17:10:34', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '1', '6', null, null, '255', '', '0', '0', '10', null, '1', '2019-07-01 17:10:34', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'number', '回款编号', '5', '7', null, null, '255', '', '0', '1', '0', null, '1', '2019-07-01 17:10:36', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'customer_id', '客户名称', '15', '7', null, null, null, '', '0', '1', '1', null, '3', '2019-07-01 17:23:15', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'contract_id', '合同编号', '20', '7', null, null, null, '', '0', '1', '2', null, '3', '2019-07-01 17:23:24', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'return_time', '回款日期', '4', '7', null, null, null, '', '0', '0', '3', null, '1', '2019-07-01 17:10:36', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'money', '回款金额', '6', '7', null, null, '255', '', '0', '0', '4', null, '1', '2019-07-01 17:10:36', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'plan_id', '期数', '21', '7', null, null, null, '', '0', '0', '5', null, '3', '2019-07-01 17:23:35', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '1', '7', null, null, '255', '', '0', '0', '6', null, '1', '2019-07-01 17:10:36', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, '回款方式', '回款方式', '3', '7', null, null, null, '', '0', '0', '7', '支票,现金,邮政汇款,电汇,网上转账,支付宝,微信支付,其他', '1', '2019-07-01 17:10:36', null, '0');
-INSERT INTO `72crm_admin_field` VALUES (null, 'content', '审批事由', '2', '10', null, null, '0', '', '0', '1', '0', null, '1', '2019-06-27 14:00:42', '7', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, null, '0', '', '0', '1', '1', null, '1', '2019-06-27 14:01:13', '7', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, '单行文本', '单行文本', '1', '10', null, '', '255', '', '0', '0', '2', null, '0', '2019-06-29 17:52:18', '7', '0');
-INSERT INTO `72crm_admin_field` VALUES (null, '人员', '人员', '10', '10', null, '', null, '', '0', '0', '3', null, '0', '2019-06-29 17:52:11', '7', '0');
-INSERT INTO `72crm_admin_field` VALUES (null, '多行文本', '多行文本', '2', '10', null, '', '1000', '', '0', '0', '4', null, '0', '2019-06-29 17:52:09', '7', '0');
-INSERT INTO `72crm_admin_field` VALUES (null, '附件', '附件', '8', '10', null, '', null, '', '0', '0', '5', null, '0', '2019-06-29 17:52:01', '7', '0');
-INSERT INTO `72crm_admin_field` VALUES (null, 'customer_id', '客户名称', '15', '8', null, null, null, '', '0', '0', '1', null, '3', '2019-06-28 16:52:13', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'contract_id', '合同编号', '20', '8', null, null, '11', '', '0', '0', '2', null, '3', '2019-06-28 16:55:17', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'money', '计划回款金额', '6', '8', null, null, null, '', '0', '0', '3', null, '3', '2019-06-28 16:53:04', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'return_date', '计划回款日期', '4', '8', null, null, null, '', '0', '0', '4', null, '3', '2019-06-28 16:54:01', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remind', '提前几天提醒', '5', '8', null, null, '11', '', '0', '0', '5', null, '3', '2019-06-28 16:55:13', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '8', null, null, '1000', '', '0', '0', '6', null, '3', '2019-06-28 16:55:07', null, '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'content', '审批内容', '1', '10', null, '', null, '', '0', '1', '0', null, '3', null, '1', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '1', null, '3', null, '1', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'type_id', '请假类型', '3', '10', null, '', null, '年假', '0', '1', '0', '年假,事假,病假,产假,调休,婚假,丧假,其他', '3', null, '2', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'content', '审批内容', '1', '10', null, '', null, '', '0', '1', '1', null, '3', null, '2', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'start_time', '开始时间', '13', '10', null, '', null, '', '0', '1', '2', null, '3', null, '2', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'end_time', '结束时间', '13', '10', null, '', null, '', '0', '1', '3', null, '3', null, '2', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'duration', '时长', '6', '10', null, '', null, '', '0', '1', '4', null, '3', null, '2', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '5', null, '3', null, '2', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'content', '出差事由', '1', '10', null, '', null, '', '0', '1', '0', null, '3', '2019-06-30 18:13:08', '3', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '1', null, '3', '2019-06-30 18:13:08', '3', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'duration', '出差总天数', '6', '10', null, '', null, '', '0', '1', '2', null, '3', '2019-06-30 18:13:08', '3', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'cause', '行程明细', '22', '10', null, '', null, '', '0', '1', '2', null, '3', '2019-06-30 18:13:08', '3', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'content', '加班原因', '1', '10', null, '', null, '', '0', '1', '0', null, '3', '2019-06-30 18:13:08', '4', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'start_time', '开始时间', '13', '10', null, '', null, '', '0', '1', '1', null, '3', '2019-06-30 18:13:08', '4', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'end_time', '结束时间', '13', '10', null, '', null, '', '0', '1', '2', null, '3', '2019-06-30 18:13:08', '4', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'duration', '加班总天数', '6', '10', null, '', null, '', '0', '1', '3', null, '3', '2019-06-30 18:13:08', '4', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '4', null, '3', '2019-06-30 18:13:08', '4', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'content', '差旅事由', '1', '10', null, '', null, '', '0', '1', '0', null, '3', '2019-06-30 18:13:08', '5', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'money', '报销总金额', '6', '10', null, '', '0', '', '0', '1', '1', null, '3', '2019-06-30 18:13:08', '5', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '2', null, '3', '2019-06-30 18:13:08', '5', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'cause', '费用明细', '23', '10', null, '', '1000', '', '0', '0', '2', null, '3', '2019-06-30 18:13:08', '5', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'content', '借款事由', '1', '10', null, '', null, '', '0', '1', '0', null, '3', '2019-06-30 18:13:08', '6', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'money', '借款金额（元）', '6', '10', null, '', '0', '', '0', '1', '1', null, '3', '2019-06-30 18:13:08', '6', '1');
-INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '2', null, '3', '2019-06-30 18:13:08', '6', '1');
+INSERT INTO `72crm_admin_field` VALUES (null, 'leads_name', '线索名称', '1', '1', null, null, '255', '', '1', '1', '0', null, '1', '2019-07-02 09:10:19', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '线索来源', '线索来源', '3', '1', null, null, null, '', '0', '0', '1', '促销,搜索引擎,广告,转介绍,线上注册,线上询价,预约上门,电话咨询,邮件咨询', '1', '2019-07-02 09:10:19', null, '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'telephone', '电话', '1', '1', null, null, '255', '', '0', '0', '2', null, '1', '2019-07-02 09:10:19', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'mobile', '手机', '7', '1', null, null, '255', '', '0', '0', '3', null, '1', '2019-07-02 09:10:19', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '客户行业', '客户行业', '3', '1', null, null, null, '', '0', '0', '4', 'IT,金融业,房地产,商业服务,运输/物流,生产,政府,文化传媒', '1', '2019-07-02 09:10:19', null, '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '客户级别', '客户级别', '3', '1', null, null, null, '', '0', '0', '5', 'A（重点客户）,B（普通客户）,C（非优先客户）', '1', '2019-07-02 09:10:19', null, '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'address', '地址', '1', '1', null, null, '255', '', '0', '0', '6', null, '1', '2019-07-02 09:10:19', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'next_time', '下次联系时间', '13', '1', null, null, null, '', '0', '0', '7', null, '1', '2019-07-02 09:10:19', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '1', '1', null, null, '255', '', '0', '0', '8', null, '1', '2019-07-02 09:10:19', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'customer_name', '客户名称', '1', '2', null, null, '255', '', '1', '1', '0', null, '1', '2019-07-02 09:10:41', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'mobile', '手机', '7', '2', null, null, '255', '', '0', '0', '1', null, '1', '2019-07-02 09:10:41', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'telephone', '电话', '1', '2', null, null, '255', '', '0', '0', '2', null, '1', '2019-07-02 09:10:41', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'website', '网址', '1', '2', null, null, '255', '', '0', '0', '6', null, '1', '2019-07-02 09:10:41', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'deal_status', '成交状态', '3', '2', null, null, null, '', '0', '1', '7', '未成交,已成交', '3', '2019-07-02 09:10:41', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'next_time', '下次联系时间', '13', '2', null, null, null, '', '0', '0', '8', null, '1', '2019-07-02 09:10:41', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '1', '2', null, null, '255', '', '0', '0', '9', null, '1', '2019-07-02 09:10:41', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '客户级别', '客户级别', '3', '2', null, null, null, '', '0', '0', '5', 'A（重点客户）,B（普通客户）,C（非优先客户）', '1', '2019-07-02 09:10:41', null, '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '客户来源', '客户来源', '3', '2', null, null, null, '', '0', '0', '3', '促销,搜索引擎,广告,转介绍,线上注册,线上询价,预约上门,陌拜,电话咨询,邮件咨询', '1', '2019-07-02 09:10:41', null, '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '客户行业', '客户行业', '3', '2', null, null, null, '', '0', '0', '4', 'IT,金融业,房地产,商业服务,运输/物流,生产,政府,文化传媒', '1', '2019-07-02 09:10:41', null, '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'name', '姓名', '1', '3', null, null, '255', '', '0', '1', '0', null, '1', '2019-07-01 17:10:21', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'customer_id', '客户名称', '15', '3', null, null, null, '', '0', '0', '1', null, '3', '2019-07-01 17:13:28', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'mobile', '手机', '7', '3', null, null, '255', '', '0', '0', '2', null, '1', '2019-07-01 17:10:21', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'telephone', '电话', '1', '3', null, null, '255', '', '0', '0', '3', null, '1', '2019-07-01 17:10:21', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'email', '电子邮箱', '14', '3', null, null, '255', '', '0', '0', '4', null, '1', '2019-07-01 17:10:21', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'post', '职务', '1', '3', null, null, '255', '', '0', '0', '5', null, '1', '2019-07-01 17:10:21', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'address', '地址', '1', '3', null, null, '255', '', '0', '0', '6', null, '1', '2019-07-01 17:10:21', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'next_time', '下次联系时间', '13', '3', null, null, null, '', '0', '0', '7', null, '1', '2019-07-01 17:10:21', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '备注', '备注', '1', '3', null, null, '255', '', '0', '0', '8', null, '1', '2019-07-01 17:10:21', null, '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '是否关键决策人', '是否关键决策人', '3', '3', null, null, null, '', '0', '0', '9', '是,否', '3', '2019-07-01 17:10:21', null, '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '性别', '性别', '3', '3', null, null, null, '', '0', '0', '10', '男,女', '3', '2019-07-01 17:10:21', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'name', '产品名称', '1', '4', null, null, '255', '', '0', '0', '0', null, '1', '2019-07-01 17:22:28', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'category_id', '产品类型', '19', '4', null, null, null, '', '0', '1', '1', null, '3', '2019-07-01 17:55:24', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'num', '产品编码', '5', '4', null, null, '255', '', '1', '1', '2', null, '1', '2019-07-01 17:22:28', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'price', '价格', '6', '4', null, null, '255', '', '0', '1', '3', null, '1', '2019-07-01 17:57:01', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'description', '产品描述', '1', '4', null, null, '255', '', '0', '0', '4', null, '1', '2019-07-01 17:22:28', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '是否上下架', '是否上下架', '3', '4', null, null, null, '', '0', '1', '5', '上架,下架', '3', '2019-07-01 17:22:28', null, '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '单位', '单位', '3', '4', null, null, null, '', '0', '0', '6', '个,块,只,把,枚,瓶,盒,台,吨,千克,米,箱,套', '1', '2019-07-01 17:22:28', null, '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'business_name', '商机名称', '1', '5', null, null, '255', '', '0', '0', '0', null, '3', '2019-07-01 17:10:31', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'customer_id', '客户名称', '15', '5', null, null, null, '', '0', '1', '1', null, '3', '2019-07-01 17:13:25', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'money', '商机金额', '6', '5', null, null, '255', '', '0', '0', '2', null, '1', '2019-07-01 17:10:31', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'deal_date', '预计成交日期', '13', '5', null, null, null, '', '0', '0', '3', null, '1', '2019-07-01 17:10:31', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '1', '5', null, null, '255', '', '0', '0', '4', null, '1', '2019-07-01 17:10:31', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'num', '合同编号', '5', '6', null, null, '255', '', '1', '1', '0', null, '1', '2019-07-01 17:10:34', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'name', '合同名称', '1', '6', null, null, '255', '', '0', '1', '1', null, '1', '2019-07-01 17:10:34', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'customer_id', '客户名称', '15', '6', null, null, null, '', '0', '1', '2', null, '3', '2019-07-01 17:22:49', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'business_id', '商机名称', '16', '6', null, null, null, '', '0', '0', '3', null, '3', '2019-07-01 17:22:57', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'order_date', '下单时间', '4', '6', null, null, null, '', '0', '0', '4', null, '1', '2019-07-01 17:10:34', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'money', '合同金额', '6', '6', null, null, '255', '', '0', '0', '5', null, '1', '2019-07-01 17:10:34', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'start_time', '合同开始时间', '4', '6', null, null, null, '', '0', '0', '6', null, '1', '2019-07-01 17:10:34', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'end_tme', '合同结束时间', '4', '6', null, null, null, '', '0', '0', '7', null, '1', '2019-07-01 17:10:34', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'contacts_id', '客户签约人', '17', '6', null, null, null, '', '0', '0', '8', null, '3', '2019-07-01 17:23:11', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'company_user_id', '公司签约人', '10', '6', null, null, null, '', '0', '0', '9', null, '3', '2019-07-01 17:10:34', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '1', '6', null, null, '255', '', '0', '0', '10', null, '1', '2019-07-01 17:10:34', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'number', '回款编号', '5', '7', null, null, '255', '', '0', '1', '0', null, '1', '2019-07-01 17:10:36', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'customer_id', '客户名称', '15', '7', null, null, null, '', '0', '1', '1', null, '3', '2019-07-01 17:23:15', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'contract_id', '合同编号', '20', '7', null, null, null, '', '0', '1', '2', null, '3', '2019-07-01 17:23:24', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'return_time', '回款日期', '4', '7', null, null, null, '', '0', '0', '3', null, '1', '2019-07-01 17:10:36', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'money', '回款金额', '6', '7', null, null, '255', '', '0', '0', '4', null, '1', '2019-07-01 17:10:36', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'plan_id', '期数', '21', '7', null, null, null, '', '0', '0', '5', null, '3', '2019-07-01 17:23:35', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '1', '7', null, null, '255', '', '0', '0', '6', null, '1', '2019-07-01 17:10:36', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '回款方式', '回款方式', '3', '7', null, null, null, '', '0', '0', '7', '支票,现金,邮政汇款,电汇,网上转账,支付宝,微信支付,其他', '1', '2019-07-01 17:10:36', null, '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'content', '审批事由', '2', '10', null, null, '0', '', '0', '1', '0', null, '1', '2019-06-27 14:00:42', '7', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, null, '0', '', '0', '1', '1', null, '1', '2019-06-27 14:01:13', '7', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '单行文本', '单行文本', '1', '10', null, '', '255', '', '0', '0', '2', null, '0', '2019-06-29 17:52:18', '7', '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '人员', '人员', '10', '10', null, '', null, '', '0', '0', '3', null, '0', '2019-06-29 17:52:11', '7', '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '多行文本', '多行文本', '2', '10', null, '', '1000', '', '0', '0', '4', null, '0', '2019-06-29 17:52:09', '7', '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, '附件', '附件', '8', '10', null, '', null, '', '0', '0', '5', null, '0', '2019-06-29 17:52:01', '7', '0',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'customer_id', '客户名称', '15', '8', null, null, null, '', '0', '0', '1', null, '3', '2019-06-28 16:52:13', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'contract_id', '合同编号', '20', '8', null, null, '11', '', '0', '0', '2', null, '3', '2019-06-28 16:55:17', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'money', '计划回款金额', '6', '8', null, null, null, '', '0', '0', '3', null, '3', '2019-06-28 16:53:04', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'return_date', '计划回款日期', '4', '8', null, null, null, '', '0', '0', '4', null, '3', '2019-06-28 16:54:01', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remind', '提前几天提醒', '5', '8', null, null, '11', '', '0', '0', '5', null, '3', '2019-06-28 16:55:13', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '8', null, null, '1000', '', '0', '0', '6', null, '3', '2019-06-28 16:55:07', null, '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'content', '审批内容', '1', '10', null, '', null, '', '0', '1', '0', null, '3', null, '1', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '1', null, '3', null, '1', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'type_id', '请假类型', '3', '10', null, '', null, '年假', '0', '1', '0', '年假,事假,病假,产假,调休,婚假,丧假,其他', '3', null, '2', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'content', '审批内容', '1', '10', null, '', null, '', '0', '1', '1', null, '3', null, '2', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'start_time', '开始时间', '13', '10', null, '', null, '', '0', '1', '2', null, '3', null, '2', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'end_time', '结束时间', '13', '10', null, '', null, '', '0', '1', '3', null, '3', null, '2', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'duration', '时长', '6', '10', null, '', null, '', '0', '1', '4', null, '3', null, '2', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '5', null, '3', null, '2', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'content', '出差事由', '1', '10', null, '', null, '', '0', '1', '0', null, '3', '2019-06-30 18:13:08', '3', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '1', null, '3', '2019-06-30 18:13:08', '3', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'duration', '出差总天数', '6', '10', null, '', null, '', '0', '1', '2', null, '3', '2019-06-30 18:13:08', '3', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'cause', '行程明细', '22', '10', null, '', null, '', '0', '1', '2', null, '3', '2019-06-30 18:13:08', '3', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'content', '加班原因', '1', '10', null, '', null, '', '0', '1', '0', null, '3', '2019-06-30 18:13:08', '4', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'start_time', '开始时间', '13', '10', null, '', null, '', '0', '1', '1', null, '3', '2019-06-30 18:13:08', '4', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'end_time', '结束时间', '13', '10', null, '', null, '', '0', '1', '2', null, '3', '2019-06-30 18:13:08', '4', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'duration', '加班总天数', '6', '10', null, '', null, '', '0', '1', '3', null, '3', '2019-06-30 18:13:08', '4', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '4', null, '3', '2019-06-30 18:13:08', '4', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'content', '差旅事由', '1', '10', null, '', null, '', '0', '1', '0', null, '3', '2019-06-30 18:13:08', '5', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'money', '报销总金额', '6', '10', null, '', '0', '', '0', '1', '1', null, '3', '2019-06-30 18:13:08', '5', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '2', null, '3', '2019-06-30 18:13:08', '5', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'cause', '费用明细', '23', '10', null, '', '1000', '', '0', '0', '2', null, '3', '2019-06-30 18:13:08', '5', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'content', '借款事由', '1', '10', null, '', null, '', '0', '1', '0', null, '3', '2019-06-30 18:13:08', '6', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'money', '借款金额（元）', '6', '10', null, '', '0', '', '0', '1', '1', null, '3', '2019-06-30 18:13:08', '6', '1',null);
+INSERT INTO `72crm_admin_field` VALUES (null, 'remark', '备注', '2', '10', null, '', '1000', '', '0', '0', '2', null, '3', '2019-06-30 18:13:08', '6', '1',null);
 
 -- ----------------------------
 -- Table structure for 72crm_admin_fieldv
@@ -307,7 +308,7 @@ CREATE TABLE `72crm_admin_field_style` (
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='字段样式表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='字段样式表';
 
 -- ----------------------------
 -- Records of 72crm_admin_field_style
@@ -328,7 +329,7 @@ CREATE TABLE `72crm_admin_file` (
   `file_type` varchar(10) DEFAULT 'file' COMMENT '文件类型',
   `batch_id` varchar(50) DEFAULT NULL COMMENT '批次id',
   PRIMARY KEY (`file_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='附件表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='附件表';
 
 -- ----------------------------
 -- Records of 72crm_admin_file
@@ -348,7 +349,7 @@ CREATE TABLE `72crm_admin_menu` (
   `status` int(4) DEFAULT '1' COMMENT '状态 1 启用 0 禁用',
   `remarks` varchar(255) DEFAULT NULL COMMENT '菜单说明',
   PRIMARY KEY (`menu_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='后台菜单表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='后台菜单表';
 
 -- ----------------------------
 -- Records of 72crm_admin_menu
@@ -457,11 +458,6 @@ INSERT INTO `72crm_admin_menu` VALUES ('128', '127', '查看列表', 'index', '3
 INSERT INTO `72crm_admin_menu` VALUES ('129', '127', '分配', 'distribute', '3', '1', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('130', '127', '领取', 'receive', '3', '1', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('131', '127', '导出', 'excelexport', '3', '1', '1', null);
-INSERT INTO `72crm_admin_menu` VALUES ('132', '1', '公海管理', 'pool', '1', '4', '1', null);
-INSERT INTO `72crm_admin_menu` VALUES ('133', '132', '查看列表', 'index', '3', '1', '1', null);
-INSERT INTO `72crm_admin_menu` VALUES ('134', '132', '分配', 'distribute', '3', '1', '1', null);
-INSERT INTO `72crm_admin_menu` VALUES ('135', '132', '领取', 'receive', '3', '1', '1', null);
-INSERT INTO `72crm_admin_menu` VALUES ('136', '132', '导出', 'excelexport', '3', '1', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('137', '0', '项目管理', 'work', '0', '0', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('138', '137', '任务', 'task', '1', '0', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('139', '138', '创建', 'save', '3', '0', '1', null);
@@ -471,6 +467,8 @@ INSERT INTO `72crm_admin_menu` VALUES ('142', '140', '编辑任务列表', 'upda
 INSERT INTO `72crm_admin_menu` VALUES ('143', '140', '删除任务列表', 'delete', '3', '0', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('144', '137', '项目', 'work', '1', '0', '1', null);
 INSERT INTO `72crm_admin_menu` VALUES ('145', '144', '项目设置', 'update', '3', '0', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('146', '2', '办公分析', 'oa', '1', '10', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('147', '146', '查看', 'read', '3', '1', '1', null);
 
 -- ----------------------------
 -- Table structure for 72crm_admin_record
@@ -491,7 +489,7 @@ CREATE TABLE `72crm_admin_record` (
   `batch_id` varchar(32) DEFAULT NULL COMMENT '批次 比如附件批次',
   PRIMARY KEY (`record_id`),
   UNIQUE KEY `record_id` (`record_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='跟进记录';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='跟进记录';
 
 -- ----------------------------
 -- Records of 72crm_admin_record
@@ -511,7 +509,7 @@ CREATE TABLE `72crm_admin_role` (
   `is_hidden` int(1) NOT NULL DEFAULT '1' COMMENT '0 隐藏 1 不隐藏',
   `label` int(2) DEFAULT NULL COMMENT '1 系统项目管理员角色 2 项目管理角色 3 项目编辑角色 4 项目只读角色',
   PRIMARY KEY (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8 COMMENT='角色表';
+) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COMMENT='角色表';
 
 -- ----------------------------
 -- Records of 72crm_admin_role
@@ -541,7 +539,7 @@ CREATE TABLE `72crm_admin_role_menu` (
   `role_id` int(11) NOT NULL COMMENT '角色ID',
   `menu_id` int(11) NOT NULL COMMENT '菜单ID',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色菜单对应关系表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色菜单对应关系表';
 
 INSERT INTO `72crm_admin_role_menu` VALUES (null, '14', '139');
 INSERT INTO `72crm_admin_role_menu` VALUES (null, '14', '141');
@@ -569,7 +567,7 @@ CREATE TABLE `72crm_admin_scene` (
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`scene_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='场景';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='场景';
 
 -- ----------------------------
 -- Records of 72crm_admin_scene
@@ -586,7 +584,7 @@ CREATE TABLE `72crm_admin_scene_default` (
   `scene_id` int(11) NOT NULL COMMENT '场景ID',
   PRIMARY KEY (`default_id`),
   UNIQUE KEY `default_id` (`default_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='场景默认关系表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='场景默认关系表';
 
 -- ----------------------------
 -- Records of 72crm_admin_scene_default
@@ -615,7 +613,7 @@ CREATE TABLE `72crm_admin_user` (
   `last_login_time` datetime DEFAULT NULL COMMENT '最后登录时间',
   `last_login_ip` varchar(30) DEFAULT NULL COMMENT '最后登录IP 注意兼容IPV6',
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
 -- ----------------------------
 -- Records of 72crm_admin_user
@@ -631,7 +629,7 @@ CREATE TABLE `72crm_admin_user_role` (
   `user_id` bigint(11) NOT NULL COMMENT '用户ID',
   `role_id` int(11) NOT NULL COMMENT '角色ID',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='用户角色对应关系表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='用户角色对应关系表';
 
 -- ----------------------------
 -- Records of 72crm_admin_user_role
@@ -662,7 +660,7 @@ CREATE TABLE `72crm_crm_achievement` (
   `status` int(2) DEFAULT NULL COMMENT '1销售（目标）2回款（目标）',
   `yeartarget` decimal(18,2) DEFAULT '0.00' COMMENT '年目标',
   PRIMARY KEY (`achievement_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='业绩目标';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业绩目标';
 
 -- ----------------------------
 -- Records of 72crm_crm_achievement
@@ -680,7 +678,7 @@ CREATE TABLE `72crm_crm_action_record` (
   `action_id` int(11) NOT NULL COMMENT '被操作对象ID',
   `content` text NOT NULL COMMENT '内容',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='字段操作记录表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='字段操作记录表';
 
 -- ----------------------------
 -- Records of 72crm_crm_action_record
@@ -4236,6 +4234,7 @@ CREATE TABLE `72crm_crm_business` (
   `business_name` varchar(50) NOT NULL COMMENT '商机名称',
   `money` decimal(18,2) DEFAULT NULL COMMENT '商机金额',
   `discount_rate` decimal(10,2) DEFAULT NULL COMMENT '整单折扣',
+  `total_price` decimal(10,2) DEFAULT NULL COMMENT '产品总金额',
   `remark` varchar(500) DEFAULT '' COMMENT '备注',
   `create_user_id` int(10) NOT NULL COMMENT '创建人ID',
   `owner_user_id` int(10) DEFAULT NULL COMMENT '负责人ID',
@@ -4247,7 +4246,7 @@ CREATE TABLE `72crm_crm_business` (
   `is_end` int(4) NOT NULL DEFAULT '0' COMMENT '1赢单2输单3无效',
   `status_remark` varchar(500) DEFAULT '',
   PRIMARY KEY (`business_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='商机表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='商机表';
 
 -- ----------------------------
 -- Records of 72crm_crm_business
@@ -4264,7 +4263,7 @@ CREATE TABLE `72crm_crm_business_change` (
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `create_user_id` int(10) NOT NULL COMMENT '创建人',
   PRIMARY KEY (`change_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='商机阶段变化表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商机阶段变化表';
 
 -- ----------------------------
 -- Records of 72crm_crm_business_change
@@ -4285,7 +4284,7 @@ CREATE TABLE `72crm_crm_business_product` (
   `subtotal` decimal(18,2) NOT NULL COMMENT '小计（折扣后价格）',
   `unit` varchar(50) DEFAULT '' COMMENT '单位',
   PRIMARY KEY (`r_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='商机产品关系表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='商机产品关系表';
 
 -- ----------------------------
 -- Records of 72crm_crm_business_product
@@ -4302,7 +4301,7 @@ CREATE TABLE `72crm_crm_business_status` (
   `rate` varchar(20) DEFAULT NULL COMMENT '赢单率',
   `order_num` int(4) DEFAULT NULL COMMENT '排序',
   PRIMARY KEY (`status_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='商机状态';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='商机状态';
 
 -- ----------------------------
 -- Records of 72crm_crm_business_status
@@ -4324,7 +4323,7 @@ CREATE TABLE `72crm_crm_business_type` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `status` int(1) NOT NULL DEFAULT '1' COMMENT '1启用0禁用',
   PRIMARY KEY (`type_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='商机状态组类别';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='商机状态组类别';
 
 -- ----------------------------
 -- Records of 72crm_crm_business_type
@@ -4352,7 +4351,7 @@ CREATE TABLE `72crm_crm_contacts` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `batch_id` varchar(32) NOT NULL COMMENT '批次',
   PRIMARY KEY (`contacts_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='联系人表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='联系人表';
 
 -- ----------------------------
 -- Records of 72crm_crm_contacts
@@ -4367,7 +4366,7 @@ CREATE TABLE `72crm_crm_contacts_business` (
   `business_id` int(11) NOT NULL,
   `contacts_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='商机联系人关联表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商机联系人关联表';
 
 -- ----------------------------
 -- Records of 72crm_crm_contacts_business
@@ -4394,6 +4393,7 @@ CREATE TABLE `72crm_crm_contract` (
   `end_time` datetime DEFAULT NULL COMMENT '结束时间',
   `money` decimal(18,2) DEFAULT NULL COMMENT '合同金额',
   `discount_rate` decimal(10,2) DEFAULT NULL COMMENT '整单折扣',
+  `total_price` decimal(10,2) DEFAULT NULL COMMENT '产品总金额',
   `types` varchar(255) DEFAULT NULL COMMENT '合同类型',
   `payment_type` varchar(255) DEFAULT NULL COMMENT '付款方式',
   `batch_id` varchar(32) NOT NULL COMMENT '批次 比如附件批次',
@@ -4403,7 +4403,7 @@ CREATE TABLE `72crm_crm_contract` (
   `remark` varchar(255) DEFAULT NULL COMMENT '备注',
   `company_user_id` int(11) DEFAULT NULL COMMENT '公司签约人',
   PRIMARY KEY (`contract_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='合同表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='合同表';
 
 -- ----------------------------
 -- Records of 72crm_crm_contract
@@ -4424,7 +4424,7 @@ CREATE TABLE `72crm_crm_contract_product` (
   `subtotal` decimal(18,2) NOT NULL COMMENT '小计（折扣后价格）',
   `unit` varchar(50) DEFAULT '' COMMENT '单位',
   PRIMARY KEY (`r_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='合同产品关系表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='合同产品关系表';
 
 -- ----------------------------
 -- Records of 72crm_crm_contract_product
@@ -4458,7 +4458,7 @@ CREATE TABLE `72crm_crm_customer` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `batch_id` varchar(32) NOT NULL COMMENT '批次 比如附件批次',
   PRIMARY KEY (`customer_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='客户表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='客户表';
 
 -- ----------------------------
 -- Records of 72crm_crm_customer
@@ -4474,7 +4474,7 @@ CREATE TABLE `72crm_crm_customer_stats` (
   `customer_num` int(10) NOT NULL DEFAULT '0' COMMENT '客户总数',
   `create_time` datetime NOT NULL COMMENT '统计时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='每日客户统计';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='每日客户统计';
 
 -- ----------------------------
 -- Records of 72crm_crm_customer_stats
@@ -4501,7 +4501,7 @@ CREATE TABLE `72crm_crm_leads` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `batch_id` varchar(32) NOT NULL COMMENT '批次 比如附件批次',
   PRIMARY KEY (`leads_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='线索表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='线索表';
 
 -- ----------------------------
 -- Records of 72crm_crm_leads
@@ -4519,7 +4519,7 @@ CREATE TABLE `72crm_crm_owner_record` (
   `post_owner_user_id` int(20) DEFAULT NULL COMMENT '接手负责人',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   PRIMARY KEY (`record_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='负责人变更记录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='负责人变更记录表';
 
 -- ----------------------------
 -- Records of 72crm_crm_owner_record
@@ -4544,7 +4544,7 @@ CREATE TABLE `72crm_crm_product` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `batch_id` varchar(32) NOT NULL COMMENT '批次',
   PRIMARY KEY (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='产品表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='产品表';
 
 -- ----------------------------
 -- Records of 72crm_crm_product
@@ -4559,7 +4559,7 @@ CREATE TABLE `72crm_crm_product_category` (
   `name` varchar(200) DEFAULT '',
   `pid` int(11) DEFAULT '0',
   PRIMARY KEY (`category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='产品分类表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='产品分类表';
 
 -- ----------------------------
 -- Records of 72crm_crm_product_category
@@ -4589,7 +4589,7 @@ CREATE TABLE `72crm_crm_receivables` (
   `remarks` varchar(255) DEFAULT NULL COMMENT '备注',
   `batch_id` varchar(32) NOT NULL COMMENT '批次',
   PRIMARY KEY (`receivables_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='回款表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='回款表';
 
 -- ----------------------------
 -- Records of 72crm_crm_receivables
@@ -4618,7 +4618,7 @@ CREATE TABLE `72crm_crm_receivables_plan` (
   `contract_id` int(11) NOT NULL COMMENT '合同ID',
   `customer_id` int(11) NOT NULL COMMENT '客户ID',
   PRIMARY KEY (`plan_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='回款计划表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='回款计划表';
 
 -- ----------------------------
 -- Records of 72crm_crm_receivables_plan
@@ -4638,7 +4638,7 @@ CREATE TABLE `72crm_oa_action_record` (
   `dept_ids` varchar(100) DEFAULT NULL COMMENT '抄送部门IDs',
   `content` varchar(500) NOT NULL COMMENT '操作内容',
   PRIMARY KEY (`log_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='oa操作记录表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='oa操作记录表';
 
 -- ----------------------------
 -- Records of 72crm_oa_action_record
@@ -4661,7 +4661,7 @@ CREATE TABLE `72crm_oa_announcement` (
   `owner_user_ids` varchar(100) DEFAULT NULL COMMENT '通知人',
   `read_user_ids` varchar(255) DEFAULT NULL COMMENT '已读用户',
   PRIMARY KEY (`announcement_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='公告表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='公告表';
 
 -- ----------------------------
 -- Records of 72crm_oa_announcement
@@ -4684,10 +4684,10 @@ CREATE TABLE `72crm_oa_event` (
   `owner_user_ids` varchar(100) DEFAULT NULL COMMENT '参与人',
   `address` varchar(100) DEFAULT NULL COMMENT '地点',
   `remark` varchar(100) DEFAULT NULL COMMENT '备注',
-  `color` varchar(15) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '颜色',
+  `color` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '颜色',
   `remind_type` int(11) DEFAULT NULL COMMENT '提醒时间0准时提醒 1：5分钟前 2：15分钟前 3：30分钟前 4：一个小时前 5：两个小时前 6：一天前 7：两天前 8：一周前',
   PRIMARY KEY (`event_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='日程表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='日程表';
 
 -- ----------------------------
 -- Records of 72crm_oa_event
@@ -4700,12 +4700,12 @@ DROP TABLE IF EXISTS `72crm_oa_event_notice`;
 CREATE TABLE `72crm_oa_event_notice` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `event_id` int(11) NOT NULL COMMENT '日程ID',
-  `noticetype` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '1天 2周 3月 4年 0不提醒',
-  `repeat` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `noticetype` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '1天 2周 3月 4年 0不提醒',
+  `repeat` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `start_time` int(11) NOT NULL COMMENT '开始时间',
   `stop_time` int(11) NOT NULL COMMENT '介绍时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='日程提醒设置表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='日程提醒设置表';
 
 -- ----------------------------
 -- Records of 72crm_oa_event_notice
@@ -4725,7 +4725,7 @@ CREATE TABLE `72crm_oa_event_relation` (
   `status` int(2) DEFAULT '0' COMMENT '状态1可用',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   PRIMARY KEY (`eventrelation_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='日程关联业务表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='日程关联业务表';
 
 -- ----------------------------
 -- Records of 72crm_oa_event_relation
@@ -4750,7 +4750,7 @@ CREATE TABLE `72crm_oa_examine` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `batch_id` varchar(32) DEFAULT NULL COMMENT '附件批次id',
   PRIMARY KEY (`examine_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='审批表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='审批表';
 
 -- ----------------------------
 -- Records of 72crm_oa_examine
@@ -4777,7 +4777,7 @@ CREATE TABLE `72crm_oa_examine_category` (
   `delete_time` datetime DEFAULT NULL COMMENT '删除时间',
   `delete_user_id` int(11) DEFAULT NULL COMMENT '删除人ID',
   PRIMARY KEY (`category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='审批类型表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='审批类型表';
 
 -- ----------------------------
 -- Records of 72crm_oa_examine_category
@@ -4845,7 +4845,7 @@ CREATE TABLE `72crm_oa_examine_relation` (
   `status` int(2) DEFAULT '1' COMMENT '状态1可用',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`r_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='审批关联业务表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='审批关联业务表';
 
 -- ----------------------------
 -- Records of 72crm_oa_examine_relation
@@ -4891,7 +4891,7 @@ CREATE TABLE `72crm_oa_examine_travel` (
   `description` varchar(500) DEFAULT NULL COMMENT '备注',
   `batch_id` varchar(32) DEFAULT NULL COMMENT '批次id',
   PRIMARY KEY (`travel_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='差旅行程表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='差旅行程表';
 
 -- ----------------------------
 -- Records of 72crm_oa_examine_travel
@@ -4917,7 +4917,7 @@ CREATE TABLE `72crm_oa_log` (
   `read_user_ids` varchar(255) DEFAULT NULL COMMENT '已读人',
   `batch_id` varchar(50) DEFAULT NULL COMMENT '文件批次ID',
   PRIMARY KEY (`log_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='工作日志表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='工作日志表';
 
 -- ----------------------------
 -- Records of 72crm_oa_log
@@ -4937,7 +4937,7 @@ CREATE TABLE `72crm_oa_log_relation` (
   `status` int(2) DEFAULT NULL COMMENT '状态1可用',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`r_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='日志关联业务表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='日志关联业务表';
 
 -- ----------------------------
 -- Records of 72crm_oa_log_relation
@@ -4974,7 +4974,7 @@ CREATE TABLE `72crm_task` (
   `batch_id` varchar(50) DEFAULT NULL COMMENT '批次',
   `is_archive` int(2) DEFAULT '0' COMMENT '1归档',
   PRIMARY KEY (`task_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='任务表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务表';
 
 -- ----------------------------
 -- Records of 72crm_task
@@ -4996,7 +4996,7 @@ CREATE TABLE `72crm_task_comment` (
   `favour` int(7) DEFAULT '0' COMMENT '赞',
   `type` int(2) DEFAULT '0' COMMENT '评论分类 1：任务评论  2：日志评论',
   PRIMARY KEY (`comment_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='任务评论表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务评论表';
 
 -- ----------------------------
 -- Records of 72crm_task_comment
@@ -5016,7 +5016,7 @@ CREATE TABLE `72crm_task_relation` (
   `status` int(2) DEFAULT NULL COMMENT '状态1可用',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`r_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='任务关联业务表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务关联业务表';
 
 -- ----------------------------
 -- Records of 72crm_task_relation
@@ -5032,15 +5032,15 @@ CREATE TABLE `72crm_work` (
   `status` int(2) DEFAULT '1' COMMENT '状态 1启用 3归档 2 删除',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `create_user_id` bigint(20) DEFAULT NULL COMMENT '创建人ID',
-  `description` text CHARACTER SET utf8 COLLATE utf8_bin COMMENT '描述',
-  `color` varchar(15) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '颜色',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT '描述',
+  `color` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '颜色',
   `is_open` int(2) DEFAULT '1' COMMENT '是否所有人可见 1 是 0 否',
   `owner_user_id` varchar(50) DEFAULT NULL COMMENT '项目成员',
   `archive_time` datetime DEFAULT NULL COMMENT '归档时间',
   `delete_time` datetime DEFAULT NULL COMMENT '删除时间',
   `batch_id` varchar(32) DEFAULT NULL,
   PRIMARY KEY (`work_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='项目表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目表';
 
 -- ----------------------------
 -- Records of 72crm_work
@@ -5059,7 +5059,7 @@ CREATE TABLE `72crm_work_task_class` (
   `work_id` int(11) DEFAULT NULL COMMENT '项目ID',
   `order_num` int(4) DEFAULT NULL COMMENT '排序',
   PRIMARY KEY (`class_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='任务分类表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='任务分类表';
 
 -- ----------------------------
 -- Records of 72crm_work_task_class
@@ -5075,9 +5075,9 @@ CREATE TABLE `72crm_work_task_label` (
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `create_user_id` int(11) DEFAULT NULL COMMENT '创建人ID',
   `status` int(2) DEFAULT '0' COMMENT '状态',
-  `color` varchar(15) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '颜色',
+  `color` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '颜色',
   PRIMARY KEY (`label_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='任务标签表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='任务标签表';
 
 -- ----------------------------
 -- Records of 72crm_work_task_label
@@ -5096,7 +5096,7 @@ CREATE TABLE `72crm_work_task_log` (
   `task_id` int(11) DEFAULT '0' COMMENT '任务ID',
   `work_id` int(11) DEFAULT '0' COMMENT '项目ID',
   PRIMARY KEY (`log_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='任务日志表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='任务日志表';
 
 -- ----------------------------
 -- Records of 72crm_work_task_log
@@ -5114,4 +5114,4 @@ CREATE TABLE `72crm_work_user` (
   `user_id` int(11) NOT NULL COMMENT '成员ID',
   `role_id` int(11) NOT NULL COMMENT '角色ID',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='项目成员表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='项目成员表';

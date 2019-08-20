@@ -192,7 +192,6 @@
               <div v-show="addDescriptionShow">
                 <el-input type="textarea"
                           :autosize="{ minRows: 2}"
-                          maxlength="50"
                           placeholder="请输入内容"
                           v-model="addDescriptionTextarea">
                 </el-input>

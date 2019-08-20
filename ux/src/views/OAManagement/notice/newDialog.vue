@@ -124,8 +124,14 @@ export default {
         content: [
           { required: true, message: '公告正文不能为空', trigger: 'blur' }
         ],
-        startTime: [{ validator: validateTime, trigger: 'blur' }],
-        endTime: [{ validator: validateTime, trigger: 'blur' }]
+        startTime: [
+          { required: true, message: '不能为空', trigger: 'blur' },
+          { validator: validateTime, trigger: 'blur' }
+        ],
+        endTime: [
+          { required: true, message: '不能为空', trigger: 'blur' },
+          { validator: validateTime, trigger: 'blur' }
+        ]
       },
       loading: false
     }

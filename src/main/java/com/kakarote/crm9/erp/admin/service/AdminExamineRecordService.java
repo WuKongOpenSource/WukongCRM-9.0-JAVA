@@ -20,10 +20,7 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AdminExamineRecordService {
     /**
@@ -92,7 +89,7 @@ public class AdminExamineRecordService {
                     //如果是负责人主管审批 获取主管的主管ID
                     Record r = Db.findFirst(Db.getSql("admin.examineLog.queryUserByUserId"), Db.findFirst(Db.getSql("admin.examineLog.queryUserByUserId"), ownerUserId).getLong("user_id"));
                     if (r == null || r.getLong("user_id") == null){
-                        examineLog.setExamineUser(Long.valueOf(BaseConstant.SUPER_ADMIN_USER_ID));
+                        examineLog.setExamineUser(BaseConstant.SUPER_ADMIN_USER_ID);
                     }else {
                         examineLog.setExamineUser(r.getLong("user_id"));}
                     examineLog.setRecordId(examineRecord.getRecordId());
@@ -190,10 +187,11 @@ public class AdminExamineRecordService {
             //判断审核撤回
             AdminExamineLog examineLog = new AdminExamineLog();
             examineLog.setLogId(null);
-            examineLog.setExamineUser(Long.valueOf(auditUserId));
+            examineLog.setExamineUser(auditUserId);
             examineLog.setCreateTime(DateUtil.date());
             examineLog.setCreateUser(auditUserId);
             examineLog.setExamineStatus(status);
+            examineLog.setExamineTime(new Date());
             examineLog.setIsRecheck(0);
             if (examine.getExamineType() == 1) {
                 examineRecord.setExamineStepId(oneExamineStep.getStepId());
@@ -354,6 +352,7 @@ public class AdminExamineRecordService {
                 //授权审批
                 if (nextUserId != null) {
                     //有下一审批人
+                    examineRecord.setExamineStatus(3);
                     AdminExamineLog examineLog = new AdminExamineLog();
                     examineLog.setCreateTime(DateUtil.date());
                     examineLog.setCreateUser(BaseUtil.getUser().getUserId());

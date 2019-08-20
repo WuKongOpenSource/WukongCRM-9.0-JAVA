@@ -99,20 +99,17 @@ export default {
   mounted() {
     this.noticeDataFun(1, this.pageNum)
     // 分批次加载
-    let _this = this
-    document.getElementsByClassName('content')[0].onscroll = function(e) {
-      let doms = document.getElementsByClassName('content')[0]
-      _this.$bus.emit('notice-list-box-scroll', e.target)
-      var scrollTop = doms.scrollTop
-      var windowHeight = doms.clientHeight
-      var scrollHeight = doms.scrollHeight //滚动条到底部的条件
-      if (scrollTop + windowHeight == scrollHeight) {
-        _this.loadMoreLoading = true
-        if (_this.isPost) {
-          _this.pageNum++
-          _this.noticeDataFun(_this.optionsValue, _this.pageNum)
+    document.getElementsByClassName('content')[0].onscroll = () => {
+      let dom = document.getElementsByClassName('content')[0]
+      let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+      //滚动条到底部的条件
+      if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
+        if (!this.isPost) {
+          this.isPost = true
+          this.pageNum++
+          this.noticeDataFun(this.optionsValue, this.pageNum)
         } else {
-          _this.loadMoreLoading = false
+          this.loadMoreLoading = false
         }
       }
     }
@@ -135,17 +132,18 @@ export default {
           this.listData = this.listData.concat(res.data.list)
           if (res.data.list.length == 0 || res.data.list.length != 15) {
             this.loadText = '没有更多了'
-            this.isPost = false
+            this.loadMoreLoading = false
           } else {
             this.loadText = '加载更多'
-            this.isPost = true
+            this.loadMoreLoading = true
           }
           this.loading = false
-          this.loadMoreLoading = false
+          this.isPost = false
         })
         .catch(err => {
+          this.loadText = ''
           this.loading = false
-          this.loadMoreLoading = false
+          this.isPost = false
         })
     },
     // 点击显示详情

@@ -1,5 +1,6 @@
 package com.kakarote.crm9.erp.admin.controller;
 
+import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.erp.admin.entity.AdminDept;
 import com.kakarote.crm9.erp.admin.service.AdminDeptService;
 import com.kakarote.crm9.utils.BaseUtil;
@@ -21,6 +22,7 @@ public class AdminDeptController extends Controller {
      * 设置部门
      * @param adminDept 部门对象
      */
+    @Permissions("manage:user")
     public void setDept(@Para("") AdminDept adminDept){
         renderJson(adminDeptService.setDept(adminDept));
     }
@@ -47,6 +49,7 @@ public class AdminDeptController extends Controller {
      * @author hmb
      * 删除部门
      */
+    @Permissions("manage:user")
     public void deleteDept(){
         String id = getPara("id");
         renderJson(adminDeptService.deleteDept(id));

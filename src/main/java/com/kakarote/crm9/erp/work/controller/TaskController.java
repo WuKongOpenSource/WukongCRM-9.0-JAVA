@@ -80,10 +80,10 @@ public class TaskController extends Controller{
         TaskRelation taskRelation = new TaskRelation();
         if(customerIds != null || contactsIds != null || businessIds != null || contractIds != null){
 
-            taskRelation.setBusinessIds(businessIds);
-            taskRelation.setContactsIds(contactsIds);
-            taskRelation.setContractIds(contractIds);
-            taskRelation.setCustomerIds(customerIds);
+            taskRelation.setBusinessIds(TagUtil.fromString(businessIds));
+            taskRelation.setContactsIds(TagUtil.fromString(contactsIds));
+            taskRelation.setContractIds(TagUtil.fromString(contractIds));
+            taskRelation.setCustomerIds(TagUtil.fromString(customerIds));
         }
         renderJson(taskService.setTask(task, taskRelation));
     }
@@ -112,10 +112,10 @@ public class TaskController extends Controller{
         TaskRelation taskRelation = new TaskRelation();
         if(customerIds != null || contactsIds != null || businessIds != null || contractIds != null){
 
-            taskRelation.setBusinessIds(businessIds);
-            taskRelation.setContactsIds(contactsIds);
-            taskRelation.setContractIds(contractIds);
-            taskRelation.setCustomerIds(customerIds);
+            taskRelation.setBusinessIds(TagUtil.fromString(businessIds));
+            taskRelation.setContactsIds(TagUtil.fromString(contactsIds));
+            taskRelation.setContractIds(TagUtil.fromString(contractIds));
+            taskRelation.setCustomerIds(TagUtil.fromString(customerIds));
         }
         renderJson(taskService.setTask(task, taskRelation));
     }
@@ -169,7 +169,6 @@ public class TaskController extends Controller{
         List<Integer> userIds = new ArrayList<>();
         if(mold == null){
             userIds.add(BaseUtil.getUser().getUserId().intValue());
-            //userIds.add(1);
         }else if(mold == 1 && userId == null){
             userIds = userService.queryUserIdsByParentId(BaseUtil.getUser().getUserId().intValue());
         }else{

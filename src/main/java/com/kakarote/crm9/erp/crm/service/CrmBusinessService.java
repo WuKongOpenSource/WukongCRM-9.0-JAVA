@@ -76,6 +76,15 @@ public class CrmBusinessService {
         if (crmBusiness.getBusinessId() != null) {
             crmBusiness.setUpdateTime(DateUtil.date());
             crmRecordService.updateRecord(new CrmBusiness().dao().findById(crmBusiness.getBusinessId()), crmBusiness, CrmEnum.BUSINESS_TYPE_KEY.getTypes());
+            CrmBusiness oldBusiness = CrmBusiness.dao.findById(crmBusiness.getBusinessId());
+            if (!oldBusiness.getStatusId().equals(crmBusiness.getStatusId())){
+                CrmBusinessChange change = new CrmBusinessChange();
+                change.setBusinessId(crmBusiness.getBusinessId());
+                change.setStatusId(crmBusiness.getStatusId());
+                change.setCreateTime(DateUtil.date());
+                change.setCreateUserId(BaseUtil.getUserId().intValue());
+                change.save();
+            }
             saveOrUpdate = crmBusiness.update();
         } else {
             crmBusiness.setCreateTime(DateUtil.date());
@@ -102,9 +111,6 @@ public class CrmBusinessService {
      * 根据商机id查询
      */
     public R queryById(Integer businessId) {
-        if(!authUtil.dataAuth("business","business_id",businessId)){
-            return R.ok().put("data",new Record().set("dataAuth",0));
-        }
         return R.ok().put("data",CrmBusiness.dao.findFirst(Db.getSql("crm.business.queryById"), businessId));
     }
 
@@ -122,7 +128,8 @@ public class CrmBusinessService {
         field.set("商机名称", record.getStr("business_name")).set("商机状态组", record.getStr("type_name")).set("商机阶段", record.getStr("status_name"))
                 .set("预计成交日期", DateUtil.formatDateTime(record.get("deal_date"))).set("客户名称", record.getStr("customer_name"))
                 .set("商机金额", record.getStr("money")).set("备注", record.getStr("remark"));
-        List<Record> recordList = Db.find("select name,value from 72crm_admin_fieldv where batch_id = ?",record.getStr("batch_id"));
+        List<Record> recordList = Db.find(Db.getSql("admin.field.queryCustomField"),record.getStr("batch_id"));
+        fieldUtil.handleType(recordList);
         fieldList.addAll(recordList);
         return fieldList;
     }
@@ -205,7 +212,9 @@ public class CrmBusinessService {
      * 商机解除关联联系人
      */
     public R unrelateContacts(Integer businessId, String contactsIds){
-        Db.delete("delete from 72crm_crm_contacts_business where business_id = ? and contacts_id in ("+contactsIds+")",businessId);
+        String[] idsArr = contactsIds.split(",");
+        SqlPara sqlPara = Db.getSqlPara("crm.business.unrelateContacts",Kv.by("businessId",businessId).set("ids",idsArr));
+        Db.delete(sqlPara.getSql(),sqlPara.getPara());
         return R.ok();
     }
 
@@ -388,25 +397,6 @@ public class CrmBusinessService {
 
     /**
      * @author wyq
-     * 查询新增字段
-     */
-    public List<Record> queryField() {
-        List<Record> fieldList = new LinkedList<>();
-        String[] settingArr = new String[]{};
-        fieldUtil.getFixedField(fieldList, "businessName", "商机名称", "", "text", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "customerId", "客户名称", "", "customer", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "typeId", "商机状态组", "", "business_type", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "statusId", "商机阶段", "", "business_status", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "money", "商机金额", "", "floatnumber", settingArr, 0);
-        fieldUtil.getFixedField(fieldList, "dealDate", "预计成交日期", "", "datetime", settingArr, 1);
-        fieldUtil.getFixedField(fieldList, "remark", "备注", "", "text", settingArr, 0);
-        fieldUtil.getFixedField(fieldList, "product", "产品", Kv.by("discount_rate", "").set("product", new ArrayList<>()).set("total_price", ""), "product", settingArr, 0);
-        fieldList.addAll(adminFieldService.list("5"));
-        return fieldList;
-    }
-
-    /**
-     * @author wyq
      * 查询编辑字段
      */
     public List<Record> queryField(Integer businessId) {
@@ -418,38 +408,11 @@ public class CrmBusinessService {
         List<Record> fieldList = adminFieldService.queryUpdateField(5,business);
         fieldList.add(new Record().set("field_name","type_id").set("name","商机状态组").set("value",business.getInt("type_id")).set("form_type","business_type").set("setting",new String[0]).set("is_null",1).set("field_type",1));
         fieldList.add(new Record().set("field_name","status_id").set("name","商机阶段").set("value",business.getInt("status_id")).set("form_type","business_status").set("setting",new String[0]).set("is_null",1).set("field_type",1));
-        Record totalPrice = Db.findFirst("select IFNULL(SUM(subtotal),0) as total_price from 72crm_crm_business_product where business_id = ?", businessId);
         List<Record> productList = Db.find(Db.getSql("crm.business.queryBusinessProduct"), businessId);
-        Kv kv = Kv.by("discount_rate", customer.getBigDecimal("discount_rate")).set("product", productList).set("total_price", totalPrice.getStr("total_price"));
-        fieldList.add(new Record().set("field_name","product").set("name","产品").set("value",kv).set("setting",new String[]{}).set("is_null",0).set("field_type",1));
+        Kv kv = Kv.by("discount_rate", business.getBigDecimal("discount_rate")).set("product", productList).set("total_price", business.getStr("total_price"));
+        fieldList.add(new Record().set("field_name","product").set("name","产品").set("value",kv).set("form_type","product").set("setting",new String[]{}).set("is_null",0).set("field_type",1));
         return fieldList;
     }
-
-    /**
-     * @author wyq
-     * 查询编辑字段
-     */
-//    public List<Record> queryField(Integer businessId) {
-//        List<Record> fieldList = new LinkedList<>();
-//        Record record = Db.findFirst("select * from businessview where business_id = ?", businessId);
-//        String[] settingArr = new String[]{};
-//        fieldUtil.getFixedField(fieldList, "business_name", "商机名称", record.getStr("business_name"), "text", settingArr, 1);
-//        List<Record> customerList = new ArrayList<>();
-//        Record customer = new Record();
-//        customerList.add(customer.set("customer_id", record.getInt("customer_id")).set("customer_name", record.getStr("customer_name")));
-//        fieldUtil.getFixedField(fieldList, "customerId", "客户名称", customerList, "customer", settingArr, 1);
-//        fieldUtil.getFixedField(fieldList, "typeId", "商机状态组", record.getInt("type_id"), "business_type", settingArr, 1);
-//        fieldUtil.getFixedField(fieldList, "statusId", "商机阶段", record.getInt("status_id"), "business_status", settingArr, 1);
-//        fieldUtil.getFixedField(fieldList, "money", "商机金额", record.getStr("money"), "floatnumber", settingArr, 0);
-//        fieldUtil.getFixedField(fieldList, "dealDate", "预计成交日期", DateUtil.formatDateTime(record.get("deal_date")), "datetime", settingArr, 1);
-//        fieldUtil.getFixedField(fieldList, "remark", "备注", record.getStr("remark"), "text", settingArr, 0);
-//        fieldList.addAll(adminFieldService.queryByBatchId(record.getStr("batch_id")));
-//        Record totalPrice = Db.findFirst("select IFNULL(SUM(subtotal),0) as total_price from 72crm_crm_business_product where business_id = ?", businessId);
-//        List<Record> productList = Db.find(Db.getSql("crm.business.queryBusinessProduct"), businessId);
-//        Kv kv = Kv.by("discount_rate", record.getBigDecimal("discount_rate")).set("product", productList).set("total_price", totalPrice.getStr("total_price"));
-//        fieldUtil.getFixedField(fieldList, "product", "产品", kv, "product", settingArr, 0);
-//        return fieldList;
-//    }
 
     /**
      * @author wyq

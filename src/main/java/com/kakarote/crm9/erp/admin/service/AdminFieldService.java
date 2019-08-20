@@ -14,10 +14,7 @@ import com.jfinal.plugin.activerecord.SqlPara;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.erp.admin.entity.*;
-import com.kakarote.crm9.utils.BaseUtil;
-import com.kakarote.crm9.utils.FieldUtil;
-import com.kakarote.crm9.utils.ParamsUtil;
-import com.kakarote.crm9.utils.R;
+import com.kakarote.crm9.utils.*;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -26,8 +23,6 @@ import java.util.stream.Collectors;
 
 
 public class AdminFieldService {
-    @Inject
-    private ParamsUtil paramsUtil;
 
     /**
      * @author wyq
@@ -63,11 +58,21 @@ public class AdminFieldService {
     public List<Record> queryUpdateField(Integer label,Record record){
         List<Record> recordList = Db.find(Db.getSql("admin.field.queryAddField"),label);
         recordList.forEach(r ->{
-            r.set("value",record.get(r.getStr("field_name"))!=null ? record.get(r.getStr("field_name")):"");
+            if (r.getInt("type") == 10 || r.getInt("type") == 12){
+                r.set("value",Db.queryStr("select value from 72crm_admin_fieldv where field_id = ? and batch_id = ?",r.getInt("field_id"),record.getStr("batch_id")));
+            }else {
+                r.set("value",record.get(r.getStr("field_name"))!=null ? record.get(r.getStr("field_name")):"");
+            }
         });
         recordList.forEach(field ->{
             if (field.getInt("type") == 8){
                 field.set("value",Db.find("select * from 72crm_admin_file where batch_id = ?",StrUtil.isNotEmpty(field.getStr("value"))?field.getStr("value"):""));
+            }
+            if (field.getInt("type") == 10){
+                field.set("value",Db.find("select user_id,realname from 72crm_admin_user where find_in_set(user_id,ifnull(?,0))",field.getStr("value")));
+            }
+            if (field.getInt("type") == 12){
+                field.set("value",Db.find("select dept_id,name from 72crm_admin_dept where find_in_set(dept_id,ifnull(?,0))",field.getStr("value")));
             }
         });
         recordToFormType(recordList);
@@ -106,6 +111,8 @@ public class AdminFieldService {
         List<String> nameList = fieldSorts.stream().map(AdminField::getName).collect(Collectors.toList());
         if (arr.size() > 0) {
             SqlPara sql = Db.getSqlPara("admin.field.deleteByChooseId", Kv.by("ids", arr).set("label", label).set("categoryId", categoryId));
+            SqlPara sqlPara = Db.getSqlPara("admin.field.deleteByFieldValue", Kv.by("ids", arr).set("label", label).set("categoryId", categoryId));
+            Db.delete(sqlPara.getSql(),sqlPara.getPara());
             Db.delete(sql.getSql(), sql.getPara());
         }
         List<String> fieldList = new ArrayList<>();
@@ -191,7 +198,7 @@ public class AdminFieldService {
                 default:
                     return R.error("type不符合要求");
             }
-            if (!paramsUtil.isValid(kv.getStr("fieldName"))){
+            if (!ParamsUtil.isValid(kv.getStr("fieldName"))){
                 return R.error("参数包含非法字段");
             }
             number = Db.queryInt("select count(*) from 72crm_crm_"+tableName+" where "+kv.getStr("fieldName")+" = ? and "+primaryKey+" != ?",kv.getStr("val"),kv.getStr("id")!=null?Integer.valueOf(kv.getStr("id")):0);
@@ -264,8 +271,8 @@ public class AdminFieldService {
                 sql.append(String.format("max(if(a.name = '%s',value, null)) AS `%s`,", name, name));
             }
         });
-        String create = "";
-        String filedCreate = "";
+        String create;
+        String filedCreate;
         switch (label) {
             case 1:
                 filedCreate = String.format(Db.getSql("admin.field.fieldleadsview"), sql, userJoin.append(deptJoin), label);
@@ -296,6 +303,8 @@ public class AdminFieldService {
                 create = Db.getSql("admin.field.receivablesview");
                 break;
             default:
+                create="";
+                filedCreate="";
                 break;
         }
         if (StrUtil.isNotBlank(filedCreate)) {
@@ -474,14 +483,12 @@ public class AdminFieldService {
         }
         AdminFieldStyle adminFleldStyle = AdminFieldStyle.dao.findFirst(AdminFieldStyle.dao.getSql("admin.field.queryFieldStyle"), type, kv.getStr("field"), BaseUtil.getUser().getUserId());
         if (adminFleldStyle != null) {
-            // TODO 列表宽度舍弃小数点
             adminFleldStyle.setStyle(new BigDecimal(kv.getStr("width")).intValue());
             adminFleldStyle.update();
         } else {
             adminFleldStyle = new AdminFieldStyle();
             adminFleldStyle.setType(type);
             adminFleldStyle.setCreateTime(new Date());
-            // TODO 列表宽度舍弃小数点
             adminFleldStyle.setStyle(new BigDecimal(kv.getStr("width")).intValue());
             adminFleldStyle.setFieldName(kv.getStr("field"));
             adminFleldStyle.setUserId(BaseUtil.getUser().getUserId());
@@ -594,5 +601,44 @@ public class AdminFieldService {
         }
         CaffeineCache.ME.remove("field", "listHead:" + adminFieldSort.getLabel() + userId);
         return R.ok();
+    }
+
+
+    /**
+     * 自定义字段人员和部门转换
+     * @author hmb
+     * @param recordList  自定义字段列表
+     * @param isDetail   1 value返回name字符串 2 value返回id数组字符串
+     */
+    public void transferFieldList(List<Record> recordList, Integer isDetail){
+        recordList.forEach(record -> {
+            Integer dataType = record.getInt("type");
+            if(isDetail == 2){
+                if(10 == dataType){
+                    if(StrUtil.isNotEmpty(record.getStr("value"))){
+                        record.set("value",TagUtil.toSet(record.getStr("value")));
+                    }
+                }else if (12 == dataType) {
+                    if(StrUtil.isNotEmpty(record.getStr("value"))){
+                        record.set("value", TagUtil.toSet(record.getStr("value")));
+                    }
+                }
+            }else {
+                if(10 == dataType){
+                    if(StrUtil.isNotEmpty(record.getStr("value"))){
+                        record.set("value",Db.queryStr("select group_concat(realname) from `72crm_admin_user` where user_id in ("+record.getStr("value")+")"));
+                    }
+                }else if (12 == dataType) {
+                    if(StrUtil.isNotEmpty(record.getStr("value"))){
+                        record.set("value",Db.queryStr("select group_concat(name) from `72crm_admin_dept` where dept_id in ("+record.getStr("value")+")"));
+                    }
+                }
+            }
+            if(dataType == 8){
+                if(StrUtil.isNotEmpty(record.getStr("value"))){
+                    record.set("value",Db.find("select * from `72crm_admin_file` where batch_id = ?",record.getStr("value")));
+                }
+            }
+        });
     }
 }

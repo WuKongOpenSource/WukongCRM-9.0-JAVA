@@ -239,7 +239,7 @@ export default {
      */
     deleteProject() {
       this.$confirm(
-        '此操作将永久删除' + ' "' + this.projectName + '"' + ', 是否继续?',
+        '确定要删除项目吗？删除后此项目中的所有任务将一并彻底删除，无法恢复',
         '提示',
         {
           confirmButtonText: '确定',

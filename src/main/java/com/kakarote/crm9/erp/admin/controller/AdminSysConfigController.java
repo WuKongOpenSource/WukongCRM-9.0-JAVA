@@ -3,13 +3,13 @@ package com.kakarote.crm9.erp.admin.controller;
 import com.alibaba.fastjson.JSON;
 import com.jfinal.aop.Clear;
 import com.jfinal.aop.Inject;
+import com.kakarote.crm9.common.annotation.Permissions;
+import com.kakarote.crm9.common.config.redis.RedisManager;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.Kv;
-import com.jfinal.plugin.redis.Cache;
-import com.jfinal.plugin.redis.Redis;
 import com.jfinal.upload.UploadFile;
 
 import java.util.Map;
@@ -29,6 +29,7 @@ public class AdminSysConfigController extends Controller {
      * 设置系统配置
      * @author hmb
      */
+    @Permissions("manage:system")
     public void setSysConfig(){
         String prefix=BaseUtil.getDate();
         UploadFile file = getFile("file", prefix);
@@ -37,9 +38,7 @@ public class AdminSysConfigController extends Controller {
             R r=adminFileService.upload(file,null,"file","/"+prefix);
             kv.set("logo",r.get("url"));
         }
-
-        Cache cache = Redis.use();
-        cache.set(SYS_CONFIG_KEY, JSON.toJSONString(kv));
+        RedisManager.getRedis().set(SYS_CONFIG_KEY, JSON.toJSONString(kv));
         renderJson(R.ok());
     }
 
@@ -49,12 +48,11 @@ public class AdminSysConfigController extends Controller {
      */
     @Clear
     public void querySysConfig(){
-        Cache cache = Redis.use();
-        if (cache.get(SYS_CONFIG_KEY) == null){
+        if (RedisManager.getRedis().get(SYS_CONFIG_KEY) == null){
             renderJson(R.ok().put("data",Kv.by("logo","").set("name","")));
             return;
         }
-        String data = cache.get(SYS_CONFIG_KEY);
+        String data = RedisManager.getRedis().get(SYS_CONFIG_KEY);
         Map map = JSON.parseObject(data, Map.class);
         renderJson(R.ok().put("data",map));
     }

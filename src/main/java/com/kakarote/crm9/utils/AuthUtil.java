@@ -8,6 +8,7 @@ import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
+import com.kakarote.crm9.erp.admin.service.AdminRoleService;
 import com.kakarote.crm9.erp.admin.service.AdminUserService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 
@@ -20,32 +21,6 @@ import java.util.Map;
  * @author wyq
  */
 public class AuthUtil {
-    @Inject
-    private AdminUserService adminUserService;
-
-    public boolean dataAuth( String table,String fieldName,Integer dataId){
-        List<Integer> roles = BaseUtil.getUser().getRoles();
-        List<Integer> dataAuth = Db.query("select data_type from 72crm_admin_role where role_id in ("+CollectionUtil.join(roles,",")+")");
-        List<Long> userIdList = new ArrayList<>();
-        Integer deptId = BaseUtil.getUser().getDeptId();
-        if (dataAuth.contains(5)){
-            return true;
-        }else if (dataAuth.contains(4)){
-            List<Integer> deptIdList = adminUserService.queryChileDeptIds(deptId, BaseConstant.AUTH_DATA_RECURSION_NUM);
-            deptIdList.add(deptId);
-            List<Long> userIds = Db.query("select user_id from 72crm_admin_user where dept_id in ("+CollectionUtil.join(deptIdList,",")+")");
-            userIdList.addAll(userIds);
-        }else if (dataAuth.contains(3)){
-            userIdList.addAll(Db.query("select user_id from 72crm_admin_user where dept_id = ?",deptId));
-        }else if (dataAuth.contains(2)){
-            userIdList.addAll(adminUserService.queryChileUserIds(BaseUtil.getUserId(),BaseConstant.AUTH_DATA_RECURSION_NUM));
-            userIdList.add(BaseUtil.getUserId());
-        }else if (dataAuth.contains(1)){
-            userIdList.add(BaseUtil.getUserId());
-        }
-        Long ownerUserId = Db.queryLong("select owner_user_id from 72crm_crm_"+table+" where "+fieldName+" = ?",dataId);
-        return userIdList.contains(ownerUserId);
-    }
 
     public static Map<String,String> getCrmTablePara(String urlPrefix){
         Map<String,String> tableParaMap = new HashMap<>();
@@ -85,13 +60,13 @@ public class AuthUtil {
             return false;
         }
         Long userId = BaseUtil.getUserId();
-        List<Long> longs = Aop.get(AdminUserService.class).queryUserByAuth(userId);
+        List<Long> longs = Aop.get(AdminUserService.class).queryUserByAuth(userId,null);
         StringBuilder authSql = new StringBuilder("select count(*) from ");
         authSql.append(tablePara.get("tableName")).append(" where ").append(tablePara.get("tableId")).append(" = ").append(id);
         if(longs != null && longs.size() > 0){
             authSql.append(" and owner_user_id in (").append(StrUtil.join(",", longs)).append(")");
             if("72crm_crm_customer".equals(tablePara.get("tableName")) || "72crm_crm_business".equals(tablePara.get("tableName")) || "72crm_crm_contract".equals(tablePara.get("tableName"))){
-                authSql.append(" or ro_user_id like CONCAT('%,','" + userId + "',',%')" + " or rw_user_id like CONCAT('%,','" + userId + "',',%')");
+                authSql.append(" or ro_user_id like CONCAT('%,','").append(userId).append("',',%')").append(" or rw_user_id like CONCAT('%,','").append(userId).append("',',%')");
             }
         }
         return Db.queryInt(authSql.toString()) == 0;
@@ -117,6 +92,12 @@ public class AuthUtil {
         }
         Map<String,String> tablePara = getOaTablePara(type);
         Long userId = BaseUtil.getUserId();
+        List<Integer>  roleIds=Aop.get(AdminRoleService.class).queryRoleIdsByUserId(userId);
+
+        //超级管理员角色拥有最高权限
+        if (roleIds.contains(BaseConstant.SUPER_ADMIN_ROLE_ID)||userId.equals(BaseConstant.SUPER_ADMIN_USER_ID)) {
+            return false;
+        }
         if(tablePara == null){
             List<Long> userIds = Db.query("select create_user_id from `72crm_oa_examine` where examine_id = ? union all select b.examine_user from `72crm_oa_examine_record` as a left join `72crm_oa_examine_log` b on a.record_id = b.record_id where a.examine_id = ?", id, id);
             return ! userIds.contains(userId);
@@ -128,13 +109,13 @@ public class AuthUtil {
             List<Long> childIdList = Aop.get(AdminUserService.class).queryChileUserIds(userId, 20);
             authSql.append(tablePara.get("tableName")).append(" where ").append(tablePara.get("tableId")).append(" = ").append(id);
             if(childIdList != null && childIdList.size()>0){
-                authSql.append(" and (").append(" (owner_user_id like CONCAT('%,','" + userId + "',',%')" ).append(" or main_user_id = ").append(userId).append(") ");
+                authSql.append(" and (").append(" (owner_user_id like CONCAT('%,','").append(userId).append("',',%')").append(" or main_user_id = ").append(userId).append(") ");
                 childIdList.forEach(childId->{
-                    authSql.append(" or (owner_user_id like CONCAT('%,','" + childId + "',',%')" ).append(" or main_user_id = ").append(childId).append(") ");
+                    authSql.append(" or (owner_user_id like CONCAT('%,','").append(childId).append("',',%')").append(" or main_user_id = ").append(childId).append(") ");
                 });
                 authSql.append(") ");
             }else {
-                authSql.append(" and ").append(" (owner_user_id like CONCAT('%,','" + userId + "',',%')" ).append(" or main_user_id = ").append(userId).append(") ");
+                authSql.append(" and ").append(" (owner_user_id like CONCAT('%,','").append(userId).append("',',%')").append(" or main_user_id = ").append(userId).append(") ");
             }
         }
         return Db.queryInt(authSql.toString()) == 0;

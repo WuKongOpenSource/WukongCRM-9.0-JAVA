@@ -1,6 +1,7 @@
 package com.kakarote.crm9.erp.admin.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.erp.admin.entity.CrmAchievement;
 import com.kakarote.crm9.erp.admin.service.AdminAchievementService;
 import com.jfinal.aop.Inject;
@@ -22,6 +23,7 @@ public class AdminAchievementController extends Controller {
      * 设置业绩目标
      * @author hmb
      */
+    @Permissions("manage:crm")
     public void setAchievement(){
         String data = getRawData();
         List<CrmAchievement> crmAchievements = JSON.parseArray(data, CrmAchievement.class);
@@ -33,6 +35,7 @@ public class AdminAchievementController extends Controller {
      * @param achievement 业绩目标对象
      * @author hmb
      */
+    @Permissions("manage:crm")
     public void queryAchievementList(@Para("")CrmAchievement achievement){
         String userId = getPara("userId");
         Integer deptId = getParaToInt("deptId");

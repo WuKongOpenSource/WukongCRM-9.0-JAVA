@@ -4,6 +4,7 @@ import cn.hutool.core.util.ReUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.log.Log;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminMenu;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdminRoleService {
+
     @Inject
     private AdminMenuService adminMenuService;
 
@@ -80,7 +82,7 @@ public class AdminRoleService {
             try {
                 menuList = JSON.parseArray(URLDecoder.decode(adminRole.getMenuIds(), "utf-8"), Integer.class);
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                Log.getLog(getClass()).error("",e);
                 throw new RuntimeException("数据错误");
             }
             adminMenuService.saveRoleMenu(adminRole.getRoleId(), adminRole.getDataType(), menuList);

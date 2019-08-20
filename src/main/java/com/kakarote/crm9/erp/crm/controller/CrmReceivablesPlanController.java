@@ -19,13 +19,6 @@ public class CrmReceivablesPlanController extends Controller {
         JSONObject jsonObject = JSONObject.parseObject(getRawData());
         renderJson(receivablesPlanService.saveAndUpdate(jsonObject));
     }
-    /**
-     * @author zxy
-     * 查询回款计划自定义字段
-     */
-    public void queryField(){
-        renderJson(R.ok().put("data",receivablesPlanService.queryField()));
-    }
 
     /**
      * 根据合同id和客户id查询未使用的回款计划

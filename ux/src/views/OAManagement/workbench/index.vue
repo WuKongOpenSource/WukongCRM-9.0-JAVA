@@ -99,24 +99,17 @@ export default {
       })
     this.workbenchData(this.activeName, this.pageNum)
     // 分批次加载
-    let _this = this
-    for (let item of document.getElementsByClassName('el-tabs__content')) {
-      item.onscroll = function() {
-        let doms = item
-        var scrollTop = doms.scrollTop
-        var windowHeight = doms.clientHeight
-        var scrollHeight = doms.scrollHeight
+    for (let dom of document.getElementsByClassName('el-tabs__content')) {
+      dom.onscroll = () => {
+        let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
         //滚动条到底部的条件
-        if (
-          scrollTop + windowHeight == scrollHeight &&
-          _this.loadMoreLoading == true
-        ) {
-          if (!_this.isPost) {
-            _this.isPost = true
-            _this.pageNum++
-            _this.workbenchData(_this.activeName, _this.pageNum)
+        if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
+          if (!this.isPost) {
+            this.isPost = true
+            this.pageNum++
+            this.workbenchData(this.activeName, this.pageNum)
           } else {
-            _this.loadMoreLoading = false
+            this.loadMoreLoading = false
           }
         }
       }

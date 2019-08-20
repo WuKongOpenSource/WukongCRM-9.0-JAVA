@@ -65,13 +65,6 @@ public class CrmReceivablesController extends Controller {
     public void  deleteByIds(@Para("receivablesIds") String receivablesIds){
         renderJson(crmReceivablesService.deleteByIds(receivablesIds));
     }
-    /**
-     * 查询回款自定义字段
-     * @author zxy
-     */
-    public void queryField(){
-        renderJson(R.ok().put("data",crmReceivablesService.queryField()));
-    }
 
     /**
      * 根据条件查询回款

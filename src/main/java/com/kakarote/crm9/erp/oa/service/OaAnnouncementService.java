@@ -40,9 +40,15 @@ public class OaAnnouncementService {
         }
         boolean flag;
         if (oaAnnouncement.getStartTime() != null && oaAnnouncement.getEndTime() != null){
-            if(oaAnnouncement.getStartTime().compareTo(oaAnnouncement.getEndTime()) == 1){
+            if((oaAnnouncement.getStartTime().compareTo(oaAnnouncement.getEndTime()))==1){
                 return R.error("结束时间早于开始时间");
             }
+        }
+        if (oaAnnouncement.getStartTime() == null ){
+          return  R.error("开始时间不能为空！");
+        }
+        if (oaAnnouncement.getEndTime() == null ){
+            return  R.error("结束时间不能为空！");
         }
         oaAnnouncement.setDeptIds(TagUtil.fromString(oaAnnouncement.getDeptIds()));
         oaAnnouncement.setOwnerUserIds(TagUtil.fromString(oaAnnouncement.getOwnerUserIds()));
@@ -73,7 +79,7 @@ public class OaAnnouncementService {
      * 根据ID查询详情
      */
     public R queryById(Integer id){
-        return R.ok().put("data", Db.find(Db.getSql("oa.announcement.queryById"),id));
+        return R.ok().put("data", Db.findFirst(Db.getSql("oa.announcement.queryById"),id));
     }
     /**
      * 倒叙查询公告集合

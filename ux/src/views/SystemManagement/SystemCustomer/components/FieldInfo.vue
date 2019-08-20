@@ -64,7 +64,7 @@
                @click.stop="handleCheckbox('remove', item, index)"
                class="el-icon-remove handle"></i>
           </div>
-          
+
         </draggable>
       </el-checkbox-group>
     </div>
@@ -98,6 +98,22 @@
                 :maxlength="4"
                 :disabled="disabled"></el-input>
       <div class="input-tips"><span>*</span>上限为2000字</div>
+    </div>
+
+    <div v-if="canTransform && transformData && transformData[field.formType]"
+         class="item-section">
+      <div class="name">
+        转化客户字段
+      </div>
+      <el-select v-model="field.relevant"
+                 clearable
+                 placeholder="请选择">
+        <el-option v-for="item in transformData[field.formType]"
+                   :key="item.value"
+                   :label="item.label"
+                   :value="item.value">
+        </el-option>
+      </el-select>
     </div>
 
     <div class="item-check-section">
@@ -206,10 +222,14 @@ export default {
           maxLength: '', // textarea 多行文本有最大数量
           defaultValue: '', // 默认值
           setting: '', // 接口返回setting数据
-          showSetting: '' // 单选选项
+          showSetting: '', // 单选选项
+          relevant: '' // 转移字段
         }
       }
-    }
+    },
+    // 是否开启转移  转移对应数据
+    canTransform: Boolean,
+    transformData: Object
   },
   mounted() {
     if (this.showSelect && this.field.showSetting.length == 0) {

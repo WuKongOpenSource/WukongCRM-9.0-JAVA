@@ -1,5 +1,6 @@
 <template>
-  <el-cascader style="width: 100%;"
+  <el-cascader ref="elCascader"
+               style="width: 100%;"
                :options="options"
                change-on-select
                :show-all-levels="false"
@@ -43,6 +44,15 @@ export default {
           this.options = res.data
         })
         .catch(() => {})
+    },
+
+    valueChange(val) {
+      this.$emit('value-change', {
+        index: this.index,
+        item: this.item,
+        value: val,
+        valueContent: this.$refs.elCascader.currentLabels.join(',')
+      })
     }
   }
 }

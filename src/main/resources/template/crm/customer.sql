@@ -17,7 +17,7 @@
     #end
 
     #sql("queryById")
-    select * from customerview
+    select *,(IF(owner_user_id is null,1,0)) as is_pool from customerview
     where customer_id = ?
     #end
 
@@ -45,7 +45,10 @@
     #end
 
     #sql("queryContacts")
-    select contacts_id,name,mobile,post,telephone,是否关键决策人 from contactsview where customer_id = ?
+    select contacts_id,name,mobile,post,telephone,是否关键决策人 from contactsview where customer_id = #para(customerId)
+      #if(contactsName)
+      and a.name like CONCAT('%',#para(contactsName),'%')
+      #end
     #end
 
     #sql ("queryContactsNumber")
@@ -80,13 +83,19 @@
     select a.contract_id,a.num,a.name as contract_name,b.customer_name,a.money,a.start_time,a.end_time,
     ifnull((select sum(c.money) from `72crm_crm_receivables` c where c.contract_id = a.contract_id and c.check_status = 2),0) as receivablesMoneyCount
     from 72crm_crm_contract as a inner join 72crm_crm_customer as b on a.customer_id = b.customer_id
-    where a.customer_id = ?
+    where a.customer_id = #para(customerId)
+      #if(contractName)
+      and a.name like CONCAT('%',#para(contractName),'%')
+      #end
     #end
 
     #sql ("queryPassContract")
     select a.contract_id,a.num,a.name as contract_name,b.customer_name,a.money,a.start_time,a.end_time
     from 72crm_crm_contract as a inner join 72crm_crm_customer as b on a.customer_id = b.customer_id
-    where a.customer_id = ? and a.check_status = ?
+    where a.customer_id = #para(customerId) and a.check_status = #para(checkStatus)
+      #if(contractName)
+      and a.name like CONCAT('%',#para(contractName),'%')
+      #end
     #end
 
     #sql ("getMembers")

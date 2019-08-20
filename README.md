@@ -164,10 +164,12 @@ UI框架：Element-UI 2.6.3
 
 ## 安装说明
 
-配置java运行环境，redis环境，mysql环境，
-然后将目录doc下的72crm.sql导入到数据库，修改`resources/config/crm9-config.txt`下的数据库以及redis的配置文件，
-undertow启动端口号在`resources/config/undertow.txt`下修改,
-默认账号 admin 默认密码 123456
+1、配置java运行环境，redis环境，mysql环境。  
+2、将目录doc下的crm9.sql导入到数据库( `初始化安装只需要导入crm9.sql就好了，更新代码导入对应日期的sql文件`)。  
+3、修改`resources/config/crm9-config.txt`下的数据库配置文件。
+4、修改`resources/config/redis.json`下的redis连接文件
+5、undertow启动端口号在`resources/config/undertow.txt`下修改。  
+默认账号 admin 默认密码 123456  
 
 
 
@@ -177,7 +179,22 @@ undertow启动端口号在`resources/config/undertow.txt`下修改,
 
 本项目JDK要求JDK8及以上
 
-### 一、Tomcat部署
+
+### 一、Undertow（默认）
+
+
+```
+<dependency>
+    <groupId>com.jfinal</groupId>
+    <artifactId>jfinal-undertow</artifactId>
+    <version>1.6</version>
+</dependency>
+```
+
+取消以上代码的注释，将tomcat的pom依赖javax.servlet.javax.servlet-api注释掉，打包方式改为jar 运行maven package，打包完成后  
+将上述打包命令生成的 crm9-release.zip 文件上传到服务器并解压,运行对应的72crm.sh/72crm.bat即可
+
+### 二、Tomcat部署
 
 
 ```
@@ -189,29 +206,15 @@ undertow启动端口号在`resources/config/undertow.txt`下修改,
 </dependency>
 ```
 
-取消以上代码的注释，将undertow的引用注释掉，打包方式改为war，运行maven package命令，将war包放在`tomcat/webapps`目录下
+取消以上代码的注释，将undertow的pom依赖com.jfinal.jfinal-undertow注释掉，并将com.kakarote.crm9.Application的main方法注释掉，打包方式改为war，  
+运行maven package命令，将war包放在`tomcat/webapps`目录下
 
-### 二、Undertow（默认）
-
-
-```
-<dependency>
-    <groupId>com.jfinal</groupId>
-    <artifactId>jfinal-undertow</artifactId>
-    <version>1.6</version>
-</dependency>
-```
+项目默认是ROOT.war，若需要携带项目名，需要修改 ux/config/prod.env.js的BASE_API为'"/项目名/"'，改动完成后需要重新打包替换到webapp下  
 
 
-取消以上代码的注释，将tomcat的引用注释掉，打包方式改为jar 运行maven package。将上述打包命令生成的 zip 文件上传到服务器并解压,将目录下的
-`
-72crm.sh/72crm.bat
-`
-放到解压后的目录下，运行即可
-
-项目webapp下自带打包后的前端代码，如果不需要对前端代码更改，直接访问即可
-如果更改了前端代码，将打包后的dist下static文件夹和index.html替换到webapp下   
-ps:可以使用`nginx`代理静态文件，后台只做接口响应，项目本身设计是前后端完全分离的
+项目webapp下自带打包后的前端代码，如果不需要对前端代码更改，直接访问即可  
+如果更改了前端代码，需要将打包后的dist下static文件夹和index.html替换到webapp下     
+ps:可以使用`nginx`代理静态文件，后台只做接口响应，项目本身设计是前后端完全分离的  
 
 
 

@@ -138,7 +138,7 @@ export default {
       crmIndexRequest(params)
         .then(res => {
           this.list = res.data.list
-          this.total = res.data.dataCount
+          this.total = res.data.totalRow
 
           this.loading = false
         })

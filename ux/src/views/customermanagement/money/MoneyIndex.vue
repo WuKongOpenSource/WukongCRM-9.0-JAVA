@@ -28,6 +28,7 @@
                 style="width: 100%"
                 :cell-style="cellStyle"
                 @row-click="handleRowClick"
+                @sort-change="sortChange"
                 @header-dragend="handleHeaderDragend"
                 @selection-change="handleSelectionChange">
         <el-table-column show-overflow-tooltip
@@ -37,6 +38,7 @@
         </el-table-column>
         <el-table-column v-for="(item, index) in fieldList"
                          :key="index"
+                         sortable="custom"
                          show-overflow-tooltip
                          :fixed="index==0"
                          :prop="item.prop"

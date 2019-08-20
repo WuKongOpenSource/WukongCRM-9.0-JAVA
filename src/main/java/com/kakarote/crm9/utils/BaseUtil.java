@@ -2,11 +2,11 @@ package com.kakarote.crm9.utils;
 
 import cn.hutool.core.date.DateUtil;
 import com.jfinal.kit.PropKit;
+import com.jfinal.log.Log;
 import com.kakarote.crm9.common.config.JfinalConfig;
-import com.kakarote.crm9.common.constant.BaseConstant;
+import com.kakarote.crm9.common.config.redis.RedisManager;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.jfinal.kit.Prop;
-import com.jfinal.plugin.redis.Redis;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.servlet.http.Cookie;
@@ -15,6 +15,7 @@ import java.net.InetAddress;
 import java.util.Date;
 
 public class BaseUtil {
+
     private static ThreadLocal<HttpServletRequest> threadLocal = new ThreadLocal<>();
 
     /**
@@ -74,7 +75,7 @@ public class BaseUtil {
             }
         } catch (Exception e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            Log.getLog(BaseUtil.class).error("",e);
         }
         HttpServletRequest request=getRequest();
         /**
@@ -127,7 +128,7 @@ public class BaseUtil {
 
 
     public static AdminUser getUser() {
-        return Redis.use().get(getToken());
+        return RedisManager.getRedis().get(getToken());
     }
 
     public static Long getUserId(){
@@ -143,20 +144,7 @@ public class BaseUtil {
     }
 
     public static String getToken(HttpServletRequest request){
-        return request.getHeader("Admin-Token") != null ? request.getHeader("Admin-Token") : getCookieValue(request,"Admin-Token");
+        return request.getHeader("Admin-Token") != null ? request.getHeader("Admin-Token") : "";
     }
 
-    public static String getCookieValue(HttpServletRequest request,String name) {
-        String cookieValue= "";
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(name)) {
-                    cookieValue = cookie.getValue();
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
 }

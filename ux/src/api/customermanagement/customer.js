@@ -144,6 +144,14 @@ export function crmCustomerExcelImport(data) {
  *
  */
 export const crmCustomerExcelDownloadURL = process.env.BASE_API + 'CrmCustomer/downloadExcel'
+export function crmCustomerDownloadExcelAPI(data) {
+  return request({
+    url: 'CrmCustomer/downloadExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob'
+  })
+}
 
 /**
  * 公海导出

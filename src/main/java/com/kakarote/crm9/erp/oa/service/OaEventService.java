@@ -53,7 +53,7 @@ public class OaEventService {
      */
     public R add(OaEvent oaEvent){
         if (oaEvent.getStartTime() != null && oaEvent.getEndTime() != null){
-            if(oaEvent.getStartTime().compareTo(oaEvent.getEndTime()) == 1){
+            if((oaEvent.getStartTime().compareTo(oaEvent.getEndTime())) == 1){
                 return R.error("结束时间早于开始时间");
             }
         }
@@ -82,7 +82,7 @@ public class OaEventService {
      */
     public R update(OaEvent oaEvent){
         if (oaEvent.getStartTime() != null && oaEvent.getEndTime() != null){
-            if(oaEvent.getStartTime().compareTo(oaEvent.getEndTime()) == 1){
+            if((oaEvent.getStartTime().compareTo(oaEvent.getEndTime())) == 1){
                 return R.error("结束时间早于开始时间");
             }
         }
@@ -169,4 +169,12 @@ public class OaEventService {
         }
         record.set("contractList",contractList);
     }
+
+    public Record queryById(Integer eventId){
+        Record record = Db.findFirst(Db.getSql("oa.event.queryById"),eventId);
+        record.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", record.getInt("create_user_id")));
+        queryRelateList(record);
+        return record;
+    }
+
 }

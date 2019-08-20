@@ -122,6 +122,15 @@ export default {
       radio: true
     }
   },
+  watch: {
+    newDialogVisible(value) {
+      if (!value) {
+        this.formInline = {
+          priority: 0
+        }
+      }
+    }
+  },
   props: {
     newDialogVisible: Boolean,
     newLoading: Boolean

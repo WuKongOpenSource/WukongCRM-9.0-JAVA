@@ -202,15 +202,6 @@ public class CrmBusinessController extends Controller {
         if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmBusinessService.boostBusinessStatus(crmBusiness));
     }
-
-    /**
-     * @author wyq
-     * 查询自定义字段
-     */
-    public void queryField(){
-        renderJson(R.ok().put("data",crmBusinessService.queryField()));
-    }
-
     /**
      * @author wyq
      * 查询商机状态组及商机状态

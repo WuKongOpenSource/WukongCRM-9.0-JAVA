@@ -146,6 +146,7 @@ export default {
       currentPage: 1, // 当前页数
       totalPage: 1, //总页数
 
+      otherItems: [],
       selectedItem: [] // 勾选的数据 点击确定 传递给父组件
     }
   },
@@ -338,14 +339,27 @@ export default {
     },
     // 标记选择数据
     checkItemsWithSelectedData() {
-      let selectedArray = this.selectedData[this.crmType]
+      let selectedArray = this.selectedData[this.crmType].map(item => {
+        item.has = false
+        return item
+      })
+
       let selectedRows = []
+      this.otherItems = []
+
       this.list.forEach((item, index) => {
         selectedArray.forEach((selectedItem, selectedIndex) => {
           if (item[this.crmType + 'Id'] == selectedItem[this.crmType + 'Id']) {
+            selectedItem.has = true
             selectedRows.push(item)
           }
         })
+      })
+
+      selectedArray.forEach((selectedItem, selectedIndex) => {
+        if (!selectedItem.has) {
+          this.otherItems.push(selectedItem)
+        }
       })
 
       this.$nextTick(() => {
@@ -393,7 +407,7 @@ export default {
           this.selectedItem = val.length === 1 ? val : [val[val.length - 1]]
         }
       } else {
-        this.selectedItem = val
+        this.selectedItem = this.otherItems.concat(val)
       }
       this.$emit('changeCheckout', {
         data: this.selectedItem,

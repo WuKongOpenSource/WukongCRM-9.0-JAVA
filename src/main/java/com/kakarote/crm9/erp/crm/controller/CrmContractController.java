@@ -165,14 +165,6 @@ public class CrmContractController extends Controller {
     }
 
     /**
-     * 查询合同自定义字段
-     * @author zxy
-     */
-    public void queryField(){
-        renderJson(R.ok().put("data",crmContractService.queryField()));
-    }
-
-    /**
      * @author wyq
      * 添加跟进记录
      */

@@ -9,6 +9,17 @@ export function crmIndexIndex(data) {
   })
 }
 
+/**
+ * 销售简报列表
+ */
+export function crmIndexIndexListAPI(data) {
+  return request({
+    url: 'Crm/Instrument/queryBulletinInfo',
+    method: 'post',
+    data: data
+  })
+}
+
 // 业绩指标
 export function crmIndexAchievementData(data) {
   return request({

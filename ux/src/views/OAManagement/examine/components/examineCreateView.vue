@@ -342,6 +342,7 @@ export default {
       // 进行编辑操作
       if (this.action.type == 'update') {
         params.examineId = this.action.id
+        params.isDetail = 2 // 1详情 2 编辑
       }
 
       let request = {

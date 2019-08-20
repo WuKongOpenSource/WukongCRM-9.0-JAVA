@@ -207,6 +207,28 @@ public class CrmRecordService<T> {
         crmActionRecord.setContent(JSON.toJSONString(strings));
         crmActionRecord.save();
     }
+
+    /**
+     * 添加(锁定/解锁)记录
+     *
+     */
+    public void addIsLockRecord(String[] ids, String crmTypes, Integer isLock) {
+        CrmActionRecord crmActionRecord = new CrmActionRecord();
+        crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        crmActionRecord.setCreateTime(new Date());
+        crmActionRecord.setTypes(crmTypes);
+        ArrayList<String> strings = new ArrayList<>();
+        if(isLock == 1){
+            strings.add("将客户锁定。");
+        }else {
+            strings.add("将客户解锁。");
+        }
+        crmActionRecord.setContent(JSON.toJSONString(strings));
+        for(String actionId : ids){
+            crmActionRecord.setActionId(Integer.valueOf(actionId));
+            crmActionRecord.save();
+        }
+    }
     /**
      * 线索转化客户
      *

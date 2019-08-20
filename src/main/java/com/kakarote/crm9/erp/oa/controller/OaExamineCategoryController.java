@@ -3,6 +3,7 @@ package com.kakarote.crm9.erp.oa.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.oa.entity.OaExamineCategory;
 import com.kakarote.crm9.erp.oa.entity.OaExamineStep;
@@ -29,6 +30,7 @@ public class OaExamineCategoryController extends Controller {
      *
      * @author hmb
      */
+    @Permissions("manage:oa")
     public void setExamineCategory() {
         JSONObject jsonObject = JSON.parseObject(getRawData());
         OaExamineCategory oaExamineCategory = new OaExamineCategory();
@@ -86,6 +88,7 @@ public class OaExamineCategoryController extends Controller {
      *
      * @author hmb
      */
+    @Permissions("manage:oa")
     public void deleteExamineCategory() {
         String id = getPara("id");
         renderJson(oaExamineCategoryService.deleteExamineCategory(id));
@@ -123,6 +126,7 @@ public class OaExamineCategoryController extends Controller {
     /**
      * 启用/禁用
      */
+    @Permissions("manage:oa")
     public void updateStatus() {
         String id = getPara("id");
         renderJson(oaExamineCategoryService.updateStatus(id));

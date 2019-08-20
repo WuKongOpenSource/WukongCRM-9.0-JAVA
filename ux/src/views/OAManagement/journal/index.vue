@@ -133,22 +133,19 @@ export default {
   methods: {
     initControlPage() {
       // 分批次加载
-      let _this = this
-      for (let item of document.getElementsByClassName('list-box')) {
-        item.onscroll = function(e) {
-          if (e && e.target.id == 'list-box' + _this.activeName) {
-            _this.$bus.emit('journal-list-box-scroll', e.target)
-            let doms = item
-            var scrollTop = doms.scrollTop
-            var windowHeight = doms.clientHeight
-            var scrollHeight = doms.scrollHeight //滚动条到底部的条件
-            if (scrollTop + windowHeight == scrollHeight) {
-              _this.loadMoreLoading = true
-              if (_this.isPost) {
-                _this.pageNum++
-                _this.getLogList()
+      for (let dom of document.getElementsByClassName('list-box')) {
+        dom.onscroll = e => {
+          if (e && e.target.id == 'list-box' + this.activeName) {
+            this.$bus.emit('journal-list-box-scroll', e.target)
+            let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+            //滚动条到底部的条件
+            if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
+              if (!this.isPost) {
+                this.isPost = true
+                this.pageNum++
+                this.getLogList()
               } else {
-                _this.loadMoreLoading = false
+                this.loadMoreLoading = false
               }
             }
           }
@@ -174,11 +171,10 @@ export default {
           this.journalLoading = false
           if (res.data.lastPage === true) {
             this.loadText = '没有更多了'
-            this.isPost = false
             this.loadMoreLoading = false
           } else {
             this.loadText = '加载更多'
-            this.isPost = true
+            this.loadMoreLoading = true
           }
           for (let item of res.data.list) {
             item.showComment = false
@@ -187,9 +183,11 @@ export default {
           this.journalData = this.journalData.concat(res.data.list)
           this.createInitAwaitMessage()
           this.loadMoreLoading = false
+          this.isPost = false
         })
         .catch(err => {
           this.journalLoading = false
+          this.isPost = false
         })
     },
     createInitAwaitMessage() {

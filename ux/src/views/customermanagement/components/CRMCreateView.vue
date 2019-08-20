@@ -519,7 +519,7 @@ export default {
           ) {
             if (this.action.type == 'update') {
               params['value'] = item.value ? objDeepCopy(item.value) : []
-
+              
             } else {
               params['value'] = item.defaultValue
                 ? objDeepCopy(item.defaultValue)

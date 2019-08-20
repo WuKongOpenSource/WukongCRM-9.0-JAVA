@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class AdminFileService {
-    public static Prop prop = PropKit.use("config/crm9-config.txt");
+    public final static Prop prop = PropKit.use("config/crm9-config.txt");
     /**
      * @param file    文件
      * @param batchId 批次ID

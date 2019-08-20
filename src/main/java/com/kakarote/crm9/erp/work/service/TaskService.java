@@ -230,101 +230,25 @@ public class TaskService{
      * 查询任务列表
      */
     public R getTaskList(Integer type, Integer status, Integer priority, Integer date, List<Integer> userIds, BasePageRequest<Task> basePageRequest, String name){
-        String total = "select count(*) from 72crm_task a where a.pid = 0 and a.ishidden = 0 ";
-        StringBuffer sql = new StringBuffer();
         Page<Record> page = new Page<>();
-        if(userIds.size() > 0){
-            if(type == null || type == 0){
-
-                sql.append(" and ( a.main_user_id in ( ");
-                for(int i = 0; i < userIds.size(); i++){
-                    if(i == 0){
-                        sql.append("'").append(userIds.get(i)).append("'");
-                    }else{
-                        sql.append(",'").append(userIds.get(i)).append("'");
-                    }
-                }
-                sql.append(")");
-                sql.append(" or a.create_user_id in ( ");
-                for(int i = 0; i < userIds.size(); i++){
-                    if(i == 0){
-                        sql.append("'").append(userIds.get(i)).append("'");
-                    }else{
-                        sql.append(",'").append(userIds.get(i)).append("'");
-                    }
-                }
-                sql.append(")");
-                sql.append(" or ( ");
-                for(int i = 0; i < userIds.size(); i++){
-                    if(i == 0){
-                        sql.append(" a.owner_user_id like concat('%,',").append(userIds.get(i)).append(",',%')");
-                    }else{
-                        sql.append(" or a.owner_user_id like concat('%,',").append(userIds.get(i)).append(",',%')");
-                    }
-                }
-                sql.append("))");
-            }else if(type == 1){
-                sql.append(" and a.main_user_id in ( ");
-                for(int i = 0; i < userIds.size(); i++){
-                    if(i == 0){
-                        sql.append("'").append(userIds.get(i)).append("'");
-                    }else{
-                        sql.append(",'").append(userIds.get(i)).append("'");
-                    }
-                }
-                sql.append(")");
-            }else if(type == 2){
-                sql.append(" and a.create_user_id in ( ");
-                for(int i = 0; i < userIds.size(); i++){
-                    if(i == 0){
-                        sql.append("'").append(userIds.get(i)).append("'");
-                    }else{
-                        sql.append(",'").append(userIds.get(i)).append("'");
-                    }
-                }
-                sql.append(")");
-            }else if(type == 3){
-                sql.append(" and ( ");
-                for(int i = 0; i < userIds.size(); i++){
-                    if(i == 0){
-                        sql.append(" a.owner_user_id like concat('%,',").append(userIds.get(i)).append(",',%')");
-                    }else{
-                        sql.append(" or a.owner_user_id like concat('%,',").append(userIds.get(i)).append(",',%')");
-                    }
-                }
-                sql.append(")");
-            }
-        }else{
+        if(userIds.size() == 0){
             page.setList(new ArrayList<>());
             return R.ok().put("data", page);
         }
-        if(status != null){
-            sql.append(" and a.status = ").append(status);
+        if(basePageRequest.getPageType() == 0){
+            List<Record> recordList = Db.find(Db.getSqlPara("work.task.getTaskList",
+                    Kv.by("type",type).set("userIds",userIds).set("status",status).
+                            set("priority",priority).set("date",date).set("taskName",name)));
+            return R.ok().put("data", queryUser(recordList));
+        }else {
+            page = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),
+                    Db.getSqlPara("work.task.getTaskList",
+                            Kv.by("type",type).set("userIds",userIds).set("status",status).
+                                    set("priority",priority).set("date",date).set("taskName",name)));
+            page.setList(queryUser(page.getList()));
+            return R.ok().put("data", page);
         }
-        if(priority != null){
-            sql.append(" and a.priority = ").append(priority);
-        }
-        if(date != null){
-            if(date == 1){
-                sql.append(" and TO_DAYS(a.stop_time) = TO_DAYS(now()) ");
-            }
-            if(date == 2){
-                sql.append(" and to_days(NOW()) - TO_DAYS(a.stop_time) = -1 ");
-            }
-            if(date == 3){
-                sql.append(" and to_days(NOW()) - TO_DAYS(a.stop_time) >= -7 and to_days(NOW()) - TO_DAYS(a.stop_time) <= 0 ");
-            }
-            if(date == 4){
-                sql.append(" and to_days(NOW()) - TO_DAYS(a.stop_time) >= -30 and to_days(NOW()) - TO_DAYS(a.stop_time) <= 0 ");
-            }
-        }
-        if(StrUtil.isNotEmpty(name)){
-            sql.append(" and a.name like '%").append(name).append("%' ");
-        }
-        sql.append(" order by a.create_time desc ");
-        page = Db.paginateByFullSql(basePageRequest.getPage(), basePageRequest.getLimit(), total + sql, Db.getSql("work.task.getTaskList") + sql);
-        page.setList(queryUser(page.getList()));
-        return R.ok().put("data", page);
+
     }
 
     private List<Record> queryUser(List<Record> tasks){
@@ -591,7 +515,20 @@ public class TaskService{
         if(AuthUtil.oaAnth(relation.toRecord())){
             return R.noAuth();
         }
-        return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("work.task.queryTaskRelation", Kv.by("businessIds", relation.getBusinessIds()).set("contactsIds", relation.getContactsIds()).set("contractIds", relation.getContractIds()).set("customerIds", relation.getCustomerIds()))));
+        Page<Record> paginate = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("work.task.queryTaskRelation", Kv.by("businessIds", relation.getBusinessIds()).set("contactsIds", relation.getContactsIds()).set("contractIds", relation.getContractIds()).set("customerIds", relation.getCustomerIds())));
+        paginate.getList().forEach(this::composeUser);
+        return R.ok().put("data", paginate);
+    }
+
+    private void composeUser(Record record){
+        Integer createUserId = record.getInt("create_user_id");
+        record.set("createUser",Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", createUserId));
+        Integer mainUserId = record.getInt("main_user_id");
+        record.set("mainUser",Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", mainUserId));
+        String ownerUserId = record.getStr("owner_user_id");
+        List<Record> ownerUserList = new ArrayList<>();
+        TagUtil.toSet(ownerUserId).forEach(userId-> ownerUserList.add(Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", userId)));
+        record.set("ownerUserList",ownerUserList);
     }
 
 

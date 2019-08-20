@@ -124,6 +124,14 @@ export function crmLeadsExcelImport(data) {
  *
  */
 export const crmLeadsExcelDownloadURL = process.env.BASE_API + 'CrmLeads/downloadExcel'
+export function crmLeadsDownloadExcelAPI(data) {
+  return request({
+    url: 'CrmLeads/downloadExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob'
+  })
+}
 
 /**
  * 跟进记录

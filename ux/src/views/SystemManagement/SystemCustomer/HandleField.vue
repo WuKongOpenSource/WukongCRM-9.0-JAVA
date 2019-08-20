@@ -59,7 +59,9 @@
                 width="310px">
         <div class="mini-title">字段属性</div>
         <field-info v-if="form"
-                    :field="form"></field-info>
+                    :field="form"
+                    :canTransform="canTransform"
+                    :transformData="transformData"></field-info>
       </el-aside>
     </el-container>
     <!-- 表单预览 -->
@@ -77,6 +79,7 @@ import {
   customFieldHandle,
   customFieldList
 } from '@/api/systemManagement/SystemCustomer'
+import { filedGetField } from '@/api/customermanagement/common'
 import PreviewFieldView from '@/views/SystemManagement/components/previewFieldView'
 import {
   SingleLineText,
@@ -105,7 +108,12 @@ export default {
     FieldInfo,
     PreviewFieldView
   },
-  computed: {},
+  computed: {
+    // 能转移
+    canTransform() {
+      return this.$route.params.type == 'crm_leads'
+    }
+  },
   data() {
     return {
       fieldList: FieldList,
@@ -119,7 +127,9 @@ export default {
       // 展示表单预览
       tablePreviewData: { types: '', id: '' },
       showTablePreview: false,
-      contentHeight: document.documentElement.clientHeight - 100
+      contentHeight: document.documentElement.clientHeight - 100,
+      // 转移匹配字段源
+      transformData: null
     }
   },
   filters: {
@@ -174,6 +184,11 @@ export default {
     }
     // 获取当前模块的自定义数据
     this.getCustomInfo()
+
+    // 配置转移字段
+    if (this.canTransform) {
+      this.getTransformField()
+    }
   },
   methods: {
     // 获取当前模块的自定义数据
@@ -399,6 +414,44 @@ export default {
       } else {
         return ''
       }
+    },
+    /**
+     * 获取添加字段
+     */
+    getTransformField() {
+      filedGetField({
+        label: crmTypeModel['customer']
+      })
+        .then(res => {
+          let data = {
+            text: [],
+            textarea: [],
+            select: [],
+            checkbox: [],
+            number: [],
+            floatnumber: [],
+            mobile: [],
+            email: [],
+            date: [],
+            datetime: [],
+            user: [],
+            structure: []
+          }
+
+          for (let index = 0; index < res.data.length; index++) {
+            const element = res.data[index]
+            let array = data[element.formType]
+            if (array) {
+              array.push({
+                label: element.name,
+                value: element.fieldId
+              })
+            }
+          }
+
+          this.transformData = data
+        })
+        .catch(() => {})
     }
   }
 }

@@ -12,5 +12,6 @@ public class BiRouter extends Routes {
         add("/biRanking", BiRankingController.class);
         add("/biFunnel", BiFunnelController.class);
         add("/biEmployee", BiEmployeeController.class);
+        add("/biWork", BiWorkController.class);
     }
 }

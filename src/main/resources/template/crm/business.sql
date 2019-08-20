@@ -100,4 +100,12 @@
         #end
     )
     #end
+
+    #sql ("unrelateContacts")
+    delete from 72crm_crm_contacts_business where business_id = #para(businessId) and contacts_id in (
+        #for(i:ids)
+          #(for.index > 0 ? "," : "")#para(i)
+        #end
+    )
+    #end
 #end

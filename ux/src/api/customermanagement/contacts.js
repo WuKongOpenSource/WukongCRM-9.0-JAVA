@@ -138,6 +138,14 @@ export function crmContactsExcelImport(data) {
  *
  */
 export const crmContactsExcelDownloadURL = process.env.BASE_API + 'CrmContacts/downloadExcel'
+export function crmContactsDownloadExcelAPI(data) {
+  return request({
+    url: 'CrmContacts/downloadExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob'
+  })
+}
 
 /**
  * 查重
