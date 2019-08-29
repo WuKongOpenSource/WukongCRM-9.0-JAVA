@@ -49,7 +49,7 @@
             k.data_type,
             k.menu_id,
             am.menu_name,
-            am.realm
+            am.parent_realm as realm
         FROM
             (
                 SELECT
@@ -67,11 +67,11 @@
                     ) t
                 LEFT JOIN 72crm_admin_role_menu arm ON t.role_id = arm.role_id
             ) k
-        INNER JOIN 72crm_admin_menu am ON k.menu_id = am.menu_id
+        INNER JOIN (SELECT x.*,y.realm as parent_realm from 72crm_admin_menu as x LEFT JOIN 72crm_admin_menu as y on x.parent_id = y.menu_id) am ON k.menu_id = am.menu_id
         WHERE
          k.user_id =#para(userId)
          #if(realm)
-            and am.realm=#para(realm)
+            and am.parent_realm = #para(realm) and am.realm = 'index'
          #end
         ORDER BY
             k.data_type DESC
