@@ -925,7 +925,7 @@ export default {
       this.$refs.resetUserNameForm.validate(valid => {
         if (valid) {
           if (this.selectionList.length > 0) {
-            val.id = this.selectionList[0].id
+            val.id = this.selectionList[0].userId;
             this.loading = true
             adminUsersUsernameEditAPI(val)
               .then(res => {
