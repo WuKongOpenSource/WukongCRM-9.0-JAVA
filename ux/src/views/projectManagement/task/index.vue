@@ -260,7 +260,7 @@ export default {
       }
     },
 
-    
+
     /**
      * 更新勾选数字
      */
@@ -364,6 +364,10 @@ export default {
             data.value.subdonecount
           this.taskList[data.section].list[data.index].childAllCount =
             data.value.allcount
+        } else if (data.type == 'change-main-user') {
+          this.taskList[data.section].list[data.index].mainUser = data.value
+        } else if (data.type == 'change-label') {
+          this.taskList[data.section].list[data.index].labelList = data.value
         }
       }
     },

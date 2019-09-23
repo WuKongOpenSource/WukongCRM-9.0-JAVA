@@ -144,7 +144,6 @@ public class AdminFieldService {
             }
             fieldList.add(entity.getName());
         }
-        createView(label);
         nameList.removeAll(fieldList);
         if (nameList.size() != 0) {
             Db.update(Db.getSqlPara("admin.field.deleteFieldSort", Kv.by("label", label).set("names", nameList)));
@@ -247,72 +246,6 @@ public class AdminFieldService {
             fieldv.save();
         });
         return true;
-    }
-
-    public synchronized void createView(Integer label) {
-        List<Record> fieldNameList = Db.find("select name,type from 72crm_admin_field WHERE label=? and field_type = 0 ORDER BY sorting asc", label);
-        StringBuilder sql = new StringBuilder();
-        StringBuilder userJoin = new StringBuilder();
-        StringBuilder deptJoin = new StringBuilder();
-        fieldNameList.forEach(record -> {
-            String name = record.getStr("name");
-            Integer type = record.getInt("type");
-            if (type == 10) {
-                sql.append(String.format("GROUP_CONCAT(if(a.name = '%s',b.realname,null)) AS `%s`,", name, name));
-                if (userJoin.length() == 0) {
-                    userJoin.append(" left join 72crm_admin_user b on find_in_set(user_id,ifnull(value,0))");
-                }
-            } else if (type == 12) {
-                sql.append(String.format("GROUP_CONCAT(if(a.name = '%s',c.name,null)) AS `%s`,", name, name));
-                if (deptJoin.length() == 0) {
-                    deptJoin.append(" left join 72crm_admin_dept c on find_in_set(c.dept_id,ifnull(value,0))");
-                }
-            } else {
-                sql.append(String.format("max(if(a.name = '%s',value, null)) AS `%s`,", name, name));
-            }
-        });
-        String create;
-        String filedCreate;
-        switch (label) {
-            case 1:
-                filedCreate = String.format(Db.getSql("admin.field.fieldleadsview"), sql, userJoin.append(deptJoin), label);
-                create = Db.getSql("admin.field.leadsview");
-                break;
-            case 2:
-                filedCreate = String.format(Db.getSql("admin.field.fieldcustomerview"), sql, userJoin.append(deptJoin), label);
-                create = Db.getSql("admin.field.customerview");
-                break;
-            case 3:
-                filedCreate = String.format(Db.getSql("admin.field.fieldcontactsview"), sql, userJoin.append(deptJoin), label);
-                create = Db.getSql("admin.field.contactsview");
-                break;
-            case 4:
-                filedCreate = String.format(Db.getSql("admin.field.fieldproductview"), sql, userJoin.append(deptJoin), label);
-                create = Db.getSql("admin.field.productview");
-                break;
-            case 5:
-                filedCreate = String.format(Db.getSql("admin.field.fieldbusinessview"), sql, userJoin.append(deptJoin), label);
-                create = Db.getSql("admin.field.businessview");
-                break;
-            case 6:
-                filedCreate = String.format(Db.getSql("admin.field.fieldcontractview"), sql, userJoin.append(deptJoin), label);
-                create = Db.getSql("admin.field.contractview");
-                break;
-            case 7:
-                filedCreate = String.format(Db.getSql("admin.field.fieldreceivablesview"), sql, userJoin.append(deptJoin), label);
-                create = Db.getSql("admin.field.receivablesview");
-                break;
-            default:
-                create="";
-                filedCreate="";
-                break;
-        }
-        if (StrUtil.isNotBlank(filedCreate)) {
-            Db.update(filedCreate);
-        }
-        if (StrUtil.isNotBlank(create)) {
-            Db.update(create);
-        }
     }
 
     public List<Record> queryFieldsByBatchId(String batchId, String... name) {
@@ -524,6 +457,9 @@ public class AdminFieldService {
                 for (Record record : fieldList) {
                     fieldUtil.add(record.getStr("field_name"), record.getStr("name"), record.getInt("field_id"));
                 }
+            }
+            if (2 == adminFieldSort.getLabel() || 8 == adminFieldSort.getLabel()){
+                fieldUtil.add("dealStatus","成交状态");
             }
             if (5 == adminFieldSort.getLabel()) {
                 fieldUtil.add("typeName", "商机状态组").add("statusName", "商机阶段");

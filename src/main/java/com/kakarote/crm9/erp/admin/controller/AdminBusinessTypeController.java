@@ -29,18 +29,16 @@ public class AdminBusinessTypeController extends Controller {
      * @author hmb
      * 设置商机组
      */
-    @Permissions("manage:crm")
+    @Permissions("manage:crm:setting")
     public void setBusinessType() {
         JSONObject jsonObject = JSON.parseObject(getRawData());
-
         CrmBusinessType crmBusinessType = jsonObject.getObject("crmBusinessType", CrmBusinessType.class);
         if(jsonObject.getJSONArray("deptIds") != null){
             List<Integer> deptIds = jsonObject.getJSONArray("deptIds").toJavaList(Integer.class);
             crmBusinessType.setDeptIds(TagUtil.fromSet(new HashSet<>(deptIds)));
         }
         JSONArray crmBusinessStatus = jsonObject.getJSONArray("crmBusinessStatus");
-        adminBusinessTypeService.addBusinessType(crmBusinessType,crmBusinessStatus);
-        renderJson(R.ok());
+        renderJson(adminBusinessTypeService.addBusinessType(crmBusinessType,crmBusinessStatus));
     }
 
     /**
@@ -48,8 +46,7 @@ public class AdminBusinessTypeController extends Controller {
      * @param basePageRequest 分页对象
      * 查询商机组列表
      */
-
-    @Permissions("manage:crm")
+    @Permissions("manage:crm:setting")
     public void queryBusinessTypeList(BasePageRequest<Void> basePageRequest) {
         renderJson(R.ok().put("data", adminBusinessTypeService.queryBusinessTypeList(basePageRequest)));
     }
@@ -58,7 +55,6 @@ public class AdminBusinessTypeController extends Controller {
      * @author hmb
      * 获取详细信息
      */
-    @Permissions("manage:crm")
     public void getBusinessType() {
         String typeId = getPara("id");
         renderJson(adminBusinessTypeService.getBusinessType(typeId));
@@ -68,7 +64,7 @@ public class AdminBusinessTypeController extends Controller {
      * @author hmb
      * 删除商机状态组
      */
-    @Permissions("manage:crm")
+    @Permissions("manage:crm:setting")
     public void deleteById() {
         String typeId = getPara("id");
         renderJson(adminBusinessTypeService.deleteById(typeId));

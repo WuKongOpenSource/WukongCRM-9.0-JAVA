@@ -341,8 +341,8 @@ export default {
 .radio {
   margin-top: 5px;
   margin-left: 0;
-  /deep/.el-radio {
-    margin-right: 10px;
+  /deep/ .el-radio {
+    margin-right: 10px !important;
   }
   .input {
     display: inline-block;

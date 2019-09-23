@@ -192,11 +192,10 @@ public class BiTimeUtil {
         return status;
     }
     public String[] getAddress(){
-        String[] address = {"北京","上海","天津","广东","浙江",
+        return new String[]{"北京","上海","天津","广东","浙江",
                 "海南","福建","湖南","湖北","重庆","辽宁","吉林",
                 "黑龙江","河南","河北","陕西","甘肃","宁夏","西藏",
                 "新疆","青海","四川","广西","贵州","江西","江苏",
                 "云南","内蒙古","山东","山西"};
-        return address;
     }
 }

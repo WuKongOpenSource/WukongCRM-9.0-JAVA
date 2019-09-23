@@ -11,6 +11,7 @@ import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminRoleService;
 import com.kakarote.crm9.erp.admin.service.AdminUserService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
+import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,32 +23,38 @@ import java.util.Map;
  */
 public class AuthUtil {
 
-    public static Map<String,String> getCrmTablePara(String urlPrefix){
+    public static Map<String,String> getCrmTablePara(CrmEnum Enum){
         Map<String,String> tableParaMap = new HashMap<>();
-        switch(urlPrefix){
-            case "CrmCustomer":
+        switch(Enum){
+            case CRM_CUSTOMER:
                 tableParaMap.put("tableName", "72crm_crm_customer");
                 tableParaMap.put("tableId", "customer_id");
+                tableParaMap.put("realm","customer");
                 break;
-            case "CrmLeads":
+            case CRM_LEADS:
                 tableParaMap.put("tableName", "72crm_crm_leads");
                 tableParaMap.put("tableId", "leads_id");
+                tableParaMap.put("realm","leads");
                 break;
-            case "CrmContract":
+            case CRM_CONTRACT:
                 tableParaMap.put("tableName", "72crm_crm_contract");
                 tableParaMap.put("tableId", "contract_id");
+                tableParaMap.put("realm","contract");
                 break;
-            case "CrmContacts":
+            case CRM_CONTACTS:
                 tableParaMap.put("tableName", "72crm_crm_contacts");
                 tableParaMap.put("tableId", "contacts_id");
+                tableParaMap.put("realm","contacts");
                 break;
-            case "CrmBusiness":
+            case CRM_BUSINESS:
                 tableParaMap.put("tableName", "72crm_crm_business");
                 tableParaMap.put("tableId", "business_id");
+                tableParaMap.put("realm","business");
                 break;
-            case "CrmReceivables":
+            case CRM_RECEIVABLES:
                 tableParaMap.put("tableName", "72crm_crm_receivables");
                 tableParaMap.put("tableId", "receivables_id");
+                tableParaMap.put("realm","receivables");
                 break;
             default:
                 return null;
@@ -60,28 +67,32 @@ public class AuthUtil {
             return false;
         }
         Long userId = BaseUtil.getUserId();
-        List<Long> longs = Aop.get(AdminUserService.class).queryUserByAuth(userId,null);
+        List<Integer> roles = BaseUtil.getUser().getRoles();
+        List<Long> longs = Aop.get(AdminUserService.class).queryUserByAuth(userId,tablePara.get("realm"));
         StringBuilder authSql = new StringBuilder("select count(*) from ");
         authSql.append(tablePara.get("tableName")).append(" where ").append(tablePara.get("tableId")).append(" = ").append(id);
-        if(longs != null && longs.size() > 0){
-            authSql.append(" and owner_user_id in (").append(StrUtil.join(",", longs)).append(")");
-            if("72crm_crm_customer".equals(tablePara.get("tableName")) || "72crm_crm_business".equals(tablePara.get("tableName")) || "72crm_crm_contract".equals(tablePara.get("tableName"))){
-                authSql.append(" or ro_user_id like CONCAT('%,','").append(userId).append("',',%')").append(" or rw_user_id like CONCAT('%,','").append(userId).append("',',%')");
+        if(! BaseConstant.SUPER_ADMIN_USER_ID.equals(userId) && !roles.contains(BaseConstant.SUPER_ADMIN_ROLE_ID)){
+            if(longs != null && longs.size() > 0){
+                authSql.append(" and (owner_user_id in (").append(StrUtil.join(",", longs)).append(")");
+                if("72crm_crm_customer".equals(tablePara.get("tableName")) || "72crm_crm_business".equals(tablePara.get("tableName")) || "72crm_crm_contract".equals(tablePara.get("tableName"))){
+                    authSql.append(" or ro_user_id like CONCAT('%,','").append(userId).append("',',%')").append(" or rw_user_id like CONCAT('%,','").append(userId).append("',',%')");
+                }
+                authSql.append(")");
             }
         }
         return Db.queryInt(authSql.toString()) == 0;
     }
 
-    public static boolean oaAnth(Record record){
+    public static boolean oaAuth(Record record){
         boolean auth = false;
         if(record.getStr("business_ids") != null){
-            auth = isCrmAuth(getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()),Integer.valueOf(record.getStr("business_ids")));
+            auth = isCrmAuth(getCrmTablePara(CrmEnum.CRM_BUSINESS),Integer.valueOf(record.getStr("business_ids")));
         }else if(record.getStr("contacts_ids") != null){
-            auth = isCrmAuth(getCrmTablePara(CrmEnum.CONTACTS_TYPE_KEY.getSign()),Integer.valueOf(record.getStr("contacts_ids")));
+            auth = isCrmAuth(getCrmTablePara(CrmEnum.CRM_CONTACTS),Integer.valueOf(record.getStr("contacts_ids")));
         }else if(record.getStr("contract_ids") != null){
-            auth = isCrmAuth(getCrmTablePara(CrmEnum.CONTRACT_TYPE_KEY.getSign()),Integer.valueOf(record.getStr("contract_ids")));
+            auth = isCrmAuth(getCrmTablePara(CrmEnum.CRM_CONTRACT),Integer.valueOf(record.getStr("contract_ids")));
         }else if(record.getStr("customer_ids") != null){
-            auth = isCrmAuth(getCrmTablePara(CrmEnum.CUSTOMER_TYPE_KEY.getSign()),Integer.valueOf(record.getStr("customer_ids")));
+            auth = isCrmAuth(getCrmTablePara(CrmEnum.CRM_CUSTOMER),Integer.valueOf(record.getStr("customer_ids")));
         }
         return auth;
     }
@@ -174,4 +185,27 @@ public class AuthUtil {
         }
     }
 
+    /**
+     * 团队成员是否有操作权限
+     */
+    public static boolean isRwAuth(Integer id, String realm){
+        Integer userId = BaseUtil.getUserId().intValue();
+        Record record = Db.findFirst("select owner_user_id,rw_user_id from 72crm_crm_"+realm+" where "+realm+"_id = ?",id);
+        String idsArr = record.getStr("rw_user_id");
+        return idsArr.contains("," + userId + ",") || userId.equals(record.getInt("owner_user_id"));
+    }
+
+    /**
+     * 客户接口判断公海不需要拦截
+     * @param customerId
+     * @return
+     */
+    public static boolean isPoolAuth(Integer customerId){
+        Integer ownerUserId = Db.queryInt("select owner_user_id from `72crm_crm_customer` where customer_id = ?", customerId);
+        if(ownerUserId==null){
+            return false;
+        }else {
+            return AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_CUSTOMER), customerId);
+        }
+    }
 }

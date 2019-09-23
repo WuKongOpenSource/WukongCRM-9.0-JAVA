@@ -226,18 +226,18 @@ export default {
      */
     totalPriceChange() {
       if (/^\d+\.?\d{0,2}$/.test(this.totalPrice)) {
-        this.totalPrice = this.totalPrice
+        this.totalPrice = this.totalPrice || 0
       } else {
-        this.totalPrice = this.totalPrice.substring(
-          0,
-          this.totalPrice.length - 1
-        )
+        this.totalPrice =
+          this.totalPrice.substring(0, this.totalPrice.length - 1) || 0
       }
       let totalPrice = this.getProductTotal()
-      this.discountRate = (
-        100.0 -
-        (parseFloat(this.totalPrice) / totalPrice) * 100
-      ).toFixed(2)
+      if (totalPrice) {
+        this.discountRate = (
+          100.0 -
+          (parseFloat(this.totalPrice) / totalPrice) * 100
+        ).toFixed(2)
+      }
       this.updateValue()
     },
     // 删除操作

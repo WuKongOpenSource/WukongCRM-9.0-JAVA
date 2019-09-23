@@ -173,7 +173,7 @@
                              :taskData="taskData">
                     <div slot="editIndex">
                       <span class="el-icon-plus"></span>
-                      <span class="label">添加标签</span>
+                      <span class="label">标签</span>
                     </div>
                   </tag-index>
                 </div>
@@ -581,8 +581,8 @@ import {
 } from '@/api/projectManagement/recycle'
 
 import membersDep from '@/components/selectEmployee/membersDep'
-import tagIndex from './tag/tagIndex'
-import subTask from './subTask'
+import TagIndex from './tag/tagIndex'
+import SubTask from './subTask'
 // emoji
 import emoji from '@/components/emoji'
 // 关联业务 - 选中列表
@@ -599,9 +599,9 @@ export default {
     emoji,
     relatedBusiness,
     XhUser,
-    tagIndex,
+    TagIndex,
     CRMFullScreenDetail,
-    subTask,
+    SubTask,
     FileCell
   },
   data() {
@@ -680,6 +680,12 @@ export default {
     },
     workId() {
       return this.taskData.workId
+    },
+    labelList() {
+      if (!this.taskData) {
+        return []
+      }
+      return this.taskData.labelList || []
     }
   },
   watch: {
@@ -688,6 +694,15 @@ export default {
       this.getDetail()
       this.getCommentList()
       this.getActivityList()
+    },
+
+    labelList(val) {
+      this.$emit('on-handle', {
+        type: 'change-label',
+        value: val,
+        index: this.detailIndex,
+        section: this.detailSection
+      })
     }
   },
   mounted() {
@@ -1010,6 +1025,13 @@ export default {
           } else {
             this.$set(this.taskData, 'mainUser', null)
           }
+
+          this.$emit('on-handle', {
+            type: 'change-main-user',
+            value: val ? val.data[0] : null,
+            index: this.detailIndex,
+            section: this.detailSection
+          })
         })
         .catch(() => {})
     },

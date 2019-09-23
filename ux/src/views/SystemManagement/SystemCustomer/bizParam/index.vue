@@ -15,6 +15,7 @@
       </div>
       <keep-alive>
         <component v-bind:is="menuIndex"
+                   :types="types"
                    class="system-view-content"></component>
       </keep-alive>
     </div>
@@ -26,6 +27,7 @@ import FollowLogTypeSet from './components/followLogTypeSet' // 跟进记录类�
 import BusinessGroupSet from './components/businessGroupSet' // 商机组设置
 import ProductCategorySet from './components/productCategorySet' // 产品类别设置
 import ContractExpireSet from './components/contractExpireSet' // 合同到期提醒设置
+import CustomerLimitSet from './components/customerLimitSet' // 拥有/锁定客户数限制
 
 export default {
   name: 'biz-param',
@@ -34,7 +36,8 @@ export default {
     BusinessGroupSet,
     ProductCategorySet,
     FollowLogTypeSet,
-    ContractExpireSet
+    ContractExpireSet,
+    CustomerLimitSet
   },
 
   data() {
@@ -43,9 +46,12 @@ export default {
         { label: '跟进记录类型设置', key: 'follow-log-type-set' },
         { label: '商机组设置', key: 'business-group-set' },
         { label: '产品类别设置', key: 'product-category-set' },
-        { label: '合同到期提醒设置', key: 'contract-expire-set' }
+        { label: '合同到期提醒设置', key: 'contract-expire-set' },
+        { label: '拥有客户数限制', key: 'own' },
+        { label: '锁定客户数限制', key: 'lock' }
       ],
-      menuIndex: 'follow-log-type-set'
+      menuIndex: 'follow-log-type-set',
+      types: '' //区分拥有客户 和 锁定客户
     }
   },
 
@@ -54,7 +60,15 @@ export default {
      * 菜单选择
      */
     menuSelect(i, key) {
-      this.menuIndex = i
+      if (i == 'own' || i == 'lock') {
+        this.types = {
+          own: 1,
+          lock: 2
+        }[i]
+        this.menuIndex = 'customer-limit-set'
+      } else {
+        this.menuIndex = i
+      }
     }
   }
 }
@@ -102,6 +116,7 @@ export default {
 }
 .system-view-nav /deep/ .el-menu {
   border-right: none;
+  margin-right: 1px;
 }
 .content-title {
   padding: 10px;

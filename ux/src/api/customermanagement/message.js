@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 /**
  * 待审核合同
- * @param {*} data 
+ * @param {*} data
  */
 export function crmMessageCheckContractAPI(data) {
   return request({
@@ -17,7 +17,7 @@ export function crmMessageCheckContractAPI(data) {
 
 /**
  * 待审核回款
- * @param {*} data 
+ * @param {*} data
  */
 export function crmMessageCheckReceivablesAPI(data) {
   return request({
@@ -32,7 +32,7 @@ export function crmMessageCheckReceivablesAPI(data) {
 
 /**
  * 今日需联系客户
- * @param {*} data 
+ * @param {*} data
  */
 export function crmMessageTodayCustomerAPI(data) {
   return request({
@@ -47,7 +47,7 @@ export function crmMessageTodayCustomerAPI(data) {
 
 /**
  * 待跟进线索
- * @param {*} data 
+ * @param {*} data
  */
 export function crmMessageFollowLeadsAPI(data) {
   return request({
@@ -63,7 +63,7 @@ export function crmMessageFollowLeadsAPI(data) {
 
 /**
  * 待跟进客户
- * @param {*} data 
+ * @param {*} data
  */
 export function crmMessageFollowCustomerAPI(data) {
   return request({
@@ -78,7 +78,7 @@ export function crmMessageFollowCustomerAPI(data) {
 
 /**
  * 即将到期合同
- * @param {*} data 
+ * @param {*} data
  */
 export function crmMessagEndContractAPI(data) {
   return request({
@@ -93,7 +93,7 @@ export function crmMessagEndContractAPI(data) {
 
 /**
  * 待回款合同
- * @param {*} data 
+ * @param {*} data
  */
 export function crmMessagRemindreceivablesplanAPI(data) {
   return request({
@@ -108,11 +108,26 @@ export function crmMessagRemindreceivablesplanAPI(data) {
 
 /**
  * 待办消息数
- * @param {*} data 
+ * @param {*} data
  */
 export function crmMessagNumAPI(data) {
   return request({
     url: 'CrmBackLog/num',
+    method: 'post',
+    data: data,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
+/**
+ * 待进入客户池
+ * @param {*} data
+ */
+export function crmMessagRemindCustomerAPI(data) {
+  return request({
+    url: 'CrmBackLog/putInPoolRemind',
     method: 'post',
     data: data,
     headers: {

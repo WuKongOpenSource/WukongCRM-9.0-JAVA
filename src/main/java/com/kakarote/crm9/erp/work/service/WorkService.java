@@ -44,12 +44,12 @@ public class WorkService{
 
     @Before(Tx.class)
     public R setWork(Work work){
+        if(Arrays.asList(work._getAttrNames()).contains("name")&&StrUtil.isEmpty(work.getName())){
+            return R.error("项目名称不能为空！");
+        }
         Integer userId = BaseUtil.getUser().getUserId().intValue();
         boolean bol;
         if(work.getWorkId() == null){
-            if(! AuthUtil.isWorkAdmin()){
-                return R.noAuth();
-            }
             Set<Integer> ownerUserIds = new HashSet<>();
             ownerUserIds.add(userId);
             if(work.getOwnerUserId() != null){
@@ -541,5 +541,14 @@ public class WorkService{
         BaseConstant.WORK_ADMIN_ROLE_ID = Db.queryInt("select role_id from `72crm_admin_role` where label = 1");
         BaseConstant.SMALL_WORK_ADMIN_ROLE_ID = Db.queryInt("select role_id from `72crm_admin_role` where label = 2");
         BaseConstant.SMALL_WORK_EDIT_ROLE_ID = Db.queryInt("select role_id from `72crm_admin_role` where label = 3");
+    }
+
+    /**
+     * @author wyq
+     * 查询有项目模块查看权限的员工
+     */
+    public R queryProjectUser(){
+        List<Record> recordList = Db.find(Db.getSql("work.queryProjectUser"),152);
+        return R.ok().put("data",recordList);
     }
 }

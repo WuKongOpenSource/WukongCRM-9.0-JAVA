@@ -80,11 +80,11 @@ public class CrmProductService {
             crmProduct.setOwnerUserId(BaseUtil.getUser().getUserId().intValue());
             crmProduct.setBatchId(batchId);
             boolean save = crmProduct.save();
-            crmRecordService.addRecord(crmProduct.getProductId(), CrmEnum.PRODUCT_TYPE_KEY.getTypes());
+            crmRecordService.addRecord(crmProduct.getProductId(), CrmEnum.CRM_PRODUCT);
             return save ? R.ok() : R.error();
         } else {
             CrmProduct oldCrmProduct = new CrmProduct().dao().findById(crmProduct.getProductId());
-            crmRecordService.updateRecord(oldCrmProduct, crmProduct, CrmEnum.PRODUCT_TYPE_KEY.getTypes());
+            crmRecordService.updateRecord(oldCrmProduct, crmProduct, CrmEnum.CRM_PRODUCT);
             crmProduct.setUpdateTime(DateUtil.date());
         }
         return crmProduct.update() ? R.ok() : R.error();
@@ -93,16 +93,18 @@ public class CrmProductService {
     /**
      * 根据id查询产品
      */
-    public R queryById(Integer id) {
-        Record record = Db.findFirst("select * from productview where product_id = ?", id);
-        return R.ok().put("data", record);
+    public Record queryById(Integer id) {
+        Record crmProduct = Db.findFirst(Db.getSql("crm.product.queryById"),id);
+        List<Record> recordList = Db.find("select name,value from `72crm_admin_fieldv` where batch_id = ?", crmProduct.getStr("batch_id"));
+        recordList.forEach(field->crmProduct.set(field.getStr("name"),field.getStr("value")));
+        return crmProduct;
     }
 
     /**
      * 根据id查询产品基本信息
      */
     public List<Record> information(Integer id) {
-        Record record = Db.findFirst("select * from productview where product_id = ?", id);
+        Record record = Db.findFirst(Db.getSql("crm.product.queryInformationById"), id);
         if (record == null) {
             return null;
         }
@@ -162,7 +164,7 @@ public class CrmProductService {
      * 查询编辑字段
      */
     public List<Record> queryField(Integer productId) {
-        Record product = Db.findFirst("select * from productview where product_id = ?",productId);
+        Record product = queryById(productId);
         List<Integer> list = crmProductCategoryService.queryId(null, product.getInt("category_id"));
         Integer[] categoryIds = new Integer[list.size()];
         categoryIds = list.toArray(categoryIds);
@@ -174,9 +176,8 @@ public class CrmProductService {
      * @author wyq
      * 产品导出
      */
-    public List<Record> exportProduct(String productIds) {
-        String[] productIdsArr = productIds.split(",");
-        return Db.find(Db.getSqlPara("crm.product.excelExport", Kv.by("ids", productIdsArr)));
+    public List<Record> exportProduct(Kv kv) {
+        return Db.find(Db.getSqlPara("crm.product.excelExport", kv));
     }
 
     /**
@@ -230,7 +231,7 @@ public class CrmProductService {
                     }
                     String productName = productList.get(kv.getInt("name")).toString();
                     Integer number = Db.queryInt("select count(*) from 72crm_crm_product where name = ?", productName);
-                    Integer categoryId = Db.queryInt("select category_id from 72crm_crm_product_category where name = ?",productList.get(kv.getInt("产品类型(*)")));
+                    Integer categoryId = Db.queryInt("select category_id from 72crm_crm_product_category where name = ? limit 1",productList.get(kv.getInt("产品类型(*)")));
                     if (categoryId == null){
                         return R.error("第"+errNum+1+"行填写的产品类型不存在");
                     }
@@ -244,6 +245,10 @@ public class CrmProductService {
                                 .fluentPut("owner_user_id", ownerUserId));
                     } else if (number > 0 && repeatHandling == 1) {
                         Record product = Db.findFirst("select product_id,batch_id from 72crm_crm_product where name = ?", productName);
+                        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_PRODUCT),product.getInt("product_id"));
+                        if (auth){
+                            return R.error("第"+errNum+1+"行数据无操作权限，不能覆盖");
+                        }
                         object.fluentPut("entity", new JSONObject().fluentPut("product_id", product.getInt("product_id"))
                                 .fluentPut("name", productName)
                                 .fluentPut("num", productList.get(kv.getInt("num")))
@@ -251,7 +256,6 @@ public class CrmProductService {
                                 .fluentPut("price", productList.get(kv.getInt("price")))
                                 .fluentPut("category_id", categoryId)
                                 .fluentPut("description", productList.get(kv.getInt("description")))
-                                .fluentPut("owner_user_id", ownerUserId)
                                 .fluentPut("batch_id", product.getStr("batch_id")));
                     } else if (number > 0 && repeatHandling == 2) {
                         continue;

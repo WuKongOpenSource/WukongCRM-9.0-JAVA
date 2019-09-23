@@ -177,6 +177,7 @@ public class OaLogService {
             Db.deleteById("72crm_oa_log_relation", "log_id", logId);
             adminFileService.removeByBatchId(oaLog.getBatchId());
             Db.deleteById("72crm_oa_log","log_id",logId);
+            commentService.deleteComment(2,logId);
             return true;
         }
         return false;
@@ -201,7 +202,7 @@ public class OaLogService {
      */
     public R queryLogRelation(BasePageRequest<OaLogRelation> basePageRequest) {
         OaLogRelation relation = basePageRequest.getData();
-        if(AuthUtil.oaAnth(relation.toRecord())){
+        if(AuthUtil.oaAuth(relation.toRecord())){
             return R.noAuth();
         }
         Page<Record> recordPage = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("oa.log.queryLogRelation", Kv.by("businessIds", relation.getBusinessIds()).set("contactsIds", relation.getContactsIds()).set("contractIds", relation.getContractIds()).set("customerIds", relation.getCustomerIds())));

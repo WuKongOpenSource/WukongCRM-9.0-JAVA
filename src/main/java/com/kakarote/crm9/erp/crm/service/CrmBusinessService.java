@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
@@ -53,14 +54,6 @@ public class CrmBusinessService {
 
     /**
      * @author wyq
-     * 分页条件查询商机
-     */
-    public Page<Record> getBusinessPageList(BasePageRequest basePageRequest) {
-        return Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),new SqlPara().setSql("select * from businessview"));
-    }
-
-    /**
-     * @author wyq
      * 新增或更新商机
      */
     @Before(Tx.class)
@@ -75,7 +68,7 @@ public class CrmBusinessService {
         boolean saveOrUpdate;
         if (crmBusiness.getBusinessId() != null) {
             crmBusiness.setUpdateTime(DateUtil.date());
-            crmRecordService.updateRecord(new CrmBusiness().dao().findById(crmBusiness.getBusinessId()), crmBusiness, CrmEnum.BUSINESS_TYPE_KEY.getTypes());
+            crmRecordService.updateRecord(new CrmBusiness().dao().findById(crmBusiness.getBusinessId()), crmBusiness, CrmEnum.CRM_BUSINESS);
             CrmBusiness oldBusiness = CrmBusiness.dao.findById(crmBusiness.getBusinessId());
             if (!oldBusiness.getStatusId().equals(crmBusiness.getStatusId())){
                 CrmBusinessChange change = new CrmBusinessChange();
@@ -95,7 +88,13 @@ public class CrmBusinessService {
             crmBusiness.setRwUserId(",");
             crmBusiness.setRoUserId(",");
             saveOrUpdate = crmBusiness.save();
-            crmRecordService.addRecord(crmBusiness.getBusinessId(), CrmEnum.BUSINESS_TYPE_KEY.getTypes());
+            if (jsonObject.getInteger("contactsId") != null){
+                CrmContactsBusiness crmContactsBusiness = new CrmContactsBusiness();
+                crmContactsBusiness.setBusinessId(crmBusiness.getBusinessId());
+                crmContactsBusiness.setContactsId(jsonObject.getInteger("contactsId"));
+                crmContactsBusiness.save();
+            }
+            crmRecordService.addRecord(crmBusiness.getBusinessId(), CrmEnum.CRM_BUSINESS);
         }
         if (businessProductList != null) {
             for (CrmBusinessProduct crmBusinessProduct : businessProductList) {
@@ -110,8 +109,11 @@ public class CrmBusinessService {
      * @author wyq
      * 根据商机id查询
      */
-    public R queryById(Integer businessId) {
-        return R.ok().put("data",CrmBusiness.dao.findFirst(Db.getSql("crm.business.queryById"), businessId));
+    public Record queryById(Integer businessId) {
+        Record crmBusiness = Db.findFirst(Db.getSql("crm.business.queryById"),businessId);
+        List<Record> recordList = Db.find("select name,value from `72crm_admin_fieldv` where batch_id = ?", crmBusiness.getStr("batch_id"));
+        recordList.forEach(field->crmBusiness.set(field.getStr("name"),field.getStr("value")));
+        return crmBusiness;
     }
 
     /**
@@ -119,7 +121,7 @@ public class CrmBusinessService {
      * 基本信息
      */
     public List<Record> information(Integer busienssId) {
-        Record record = Db.findFirst(Db.getSql("crm.business.queryById"), busienssId);
+        Record record = Db.findFirst(Db.getSql("crm.business.queryInformationById"), busienssId);
         if (null == record) {
             return null;
         }
@@ -265,26 +267,27 @@ public class CrmBusinessService {
      */
     public R transfer(CrmBusiness crmBusiness) {
         String[] businessIdsArr = crmBusiness.getBusinessIds().split(",");
-        return Db.tx(() -> {
-            for (String businessId : businessIdsArr) {
-                String memberId = "," + crmBusiness.getNewOwnerUserId() + ",";
-                Db.update(Db.getSql("crm.business.deleteMember"), memberId, memberId, Integer.valueOf(businessId));
-                CrmBusiness oldBusiness = CrmBusiness.dao.findById(Integer.valueOf(businessId));
-                if (2 == crmBusiness.getTransferType()) {
-                    if (1 == crmBusiness.getPower()) {
-                        crmBusiness.setRoUserId(oldBusiness.getRoUserId() + oldBusiness.getOwnerUserId() + ",");
-                    }
-                    if (2 == crmBusiness.getPower()) {
-                        crmBusiness.setRwUserId(oldBusiness.getRwUserId() + oldBusiness.getOwnerUserId() + ",");
-                    }
-                }
-                crmBusiness.setBusinessId(Integer.valueOf(businessId));
-                crmBusiness.setOwnerUserId(crmBusiness.getNewOwnerUserId());
-                crmBusiness.update();
-                crmRecordService.addConversionRecord(Integer.valueOf(businessId), CrmEnum.BUSINESS_TYPE_KEY.getTypes(), crmBusiness.getNewOwnerUserId());
+        for (String businessId : businessIdsArr) {
+            if (!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !AuthUtil.isRwAuth(Integer.parseInt(businessId),"business")){
+                return R.error("无权限转移");
             }
-            return true;
-        }) ? R.ok() : R.error();
+            String memberId = "," + crmBusiness.getNewOwnerUserId() + ",";
+            Db.update(Db.getSql("crm.business.deleteMember"), memberId, memberId, Integer.valueOf(businessId));
+            CrmBusiness oldBusiness = CrmBusiness.dao.findById(Integer.valueOf(businessId));
+            if (2 == crmBusiness.getTransferType()) {
+                if (1 == crmBusiness.getPower()) {
+                    crmBusiness.setRoUserId(oldBusiness.getRoUserId() + oldBusiness.getOwnerUserId() + ",");
+                }
+                if (2 == crmBusiness.getPower()) {
+                    crmBusiness.setRwUserId(oldBusiness.getRwUserId() + oldBusiness.getOwnerUserId() + ",");
+                }
+            }
+            crmBusiness.setBusinessId(Integer.valueOf(businessId));
+            crmBusiness.setOwnerUserId(crmBusiness.getNewOwnerUserId());
+            crmBusiness.update();
+            crmRecordService.addConversionRecord(Integer.valueOf(businessId), CrmEnum.CRM_BUSINESS, crmBusiness.getNewOwnerUserId());
+        }
+        return R.ok();
     }
 
     /**
@@ -374,8 +377,10 @@ public class CrmBusinessService {
      * @author wyq
      * 商机状态组展示
      */
-    public List<Record> queryBusinessStatus(Integer businessId) {
-        return Db.find(Db.getSql("crm.business.queryBusinessStatus"), businessId);
+    public Record queryBusinessStatus(Integer businessId) {
+        List<Record> statusList = Db.find(Db.getSql("crm.business.queryBusinessStatusList"), businessId);
+        Record business = Db.findFirst(Db.getSql("crm.business.queryBusinessStatus"),businessId);
+        return business.set("statusList",statusList);
     }
 
     /**
@@ -400,7 +405,7 @@ public class CrmBusinessService {
      * 查询编辑字段
      */
     public List<Record> queryField(Integer businessId) {
-        Record business = Db.findFirst("select * from businessview where business_id = ?",businessId);
+        Record business = queryById(businessId);
         List<Record> customerList = new ArrayList<>();
         Record customer = new Record();
         customerList.add(customer.set("customer_id",business.getInt("customer_id")).set("customer_name",business.getStr("customer_name")));

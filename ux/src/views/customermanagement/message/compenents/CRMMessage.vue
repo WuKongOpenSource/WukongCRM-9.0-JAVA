@@ -10,7 +10,8 @@
     </div>
     <div class="option-bar">
       <div v-if="selectionList.length == 0">
-        <el-select v-model="optionsType"
+        <el-select v-if="showOptions"
+                   v-model="optionsType"
                    @change="refreshList"
                    placeholder="请选择">
           <el-option v-for="item in options"
@@ -19,9 +20,11 @@
                      :value="item.value">
           </el-option>
         </el-select>
-        <el-select v-model="isSubType"
+        <el-select v-if="showSubType"
+                   v-model="isSubType"
                    @change="refreshList"
-                   style="width: 120px; margin-left: 10px;"
+                   :style="{'margin-left': showOptions ? '10px' : 0}"
+                   style="width: 120px;"
                    placeholder="请选择">
           <el-option v-for="item in [{name: '我的', value: 1}, {name: '我下属的', value: 2}]"
                      :key="item.value"
@@ -235,6 +238,17 @@ export default {
       return false
     },
 
+    // 展示我的/下属筛选
+    showSubType() {
+      if (
+        this.infoType == 'todayCustomer' ||
+        this.infoType == 'putInPoolRemind'
+      ) {
+        return true
+      }
+      return false
+    },
+
     // 下拉数据
     options() {
       if (this.infoType == 'todayCustomer') {
@@ -268,7 +282,7 @@ export default {
   },
 
   mounted() {
-    if (this.options.length > 0) {
+    if (this.showOptions && this.options.length > 0) {
       this.optionsType = this.options[0].value
     }
 
@@ -320,9 +334,11 @@ export default {
               followCustomer: crmCustomerSetFollowAPI
             }[this.infoType]
             request({
-              ids: this.selectionList.map(item => {
-                return item[this.crmType + 'Id']
-              }).join(',')
+              ids: this.selectionList
+                .map(item => {
+                  return item[this.crmType + 'Id']
+                })
+                .join(',')
             })
               .then(res => {
                 this.$message.success('操作成功')

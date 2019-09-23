@@ -121,7 +121,7 @@ public class OaEventService {
      */
     public R queryEventRelation(BasePageRequest<OaEventRelation> basePageRequest){
         OaEventRelation relation = basePageRequest.getData();
-        if(AuthUtil.oaAnth(relation.toRecord())){
+        if(AuthUtil.oaAuth(relation.toRecord())){
             return R.noAuth();
         }
         Page<Record> recordPage = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("oa.event.queryEventRelation", Kv.by("businessIds", relation.getBusinessIds()).set("contactsIds", relation.getContactsIds()).set("contractIds", relation.getContractIds()).set("customerIds", relation.getCustomerIds())));

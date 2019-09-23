@@ -83,6 +83,7 @@
           </flexbox>
         </div>
       </div>
+      <slot></slot>
     </div>
     <c-r-m-full-screen-detail :visible.sync="showFullDetail"
                               :crmType="relationCrmType"

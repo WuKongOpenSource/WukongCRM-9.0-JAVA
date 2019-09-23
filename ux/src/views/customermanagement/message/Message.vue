@@ -84,6 +84,14 @@ export default {
           hidden: false
         },
         {
+          name: '待进入公海的客户',
+          crmType: 'customer',
+          infoType: 'putInPoolRemind',
+          num: 0,
+          tips: '',
+          hidden: false
+        },
+        {
           name: '待审核合同',
           crmType: 'contract',
           infoType: 'checkContract',

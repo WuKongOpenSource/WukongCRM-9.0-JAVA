@@ -39,8 +39,8 @@
       </el-form>
       <div class="copyright">
         悟空CRM受国家计算机软件著作权保护，未经授权不得进行商业行为，违者必究。<br>
-        ©2019 悟空软件<a target="_blank"
-           href="http://www.5kcrm.com">www.5kcrm.com</a>
+        <a target="_blank"
+           href="http://www.5kcrm.com">©2019 悟空CRM</a>
       </div>
     </div>
 
@@ -108,7 +108,7 @@ export default {
             .dispatch('Login', this.loginForm)
             .then(res => {
               this.loading = false
-              this.$router.push({ path: this.redirect || '/workbench/index' })
+              this.$router.push({ path: this.redirect || '/' })
             })
             .catch(() => {
               this.loading = false

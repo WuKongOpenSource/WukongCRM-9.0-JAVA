@@ -2,6 +2,8 @@ package com.kakarote.crm9.erp.crm.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Before;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
@@ -36,14 +38,6 @@ public class CrmBusinessController extends Controller {
 
     /**
      * @author wyq
-     * 全局搜索查询商机
-     */
-    public void queryList(BasePageRequest basePageRequest){
-        renderJson(R.ok().put("data",crmBusinessService.getBusinessPageList(basePageRequest)));
-    }
-
-    /**
-     * @author wyq
      * 新增或更新商机
      */
     @Permissions({"crm:business:save","crm:business:update"})
@@ -59,7 +53,7 @@ public class CrmBusinessController extends Controller {
     @Permissions("crm:business:read")
     @NotNullValidate(value = "businessId",message = "商机id不能为空")
     public void queryById(@Para("businessId")Integer businessId){
-        renderJson(crmBusinessService.queryById(businessId));
+        renderJson(R.ok().put("data",crmBusinessService.queryById(businessId)));
     }
 
     /**
@@ -76,7 +70,7 @@ public class CrmBusinessController extends Controller {
      * 根据商机id查询产品
      */
     public void queryProduct(BasePageRequest<CrmBusiness> basePageRequest){
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), basePageRequest.getData().getBusinessId());
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_BUSINESS), basePageRequest.getData().getBusinessId());
         if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmBusinessService.queryProduct(basePageRequest));
     }
@@ -86,7 +80,7 @@ public class CrmBusinessController extends Controller {
      * 根据商机id查询合同
      */
     public void queryContract(BasePageRequest<CrmBusiness> basePageRequest){
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), basePageRequest.getData().getBusinessId());
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_BUSINESS), basePageRequest.getData().getBusinessId());
         if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmBusinessService.queryContract(basePageRequest));
     }
@@ -133,6 +127,7 @@ public class CrmBusinessController extends Controller {
     @NotNullValidate(value = "businessIds",message = "商机id不能为空")
     @NotNullValidate(value = "newOwnerUserId",message = "负责人id不能为空")
     @NotNullValidate(value = "transferType",message = "移除方式不能为空")
+    @Before(Tx.class)
     public void transfer(@Para("")CrmBusiness crmBusiness){
         renderJson(crmBusinessService.transfer(crmBusiness));
     }
@@ -143,7 +138,7 @@ public class CrmBusinessController extends Controller {
      */
     @NotNullValidate(value = "businessId",message = "商机id不能为空")
     public void getMembers(@Para("businessId")Integer businessId){
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), businessId);
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_BUSINESS), businessId);
         if(auth){renderJson(R.noAuth()); return; }
         renderJson(R.ok().put("data",crmBusinessService.getMembers(businessId)));
     }
@@ -187,7 +182,7 @@ public class CrmBusinessController extends Controller {
      */
     @NotNullValidate(value = "businessId",message = "商机id不能为空")
     public void queryBusinessStatus(@Para("businessId")Integer businessId){
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), businessId);
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_BUSINESS), businessId);
         if(auth){renderJson(R.noAuth()); return; }
         renderJson(R.ok().put("data",crmBusinessService.queryBusinessStatus(businessId)));
     }
@@ -198,7 +193,7 @@ public class CrmBusinessController extends Controller {
      */
     @NotNullValidate(value = "businessId",message = "商机id不能为空")
     public void boostBusinessStatus(@Para("")CrmBusiness crmBusiness){
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), crmBusiness.getBusinessId());
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_BUSINESS), crmBusiness.getBusinessId());
         if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmBusinessService.boostBusinessStatus(crmBusiness));
     }
@@ -218,7 +213,7 @@ public class CrmBusinessController extends Controller {
     @NotNullValidate(value = "content",message = "内容不能为空")
     @NotNullValidate(value = "category",message = "跟进类型不能为空")
     public void addRecord(@Para("")AdminRecord adminRecord){
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), adminRecord.getTypesId());
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_BUSINESS), adminRecord.getTypesId());
         if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmBusinessService.addRecord(adminRecord));
     }
@@ -228,7 +223,7 @@ public class CrmBusinessController extends Controller {
      * 查看跟进记录
      */
     public void getRecord(BasePageRequest<CrmBusiness> basePageRequest){
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.BUSINESS_TYPE_KEY.getSign()), basePageRequest.getData().getBusinessId());
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_BUSINESS), basePageRequest.getData().getBusinessId());
         if(auth){renderJson(R.noAuth()); return; }
         renderJson(R.ok().put("data",crmBusinessService.getRecord(basePageRequest)));
     }

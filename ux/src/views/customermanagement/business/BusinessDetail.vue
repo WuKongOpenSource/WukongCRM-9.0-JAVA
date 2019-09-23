@@ -258,13 +258,13 @@ export default {
   methods: {
     getDetial() {
       this.loading = true
+      this.getBusinessStatusById()
       crmBusinessRead({
         businessId: this.id
       })
         .then(res => {
           this.loading = false
           this.detailData = res.data
-          this.getBusinessStatusById(res.data)
 
           this.headDetails[0].value = res.data.customerName
 
@@ -279,14 +279,15 @@ export default {
         })
     },
     // 获取详情下的状态信息
-    getBusinessStatusById(data) {
+    getBusinessStatusById() {
       this.loading = true
       crmBusinessStatusById({
         businessId: this.id
       })
         .then(res => {
           this.loading = false
-          this.handleBusinessStatus(data.isEnd, data.statusId, res.data)
+          let data = res.data
+          this.handleBusinessStatus(data.isEnd, data.statusId, data.statusList, data.statusRemark)
         })
         .catch(() => {
           this.loading = false
@@ -299,52 +300,32 @@ export default {
     //** tab标签点击 */
     handleClick(tab, event) {},
     /** 处理商机状态数据 */
-    handleBusinessStatus(isEnd, statusId, statusList) {
+    handleBusinessStatus(isEnd, statusId, statusList, statusRemark) {
       this.status = []
       if (statusList && statusList.length > 0) {
-        var isdoing = false
-        var isdoingIndex = 0
+        let isdoing = isEnd == 0
+        let isdoingIndex = -1
         for (let index = 0; index < statusList.length; index++) {
           const item = statusList[index]
-          if (statusId == 0) {
-            // 没有阶段一般不会有
-            if (isEnd != 0) {
-              // 状态已完成 展示灰色效果
-              if (isEnd == 1) {
-                //赢单
-                item['class'] = 'state-suc'
-              } else {
-                item['class'] = 'state-invalid'
-              }
-            } else {
-              item['class'] = 'state-undo'
-            }
-          } else if (item.statusId == statusId) {
-            item['class'] = 'state-suc'
-            item['isdoing'] = true
-            isdoing = true
-            isdoingIndex = index
-          } else {
-            if (isdoing) {
-              if (isEnd != 0) {
-                // 状态已完成 展示灰色效果
-                if (isEnd == 1) {
-                  //赢单
-                  item['class'] = 'state-suc'
-                } else {
-                  item['class'] = 'state-invalid'
-                }
-              } else {
-                item['class'] = 'state-undo'
-              }
-            } else {
+          if (isdoing) {
+            if (item.statusId == statusId) {
+              isdoingIndex = index
               item['class'] = 'state-suc'
+            } else {
+              item['class'] = isdoingIndex >= 0 ? 'state-undo' : 'state-suc'
+            }
+          } else {
+            if (item.statusId == statusId) {
+              isdoingIndex = index
+              item['class'] = 'state-suc'
+            } else {
+              item['class'] = isdoingIndex >= 0 ? 'state-invalid' : 'state-suc'
             }
           }
           this.status.push(item)
         }
 
-        var overItem = { type: isEnd }
+        let overItem = { type: isEnd }
         if (isEnd == 0) {
           overItem.name = '结束'
           overItem['overIcon'] = ['el-icon-arrow-down', 'el-icon--right']
@@ -366,13 +347,13 @@ export default {
         } else if (isEnd == 2) {
           overItem.name = '输单'
           overItem.title = '赢单率0%'
-          overItem.detail = data.statusRemark
+          overItem.detail = statusRemark
           overItem['overIcon'] = ['el-icon-circle-close', 'el-icon--right']
           overItem['class'] = 'state-fail'
         } else if (isEnd == 3) {
           overItem.name = '无效'
           overItem.title = '赢单率0%'
-          overItem.detail = data.statusRemark
+          overItem.detail = statusRemark
           overItem['overIcon'] = ['el-icon-remove-outline', 'el-icon--right']
           overItem['class'] = 'state-invalid'
         }
@@ -435,7 +416,7 @@ export default {
               businessId: this.id,
               statusId: item.statusId,
               isEnd: item.type,
-              remark: value
+              statusRemark: value
             })
               .then(res => {
                 this.loading = false

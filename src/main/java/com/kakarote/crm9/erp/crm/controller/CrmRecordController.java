@@ -25,7 +25,12 @@ public class CrmRecordController extends Controller {
     public void queryRecordList(){
         String actionId = getPara("actionId");
         String types = getPara("types");
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.getSign(Integer.valueOf(types))), Integer.valueOf(actionId));
+        boolean auth;
+        if("2".equals(types)){
+            auth = AuthUtil.isPoolAuth(Integer.valueOf(actionId));
+        }else {
+            auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.parse(Integer.valueOf(types))), Integer.valueOf(actionId));
+        }
         if(auth){renderJson(R.noAuth()); return; }
         renderJson(crmRecordService.queryRecordList(actionId,types));
     }

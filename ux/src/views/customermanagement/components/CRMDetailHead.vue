@@ -49,6 +49,10 @@
                   :selectionList="[detail]"
                   @handle="handleCallBack"
                   :dialogVisible.sync="allocDialogShow"></alloc-handle>
+    <deal-status-handle :crmType="crmType"
+                        :selectionList="[detail]"
+                        @handle="handleCallBack"
+                        :visible.sync="dealStatusShow"></deal-status-handle>
   </div>
 </template>
 <script type="text/javascript">
@@ -70,12 +74,14 @@ import { crmReceivablesDelete } from '@/api/customermanagement/money'
 import { crmProductStatus } from '@/api/customermanagement/product'
 import TransferHandle from './selectionHandle/TransferHandle' // 转移
 import AllocHandle from './selectionHandle/AllocHandle' // 公海分配操作
+import DealStatusHandle from './selectionHandle/DealStatusHandle' // 客户状态修改操作
 
 export default {
   name: 'c-r-m-detail-head',
   components: {
     TransferHandle,
-    AllocHandle
+    AllocHandle,
+    DealStatusHandle
   },
   computed: {
     ...mapGetters(['crm', 'CRMConfig']),
@@ -122,11 +128,17 @@ export default {
       return this.isSeas ? false : this.crm[this.crmType].update
     }
   },
+  watch: {
+    isSeas() {
+      this.moreTypes = this.getSelectionHandleItemsInfo()
+    }
+  },
   data() {
     return {
       moreTypes: [], // 更多操作
       transferDialogShow: false, // 转移操作
-      allocDialogShow: false // 公海分配操作提示框
+      allocDialogShow: false, // 公海分配操作提示框
+      dealStatusShow: false // 成交状态修改框
     }
   },
   props: {
@@ -213,6 +225,9 @@ export default {
       } else if (type == 'alloc') {
         // 公海分配操作
         this.allocDialogShow = true
+      } else if (type == 'deal_status') {
+        // 客户成交状态操作
+        this.dealStatusShow = true
       }
     },
     confirmHandle(type) {
@@ -362,6 +377,11 @@ export default {
           name: '下架',
           type: 'disable',
           icon: require('@/assets/img/selection_disable.png')
+        },
+        deal_status: {
+          name: '更改成交状态',
+          type: 'deal_status',
+          icon: require('@/assets/img/selection_deal_status.png')
         }
       }
       if (this.crmType == 'leads') {
@@ -379,6 +399,7 @@ export default {
         } else {
           return this.forSelectionHandleItems(handleInfos, [
             'put_seas',
+            'deal_status',
             'lock',
             'unlock',
             'delete'
@@ -434,6 +455,9 @@ export default {
       } else if (type == 'start' || type == 'disable') {
         // 上架 下架(产品)
         return this.crm[this.crmType].status
+      } else if (type == 'deal_status') {
+        // 客户状态修改
+        return this.crm[this.crmType].dealStatus
       }
 
       return true

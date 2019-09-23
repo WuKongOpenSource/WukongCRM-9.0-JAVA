@@ -30,7 +30,12 @@ public class AdminUserController extends Controller {
      * 设置系统用户
      * @param adminUser
      */
-    @Permissions("manage:user")
+    @Permissions("manage:users:userSave")
+    public void addUser(@Para("") AdminUser adminUser){
+        renderJson(adminUserService.setUser(adminUser,getPara("roleIds")));
+    }
+
+    @Permissions("manage:users:userUpdate")
     public void setUser(@Para("") AdminUser adminUser){
         renderJson(adminUserService.setUser(adminUser,getPara("roleIds")));
     }
@@ -39,7 +44,7 @@ public class AdminUserController extends Controller {
      * @author hmb
      * 更新状态
      */
-    @Permissions("manage:user")
+    @Permissions("manage:users:userEnables")
     public void setUserStatus(){
         String ids = getPara("userIds");
         String status = getPara("status");
@@ -60,7 +65,7 @@ public class AdminUserController extends Controller {
      * @author hmb
      * 重置密码
      */
-    @Permissions("manage:user")
+    @Permissions("manage:users:userEnables")
     public void resetPassword(){
         String ids = getPara("userIds");
         String pwd = getPara("password");
@@ -71,7 +76,7 @@ public class AdminUserController extends Controller {
      * @author hmb
      * 查询上级列表
      */
-    @Permissions("manage:user")
+    @Permissions("manage:users:read")
     public void querySuperior(){
         String realName = getPara("realName");
         renderJson(adminUserService.querySuperior(realName));
@@ -81,7 +86,7 @@ public class AdminUserController extends Controller {
      * 查询所用用户列表
      * @author hmb
      */
-    @Permissions("manage:user")
+    @Permissions("manage:users:read")
     public void queryAllUserList(){
         renderJson(adminUserService.queryAllUserList());
     }
@@ -132,8 +137,7 @@ public class AdminUserController extends Controller {
         adminUser.setPassword(newPass);
         boolean b=adminUserService.updateUser(adminUser);
         if(b){
-            RedisManager.getRedis().del(BaseUtil.getToken());
-            removeCookie("Admin-Token");
+            BaseUtil.userExit(adminUser.getUserId(),null);
         }
         renderJson(R.isSuccess(b));
     }
@@ -152,7 +156,7 @@ public class AdminUserController extends Controller {
      * @param username 用户新账号
      * @param password 用户新密码
      */
-    @Permissions("manage:user")
+    @Permissions("manage:users:userUpdate")
     @NotNullValidate(value = "username",message = "账号不能为空")
     @NotNullValidate(value = "password",message = "密码不能为空")
     @NotNullValidate("id")
@@ -161,6 +165,6 @@ public class AdminUserController extends Controller {
 
     }
     public void queryUserByDeptId(@Para("deptId")Integer deptId){
-        renderJson(R.ok().put("data",adminUserService.queryUserByDeptId(deptId)));;
+        renderJson(R.ok().put("data",adminUserService.queryAllUserByDeptId(deptId)));
     }
 }

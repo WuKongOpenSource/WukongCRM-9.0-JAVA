@@ -63,7 +63,7 @@ export default {
   activated() {
     if (this.firstRequst) {
       this.firstRequst = false
-      this.getList(true) 
+      this.getList(true)
     } else {
       this.getList(false)
     }
@@ -151,6 +151,10 @@ export default {
           this.taskList[data.index].childWCCount = data.value.subdonecount
           this.taskList[data.index].childAllCount =
             data.value.allcount
+        } else if (data.type == 'change-main-user') {
+          this.taskList[data.index].mainUser = data.value
+        } else if (data.type == 'change-label') {
+          this.taskList[data.index].labelList = data.value
         }
       }
     },

@@ -555,150 +555,144 @@
         where  left(ccc.address,INSTR(ccc.address, ',') - 1) like concat('%',#para(address),'%')
       #end
        #sql("portrait")
-          SELECT (SELECT COUNT(1) FROM customerview WHERE `客户行业` =ccc.`客户行业`) as allCustomer,
-        (SELECT COUNT(1) FROM customerview where deal_status = '已成交' and `客户行业` =ccc.`客户行业`) as dealCustomer,
-        CASE
-        when  ccc.`客户行业` = '' then  '未知'
-        ELSE ccc.`客户行业` end
-        as industry
-         FROM customerview as ccc
-         where   ccc.owner_user_id in (
+        SELECT count(*) as allCustomer,
+        sum(case when a.deal_status = '已成交' then 1 else 0 end) as dealCustomer,
+        (case when (b.`value` = '') then '未知' else b.`value` end) as industry
+        FROM 72crm_crm_customer as a
+        LEFT JOIN 72crm_admin_fieldv as b on a.batch_id=b.batch_id and b.`name`='客户行业'
+         where   a.owner_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
          #end
          )
           #if(type == 1)
-          and to_days(NOW()) = TO_DAYS(ccc.create_time)
+          and to_days(NOW()) = TO_DAYS(a.create_time)
           #end
            #if(type == 2)
-          and to_days(NOW()) - TO_DAYS(ccc.create_time) = 1
+          and to_days(NOW()) - TO_DAYS(a.create_time) = 1
           #end
            #if(type == 3)
-          and YEARWEEK(date_format(ccc.create_time,'%Y-%m-%d')) = YEARWEEK(now())
+          and YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now())
           #end
            #if(type == 4)
-          and YEARWEEK(date_format(ccc.create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
+          and YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
           #end
            #if(type == 5)
-          and date_format(ccc.create_time,'%Y-%m')=date_format(now(),'%Y-%m')
+          and date_format(a.create_time,'%Y-%m')=date_format(now(),'%Y-%m')
           #end
            #if(type == 6)
-          and date_format(ccc.create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+          and date_format(a.create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
           #end
            #if(type == 7)
-          and QUARTER(ccc.create_time)=QUARTER(now()) AND YEAR(ccc.create_time)=YEAR(NOW())
+          and QUARTER(a.create_time)=QUARTER(now()) AND YEAR(a.create_time)=YEAR(NOW())
           #end
            #if(type == 8)
-          and QUARTER(ccc.create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(ccc.create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
+          and QUARTER(a.create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(a.create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
           #end
            #if(type == 9)
-          and YEAR(ccc.create_time)=YEAR(NOW())
+          and YEAR(a.create_time)=YEAR(NOW())
           #end
            #if(type == 10)
-          and YEAR(ccc.create_time)=YEAR(date_sub(now(),interval 1 year))
+          and YEAR(a.create_time)=YEAR(date_sub(now(),interval 1 year))
           #end
            #if(type == 11)
-            and  TO_DAYS(ccc.create_time) >= TO_DAYS(#para(startTime))
-            and  TO_DAYS(ccc.create_time) <= TO_DAYS(#para(endTime))
+            and  TO_DAYS(a.create_time) >= TO_DAYS(#para(startTime))
+            and  TO_DAYS(a.create_time) <= TO_DAYS(#para(endTime))
           #end
-        GROUP BY ccc.`客户行业`
+        GROUP BY b.value
        #end
        #sql("portraitLevel")
-         SELECT (SELECT COUNT(1) FROM customerview WHERE `客户级别` =ccc.`客户级别`) as allCustomer,
-          (SELECT COUNT(1) FROM customerview where deal_status = '已成交' and `客户级别` =ccc.`客户级别`) as dealCustomer,
-          CASE
-          when  ccc.`客户级别` = '' then  '未知'
-          ELSE ccc.`客户级别` end
-          as level
-          FROM customerview as ccc
-          where   ccc.owner_user_id in (
+         SELECT count(*) as allCustomer,
+        sum(case when a.deal_status = '已成交' then 1 else 0 end) as dealCustomer,
+        (case when (b.`value` = '') then '未知' else b.`value` end) as level
+        FROM 72crm_crm_customer as a
+        LEFT JOIN 72crm_admin_fieldv as b on a.batch_id=b.batch_id and b.`name`='客户级别'
+        where   a.owner_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
          #end
          )
           #if(type == 1)
-          and to_days(NOW()) = TO_DAYS(ccc.create_time)
+          and to_days(NOW()) = TO_DAYS(a.create_time)
           #end
            #if(type == 2)
-          and to_days(NOW()) - TO_DAYS(ccc.create_time) = 1
+          and to_days(NOW()) - TO_DAYS(a.create_time) = 1
           #end
            #if(type == 3)
-          and YEARWEEK(date_format(ccc.create_time,'%Y-%m-%d')) = YEARWEEK(now())
+          and YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now())
           #end
            #if(type == 4)
-          and YEARWEEK(date_format(ccc.create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
+          and YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
           #end
            #if(type == 5)
-          and date_format(ccc.create_time,'%Y-%m')=date_format(now(),'%Y-%m')
+          and date_format(a.create_time,'%Y-%m')=date_format(now(),'%Y-%m')
           #end
            #if(type == 6)
-          and date_format(ccc.create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+          and date_format(a.create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
           #end
            #if(type == 7)
-          and QUARTER(ccc.create_time)=QUARTER(now()) AND YEAR(ccc.create_time)=YEAR(NOW())
+          and QUARTER(a.create_time)=QUARTER(now()) AND YEAR(a.create_time)=YEAR(NOW())
           #end
            #if(type == 8)
-          and QUARTER(ccc.create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(ccc.create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
+          and QUARTER(a.create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(a.create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
           #end
            #if(type == 9)
-          and YEAR(ccc.create_time)=YEAR(NOW())
+          and YEAR(a.create_time)=YEAR(NOW())
           #end
            #if(type == 10)
-          and YEAR(ccc.create_time)=YEAR(date_sub(now(),interval 1 year))
+          and YEAR(a.create_time)=YEAR(date_sub(now(),interval 1 year))
           #end
            #if(type == 11)
-            and  TO_DAYS(ccc.create_time) >= TO_DAYS(#para(startTime))
-            and  TO_DAYS(ccc.create_time) <= TO_DAYS(#para(endTime))
+            and  TO_DAYS(a.create_time) >= TO_DAYS(#para(startTime))
+            and  TO_DAYS(a.create_time) <= TO_DAYS(#para(endTime))
           #end
-        GROUP BY ccc.`客户级别`
+        GROUP BY b.`value`
        #end
        #sql("portraitSource")
-        SELECT (SELECT COUNT(1) FROM customerview WHERE `客户来源` =ccc.`客户来源`) as allCustomer,
-          (SELECT COUNT(1) FROM customerview where deal_status = '已成交' and `客户来源` =ccc.`客户来源`) as dealCustomer,
-          CASE
-          when  ccc.`客户来源` = '' then  '未知'
-          ELSE ccc.`客户来源` end
-          as source
-           FROM customerview as ccc
-          where   ccc.owner_user_id in (
+        SELECT count(*) as allCustomer,
+        sum(case when a.deal_status = '已成交' then 1 else 0 end) as dealCustomer,
+        (case when (b.`value` = '') then '未知' else b.`value` end) as source
+        FROM 72crm_crm_customer as a
+        LEFT JOIN 72crm_admin_fieldv as b on a.batch_id=b.batch_id and b.`name`='客户来源'
+          where   a.owner_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
          #end
          )
           #if(type == 1)
-          and to_days(NOW()) = TO_DAYS(ccc.create_time)
+          and to_days(NOW()) = TO_DAYS(a.create_time)
           #end
            #if(type == 2)
-          and to_days(NOW()) - TO_DAYS(ccc.create_time) = 1
+          and to_days(NOW()) - TO_DAYS(a.create_time) = 1
           #end
            #if(type == 3)
-          and YEARWEEK(date_format(ccc.create_time,'%Y-%m-%d')) = YEARWEEK(now())
+          and YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now())
           #end
            #if(type == 4)
-          and YEARWEEK(date_format(ccc.create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
+          and YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
           #end
            #if(type == 5)
-          and date_format(ccc.create_time,'%Y-%m')=date_format(now(),'%Y-%m')
+          and date_format(a.create_time,'%Y-%m')=date_format(now(),'%Y-%m')
           #end
            #if(type == 6)
-          and date_format(ccc.create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+          and date_format(a.create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
           #end
            #if(type == 7)
-          and QUARTER(ccc.create_time)=QUARTER(now()) AND YEAR(ccc.create_time)=YEAR(NOW())
+          and QUARTER(a.create_time)=QUARTER(now()) AND YEAR(a.create_time)=YEAR(NOW())
           #end
            #if(type == 8)
-          and QUARTER(ccc.create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(ccc.create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
+          and QUARTER(a.create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(a.create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
           #end
            #if(type == 9)
-          and YEAR(ccc.create_time)=YEAR(NOW())
+          and YEAR(a.create_time)=YEAR(NOW())
           #end
            #if(type == 10)
-          and YEAR(ccc.create_time)=YEAR(date_sub(now(),interval 1 year))
+          and YEAR(a.create_time)=YEAR(date_sub(now(),interval 1 year))
           #end
            #if(type == 11)
-            and  TO_DAYS(ccc.create_time) >= TO_DAYS(#para(startTime))
-            and  TO_DAYS(ccc.create_time) <= TO_DAYS(#para(endTime))
+            and  TO_DAYS(a.create_time) >= TO_DAYS(#para(startTime))
+            and  TO_DAYS(a.create_time) <= TO_DAYS(#para(endTime))
           #end
-        GROUP BY ccc.`客户来源`
+        GROUP BY b.value
        #end
 #end

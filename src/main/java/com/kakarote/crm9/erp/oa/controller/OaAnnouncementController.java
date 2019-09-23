@@ -1,5 +1,6 @@
 package com.kakarote.crm9.erp.oa.controller;
 
+import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.erp.oa.entity.OaAnnouncement;
 import com.kakarote.crm9.erp.oa.service.OaAnnouncementService;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
@@ -19,6 +20,7 @@ public class OaAnnouncementController extends Controller {
     /**
      * 添加或修改
      */
+    @Permissions({"oa:announcement:save","oa:announcement:update"})
     public void saveAndUpdate(@Para("") OaAnnouncement oaAnnouncement){
         oaAnnouncement.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
         renderJson(announcementService.saveAndUpdate(oaAnnouncement));
@@ -26,6 +28,7 @@ public class OaAnnouncementController extends Controller {
     /**
      * 删除
      */
+    @Permissions("oa:announcement:delete")
     public void delete(@Para("id")Integer id){
         renderJson(announcementService.delete(id));
     }
@@ -35,8 +38,10 @@ public class OaAnnouncementController extends Controller {
     public void queryById(@Para("id")Integer id){
         renderJson(announcementService.queryById(id));
     }
+
     /**
      * 倒叙查询公告集合
+     * @author zhangzhiwei
      */
     public void queryList(BasePageRequest<OaAnnouncement> basePageRequest,@Para("type")Integer type){
         renderJson(announcementService.queryList(basePageRequest,type));

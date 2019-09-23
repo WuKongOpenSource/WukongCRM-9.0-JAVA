@@ -30,7 +30,8 @@
                         value-format="yyyy-MM-dd HH:mm:ss"
                         :editable="false">
         </el-date-picker>
-        <el-checkbox v-model="isEvent">添加到日程提醒</el-checkbox>
+        <el-checkbox v-if="showOAPermission"
+                     v-model="isEvent">添加到日程提醒</el-checkbox>
         <el-button @click.native="sendInfo"
                    class="se-send"
                    type="primary">发布</el-button>

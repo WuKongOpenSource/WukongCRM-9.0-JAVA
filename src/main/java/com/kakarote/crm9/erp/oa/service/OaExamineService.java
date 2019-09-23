@@ -105,33 +105,24 @@ public class OaExamineService{
     private void setCountRecord(Record record){
         Integer examineId = record.getInt("examine_id");
         String categoryTitle = record.getStr("categoryTitle");
-        Record countRecord = Db.findFirst("select count(*) as count,sum(duration) as duration,sum(money) as moeny from 72crm_oa_examine_travel where examine_id = ?", examineId);
+        Integer count = Db.queryInt("select count(*) as count from 72crm_oa_examine_travel where examine_id = ?", examineId);
         StringBuilder causeTitle = new StringBuilder();
-        if(countRecord != null){
+        if(count > 0){
+            causeTitle.append(count);
             switch(categoryTitle){
                 case "出差审批":
-                    if(countRecord.get("count") != null){
-                        causeTitle.append(countRecord.getInt("count"));
-                    }else{
-                        causeTitle.append(0);
-                    }
                     causeTitle.append("个行程，共");
-                    if(countRecord.get("duration") != null){
-                        causeTitle.append(countRecord.getInt("duration"));
+                    if(record.get("duration") != null){
+                        causeTitle.append(record.getInt("duration"));
                     }else{
                         causeTitle.append(0);
                     }
                     causeTitle.append("天。");
                     break;
                 case "差旅报销":
-                    if(countRecord.get("count") != null){
-                        causeTitle.append(countRecord.getInt("count"));
-                    }else{
-                        causeTitle.append(0);
-                    }
                     causeTitle.append("个报销事项，共");
-                    if(countRecord.get("moeny") != null){
-                        causeTitle.append(countRecord.getInt("moeny"));
+                    if(record.get("money") != null){
+                        causeTitle.append(record.getInt("money"));
                     }else{
                         causeTitle.append(0);
                     }
@@ -407,6 +398,7 @@ public class OaExamineService{
                 //没有上级，审核通过
                 examineRecord.setExamineStatus(1);
             }else{
+                examineRecord.setExamineStatus(3);
                 //把下一步审批人放入操作记录中
                 OaActionRecord oaActionRecord = new OaActionRecord().findFirst("select * from `72crm_oa_action_record` where type = 5 and action_id = ? and content = '添加了审批' limit 1", examineId);
                 String joinUserIds = oaActionRecord.getJoinUserIds();
@@ -752,7 +744,7 @@ public class OaExamineService{
 
     public R queryExamineRelation(BasePageRequest<OaExamineRelation> pageRequest){
         OaExamineRelation relation = pageRequest.getData();
-        if(AuthUtil.oaAnth(relation.toRecord())){
+        if(AuthUtil.oaAuth(relation.toRecord())){
             return R.noAuth();
         }
         Page<Record> paginate = Db.paginate(pageRequest.getPage(), pageRequest.getLimit(), Db.getSqlPara("oa.examine.queryExamineRelation", Kv.by("businessIds", relation.getBusinessIds()).set("contactsIds", relation.getContactsIds()).set("contractIds", relation.getContractIds()).set("customerIds", relation.getCustomerIds())));

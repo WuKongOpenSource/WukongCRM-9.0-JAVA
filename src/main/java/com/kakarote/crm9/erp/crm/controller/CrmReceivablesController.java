@@ -54,7 +54,7 @@ public class CrmReceivablesController extends Controller {
     @Permissions("crm:receivables:read")
     @NotNullValidate(value = "receivablesId",message = "回款id不能为空")
     public void  queryById(@Para("receivablesId") Integer receivablesId){
-        renderJson(crmReceivablesService.queryById(receivablesId));
+        renderJson(R.ok().put("data",crmReceivablesService.queryById(receivablesId)));
     }
     /**
      * @author zxy

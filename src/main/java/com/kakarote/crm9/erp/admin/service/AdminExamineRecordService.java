@@ -27,7 +27,7 @@ public class AdminExamineRecordService {
      * 第一次添加审核记录和审核日志 type 1 合同 2 回款 userId:授权审批人
      */
     @Before(Tx.class)
-    public Map<String, Integer> saveExamineRecord(Integer type, Long userId, Integer ownerUserId, Integer recordId) {
+    public Map<String, Integer> saveExamineRecord(Integer type, Long userId, Integer ownerUserId, Integer recordId,Integer status) {
         Map<String, Integer> map = new HashMap<>();
         //创建审核记录
         AdminExamineRecord examineRecord = new AdminExamineRecord();
@@ -40,10 +40,15 @@ public class AdminExamineRecordService {
         }
         //创建审核日志
         AdminExamineLog examineLog = new AdminExamineLog();
-        examineRecord.setExamineStatus(0);
         examineLog.setCreateTime(DateUtil.date());
         examineLog.setCreateUser(BaseUtil.getUser().getUserId());
-        examineLog.setExamineStatus(0);
+        if (status != null) {
+            examineLog.setExamineStatus(5);
+            examineRecord.setExamineStatus(5);
+        }else {
+            examineLog.setExamineStatus(0);
+            examineRecord.setExamineStatus(0);
+        }
         examineLog.setOrderId(1);
         //根据type查询当前启用审批流程
         AdminExamine examine = AdminExamine.dao.findFirst(Db.getSql("admin.examine.getExamineByCategoryType"), type);
@@ -52,7 +57,7 @@ public class AdminExamineRecordService {
         } else {
             examineRecord.setExamineId(examine.getExamineId());
             //先判断该审批流程是否为固定审批
-            if (examine.getExamineType() == 1) {
+            if (examine.getExamineType() == 1 ) {
                 //固定审批
                 //先查询该审批流程的审批步骤的第一步
                 AdminExamineStep examineStep = AdminExamineStep.dao.findFirst(Db.getSql("admin.examineStep.queryExamineStepByExamineIdOrderByStepNum"), examine.getExamineId());
@@ -63,7 +68,11 @@ public class AdminExamineRecordService {
                 } else {
                     examineRecord.update();
                 }
-
+                if (status != null){
+                    map.put("status", 1);
+                    map.put("id", examineRecord.getRecordId());
+                    return map;
+                }
                 if (examineStep.getStepType() == 2 || examineStep.getStepType() == 3) {
                     String[] userIds = examineStep.getCheckUserId().split(",");
                     for (String id : userIds) {
@@ -106,7 +115,9 @@ public class AdminExamineRecordService {
                     examineRecord.update();
                 }
                 examineLog.setRecordId(examineRecord.getRecordId());
-                examineLog.save();
+                if (userId != null) {
+                    examineLog.save();
+                }
             }
 
             map.put("status", 1);
@@ -198,7 +209,7 @@ public class AdminExamineRecordService {
                 examineLog.setExamineStepId(examineStep.getStepId());
                 examineLog.setOrderId(examineStep.getStepNum());
             } else {
-                Integer orderId = Db.queryInt("select order_id from 72crm_admin_examine_log where record_id = ? and is_recheck = 0 and examine_status !=0 order by order_id desc limit 1 ", recordId);
+                Integer orderId = Db.queryInt(Db.getSql("admin.examineStep.queryExamineStepOrderId"), recordId);
                 if (orderId == null) {
                     orderId = 1;
                 }
@@ -413,14 +424,20 @@ public class AdminExamineRecordService {
         JSONObject jsonObject = new JSONObject();
         Record examineRecord = Db.findFirst(Db.getSql("admin.examineStep.queryExamineRecordById"), recordId);
         //如果当前审批已撤回
-        if (examineRecord.getInt("examine_status") == 4) {
+        if (examineRecord.getInt("examine_status") == 4 ||  examineRecord.getInt("examine_status") == 5) {
             jsonObject.put("examineType", 1);
-            List<Record> user = Db.find(Db.getSql("admin.examineLog.queryUserByRecordId"), recordId);
+            List<Record> user = Db.find(Db.getSql("admin.examineLog.queryUserByRecordId"), recordId,examineRecord.getInt("examine_status"));
+
+            if (examineRecord.getInt("examine_status") == 5) {
+                examineRecord.set("examine_status", 6);
+                user.forEach(record ->{
+                    record.set("examine_status",6);
+                });
+            }
             examineRecord.set("userList", user);
             List<Record> records = new ArrayList<>();
             records.add(examineRecord);
             jsonObject.put("steps", records);
-
             return R.ok().put("data", jsonObject);
         }
         AdminExamine adminExamine = AdminExamine.dao.findById(examineRecord.getInt("examine_id"));

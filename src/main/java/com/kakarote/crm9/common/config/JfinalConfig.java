@@ -1,7 +1,6 @@
 package com.kakarote.crm9.common.config;
 
 import cn.hutool.core.util.ClassLoaderUtil;
-import com.alibaba.druid.wall.WallFilter;
 import com.jfinal.aop.Aop;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.druid.DruidConfig;
@@ -143,16 +142,6 @@ public class JfinalConfig extends JFinalConfig {
 
     @Override
     public void onStart() {
-        AdminFieldService adminFieldService=Aop.get(AdminFieldService.class);
-        adminFieldService.createView(1);
-        adminFieldService.createView(2);
-        adminFieldService.createView(3);
-        adminFieldService.createView(4);
-        adminFieldService.createView(5);
-        adminFieldService.createView(6);
-        adminFieldService.createView(7);
-        adminFieldService.createView(8);
-        adminFieldService.createView(10);
         WorkService workService= Aop.get(WorkService.class);
         workService.initialization();
     }

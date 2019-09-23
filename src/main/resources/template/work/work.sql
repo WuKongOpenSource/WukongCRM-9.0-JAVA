@@ -65,7 +65,7 @@
       count(is_archive=1 or null) as archive,
       ifnull(ROUND((count(status=5 or null)/count(*))*100,2),0) as completionRate,
       ifnull(ROUND((count(status=2 or null)/count(*))*100,2),0) as overdueRate
-      from 72crm_task where 1 = 1 and ishidden = 0 and work_id >0
+      from 72crm_task where 1 = 1 and ishidden = 0
       #if(workId)
         and work_id = #para(workId)
       #end
@@ -113,5 +113,11 @@
   #end
   #sql("getTaskOwnerOnWork")
     select user_id,img,realname from `72crm_admin_user` where user_id in (select main_user_id from `72crm_task` where ishidden = 0 and work_id in (?))
+  #end
+
+  #sql ("queryProjectUser")
+  select user_id,realname from 72crm_admin_user as a left join 72crm_admin_user_role as b on a.user_id = b.user_id
+  left join 72crm_admin_role_menu as c on b.role_id = c.role_id
+  where d.menu_id = ?
   #end
 #end

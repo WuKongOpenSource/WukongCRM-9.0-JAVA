@@ -10,7 +10,7 @@
                      :isSeas="true"
                      crm-type="customer">
     </c-r-m-list-head>
-    <div v-empty="!crm.customer.pool"
+    <div v-empty="!crm.pool.index"
          xs-empty-icon="nopermission"
          xs-empty-text="暂无权限"
          class="crm-container">

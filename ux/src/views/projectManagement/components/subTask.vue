@@ -172,8 +172,6 @@ export default {
               this.num = 0
             })
         } else if (this.subTaskCom == 'edit') {
-          let ids = this.xhUserData.length > 0 ? this.xhUserData[0].userId : ''
-
           if (
             this.isNum == 1 ||
             this.text != this.subtasksTextarea ||

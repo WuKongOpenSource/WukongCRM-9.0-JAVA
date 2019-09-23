@@ -137,6 +137,7 @@
                  :crmType="reportData.crmType"
                  :request="reportData.request"
                  :params="reportData.params"
+                 :fieldList="fieldReportList"
                  @hide="showReportList = false"></report-list>
   </div>
 </template>
@@ -148,7 +149,8 @@ import {
   crmIndexAchievementData,
   crmIndexFunnel,
   crmIndexSaletrend,
-  crmIndexIndexListAPI
+  crmIndexIndexListAPI,
+  crmQueryRecordConuntAPI
 } from '@/api/customermanagement/workbench'
 import { crmBusinessStatusList } from '@/api/customermanagement/business'
 import { formatTimeToTimestamp } from '@/utils'
@@ -210,7 +212,7 @@ export default {
           title: '新增跟进记录',
           icon: require('@/assets/img/c_log.png'),
           field: 'recordCount',
-          type: '',
+          type: 'record',
           value: 0
         },
         {
@@ -223,6 +225,7 @@ export default {
         }
       ],
       showReportList: false,
+      fieldReportList: null,
       reportData: {
         title: '',
         placeholder: '',
@@ -313,10 +316,27 @@ export default {
           business: '请输入商机名称',
           business_status: '请输入商机名称',
           contract: '请输入合同名称',
-          receivables: '请输入回款编号'
+          receivables: '请输入回款编号',
+          record: ''
         }[item.type]
+        if (item.type == 'record') {
+          this.fieldReportList = [
+            {
+              label: '模块',
+              prop: 'crmType',
+              width: 300
+            },
+            {
+              label: '新增跟进记录数',
+              prop: 'count'
+            }
+          ]
+          this.reportData.request = crmQueryRecordConuntAPI
+        } else {
+          this.fieldReportList = null
+          this.reportData.request = crmIndexIndexListAPI
+        }
         this.reportData.crmType = item.type
-        this.reportData.request = crmIndexIndexListAPI
         this.reportData.params = this.getBaseParams()
         this.reportData.params.label = item.label
         this.showReportList = true

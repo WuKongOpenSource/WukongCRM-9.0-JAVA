@@ -53,7 +53,7 @@ export default {
   data() {
     return {
       activeName: 'mytask',
-      activePramas: { priority: '' },
+      activePramas: { status: '1', priority: '' },
       tabData: [
         { label: '我的任务', key: 'mytask' },
         { label: '我下属的任务', key: 'subtask' }

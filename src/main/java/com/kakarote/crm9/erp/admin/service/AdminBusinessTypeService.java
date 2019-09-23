@@ -21,12 +21,16 @@ import java.util.List;
 public class AdminBusinessTypeService {
 
     @Before(Tx.class)
-    public void addBusinessType(CrmBusinessType crmBusinessType, JSONArray crmBusinessStatusList){
+    public R addBusinessType(CrmBusinessType crmBusinessType, JSONArray crmBusinessStatusList){
         if (crmBusinessType.getTypeId() == null) {
             crmBusinessType.setCreateTime(new Date());
             crmBusinessType.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
             crmBusinessType.save();
         } else {
+            Integer count = Db.queryInt("select count(*) from 72crm_crm_business where type_id = ?", crmBusinessType.getTypeId());
+            if (count > 0) {
+                return R.error("使用中的商机组不可以修改");
+            }
             crmBusinessType.setUpdateTime(new Date());
             crmBusinessType.update();
             Db.delete(Db.getSql("admin.businessType.deleteBusinessStatus"),crmBusinessType.getTypeId());
@@ -39,6 +43,7 @@ public class AdminBusinessTypeService {
             crmBusinessStatus.setOrderNum(i+1);
             crmBusinessStatus.save();
         }
+        return R.ok();
     }
 
     public Page<Record> queryBusinessTypeList(BasePageRequest request) {

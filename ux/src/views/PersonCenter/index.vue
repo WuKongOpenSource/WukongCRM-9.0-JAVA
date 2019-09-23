@@ -64,10 +64,7 @@
 </template>
 
 <script>
-import {
-  adminUsersRead,
-  adminUsersUpdateImg
-} from '@/api/personCenter/personCenter'
+import { adminUsersUpdateImg } from '@/api/personCenter/personCenter'
 
 import { mapGetters } from 'vuex'
 import EditImage from '@/components/EditImage'

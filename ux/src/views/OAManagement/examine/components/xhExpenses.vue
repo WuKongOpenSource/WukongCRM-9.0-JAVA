@@ -43,6 +43,8 @@
                   type="textarea"
                   resize="none"
                   :rows="3"
+                  :maxlength="200"
+                  show-word-limit
                   @input="valueChange"></el-input>
       </div>
       <div class="files">

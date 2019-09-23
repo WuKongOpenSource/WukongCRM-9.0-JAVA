@@ -12,7 +12,7 @@ public class BaseConstant implements Serializable {
 
     public static final String NAME = "72CRM";
 
-    public static final String VERSION = "1.3.2";
+    public static final String VERSION = "1.3.3";
 
     private static final long serialVersionUID = 1L;
     /**
@@ -25,7 +25,7 @@ public class BaseConstant implements Serializable {
     /**
      * 角色类型列表
      */
-    public static final Integer[] ROLE_TYPES = {1, 2, 3, 4, 0};
+    public static final Integer[] ROLE_TYPES = {1, 2, 7, 8, 0};
 
     /**
      * 超级管理员的roleId

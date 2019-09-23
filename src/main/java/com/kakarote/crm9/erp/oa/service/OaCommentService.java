@@ -62,4 +62,10 @@ public class OaCommentService{
         });
         return recordList;
     }
+
+    @Before(Tx.class)
+    public R deleteComment(Integer type,Integer typeId){
+        Db.delete("delete from `72crm_task_comment` where type = ? and type_id = ?",type,typeId);
+        return R.ok ();
+    }
 }

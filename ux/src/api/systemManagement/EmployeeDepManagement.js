@@ -10,7 +10,7 @@ export function depDelete(data) {
 
 export function depEdit(data) {
   return request({
-    url: 'system/dept/setDept',
+    url: 'system/dept/updateDept',
     method: 'post',
     data: data
   })
@@ -18,15 +18,23 @@ export function depEdit(data) {
 
 export function depSave(data) {
   return request({
-    url: 'system/dept/setDept',
+    url: 'system/dept/addDept',
     method: 'post',
     data: data
   })
 }
 
-export function usersAdd(params) {
+export function usersEdit(params) {
   return request({
     url: 'system/user/setUser',
+    method: 'post',
+    data: params
+  })
+}
+
+export function usersAdd(params) {
+  return request({
+    url: 'system/user/addUser',
     method: 'post',
     data: params
   })
@@ -44,7 +52,7 @@ export function roleList(data) {
 // 重置密码
 export function resetPassword(data) {
   return request({
-    url: 'admin/users/resetPassword',
+    url: 'system/user/resetPassword',
     method: 'post',
     data: data
   })
@@ -73,7 +81,7 @@ export function adminUsersUpdatePwd(data) {
  */
 export function adminUsersUsernameEditAPI(data) {
   return request({
-    url: 'admin/users/usernameEdit',
+    url: 'system/user/usernameEdit',
     method: 'post',
     data: data
   })

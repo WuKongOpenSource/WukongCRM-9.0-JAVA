@@ -13,7 +13,9 @@ import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
+import com.kakarote.crm9.erp.admin.entity.AdminExamineRecord;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminExamineRecordService;
@@ -65,9 +67,11 @@ public class CrmContractService {
     /**
      * 根据id查询合同
      */
-    public R queryById(Integer id) {
+    public Record queryById(Integer id) {
         Record record = Db.findFirst(Db.getSql("crm.contract.queryByContractId"), id);
-        return R.ok().put("data", record);
+        List<Record> recordList = Db.find("select name,value from `72crm_admin_fieldv` where batch_id = ?", record.getStr("batch_id"));
+        recordList.forEach(field->record.set(field.getStr("name"),field.getStr("value")));
+        return record;
     }
 
     /**
@@ -141,32 +145,48 @@ public class CrmContractService {
             crmContract.setUpdateTime(DateUtil.date());
             crmContract.setRoUserId(",");
             crmContract.setRwUserId(",");
-            crmContract.setCheckStatus(0);
+
             crmContract.setOwnerUserId(BaseUtil.getUser().getUserId().intValue());
 
-
-            Map<String, Integer> map = examineRecordService.saveExamineRecord(1, jsonObject.getLong("checkUserId"), crmContract.getOwnerUserId(), null);
-            if (map.get("status") == 0) {
-                return R.error("没有启动的审核步骤，不能添加！");
-            } else {
-                crmContract.setExamineRecordId(map.get("id"));
+                Map<String, Integer> map =
+                        examineRecordService.saveExamineRecord(1,
+                                jsonObject.getLong("checkUserId"),
+                                crmContract.getOwnerUserId(), null,crmContract.getCheckStatus());
+                if (map.get("status") == 0) {
+                    return R.error("没有启动的审核步骤，不能添加！");
+                } else {
+                    crmContract.setExamineRecordId(map.get("id"));
+                }
+            if (crmContract.getCheckStatus() != null && crmContract.getCheckStatus() == 5){
+                crmContract.setCheckStatus(5);
+            }else {
+                crmContract.setCheckStatus(0);
             }
+
             flag = crmContract.save();
-            crmRecordService.addRecord(crmContract.getContractId(),CrmEnum.CONTRACT_TYPE_KEY.getTypes());
+            crmRecordService.addRecord(crmContract.getContractId(), CrmEnum.CRM_CONTRACT);
         } else {
             CrmContract contract = CrmContract.dao.findById(crmContract.getContractId());
-            if (contract.getCheckStatus() != 4 && contract.getCheckStatus() != 3) {
+            if (contract.getCheckStatus() != 4 && contract.getCheckStatus() != 3 && contract.getCheckStatus() != 5) {
                 return R.error("不能编辑，请先撤回再编辑！");
             }
-            Map<String, Integer> map = examineRecordService.saveExamineRecord(1, jsonObject.getLong("checkUserId"), contract.getOwnerUserId(), contract.getExamineRecordId());
-            if (map.get("status") == 0) {
-                return R.error("没有启动的审核步骤，不能添加！");
-            } else {
-                crmContract.setExamineRecordId(map.get("id"));
+
+                Map<String, Integer> map = examineRecordService.saveExamineRecord(1,
+                        jsonObject.getLong("checkUserId"), contract.getOwnerUserId(),
+                        contract.getExamineRecordId(),crmContract.getCheckStatus());
+                if (map.get("status") == 0) {
+                    return R.error("没有启动的审核步骤，不能添加！");
+                } else {
+                    crmContract.setExamineRecordId(map.get("id"));
+                }
+            if (crmContract.getCheckStatus() != null && crmContract.getCheckStatus() == 5){
+                crmContract.setCheckStatus(5);
+            }else {
+                crmContract.setCheckStatus(0);
             }
-            crmContract.setCheckStatus(0);
+
             crmContract.setUpdateTime(DateUtil.date());
-            crmRecordService.updateRecord(new CrmContract().dao().findById(crmContract.getContractId()), crmContract, CrmEnum.CONTRACT_TYPE_KEY.getTypes());
+            crmRecordService.updateRecord(new CrmContract().dao().findById(crmContract.getContractId()), crmContract, CrmEnum.CRM_CONTRACT);
             flag = crmContract.update();
         }
         JSONArray jsonArray = jsonObject.getJSONArray("product");
@@ -215,25 +235,16 @@ public class CrmContractService {
      */
     public List<Record> queryListByType(String type, Integer id) {
         StringBuilder sql = new StringBuilder("select * from contractview where ");
-        if (type.equals(CrmEnum.CUSTOMER_TYPE_KEY.getTypes())) {
+        if (type.equals(CrmEnum.CRM_CUSTOMER.getType()+"")) {
             sql.append("  customer_id = ? ");
         }
-        if (type.equals(CrmEnum.BUSINESS_TYPE_KEY.getTypes())) {
+        if (type.equals(CrmEnum.CRM_BUSINESS.getType()+"")) {
             sql.append("  business_id = ? ");
         }
-
         return Db.find(sql.toString(), id);
     }
 
-    /**
-     * 根据合同批次查询产品
-     *
-     * @param batchId 合同批次
-     * @return
-     */
-    public List<Record> queryProductById(String batchId) {
-        return Db.find(Db.getSql("crm.contract.queryProductById"), batchId);
-    }
+
 
     /**
      * 根据合同id查询回款
@@ -279,26 +290,27 @@ public class CrmContractService {
      */
     public R transfer(CrmContract crmContract) {
         String[] contractIdsArr = crmContract.getContractIds().split(",");
-        return Db.tx(() -> {
-            for (String contractId : contractIdsArr) {
-                String memberId = "," + crmContract.getNewOwnerUserId() + ",";
-                Db.update(Db.getSql("crm.contract.deleteMember"), memberId, memberId, Integer.valueOf(contractId));
-                CrmContract oldContract = CrmContract.dao.findById(Integer.valueOf(contractId));
-                if (2 == crmContract.getTransferType()) {
-                    if (1 == crmContract.getPower()) {
-                        crmContract.setRoUserId(oldContract.getRoUserId() + oldContract.getOwnerUserId() + ",");
-                    }
-                    if (2 == crmContract.getPower()) {
-                        crmContract.setRwUserId(oldContract.getRwUserId() + oldContract.getOwnerUserId() + ",");
-                    }
-                }
-                crmContract.setContractId(Integer.valueOf(contractId));
-                crmContract.setOwnerUserId(crmContract.getNewOwnerUserId());
-                crmContract.update();
-                crmRecordService.addConversionRecord(Integer.valueOf(contractId), CrmEnum.CONTRACT_TYPE_KEY.getTypes(), crmContract.getNewOwnerUserId());
+        for (String contractId : contractIdsArr) {
+            if (!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !AuthUtil.isRwAuth(Integer.parseInt(contractId),"contract")){
+                return R.error("无权限转移");
             }
-            return true;
-        }) ? R.ok() : R.error();
+            String memberId = "," + crmContract.getNewOwnerUserId() + ",";
+            Db.update(Db.getSql("crm.contract.deleteMember"), memberId, memberId, Integer.valueOf(contractId));
+            CrmContract oldContract = CrmContract.dao.findById(Integer.valueOf(contractId));
+            if (2 == crmContract.getTransferType()) {
+                if (1 == crmContract.getPower()) {
+                    crmContract.setRoUserId(oldContract.getRoUserId() + oldContract.getOwnerUserId() + ",");
+                }
+                if (2 == crmContract.getPower()) {
+                    crmContract.setRwUserId(oldContract.getRwUserId() + oldContract.getOwnerUserId() + ",");
+                }
+            }
+            crmContract.setContractId(Integer.valueOf(contractId));
+            crmContract.setOwnerUserId(crmContract.getNewOwnerUserId());
+            crmContract.update();
+            crmRecordService.addConversionRecord(Integer.valueOf(contractId), CrmEnum.CRM_CONTRACT, crmContract.getNewOwnerUserId());
+        }
+        return R.ok();
     }
 
     /**
@@ -386,7 +398,7 @@ public class CrmContractService {
      * 查询编辑字段
      */
     public List<Record> queryField(Integer contractId) {
-        Record contract = Db.findFirst("select * from contractview where contract_id = ?",contractId);
+        Record contract = queryById(contractId);
         List<Record> list = new ArrayList<>();
         list.add(new Record().set("customer_id",contract.getInt("customer_id")).set("customer_name",contract.getStr("customer_name")));
         contract.set("customer_id",list);
@@ -404,6 +416,7 @@ public class CrmContractService {
         if (contract.getStr("company_user_id") != null && contract.getInt("company_user_id") != 0) {
             list.add(new Record().set("company_user_id", contract.getStr("company_user_id")).set("realname", contract.getStr("company_user_name")));
         }
+
         contract.set("company_user_id",list);
         List<Record> fieldList = adminFieldService.queryUpdateField(6,contract);
         Kv kv = Kv.by("discount_rate", contract.getBigDecimal("discount_rate"))
@@ -483,7 +496,7 @@ public class CrmContractService {
      * 查询合同到期提醒设置
      */
     public R queryContractConfig(){
-        AdminConfig config = AdminConfig.dao.findFirst("select status,value as contractDay from 72crm_admin_config where name = 'expiringContractDays' limit 1");
+        AdminConfig config = AdminConfig.dao.findFirst(Db.getSql("crm.contract.queryContractConfig"));
         if (config == null){
             config = new AdminConfig();
             config.setStatus(0);

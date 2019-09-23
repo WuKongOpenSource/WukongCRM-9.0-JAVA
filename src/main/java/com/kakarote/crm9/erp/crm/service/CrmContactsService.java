@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.log.Log;
 import com.jfinal.upload.UploadFile;
+import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
@@ -87,7 +88,10 @@ public class CrmContactsService {
      * 根据id查询联系人
      */
     public Record queryById(Integer contactsId){
-        return Db.findFirst(Db.getSql("crm.contact.queryById"),contactsId);
+        Record crmContacts = Db.findFirst(Db.getSql("crm.contact.queryById"),contactsId);
+        List<Record> recordList = Db.find("select name,value from `72crm_admin_fieldv` where batch_id = ?", crmContacts.getStr("batch_id"));
+        recordList.forEach(field->crmContacts.set(field.getStr("name"),field.getStr("value")));
+        return crmContacts;
     }
 
     /**
@@ -95,7 +99,7 @@ public class CrmContactsService {
      * 基本信息
      */
     public List<Record> information(Integer contactsId){
-        Record record = Db.findFirst("select * from contactsview where contacts_id = ?",contactsId);
+        Record record = Db.findFirst(Db.getSql("crm.contact.queryInformationById"),contactsId);
         if (null == record){
             return null;
         }
@@ -175,7 +179,7 @@ public class CrmContactsService {
         adminFieldService.save(jsonObject.getJSONArray("field"),batchId);
         if (crmContacts.getContactsId() != null) {
             crmContacts.setUpdateTime(DateUtil.date());
-            crmRecordService.updateRecord(new CrmContacts().dao().findById(crmContacts.getContactsId()),crmContacts, CrmEnum.CONTACTS_TYPE_KEY.getTypes());
+            crmRecordService.updateRecord(new CrmContacts().dao().findById(crmContacts.getContactsId()),crmContacts, CrmEnum.CRM_CONTACTS);
             return crmContacts.update() ? R.ok() : R.error();
         }else {
             crmContacts.setCreateTime(DateUtil.date());
@@ -186,7 +190,13 @@ public class CrmContactsService {
             }
             crmContacts.setBatchId(batchId);
             boolean save = crmContacts.save();
-            crmRecordService.addRecord(crmContacts.getContactsId(),CrmEnum.CONTACTS_TYPE_KEY.getTypes());
+            if (jsonObject.getInteger("businessId") != null){
+                CrmContactsBusiness crmContactsBusiness = new CrmContactsBusiness();
+                crmContactsBusiness.setBusinessId(jsonObject.getInteger("businessId"));
+                crmContactsBusiness.setContactsId(crmContacts.getContactsId());
+                crmContactsBusiness.save();
+            }
+            crmRecordService.addRecord(crmContacts.getContactsId(),CrmEnum.CRM_CONTACTS);
             return  save? R.ok() : R.error();
         }
     }
@@ -214,11 +224,15 @@ public class CrmContactsService {
      * @author wyq
      * 联系人转移
      */
+    @Before(Tx.class)
     public R transfer(CrmContacts crmContacts){
         String[] contactsIdsArr = crmContacts.getContactsIds().split(",");
         int update = Db.update(Db.getSqlPara("crm.contact.transfer", Kv.by("ownerUserId", crmContacts.getNewOwnerUserId()).set("ids", contactsIdsArr)));
         for(String contactsId : contactsIdsArr){
-            crmRecordService.addConversionRecord(Integer.valueOf(contactsId),CrmEnum.CONTACTS_TYPE_KEY.getTypes(),crmContacts.getNewOwnerUserId());
+            if (!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !AuthUtil.isRwAuth(Integer.parseInt(contactsId),"customer")){
+                return R.error("无权限转移");
+            }
+            crmRecordService.addConversionRecord(Integer.valueOf(contactsId),CrmEnum.CRM_CONTACTS,crmContacts.getNewOwnerUserId());
         }
         return update > 0 ? R.ok() : R.error();
     }
@@ -228,10 +242,16 @@ public class CrmContactsService {
      * @param customerId 客户ID
      * @param ownerUserId 负责人ID
      */
-    public boolean updateOwnerUserId(Integer customerId,Integer ownerUserId){
+    public R updateOwnerUserId(Integer customerId,Integer ownerUserId){
+        List<Integer> contactsIdList = Db.query("select contacts_id from 72crm_crm_contacts where customer_id = ?",customerId);
+        for (Integer contactsId : contactsIdList) {
+            if (!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !AuthUtil.isRwAuth(contactsId, "contacts")) {
+                return R.error("无权限转移");
+            }
+        }
         Db.update("update 72crm_crm_contacts set owner_user_id = " + ownerUserId + " where customer_id = "+customerId);
-        crmRecordService.addConversionRecord(customerId,CrmEnum.CUSTOMER_TYPE_KEY.getTypes(),ownerUserId);
-        return true;
+        crmRecordService.addConversionRecord(customerId,CrmEnum.CRM_CUSTOMER,ownerUserId);
+        return R.ok();
     }
 
     /**
@@ -239,7 +259,7 @@ public class CrmContactsService {
      * 查询编辑字段
      */
     public List<Record> queryField(Integer contactsId) {
-        Record contacts = Db.findFirst("select * from contactsview where contacts_id = ?",contactsId);
+        Record contacts = queryById(contactsId);
         List<Record> customerList = new ArrayList<>();
         Record customer = new Record();
         customerList.add(customer.set("customer_id",contacts.getInt("customer_id")).set("customer_name",contacts.getStr("customer_name")));
@@ -311,9 +331,8 @@ public class CrmContactsService {
      * @author wyq
      * 联系人导出
      */
-    public List<Record> exportContacts(String contactsIds) {
-        String[] contactsIdsArr = contactsIds.split(",");
-        return Db.find(Db.getSqlPara("crm.contact.excelExport", Kv.by("ids", contactsIdsArr)));
+    public List<Record> exportContacts(Kv kv) {
+        return Db.find(Db.getSqlPara("crm.contact.excelExport", kv));
     }
 
     /**
@@ -336,7 +355,7 @@ public class CrmContactsService {
         Integer errNum = 0;
         try {
             List<List<Object>> read = reader.read();
-            List<Object> list = read.get(2);
+            List<Object> list = read.get(1);
             List<Record> recordList = adminFieldService.customFieldList("3");
             recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
             List<Record> fieldList = adminFieldService.queryAddField(3);
@@ -378,7 +397,7 @@ public class CrmContactsService {
                     }
                     Record  repeatField= Db.findFirst(Db.getSqlPara("crm.contact.queryRepeatFieldNumber",Kv.by("contactsName",contactsName).set("telephone",telephone).set("mobile",mobile)));
                     Integer number = repeatField.getInt("number");
-                    Integer customerId = Db.queryInt("select customer_id from 72crm_crm_customer where customer_name = ?",contactsList.get(kv.getInt("customer_id")));
+                    Integer customerId = Db.queryInt("select customer_id from 72crm_crm_customer where customer_name = ? limit 1",contactsList.get(kv.getInt("customer_id")));
                     if (customerId == null){
                         return R.error("第"+errNum+1+"行填写的客户不存在");
                     }
@@ -394,21 +413,22 @@ public class CrmContactsService {
                                 .fluentPut("remark", contactsList.get(kv.getInt("remark")))
                                 .fluentPut("owner_user_id", ownerUserId));
                     } else if (number == 1 && repeatHandling == 1) {
-                        if (repeatHandling == 1){
-                            Record contacts = Db.findFirst(Db.getSqlPara("crm.contact.queryRepeatField",Kv.by("contactsName",contactsName).set("telephone",telephone).set("mobile",mobile)));
-                            object.fluentPut("entity", new JSONObject().fluentPut("contacts_id", contacts.getInt("contacts_id"))
-                                    .fluentPut("name", contactsName)
-                                    .fluentPut("customer_id",customerId)
-                                    .fluentPut("telephone", telephone)
-                                    .fluentPut("mobile", mobile)
-                                    .fluentPut("email",contactsList.get(kv.getInt("email")))
-                                    .fluentPut("post",contactsList.get(kv.getInt("post")))
-                                    .fluentPut("address", contactsList.get(kv.getInt("address")))
-                                    .fluentPut("next_time", contactsList.get(kv.getInt("next_time")))
-                                    .fluentPut("remark", contactsList.get(kv.getInt("remark")))
-                                    .fluentPut("owner_user_id", ownerUserId)
-                                    .fluentPut("batch_id", contacts.getStr("batch_id")));
+                        Record contacts = Db.findFirst(Db.getSqlPara("crm.contact.queryRepeatField",Kv.by("contactsName",contactsName).set("telephone",telephone).set("mobile",mobile)));
+                        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_CONTACTS),contacts.getInt("contacts_id"));
+                        if (auth){
+                            return R.error("第"+errNum+1+"行数据无操作权限，不能覆盖");
                         }
+                        object.fluentPut("entity", new JSONObject().fluentPut("contacts_id", contacts.getInt("contacts_id"))
+                                .fluentPut("name", contactsName)
+                                .fluentPut("customer_id",customerId)
+                                .fluentPut("telephone", telephone)
+                                .fluentPut("mobile", mobile)
+                                .fluentPut("email",contactsList.get(kv.getInt("email")))
+                                .fluentPut("post",contactsList.get(kv.getInt("post")))
+                                .fluentPut("address", contactsList.get(kv.getInt("address")))
+                                .fluentPut("next_time", contactsList.get(kv.getInt("next_time")))
+                                .fluentPut("remark", contactsList.get(kv.getInt("remark")))
+                                .fluentPut("batch_id", contacts.getStr("batch_id")));
                     } else if (repeatHandling == 2){
                         continue;
                     } else if (number > 1){

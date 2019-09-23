@@ -4,51 +4,54 @@ public enum CrmEnum {
     /**
      * CRM Enum
      */
-    LEADS_TYPE_KEY("线索", "1","CrmLeads"),
-    CUSTOMER_TYPE_KEY("客户", "2","CrmCustomer"),
-    CONTACTS_TYPE_KEY("联系人", "3","CrmContacts"),
-    PRODUCT_TYPE_KEY("产品", "4","CrmProduct"),
-    BUSINESS_TYPE_KEY("商机","5","CrmBusiness"),
-    CONTRACT_TYPE_KEY("合同","6","CrmContract"),
-    RECEIVABLES_TYPE_KEY("回款","7","CrmReceivables");
+    CRM_LEADS("crm_leads",1,"线索"),
+    CRM_CUSTOMER("crm_customer",2,"客户"),
+    CRM_CONTACTS("crm_contacts",3,"联系人"),
+    CRM_PRODUCT("crm_product", 4,"产品"),
+    CRM_BUSINESS("crm_business",5,"商机"),
+    CRM_CONTRACT("crm_contract",6,"合同"),
+    CRM_RECEIVABLES("crm_receivables",7,"回款"),
+    CRM_CUSTOMER_POOL("crm_customer_pool",8,"客户公海"),
+    CRM_NULL("NULL",0,"NULL")
+    ;
 
     private final String name;
-    private final String types;
-    private final String sign;
-    CrmEnum(String name, String types,String sign) {
+    private final int  type;
+    private final String remarks;
+
+    CrmEnum(String name, int type,String remarks) {
         this.name = name;
-        this.types = types;
-        this.sign = sign;
+        this.type = type;
+        this.remarks = remarks;
     }
-    public static String getName(String types) {
-        for (CrmEnum c : CrmEnum.values()) {
-            if (c.getTypes().equals(types)) {
-                return c.name;
+    public static CrmEnum parse(int type) {
+        for (CrmEnum Enum : CrmEnum.values()) {
+            if (Enum.getType()==type) {
+                return Enum;
             }
         }
-        return null;
+        return CRM_NULL;
     }
 
-    public static String getSign(Integer types) {
-        for (CrmEnum c : CrmEnum.values()) {
-            if (c.getTypes().equals(types.toString())) {
-                return c.sign;
+    public static CrmEnum parse(String name) {
+        for (CrmEnum Enum : CrmEnum.values()) {
+            if (Enum.getName().equals(name)) {
+                return Enum;
             }
         }
-        return "error";
+        return CRM_NULL;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getTypes() {
-        return types;
+    public int getType() {
+        return type;
     }
 
-
-    public String getSign(){
-        return sign;
+    public String getRemarks() {
+        return remarks;
     }
 
 }

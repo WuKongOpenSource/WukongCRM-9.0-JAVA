@@ -55,13 +55,4 @@ public class TagUtil{
         }
         return sb.toString();
     }
-
-    public static void main(String[] args){
-        String str = ",1,2,3,4,";
-        System.out.println(fromString(str));
-        Set<Integer> integers = toSet(str);
-        System.out.println(integers.toString());
-        str = null;
-        System.out.println(fromString(str));
-    }
 }

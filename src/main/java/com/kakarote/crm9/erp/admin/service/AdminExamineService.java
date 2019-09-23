@@ -4,8 +4,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
-import com.kakarote.crm9.erp.admin.entity.AdminExamine;
-import com.kakarote.crm9.erp.admin.entity.AdminExamineStep;
+import com.kakarote.crm9.erp.admin.entity.*;
+import com.kakarote.crm9.erp.crm.entity.CrmContract;
+import com.kakarote.crm9.erp.crm.entity.CrmReceivables;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Before;
@@ -157,7 +158,7 @@ public class AdminExamineService {
     /**
      * 查询当前启用审核流程步骤
      */
-    public R queryExaminStep(Integer categoryType) {
+    public R queryExaminStep(Integer categoryType,Integer id) {
         Record record = Db.findFirst(Db.getSql("admin.examine.getExamineByCategoryType"), categoryType);
         if (record != null) {
             if (record.getInt("examine_type") == 1) {
@@ -179,6 +180,31 @@ public class AdminExamineService {
                     r.set("userList", userList);
                 });
                 record.set("examineSteps", list);
+            }else {
+                if (id != null) {
+                    Integer recordId = null;
+                    if (categoryType == 1) {
+                        CrmContract contract = CrmContract.dao.findById(id);
+                        if (contract.getExamineRecordId() != null) {
+                            recordId = contract.getExamineRecordId();
+                        }
+                    } else {
+                        CrmReceivables receivables = CrmReceivables.dao.findById(id);
+                        if (receivables.getExamineRecordId() != null) {
+                            recordId = receivables.getExamineRecordId();
+                        }
+                    }
+                    if (recordId != null) {
+                        AdminExamineLog examineLog = AdminExamineLog.dao.findFirst("select * from 72crm_admin_examine_log where record_id = ? and is_recheck = 0", recordId);
+                        if(examineLog != null){
+                            record.set("examineUser", examineLog.getExamineUser());
+                            AdminUser user = AdminUser.dao.findById(examineLog.getExamineUser());
+                            if(user != null){
+                                record.set("examineUserName", user.getRealname());
+                            }
+                        }
+                    }
+                }
             }
             return R.ok().put("data", record);
         }

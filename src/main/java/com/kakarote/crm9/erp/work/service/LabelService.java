@@ -66,7 +66,7 @@ public class LabelService{
 
     public R getLabelListByOwn(){
         Long userId = BaseUtil.getUserId();
-        List<String> labelIdList = Db.query("select label_id from `72crm_task` where create_user_id = ? or main_user_id = ? or owner_user_id like concat('%,',?,',%') and ishidden = 0", userId, userId, userId);
+        List<String> labelIdList = Db.query(Db.getSql("work.label.queryLabelIdList"), userId, userId, userId);
         List<Integer> list = workService.toList(labelIdList);
         List<String> collect = list.stream().map(Object::toString).collect(Collectors.toList());
         List<WorkTaskLabel> resultList;

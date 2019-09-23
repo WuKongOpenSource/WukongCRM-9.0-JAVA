@@ -17,6 +17,7 @@ import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
 import java.lang.reflect.Parameter;
+import java.util.Date;
 
 public class ErpInterceptor implements Interceptor {
     @Override
@@ -35,8 +36,7 @@ public class ErpInterceptor implements Interceptor {
             }
             //数据转换json的处理
             this.modelToJson(invocation);
-
-            RedisManager.getRedis().expire(token, 3600);
+            BaseUtil.userExpire(token);
             invocation.invoke();
         } catch (Exception e) {
             invocation.getController().renderJson(R.error("服务器响应异常"));
@@ -87,7 +87,7 @@ public class ErpInterceptor implements Interceptor {
                 Class clazz = parameters[i].getType();
                 if (clazz.isAssignableFrom(Record.class)) {
                     inv.setArg(i, new Record().setColumns(jsonObject));
-                }else if(BasicType.unWrap(clazz).isPrimitive()||clazz.isAssignableFrom(String.class)){
+                }else if(BasicType.unWrap(clazz).isPrimitive()||clazz.isAssignableFrom(String.class)||clazz.isAssignableFrom(Date.class)){
                     String name=parameters[i].getName();
                     inv.setArg(i,jsonObject.getObject(name,clazz));
                 } else {

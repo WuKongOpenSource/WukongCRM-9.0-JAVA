@@ -107,7 +107,7 @@ public class AdminDeptService {
     private List<Record> queryDeptByParentUser(Long userId,Integer deepness){
         List<Record> recordList=new ArrayList<>();
         if(deepness>0){
-            List<Record> records=Db.find("SELECT a.dept_id AS id,a.name,a.pid,b.user_id FROM 72crm_admin_dept as a LEFT JOIN 72crm_admin_user as b on a.dept_id=b.dept_id WHERE b.parent_id = ?",userId);
+            List<Record> records=Db.find(Db.getSql("admin.dept.queryDeptByParentUser"),userId);
             recordList.addAll(records);
             records.forEach(record -> {
                 recordList.addAll(queryDeptByParentUser(record.getLong("user_id"),deepness-1));

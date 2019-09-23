@@ -85,6 +85,14 @@
       select user_id as id,realname from 72crm_admin_user where dept_id =?
     #end
 
+    #sql("queryAllUserByDeptId")
+        select user_id as id,realname  from 72crm_admin_user where dept_id in (
+            #for(i : ids)
+                #(for.index > 0 ? "," : "")#para(i)
+            #end
+        )
+    #end
+
     #sql ("updateScene")
     delete from 72crm_admin_scene where user_id in (
         #for(i:ids)

@@ -438,7 +438,7 @@ export default {
       this.currentPage = val
       this.getList()
     },
-    // 0待审核、1审核中、2审核通过、3审核未通过
+    // 0待审核、1审核中、2审核通过、3已拒绝 4已撤回 5未提交
     getStatusStyle(status) {
       if (status == 0) {
         return {
@@ -464,7 +464,7 @@ export default {
           'background-color': '#FEF0F0',
           'color': '#F56C6B'
         }
-      } else if (status == 4) {
+      } else if (status == 4 || status == 5) {
         return {
           'background-color': '#FFFFFF'
         }
@@ -481,6 +481,8 @@ export default {
         return '拒绝'
       } else if (status == 4) {
         return '撤回'
+      } else if (status == 5) {
+        return '未提交'
       }
       return ''
     },

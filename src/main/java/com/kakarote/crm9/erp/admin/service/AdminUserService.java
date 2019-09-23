@@ -103,16 +103,18 @@ public class AdminUserService {
     /**
      * @author wyq
      * 查询上级id
-     * @param userId
+     * @param userId 用户ID
      */
     private List<Long> queryTopUserId(Long userId,Integer deepness){
         List<Long> arrUsers=new ArrayList<>();
         if (deepness-- > 0){
             AdminUser adminUser=AdminUser.dao.findById(userId);
-            if(adminUser.getParentId() != null && !adminUser.getParentId().equals(0L)){
-                arrUsers.addAll(queryTopUserId(adminUser.getParentId(),deepness));
+            if(adminUser!=null){
+                if(adminUser.getParentId() != null && !adminUser.getParentId().equals(0L)){
+                    arrUsers.addAll(queryTopUserId(adminUser.getParentId(),deepness));
+                }
+                arrUsers.add(adminUser.getUserId());
             }
-            arrUsers.add(adminUser.getUserId());
         }
         return arrUsers;
     }
@@ -196,6 +198,7 @@ public class AdminUserService {
             AdminUser adminUser = new AdminUser().dao().findById(id);
             String password = BaseUtil.sign(adminUser.getUsername() + pwd, adminUser.getSalt());
             Db.update("update 72crm_admin_user set password = ? where user_id = ?", password, id);
+            BaseUtil.userExit(adminUser.getUserId(),null);
         }
         return R.ok();
     }
@@ -260,6 +263,9 @@ public class AdminUserService {
     public R setUserStatus(String ids, String status) {
         for (Integer id : TagUtil.toSet(ids)) {
             Db.update("update 72crm_admin_user set status = ? where user_id = ?", status, id);
+            if("0".equals(status)){
+                BaseUtil.userExit(Long.valueOf(id),null);
+            }
         }
         return R.ok();
     }
@@ -410,6 +416,13 @@ public class AdminUserService {
         return Db.find(Db.getSql("admin.user.queryUserByDeptId"),deptId);
     }
 
+    public List<Record> queryAllUserByDeptId(Integer deptId) {
+        List<Integer> deptIdList = new ArrayList<>();
+        deptIdList.add(deptId);
+        deptIdList.addAll(queryChileDeptIds(deptId, BaseConstant.AUTH_DATA_RECURSION_NUM));
+        return Db.find(Db.getSqlPara("admin.user.queryAllUserByDeptId",Kv.by("ids",deptIdList)));
+    }
+
     /**
      * @author zxy
      * 根据部门id和用户ID 去重 （仪盘表中业绩指标用）
@@ -468,11 +481,12 @@ public class AdminUserService {
         }
         adminUser.setUsername(username);
         adminUser.setPassword(BaseUtil.sign(username+password,adminUser.getSalt()));
+        BaseUtil.userExit(adminUser.getUserId(),null);
         return R.isSuccess(adminUser.update());
     }
 
     private String getUserIds(String deptIds,String userIds){
-        List<Record> allUsers = Db.find("select * from 72crm_admin_user where dept_id   NOT in ( ? ) and user_id in (?)", deptIds, userIds);
+        List<Record> allUsers = Db.find("select * from 72crm_admin_user where dept_id NOT in (?) and user_id in (?)", deptIds, userIds);
         userIds = null;
         for ( Record user: allUsers) {
             if (userIds == null){

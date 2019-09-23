@@ -185,15 +185,18 @@ export function getMaxIndex() {
 
 /** 深拷贝 */
 export function objDeepCopy(source) {
-  var sourceCopy = source instanceof Array ? [] : {}
-  for (var item in source) {
-    if (!source[item]) {
-      sourceCopy[item] = source[item]
-    } else {
-      sourceCopy[item] = typeof source[item] === 'object' ? objDeepCopy(source[item]) : source[item]
+  if (typeof source === 'object') {
+    var sourceCopy = source instanceof Array ? [] : {}
+    for (var item in source) {
+      if (!source[item]) {
+        sourceCopy[item] = source[item]
+      } else {
+        sourceCopy[item] = typeof source[item] === 'object' ? objDeepCopy(source[item]) : source[item]
+      }
     }
+    return sourceCopy
   }
-  return sourceCopy
+  return source
 }
 
 /** 获取文件类型图标 */

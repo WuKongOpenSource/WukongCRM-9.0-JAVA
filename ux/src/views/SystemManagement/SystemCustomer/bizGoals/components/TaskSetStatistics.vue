@@ -173,7 +173,7 @@ export default {
     window.onresize = () => {
       this.tableHeight = document.documentElement.clientHeight - 290
     }
-    
+
     this.dateSelect = moment(new Date())
       .year()
       .toString()
@@ -547,7 +547,7 @@ export default {
       } else {
         cuf = new Array(s.length)
         for (i = 0; i !== s.length; ++i) {
-          cuf[i] = s.charCodeAt(i) & oxFF
+          cuf[i] = s.charCodeAt(i) & 0xff
         }
         return cuf
       }

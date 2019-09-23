@@ -1,14 +1,16 @@
 #namespace("crm.leads")
     #sql("getLeadsPageList")
-    select leads_id,leads_name,owner_user_name from leadsview where 1=1
+    select a.leads_id,a.leads_name,b.realname as ownerUserName
+    from 72crm_crm_leads as a left join 72crm_admin_user as b on a.owner_user_id = b.user_id
+    where 1=1
       #if(leadsName)
-      and leads_name like CONCAT('%',#para(leadsName),'%')
+      and a.leads_name like CONCAT('%',#para(leadsName),'%')
       #end
       #if(telephone)
-      and telephone = #para(telephone)
+      and a.telephone = #para(telephone)
       #end
       #if(mobile)
-      and mobile = #para(mobile)
+      and a.mobile = #para(mobile)
       #end
     #end
 
@@ -20,7 +22,8 @@
     #end
 
     #sql("queryById")
-    select *,leads_name as name from leadsview
+    select a.*,a.leads_name as name,b.realname as ownerUserName
+    from 72crm_crm_leads as a left join 72crm_admin_user as b on a.owner_user_id = b.user_id
     where leads_id = ?
     #end
 
@@ -54,13 +57,39 @@
     #end
 
     #sql ("excelExport")
-    select leads_name,线索来源,客户行业,客户级别,next_time,telephone,mobile,address,remark,create_user_name,owner_user_name,create_time,update_time
-    from leadsview
-    where leads_id in (
-        #for(i:ids)
-          #(for.index > 0 ? "," : "")#para(i)
+    SELECT
+      `a`.*,
+      `b`.`realname` AS `create_user_name`,
+      `c`.`realname` AS `owner_user_name`,
+      `z`.*
+    FROM
+      `72crm_crm_leads` as `a`
+    left JOIN `72crm_admin_user` `b` ON `a`.`create_user_id` = `b`.`user_id`
+    left JOIN `72crm_admin_user` `c` ON `a`.`owner_user_id` = `c`.`user_id`
+    INNER JOIN (
+      SELECT
+        b.batch_id as field_batch_id
+        #for(field : fieldMap)
+          #if(field.value&&field.value.get("field_type")==0)
+            #if(field.value.get("type")==12)
+              ,GROUP_CONCAT(if(a.name = #para(field.key),c.name,null)) AS `#(field.key)`
+            #elseif(field.value.get("type")==10)
+              ,GROUP_CONCAT(if(a.name = #para(field.key),d.realname,null)) AS `#(field.key)`
+            #else
+              ,max(CASE WHEN `a`.`name` = #para(field.key) THEN `a`.`value` END) AS `#(field.key)`
+            #end
+          #end
         #end
-    ) order by update_time desc
+        FROM 72crm_admin_fieldv AS a RIGHT JOIN (SELECT batch_id FROM 72crm_crm_leads WHERE leads_id in (#for(i:ids) #(for.index > 0 ? "," : "")#para(i) #end)) AS b ON a.batch_id = b.batch_id
+        #if(fieldMap.containsKey("user"))
+          left join 72crm_admin_user d on find_in_set(d.user_id,ifnull(a.value,0))
+        #end
+        #if(fieldMap.containsKey("dept"))
+          left join 72crm_admin_dept c on find_in_set(c.dept_id,ifnull(a.value,0))
+        #end
+        GROUP BY b.batch_id
+    ) `z` ON `a`.`batch_id` = `z`.`field_batch_id`
+    order by update_time desc
     #end
 
     #sql ("queryBatchIdByIds")

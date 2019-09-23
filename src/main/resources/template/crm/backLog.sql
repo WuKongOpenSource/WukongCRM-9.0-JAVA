@@ -59,4 +59,14 @@
   select count(*) from 72crm_crm_contract as a inner join 72crm_crm_customer as b on a.customer_id = b.customer_id
   where to_days(a.end_time) >= to_days(now()) and to_days(a.end_time) <= to_days(now()) + IFNULL(?,0) and a.owner_user_id = ?
   #end
+
+  #sql ("putInPoolRemindNum")
+  select count(*) from 72crm_crm_customer as a
+  where owner_user_id is not null and deal_status ='未成交' and is_lock = 0  and owner_user_id = ? and
+      ((to_days(now()) - to_days(IFNULL((
+            SELECT car.create_time
+            FROM 72crm_admin_record as car
+            where car.types = 'crm_customer' and car.types_id = a.customer_id ORDER BY car.create_time DESC LIMIT 1)
+      ,a.create_time))) between ? and ? or (to_days(now()) - to_days(create_time)) between ? and ?)
+  #end
 #end

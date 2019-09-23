@@ -86,11 +86,12 @@ public class AdminLoginController extends Controller{
             String token = IdUtil.simpleUUID();
             user.setLastLoginIp(BaseUtil.getLoginAddress(getRequest()));
             user.setLastLoginTime(new Date());
+
             user.update();
             user.setRoles(adminRoleService.queryRoleIdsByUserId(user.getUserId()));
             redis.setex(token, 3600, user);
+            BaseUtil.setToken(user.getUserId(),token,1);
             user.remove("password", "salt");
-            //setCookie("Admin-Token", token, 3600*24,true);
             renderJson(R.ok().put("Admin-Token", token).put("user", user).put("auth", adminRoleService.auth(user.getUserId())));
         }else{
             Log.getLog(getClass()).warn("用户登录失败");

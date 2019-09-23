@@ -1,6 +1,7 @@
 package com.kakarote.crm9.erp.crm.controller;
 
 import cn.hutool.core.util.StrUtil;
+import com.jfinal.aop.Clear;
 import com.jfinal.core.paragetter.Para;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
@@ -54,7 +55,7 @@ public class InstrumentController extends Controller {
         } else if (deptIds != null && StrUtil.isNotEmpty(deptIds)) {
             userIds = adminUserService.queryUserIdsByDept(deptIds) + "," + userIds;
         }
-        renderJson(R.ok().put("data",instrumentService.queryBulletinInfo(basePageRequest,userIds,type,label)));
+        renderJson(instrumentService.queryBulletinInfo(basePageRequest,userIds,type,label));
     }
     /**
      * 销售趋势
@@ -126,6 +127,50 @@ public class InstrumentController extends Controller {
             }
         }
         renderJson(instrumentService.sellFunnel(type,userIds,startTime, endTime,typeId));
+    }
+
+    /**
+     * 查询销售简报的跟进记录统计
+     */
+    public void queryRecordConunt() {
+        String type = getPara("type");
+        String userIds = getPara("userIds");
+        String deptIds = getPara("deptIds");
+        String startTime = getPara("startTime");
+        String endTime = getPara("endTime");
+        if (StrUtil.isEmpty(userIds) && StrUtil.isEmpty(deptIds)){
+            userIds = BaseUtil.getUserId().toString();
+        }
+        if (StrUtil.isNotEmpty(deptIds)){
+            String ids = adminUserService.queryUserIdsByDept(deptIds);
+            if (StrUtil.isEmpty(ids)){
+                userIds = ids + userIds;
+            }
+        }
+        renderJson(instrumentService.queryRecordCount(type, userIds,startTime,endTime));
+    }
+
+    /**
+     * 查询跟进记录统计列表
+     * @param basePageRequest
+     */
+    public void queryRecordList(BasePageRequest basePageRequest){
+        String type = getPara("type");
+        String userIds = getPara("userIds");
+        String deptIds = getPara("deptIds");
+        String startTime = getPara("startTime");
+        String endTime = getPara("endTime");
+        String crmType = getPara("crmType");
+        if (StrUtil.isEmpty(userIds) && StrUtil.isEmpty(deptIds)){
+            userIds = BaseUtil.getUserId().toString();
+        }
+        if (StrUtil.isNotEmpty(deptIds)){
+            String ids = adminUserService.queryUserIdsByDept(deptIds);
+            if (StrUtil.isEmpty(ids)){
+                userIds = ids + userIds;
+            }
+        }
+        renderJson(instrumentService.queryRecordList(basePageRequest,type, userIds,startTime,endTime,crmType));
     }
 
 }

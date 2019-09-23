@@ -16,7 +16,7 @@ public class CaffeineCache implements ICache {
     private static final String DEFAULT_KEY="default";
 
     private CaffeineCache() {
-        cacheConcurrentHashMap.put(DEFAULT_KEY,Caffeine.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build());
+        cacheConcurrentHashMap.put(DEFAULT_KEY,Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES).build());
     }
 
     @Override
@@ -36,7 +36,7 @@ public class CaffeineCache implements ICache {
     public void put(String cacheName, Object key, Object value) {
         Cache<Object, Object> cache = cacheConcurrentHashMap.get(cacheName);
         if (cache == null) {
-            cache = Caffeine.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
+            cache = Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES).build();
             cacheConcurrentHashMap.put(cacheName, cache);
         }
         cache.put(key, value);

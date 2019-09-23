@@ -25,7 +25,7 @@ public class CrmInterceptor implements Interceptor {
         String[] split = requestURI.split("/");
         Long userId = BaseUtil.getUserId();
         boolean flag = false;
-        Map<String,String> tablePara =  AuthUtil.getCrmTablePara(split[1]);
+        Map<String,String> tablePara =  AuthUtil.getCrmTablePara(CrmEnum.parse(split[1]));
         if(! userId.equals(BaseConstant.SUPER_ADMIN_USER_ID)){
             if(tablePara != null){
                 if("addOrUpdate".equals(split[2]) || "saveAndUpdate".equals(split[2])){
@@ -71,9 +71,12 @@ public class CrmInterceptor implements Interceptor {
                         }
                     }
                 }else if("queryById".equals(split[2])){
-                    String[] next = controller.getParaMap().values().iterator().next();
-                    if(next != null && next.length > 0){
-                        flag =   AuthUtil.isCrmAuth(tablePara, Integer.valueOf(next[0]));
+                    //客户公海单独处理
+                    if(! "CrmCustomer".equals(split[1])){
+                        String[] next = controller.getParaMap().values().iterator().next();
+                        if(next != null && next.length > 0){
+                            flag =   AuthUtil.isCrmAuth(tablePara, Integer.valueOf(next[0]));
+                        }
                     }
                 }
                 if(flag){

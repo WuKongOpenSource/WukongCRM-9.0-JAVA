@@ -14,7 +14,7 @@ public class CrmBackLogController extends Controller {
     CrmBackLogService crmBackLogService;
 
     /**
-     * 代办事项数量统计
+     * 待办事项数量统计
      */
     public void num(){
         renderJson(crmBackLogService.num());
@@ -81,5 +81,13 @@ public class CrmBackLogController extends Controller {
      */
     public void endContract(BasePageRequest basePageRequest){
         renderJson(crmBackLogService.endContract(basePageRequest));
+    }
+
+    /**
+     * @author wyq
+     * 待进入客户池提醒
+     */
+    public void putInPoolRemind(BasePageRequest basePageRequest){
+        renderJson(crmBackLogService.putInPoolRemind(basePageRequest));
     }
 }

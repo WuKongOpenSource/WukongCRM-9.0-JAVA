@@ -45,27 +45,6 @@ public class CrmReceivablesService {
     private AuthUtil authUtil;
 
     /**
-     * 获取用户审核通过和未通过的回款
-     *
-     * @param userId 用户ID
-     * @author HJP
-     */
-    public List<CrmReceivables> queryListByUserId(Integer userId) {
-        CrmReceivables crmReceivables = new CrmReceivables();
-        String sql = "select re.receivables_id,re.contract_id,c.`name`,r.check_time,r.check_user_id,u.username,re.check_status from 72crm_crm_receivables re"
-                + "left join 72crm_crm_contract c"
-                + "on c.contract_id=re.contract_id"
-                + "left join 72crm_admin_examine_step s"
-                + "on re.flow_id=s.flow_id and re.order_id=s.order_id"
-                + "left join 72crm_admin_examine_record r"
-                + "on s.flow_id=r.flow_id and s.step_id=r.step_id"
-                + "left join 72crm_admin_user u"
-                + "on r.check_user_id=u.id"
-                + "where re.check_status=2 or re.check_status=3 and re.create_user_id=" + userId;
-        return crmReceivables.find(sql);
-    }
-
-    /**
      * 分页查询回款
      */
     public Page<Record> queryPage(BasePageRequest<CrmReceivables> basePageRequest) {
@@ -92,14 +71,22 @@ public class CrmReceivablesService {
             crmReceivables.setCreateTime(DateUtil.date());
             crmReceivables.setUpdateTime(DateUtil.date());
             crmReceivables.setBatchId(batchId);
-            crmReceivables.setCheckStatus(0);
             crmReceivables.setOwnerUserId(BaseUtil.getUser().getUserId().intValue());
-            Map<String, Integer> map = examineRecordService.saveExamineRecord(2, jsonObject.getLong("checkUserId"), crmReceivables.getOwnerUserId(), null);
-            if (map.get("status") == 0) {
-                return R.error("没有启动的审核步骤，不能添加！");
-            } else {
-                crmReceivables.setExamineRecordId(map.get("id"));
+
+                Map<String, Integer> map = examineRecordService.saveExamineRecord(2,
+                        jsonObject.getLong("checkUserId"),
+                        crmReceivables.getOwnerUserId(), null,crmReceivables.getCheckStatus());
+                if (map.get("status") == 0) {
+                    return R.error("没有启动的审核步骤，不能添加！");
+                } else {
+                    crmReceivables.setExamineRecordId(map.get("id"));
+                }
+            if (crmReceivables.getCheckStatus() != null && crmReceivables.getCheckStatus() == 5){
+                crmReceivables.setCheckStatus(5);
+            }else {
+                crmReceivables.setCheckStatus(0);
             }
+
             boolean save = crmReceivables.save();
             CrmReceivablesPlan crmReceivablesPlan = CrmReceivablesPlan.dao.findById(crmReceivables.getPlanId());
             if (crmReceivablesPlan != null) {
@@ -107,21 +94,28 @@ public class CrmReceivablesService {
                 crmReceivablesPlan.setUpdateTime(DateUtil.date());
                 crmReceivablesPlan.update();
             }
-            crmRecordService.addRecord(crmReceivables.getReceivablesId(), CrmEnum.RECEIVABLES_TYPE_KEY.getTypes());
+            crmRecordService.addRecord(crmReceivables.getReceivablesId(), CrmEnum.CRM_RECEIVABLES);
             return R.isSuccess(save);
         } else {
             CrmReceivables receivables = CrmReceivables.dao.findById(crmReceivables.getReceivablesId());
-            if (receivables.getCheckStatus() != 4 && receivables.getCheckStatus() != 3) {
+            if (receivables.getCheckStatus() != 4 && receivables.getCheckStatus() != 3 && receivables.getCheckStatus() != 5) {
                 return R.error("不能编辑，请先撤回再编辑！");
             }
-            Map<String, Integer> map = examineRecordService.saveExamineRecord(2, jsonObject.getLong("checkUserId"), receivables.getOwnerUserId(), receivables.getExamineRecordId());
-            if (map.get("status") == 0) {
-                return R.error("没有启动的审核步骤，不能添加！");
-            } else {
-                crmReceivables.setExamineRecordId(map.get("id"));
-            }
-            crmRecordService.updateRecord(new CrmReceivables().dao().findById(crmReceivables.getReceivablesId()), crmReceivables, CrmEnum.RECEIVABLES_TYPE_KEY.getTypes());
-            crmReceivables.setCheckStatus(0);
+                Map<String, Integer> map = examineRecordService.saveExamineRecord(2,
+                        jsonObject.getLong("checkUserId"),
+                        receivables.getOwnerUserId(),
+                        receivables.getExamineRecordId(),crmReceivables.getCheckStatus());
+                if (map.get("status") == 0) {
+                    return R.error("没有启动的审核步骤，不能添加！");
+                } else {
+                    crmReceivables.setExamineRecordId(map.get("id"));
+                }
+            if (crmReceivables.getCheckStatus() != null && crmReceivables.getCheckStatus() == 5){
+                    crmReceivables.setCheckStatus(5);
+                }else {
+                    crmReceivables.setCheckStatus(0);
+                }
+            crmRecordService.updateRecord(new CrmReceivables().dao().findById(crmReceivables.getReceivablesId()), crmReceivables,CrmEnum.CRM_RECEIVABLES);
             crmReceivables.setUpdateTime(DateUtil.date());
             CrmReceivablesPlan crmReceivablesPlan = CrmReceivablesPlan.dao.findById(crmReceivables.getPlanId());
             if (crmReceivablesPlan != null) {
@@ -136,16 +130,18 @@ public class CrmReceivablesService {
     /**
      * 根据id查询回款
      */
-    public R queryById(Integer id) {
-        Record record = Db.findFirst(Db.getSqlPara("crm.receivables.queryReceivablesById", Kv.by("id", id)));
-        return R.ok().put("data", record);
+    public Record queryById(Integer id) {
+        Record record = Db.findFirst(Db.getSql("crm.receivables.queryReceivablesById"), id);
+        List<Record> recordList = Db.find("select name,value from `72crm_admin_fieldv` where batch_id = ?", record.getStr("batch_id"));
+        recordList.forEach(field->record.set(field.getStr("name"),field.getStr("value")));
+        return record;
     }
 
     /**
      * 根据id查询回款基本信息
      */
     public List<Record> information(Integer id) {
-        Record record = Db.findFirst(Db.getSqlPara("crm.receivables.queryReceivablesById", Kv.by("id", id)));
+        Record record = Db.findFirst(Db.getSql("crm.receivables.queryReceivablesById"),id);
         if (record == null) {
             return null;
         }
@@ -191,12 +187,12 @@ public class CrmReceivablesService {
      * 查询编辑字段
      */
     public List<Record> queryField(Integer receivablesId) {
-        Record receivables = Db.findFirst("select * from receivablesview where receivables_id = ?",receivablesId);
+        Record receivables = queryById(receivablesId);
         List<Record> list = new ArrayList<>();
         list.add(new Record().set("customer_id",receivables.getInt("customer_id")).set("customer_name",receivables.getStr("customer_name")));
         receivables.set("customer_id",list);
         list = new ArrayList<>();
-        list.add(new Record().set("contract_id", receivables.getStr("contract_id")).set("contract_num", receivables.getStr("contract_num")));
+        list.add(new Record().set("contract_id", receivables.getStr("contract_id")).set("contract_num", receivables.getStr("contractNum")));
         receivables.set("contract_id",list);
         return adminFieldService.queryUpdateField(7,receivables);
     }
@@ -222,10 +218,10 @@ public class CrmReceivablesService {
     public List<Record> queryListByType(String type, Integer id) {
         String sq = "select * from 72crm_crm_receivables where ";
         StringBuffer sql = new StringBuffer(sq);
-        if (type.equals(CrmEnum.CUSTOMER_TYPE_KEY.getTypes())) {
+        if (type.equals(CrmEnum.CRM_CUSTOMER.getType()+"")) {
             sql.append("  customer_id = ? ");
         }
-        if (type.equals(CrmEnum.CONTRACT_TYPE_KEY.getTypes())) {
+        if (type.equals(CrmEnum.CRM_CONTRACT.getType()+"")) {
             sql.append("  contract_id = ? ");
         }
 

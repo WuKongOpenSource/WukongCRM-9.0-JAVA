@@ -1,6 +1,5 @@
 import request from '@/utils/request'
 
-
 export function roleListFun(data) {
   return request({
     url: 'system/role/getAllRoleList',
@@ -75,5 +74,32 @@ export function usersDelete(data) {
     url: 'system/role/unbindingUser',
     method: 'post',
     data: data
+  })
+}
+
+// 角色分类列表
+export function adminGroupsTypeListAPI(data) {
+  return request({
+      url: 'system/role/getRoleTypeList',
+      method: 'post',
+      data: data
+  })
+}
+
+// 参数 roleType   根据角色类型查询角色列表
+export function systemRoleByTypeAPI(data) {
+  return request({
+      url: 'system/role/getRoleByType',
+      method: 'post',
+      data: data
+  })
+}
+
+// 规则
+export function systemRuleByTypeAPI(data) {
+  return request({
+      url: 'system/menu/getMenuListByType',
+      method: 'post',
+      data: data
   })
 }

@@ -1,6 +1,4 @@
 package com.kakarote.crm9.erp.bi.service;
-
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
@@ -8,10 +6,7 @@ import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.erp.bi.common.BiTimeUtil;
 import com.kakarote.crm9.utils.R;
-import org.apache.xmlbeans.impl.xb.xsdschema.Public;
-
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class BiRankingService {

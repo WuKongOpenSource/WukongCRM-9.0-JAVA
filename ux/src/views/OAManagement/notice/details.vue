@@ -15,10 +15,10 @@
       <div class="btn-box"
            v-if="btnShow">
         <el-button type="primary"
-                   v-if="titleList.isUpdate == 1"
+                   v-if="permissionUpdate"
                    @click="onEdit">编辑</el-button>
         <el-button type="danger"
-                   v-if="titleList.isDelete == 1"
+                   v-if="permissionDelete"
                    @click="deleteFun">删除</el-button>
       </div>
     </div>
@@ -36,6 +36,8 @@ import CreateView from '@/components/CreateView'
 import VEdit from './edit'
 // API
 import { noticeDelete, noticeAdd } from '@/api/oamanagement/notice'
+import { mapGetters } from 'vuex'
+
 export default {
   components: {
     CreateView,
@@ -46,6 +48,15 @@ export default {
       showEdit: false,
       formData: {},
       loading: false
+    }
+  },
+  computed: {
+    ...mapGetters(['oa']),
+    permissionUpdate() {
+      return this.oa && this.oa.announcement && this.oa.announcement.update
+    },
+    permissionDelete() {
+      return this.oa && this.oa.announcement && this.oa.announcement.delete
     }
   },
   props: {

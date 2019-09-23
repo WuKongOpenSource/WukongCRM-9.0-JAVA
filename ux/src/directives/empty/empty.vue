@@ -75,7 +75,6 @@ export default {
 
 .empty-content {
   top: 50%;
-  margin-top: -60px;
   width: 100%;
   text-align: center;
   position: absolute;

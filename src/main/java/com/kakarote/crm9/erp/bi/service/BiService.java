@@ -31,16 +31,6 @@ public class BiService {
         List<Record> categorys = Db.find(Db.getSqlPara("bi.base.queryProductSell",Kv.by("startTime",startTime).set("endTime",endTime).set("userId",userId).set("deptId",deptId)));
         return  R.ok().put("data",categorys);
     }
-    /**
-     * 回款统计，根据月份获取合同信息
-     *  userId用户ID deptId部门ID
-     */
-    public R queryByUserIdOrYear(Integer userId,Integer deptId,String year , String month){
-        List<Record> categorys = Db.find(Db.getSqlPara("bi.base.queryByUserIdOrYear",
-                Kv.by("userId",userId).set("deptId",deptId)
-                        .set("year",year).set("month",month)));
-        return  R.ok().put("data",categorys);
-    }
 
     /**
      * 获取商业智能业绩目标完成情况

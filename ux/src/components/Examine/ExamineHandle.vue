@@ -29,6 +29,8 @@
               type="textarea"
               resize="none"
               :rows="5"
+              :maxlength="200"
+              show-word-limit
               :placeholder="placeholder"></el-input>
     <div slot="footer"
          class="dialog-footer">

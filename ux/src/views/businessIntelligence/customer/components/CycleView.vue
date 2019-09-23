@@ -1,7 +1,8 @@
 <template>
   <div class="cycle-content"
        v-loading="loading">
-    <filtrate-handle-view class="filtrate-bar"
+    <filtrate-handle-view v-if="initView"
+                          class="filtrate-bar"
                           moduleType="customer"
                           @load="loading=true"
                           @change="getDataList">

@@ -4,12 +4,12 @@ import cn.hutool.core.date.DateUtil;
 import com.jfinal.kit.PropKit;
 import com.jfinal.log.Log;
 import com.kakarote.crm9.common.config.JfinalConfig;
+import com.kakarote.crm9.common.config.redis.Redis;
 import com.kakarote.crm9.common.config.redis.RedisManager;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.jfinal.kit.Prop;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.util.Date;
@@ -17,6 +17,10 @@ import java.util.Date;
 public class BaseUtil {
 
     private static ThreadLocal<HttpServletRequest> threadLocal = new ThreadLocal<>();
+
+    private static final String USER_ADMIN_TOKEN = "72CRM_USER_ADMIN_TOKEN";
+
+    private static final String USER_MOBILE_TOKEN = "72CRM_USER_MOBILE_TOKEN";
 
     /**
      *
@@ -67,6 +71,7 @@ public class BaseUtil {
         return DateUtil.format(new Date(), "yyyyMMdd");
     }
 
+    //FIXME 如果获取的地址不正确,直接返回一个固定地址也可以
     public static String getIpAddress() {
         Prop prop = PropKit.use("config/undertow.txt");
         try {
@@ -74,25 +79,9 @@ public class BaseUtil {
                 return "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + prop.get("undertow.port", "8080") + "/";
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             Log.getLog(BaseUtil.class).error("",e);
         }
         HttpServletRequest request=getRequest();
-        /**
-         * TODO nginx反向代理下手动增加一个请求头 proxy_set_header proxy_url "代理映射路径";
-         * 如 location /api/ {
-         *     proxy_set_header proxy_url "api"
-         *     proxy_redirect off;
-         * 	   proxy_set_header Host $host:$server_port;
-         *     proxy_set_header X-Real-IP $remote_addr;
-         * 	   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-         * 	   proxy_set_header X-Forwarded-Proto  $scheme;
-         * 	   proxy_connect_timeout 60;
-         * 	   proxy_send_timeout 120;
-         * 	   proxy_read_timeout 120;
-         *     proxy_pass http://127.0.0.1:8080/;
-         *    }
-         */
         String proxy=request.getHeader("proxy_url")!=null?"/"+request.getHeader("proxy_url"):"";
         return "http://" + request.getServerName()+":"+ request.getServerPort()+ request.getContextPath()+proxy+"/";
     }
@@ -126,7 +115,6 @@ public class BaseUtil {
         return threadLocal.get();
     }
 
-
     public static AdminUser getUser() {
         return RedisManager.getRedis().get(getToken());
     }
@@ -145,6 +133,44 @@ public class BaseUtil {
 
     public static String getToken(HttpServletRequest request){
         return request.getHeader("Admin-Token") != null ? request.getHeader("Admin-Token") : "";
+    }
+
+    public static void userExit(Long userId,Integer type){
+        Redis redis = RedisManager.getRedis();
+        if(type==null||type==1){
+            if(redis.exists(USER_ADMIN_TOKEN+userId)){
+                String token=redis.get(USER_ADMIN_TOKEN+userId);
+                redis.del(USER_ADMIN_TOKEN+userId);
+                redis.del(token);
+            }
+        }
+        if(type==null||type==2){
+            if(redis.exists(USER_MOBILE_TOKEN+userId)){
+                String token=redis.get(USER_MOBILE_TOKEN+userId);
+                redis.del(USER_MOBILE_TOKEN+userId);
+                redis.del(token);
+            }
+        }
+    }
+    public static void setToken(Long userId,String token,Integer type){
+        userExit(userId,type);
+        Redis redis = RedisManager.getRedis();
+        if(redis.exists(token)){
+            if(type==1){
+                redis.setex(USER_ADMIN_TOKEN+userId,redis.ttl(token).intValue(),token);
+            }else if(type==2){
+                redis.setex(USER_MOBILE_TOKEN+userId,redis.ttl(token).intValue(),token);
+            }
+        }
+
+    }
+    public static void userExpire(String token){
+        Redis redis = RedisManager.getRedis();
+        if(redis.exists(token)){
+            redis.expire(token,3600);
+            redis.expire(USER_ADMIN_TOKEN+getUserId(),3600);
+            redis.expire(USER_MOBILE_TOKEN+getUserId(),3600);
+        }
     }
 
 }

@@ -34,7 +34,7 @@ export default {
   methods: {
     enterHome() {
       this.$router.replace({
-        name: 'workbench'
+        path: '/'
       })
     },
     enterLogin() {

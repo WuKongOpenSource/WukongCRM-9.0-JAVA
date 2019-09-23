@@ -17,6 +17,7 @@
           </div>
         </div>
         <xh-user-cell :infoType="types"
+                      :value="draftUser ? [draftUser] : []"
                       @value-change="fieldValueChange"></xh-user-cell>
       </el-form-item>
     </el-form>
@@ -85,7 +86,8 @@ export default {
         name: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
       },
       // 审核信息 examineType 1 固定审批 2 授权审批
-      examineInfo: {}
+      examineInfo: {},
+      draftUser: null
     }
   },
   props: {
@@ -106,24 +108,39 @@ export default {
   methods: {
     getDetail() {
       let reqeust = {
-        oa_examine : oaCreateExamineFlow,
-        crm_contract : crmCreateExamineFlow,
-        crm_receivables : crmCreateExamineFlow,
+        oa_examine: oaCreateExamineFlow,
+        crm_contract: crmCreateExamineFlow,
+        crm_receivables: crmCreateExamineFlow
       }[this.types]
 
       let params = {}
       if (this.types == 'oa_examine') {
         params.categoryId = this.typesId
       } else {
+        params.id = this.typesId
         params.categoryType = this.types == 'crm_contract' ? 1 : 2 // 1 合同 2 回款
       }
       reqeust(params)
         .then(res => {
           this.examineInfo = res.data
-          this.$emit('value-change', {
-            examineType: res.data.examineType, // 审批类型
-            value: [] // 审批信息
-          })
+          if (res.data.examineType == 2 && res.data.examineUser) {
+            this.draftUser = {
+              realname: res.data.examineUserName,
+              userId: res.data.examineUser
+            }
+            this.form.name = res.data.examineUserName
+            this.$emit('value-change', {
+              examineType: res.data.examineType, // 审批类型
+              value: [this.draftUser] // 审批信息
+            })
+          } else {
+            this.form.name = ''
+            this.draftUser = null
+            this.$emit('value-change', {
+              examineType: res.data.examineType, // 审批类型
+              value: [] // 审批信息
+            })
+          }
         })
         .catch(() => {})
     },
@@ -143,7 +160,13 @@ export default {
     },
     // 字段的值更新
     fieldValueChange(data) {
-      this.form.name = data
+      if (data.value.length) {
+        this.draftUser = data.value[0]
+        this.form.name = this.draftUser.userId
+      } else {
+        this.draftUser = null
+        this.form.name = ''
+      }
       this.$emit('value-change', {
         examineType: this.examineInfo.examineType, // 审批类型
         value: data.value // 审批信息

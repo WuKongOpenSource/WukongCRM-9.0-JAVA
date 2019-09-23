@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 系统配置
+// 企业首页
 export function adminSystemSave(data) {
   return request({
     url: 'sysConfig/setSysConfig',
@@ -12,7 +12,7 @@ export function adminSystemSave(data) {
   })
 }
 
-// 系统配置
+// 企业首页
 export function adminSystemIndex(data) {
   return request({
     url: 'sysConfig/querySysConfig',

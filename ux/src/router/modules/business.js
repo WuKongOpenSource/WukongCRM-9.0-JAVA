@@ -107,7 +107,7 @@ const achievementAuth = {
   requiresAuth: true,
   index: 1,
   type: 'bi',
-  subType: 'achievement'
+  subType: 'contract'
 }
 
 const achievementRouter = {

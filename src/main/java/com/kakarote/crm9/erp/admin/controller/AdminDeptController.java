@@ -22,8 +22,13 @@ public class AdminDeptController extends Controller {
      * 设置部门
      * @param adminDept 部门对象
      */
-    @Permissions("manage:user")
-    public void setDept(@Para("") AdminDept adminDept){
+    @Permissions("manage:users:deptSave")
+    public void addDept(@Para("") AdminDept adminDept){
+        renderJson(adminDeptService.setDept(adminDept));
+    }
+
+    @Permissions("manage:users:deptUpdate")
+    public void updateDept(@Para("") AdminDept adminDept){
         renderJson(adminDeptService.setDept(adminDept));
     }
 
@@ -49,7 +54,7 @@ public class AdminDeptController extends Controller {
      * @author hmb
      * 删除部门
      */
-    @Permissions("manage:user")
+    @Permissions("manage:users:deptDelete")
     public void deleteDept(){
         String id = getPara("id");
         renderJson(adminDeptService.deleteDept(id));

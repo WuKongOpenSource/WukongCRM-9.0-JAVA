@@ -14,7 +14,7 @@
 <script type="text/javascript">
 import stringMixin from './stringMixin'
 import {
-  crmContractQueryReceivablesPlan
+  crmQueryReceivablesPlansByContractId
 } from '@/api/customermanagement/contract'
 
 export default {
@@ -53,7 +53,7 @@ export default {
   methods: {
     getPlanList() {
       this.loading = true
-      crmContractQueryReceivablesPlan({ contractId: this.relation.contractId, pageType: 0})
+      crmQueryReceivablesPlansByContractId({ contractId: this.relation.contractId})
         .then(res => {
           this.loading = false
           this.option = res.data

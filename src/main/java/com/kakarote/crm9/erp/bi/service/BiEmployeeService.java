@@ -8,6 +8,7 @@ import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.erp.bi.common.BiTimeUtil;
 import com.kakarote.crm9.utils.R;
+import com.kakarote.crm9.utils.TagUtil;
 
 import java.util.List;
 
@@ -103,11 +104,12 @@ public class BiEmployeeService {
         Integer beginTime = record.getInt("beginTime");
         Integer finalTime = record.getInt("finalTime");
         Integer cycleNum = record.getInt("cycleNum");
-        Record total = Db.findFirst(Db.getSqlPara("bi.employee.totalContract", Kv.by("sqlDateFormat",sqlDateFormat).set("beginTime",beginTime).set("finalTime",finalTime).set("userIds",userIds)));
+        Record total = Db.findFirst(Db.getSqlPara("bi.employee.totalContract", Kv.by("sqlDateFormat",sqlDateFormat).set("beginTime",beginTime).set("finalTime",finalTime).set("userIds", TagUtil.toSet(userIds))));
         StringBuffer sqlStringBuffer = new StringBuffer();
         for (int i=1; i <= cycleNum;i++){
-            sqlStringBuffer.append("select '").append(beginTime).append("'as type,count(contract_id) as contractNum,IFNULL(SUM(money),0) " +
-                    "as contractMoney,IFNULL((select SUM(money) from 72crm_crm_receivables as b where b.contract_id = a.contract_id),0)" +
+            sqlStringBuffer.append("select '").append(beginTime).append("'as type,count(contract_id) as contractNum,IFNULL(SUM(IFNULL(money,0)),0) " +
+                    "as contractMoney,IFNULL(SUM(IFNULL((select money from 72crm_crm_receivables as b where b.contract_id = a.contract_id),0)),0)" +
+                    "" +
                     " as receivablesMoney from 72crm_crm_contract as a where DATE_FORMAT(order_date,'").append(sqlDateFormat)
                     .append("') = '").append(beginTime).append("' and check_status = 2 and owner_user_id in (").append(userIds).append(")");
             if (i != cycleNum){

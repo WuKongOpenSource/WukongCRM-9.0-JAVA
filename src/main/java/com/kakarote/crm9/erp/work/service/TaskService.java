@@ -336,16 +336,6 @@ public class TaskService{
 
         Task auldTask = Task.dao.findById(task.getTaskId());
         task.update();
-
-        //判断描述是否修改
-       /* if (task.getDescription() != null){
-            if (auldTask.getDescription() == null || auldTask.getDescription().equals("")){
-                workTaskLog.setContent("增加加了描述 " + task.getDescription());
-            } else if (!auldTask.getDescription().equals(task.getDescription())){
-               workTaskLog.setContent("修改了描述 " + task.getDescription());
-            }
-           saveWorkTaskLog(workTaskLog);
-        }*/
         Set<Map.Entry<String,Object>> newEntries = task._getAttrsEntrySet();
         Set<Map.Entry<String,Object>> oldEntries = auldTask._getAttrsEntrySet();
         newEntries.forEach(x -> {
@@ -379,6 +369,9 @@ public class TaskService{
                             }
                             workTaskLog.setContent("修改 优先级 为：" + value + "");
                         }else{
+                            if("main_user_id".equals(y.getKey())){
+                                newValue = Db.queryStr("select realname from `72crm_admin_user` where user_id = ?", newValue);
+                            }
                             workTaskLog.setContent("修改" + getTaileName(y.getKey()) + "为：" + newValue + "");
                         }
                         saveWorkTaskLog(workTaskLog);
@@ -435,7 +428,7 @@ public class TaskService{
                 for(String id : userIds){
                     if(StrUtil.isNotBlank(id)){
                         adminUser = AdminUser.dao.findById(id);
-                        workTaskLog.setContent("添加 " + adminUser.getUsername() + "参与任务");
+                        workTaskLog.setContent("添加 " + adminUser.getRealname() + "参与任务");
                         saveWorkTaskLog(workTaskLog);
                     }
                 }
@@ -446,7 +439,7 @@ public class TaskService{
                     if(StrUtil.isNotBlank(id)){
                         if(! auldTask.getOwnerUserId().contains("," + id + ",")){
                             adminUser = AdminUser.dao.findById(id);
-                            workTaskLog.setContent("添加 " + adminUser.getUsername() + "参与任务");
+                            workTaskLog.setContent("添加 " + adminUser.getRealname() + "参与任务");
                             saveWorkTaskLog(workTaskLog);
                         }
                     }
@@ -456,7 +449,7 @@ public class TaskService{
                     if(StrUtil.isNotBlank(id)){
                         if(! task.getOwnerUserId().contains("," + id + ",")){
                             adminUser = AdminUser.dao.findById(id);
-                            workTaskLog.setContent("将 " + adminUser.getUsername() + "从任务中移除");
+                            workTaskLog.setContent("将 " + adminUser.getRealname() + "从任务中移除");
                             saveWorkTaskLog(workTaskLog);
                         }
                     }
@@ -475,6 +468,8 @@ public class TaskService{
             return "结束时间";
         }else if("description".equals(key)){
             return "任务描述";
+        }else if("main_user_id".equals(key)){
+            return "负责人";
         }
         return "";
     }
@@ -502,6 +497,7 @@ public class TaskService{
         }else {
             bol = Db.update("update 72crm_task set ishidden = 1,hidden_time = now() where task_id = ?", taskId) > 0;
         }
+        adminFileService.removeByBatchId(Db.queryStr("select batch_id from `72crm_task` where task_id = ?",taskId));
         return bol ? R.ok() : R.error();
     }
 
@@ -512,7 +508,7 @@ public class TaskService{
      */
     public R queryTaskRelation(BasePageRequest<TaskRelation> basePageRequest){
         TaskRelation relation = basePageRequest.getData();
-        if(AuthUtil.oaAnth(relation.toRecord())){
+        if(AuthUtil.oaAuth(relation.toRecord())){
             return R.noAuth();
         }
         Page<Record> paginate = Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("work.task.queryTaskRelation", Kv.by("businessIds", relation.getBusinessIds()).set("contactsIds", relation.getContactsIds()).set("contractIds", relation.getContractIds()).set("customerIds", relation.getCustomerIds())));

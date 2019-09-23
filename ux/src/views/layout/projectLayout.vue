@@ -8,7 +8,7 @@
       <el-aside width="auto"
                 class="aside-container">
         <sidebar :items="sidebarItems"
-                 createButtonTitle="创建项目"
+                 :createButtonTitle="permissonProject ? '创建项目' : ''"
                  createButtonIcon="el-icon-plus"
                  mainRouter="project"
                  @quicklyCreate="quicklyCreate"></sidebar>
@@ -23,6 +23,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { childrenMenu } from '@/router/modules/project/project'
 import { Navbar, Sidebar, AppMain } from './components'
 import { workIndexWorkListAPI } from '@/api/projectManagement/task'
@@ -36,6 +37,12 @@ export default {
     Sidebar,
     AppMain,
     AddProject
+  },
+  computed: {
+    ...mapGetters(['project']),
+    permissonProject() {
+      return this.project && this.project.projectManage && this.project.projectManage.save
+    }
   },
   data() {
     return {
@@ -219,5 +226,9 @@ export default {
 
 #project-main-container {
   max-height: 100%;
+}
+
+.el-container {
+  overflow: hidden;
 }
 </style>

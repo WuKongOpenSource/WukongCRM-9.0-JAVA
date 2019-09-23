@@ -26,6 +26,13 @@
    #sql("queryByCustomerIdContractId")
      SELECT * from 72crm_crm_receivables_plan WHERE receivables_id is null and contract_id = ? and customer_id = ?
    #end
+
+   #sql ("queryReceivablesPlansByContractId")
+     select a.plan_id,a.num
+     from 72crm_crm_receivables_plan as a left join 72crm_crm_receivables as b on a.plan_id = b.plan_id
+     where b.receivables_id is null and a.contract_id = ?
+   #end
+
    #sql("queryReceivablesPlanById")
      select * from 72crm_crm_receivables_plan where contract_id = ?
    #end

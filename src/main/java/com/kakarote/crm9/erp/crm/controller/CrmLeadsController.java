@@ -4,12 +4,14 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.kit.Kv;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.common.annotation.LoginFormCookie;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
@@ -133,7 +135,7 @@ public class CrmLeadsController extends Controller {
     @NotNullValidate(value = "content",message = "内容不能为空")
     @NotNullValidate(value = "category",message = "跟进类型不能为空")
     public void addRecord(@Para("")AdminRecord adminRecord){
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.LEADS_TYPE_KEY.getSign()), adminRecord.getTypesId());
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_LEADS), adminRecord.getTypesId());
         if(auth){
             renderJson(R.noAuth());
             return;
@@ -146,7 +148,7 @@ public class CrmLeadsController extends Controller {
      * 查看跟进记录
      */
     public void getRecord(BasePageRequest<CrmLeads> basePageRequest){
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.LEADS_TYPE_KEY.getSign()), basePageRequest.getData().getLeadsId());
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_LEADS), basePageRequest.getData().getLeadsId());
         if(auth){renderJson(R.noAuth()); return; }
         renderJson(R.ok().put("data",crmLeadsService.getRecord(basePageRequest)));
     }
@@ -157,7 +159,10 @@ public class CrmLeadsController extends Controller {
      */
     @Permissions("crm:leads:excelexport")
     public void batchExportExcel(@Para("ids")String leadsIds) throws IOException {
-        List<Record> recordList = crmLeadsService.exportLeads(leadsIds);
+        Map<String, AdminField> fieldMap = adminSceneService.getAdminFieldMap(1);
+        String[] leadsIdsArr = leadsIds.split(",");
+        Kv kv = Kv.by("ids", leadsIdsArr).set("fieldMap",fieldMap);
+        List<Record> recordList = crmLeadsService.exportLeads(kv);
         export(recordList);
         renderNull();
     }
@@ -171,7 +176,8 @@ public class CrmLeadsController extends Controller {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         jsonObject.fluentPut("excel","yes").fluentPut("type","1");
         AdminSceneService adminSceneService = new AdminSceneService();
-        List<Record> recordList = (List<Record>)adminSceneService.filterConditionAndGetPageList(basePageRequest).get("data");
+        JSONObject data = (JSONObject)adminSceneService.filterConditionAndGetPageList(basePageRequest).get("data");
+        List<Record> recordList = data.getJSONArray("list").toJavaList(Record.class);
         export(recordList);
         renderNull();
     }
@@ -182,30 +188,37 @@ public class CrmLeadsController extends Controller {
             writer = ExcelUtil.getWriter();
             AdminFieldService adminFieldService = new AdminFieldService();
             List<Record> fieldList = adminFieldService.customFieldList("1");
-            writer.addHeaderAlias("leads_name","线索名称");
-            writer.addHeaderAlias("next_time","下次联系时间");
-            writer.addHeaderAlias("telephone","电话");
-            writer.addHeaderAlias("mobile","手机号");
-            writer.addHeaderAlias("address","地址");
-            writer.addHeaderAlias("remark","备注");
-            writer.addHeaderAlias("create_user_name","创建人");
-            writer.addHeaderAlias("owner_user_name","负责人");
-            writer.addHeaderAlias("create_time","创建时间");
-            writer.addHeaderAlias("update_time","更新时间");
-            for (Record field:fieldList){
-                writer.addHeaderAlias(field.getStr("name"),field.getStr("name"));
+            writer.addHeaderAlias("leads_name", "线索名称");
+            writer.addHeaderAlias("next_time", "下次联系时间");
+            writer.addHeaderAlias("telephone", "电话");
+            writer.addHeaderAlias("mobile", "手机号");
+            writer.addHeaderAlias("address", "地址");
+            writer.addHeaderAlias("remark", "备注");
+            writer.addHeaderAlias("create_user_name", "创建人");
+            writer.addHeaderAlias("owner_user_name", "负责人");
+            writer.addHeaderAlias("create_time", "创建时间");
+            writer.addHeaderAlias("update_time", "更新时间");
+            for (Record field : fieldList) {
+                writer.addHeaderAlias(field.getStr("name"), field.getStr("name"));
             }
-            writer.merge(fieldList.size()+1,"线索信息");
+            writer.merge(fieldList.size() + 9, "线索信息");
             HttpServletResponse response = getResponse();
-            List<Map<String,Object>> list = new ArrayList<>();
-            for (Record record : recordList){
-                list.add(record.remove("batch_id","is_transform","customer_id","leads_id","owner_user_id","create_user_id","followup","field_batch_id").getColumns());
+            List<Map<String, Object>> list = new ArrayList<>();
+            if (recordList.size() == 0){
+                Record record = new Record().set("leads_name","").set("next_time","").set("telephone","").set("mobile","").set("address","").set("remark","").set("create_user_name","").set("owner_user_name","").set("create_time","").set("update_time","");
+                for (Record field : fieldList) {
+                    record.set(field.getStr("name"),"");
+                }
+                list.add(record.getColumns());
             }
-            writer.write(list,true);
+            for (Record record : recordList) {
+                list.add(record.remove("batch_id", "is_transform", "customer_id", "leads_id", "owner_user_id", "create_user_id", "followup", "field_batch_id").getColumns());
+            }
+            writer.write(list, true);
             writer.setRowHeight(0, 30);
             writer.setRowHeight(1, 20);
-            for (int i=0; i < fieldList.size()+15;i++){
-                writer.setColumnWidth(i,20);
+            for (int i = 0; i < fieldList.size() + 15; i++) {
+                writer.setColumnWidth(i, 20);
             }
             Cell cell = writer.getCell(0, 0);
             CellStyle cellStyle = cell.getCellStyle();
@@ -224,9 +237,9 @@ public class CrmLeadsController extends Controller {
             response.setHeader("Content-Disposition", "attachment;filename=leads.xls");
             ServletOutputStream out = response.getOutputStream();
             writer.flush(out);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             // 关闭writer，释放内存
             writer.close();
         }

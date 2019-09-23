@@ -31,14 +31,10 @@ export default {
   watch: {
     $route(to, from) {
       this.showPreviewImg = false //切换页面隐藏图片预览
-      let paths = to.path.split('/')
       if (to.meta.menuIndex) {
         this.$store.commit('SET_ACTIVEINDEX', to.meta.menuIndex)
-      } else if (paths.length >= 3) {
-        this.$store.commit(
-          'SET_ACTIVEINDEX',
-          paths.slice(2, paths.length).join('/')
-        )
+      } else {
+        this.$store.commit('SET_ACTIVEINDEX', to.path)
       }
     }
   },

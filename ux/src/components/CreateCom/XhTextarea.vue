@@ -3,6 +3,8 @@
             type="textarea"
             resize="none"
             :rows="3"
+            :maxlength="200"
+            show-word-limit
             @input="valueChange"
             :disabled="disabled"></el-input>
 </template>

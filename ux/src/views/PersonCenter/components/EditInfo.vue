@@ -13,7 +13,7 @@
              label-position="top">
       <el-form-item label="姓名"
                     class="create-item"
-                    prop="name">
+                    prop="realname">
         <el-input v-model="ruleForm.realname"></el-input>
       </el-form-item>
       <el-form-item label="邮箱"
@@ -37,7 +37,8 @@
       <el-form-item label="手机号（登录名）"
                     class="create-item"
                     prop="username">
-        <el-input v-model="ruleForm.username" :disabled="true"></el-input>
+        <el-input v-model="ruleForm.username"
+                  :disabled="true"></el-input>
       </el-form-item>
     </el-form>
     <span slot="footer"
@@ -93,8 +94,12 @@ export default {
       loading: false,
       showDialog: false,
       rules: {
+        realname: [{ required: true, message: '请填写姓名', trigger: 'blur' }],
         email: [{ validator: validateCRMEmail, trigger: 'change' }],
-        username: [{ validator: validateCRMMobile, trigger: 'change' }]
+        username: [
+          { required: true, message: '请填写姓名', trigger: 'blur' },
+          { validator: validateCRMMobile, trigger: 'change' }
+        ]
       },
       ruleForm: {
         realname: '',

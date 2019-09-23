@@ -3,7 +3,7 @@
        v-loading="loading">
     <el-button type="primary"
                class="new-btn"
-               v-if="newStatus"
+               v-if="permissionSave"
                @click="newBtn">新建公告</el-button>
     <el-tabs v-model="activeName">
       <el-tab-pane label="公告"
@@ -56,6 +56,7 @@
 import VDetails from './details'
 import newDialog from './newDialog'
 import NoticeCell from './noticeCell'
+import { mapGetters } from 'vuex'
 // API
 import { noticeList } from '@/api/oamanagement/notice'
 
@@ -87,13 +88,18 @@ export default {
       loadText: '加载更多',
       loadMoreLoading: true,
       // 判断是否还有数据
-      isPost: true,
-      newStatus: false
+      isPost: true
     }
   },
   watch: {
     $route(to, from) {
       this.$router.go(0)
+    }
+  },
+  computed: {
+    ...mapGetters(['oa']),
+    permissionSave() {
+      return this.oa && this.oa.announcement && this.oa.announcement.save
     }
   },
   mounted() {
@@ -123,9 +129,6 @@ export default {
         limit: 15
       })
         .then(res => {
-          res.data.isSave == 1
-            ? (this.newStatus = true)
-            : (this.newStatus = false)
           for (let item of res.data.list) {
             item.contentSub = item.content.substring(0, 150)
           }

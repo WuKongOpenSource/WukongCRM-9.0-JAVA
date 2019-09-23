@@ -23,7 +23,7 @@ public class AdminAchievementController extends Controller {
      * 设置业绩目标
      * @author hmb
      */
-    @Permissions("manage:crm")
+    @Permissions("manage:crm:achievement")
     public void setAchievement(){
         String data = getRawData();
         List<CrmAchievement> crmAchievements = JSON.parseArray(data, CrmAchievement.class);
@@ -35,7 +35,7 @@ public class AdminAchievementController extends Controller {
      * @param achievement 业绩目标对象
      * @author hmb
      */
-    @Permissions("manage:crm")
+    @Permissions("manage:crm:achievement")
     public void queryAchievementList(@Para("")CrmAchievement achievement){
         String userId = getPara("userId");
         Integer deptId = getParaToInt("deptId");

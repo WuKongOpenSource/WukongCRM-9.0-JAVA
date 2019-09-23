@@ -51,6 +51,7 @@
                        :key="index"
                        show-overflow-tooltip
                        :prop="item.prop"
+                       :formatter="fieldFormatter"
                        :label="item.label">
       </el-table-column>
     </el-table>
@@ -312,6 +313,37 @@ export default {
             })
           })
       }
+    },
+
+    /**
+     * 格式化字段
+     */
+    fieldFormatter(row, column) {
+      // 如果需要格式化
+      if (column.property === 'checkStatus') {
+        return this.getStatusName(row.checkStatus)
+      }
+      return row[column.property]
+    },
+
+    /**
+     * 对应的状态名
+     */
+    getStatusName(status) {
+      if (status == 0) {
+        return '待审核'
+      } else if (status == 1) {
+        return '审核中'
+      } else if (status == 2) {
+        return '通过'
+      } else if (status == 3) {
+        return '拒绝'
+      } else if (status == 4) {
+        return '撤回'
+      } else if (status == 5) {
+        return '未提交'
+      }
+      return ''
     },
 
     /**

@@ -27,6 +27,7 @@ public class BiController extends Controller {
         Integer deptId = getInt("deptId");
         renderJson(biService.queryCrmBusinessStatistics(userId,deptId,productId,startTime,endTime));
     }
+
     /**
      * 产品销售情况统计
      * @author zxy
@@ -39,18 +40,6 @@ public class BiController extends Controller {
         Integer userId = getInt("userId");
         Integer deptId = getInt("deptId");
         renderJson(biService.queryProductSell(startTime,endTime,userId,deptId));
-    }
-    /**
-     * 回款统计，根据月份获取合同信息
-     *  userId用户ID deptId部门ID
-     */
-    @Permissions("bi:receivables:read")
-    public void queryByMonth(){
-        String year = get("year");
-        String month = get("month");
-        Integer userId = getInt("userId");
-        Integer deptId = getInt("deptId");
-        renderJson(biService.queryByUserIdOrYear(userId,deptId,year,month));
     }
 
     /**

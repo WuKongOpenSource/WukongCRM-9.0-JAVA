@@ -24,9 +24,17 @@ public class AdminRoleController extends Controller {
      * @author wyq
      * 获取全部角色列表
      */
-    @Permissions("manage:permission")
     public void getAllRoleList(){
         renderJson(R.ok().put("data",adminRoleService.getAllRoleList()));
+    }
+
+
+    /**
+     * 根据角色类型查询角色列表
+     * @param roleType
+     */
+    public void getRoleByType(@Para("roleType")Integer roleType){
+        renderJson(R.ok().put("data",adminRoleService.getRoleByType(roleType)));
     }
 
     /**
@@ -34,7 +42,6 @@ public class AdminRoleController extends Controller {
      * @param roleType 角色类型
      * 根据角色类型查询关联员工
      */
-    @Permissions("manage:permission")
     public void getRoleUser(@Para("roleType")Integer roleType){
         renderJson(R.ok().put("data",adminRoleService.getRoleUser(roleType)));
     }
@@ -43,7 +50,7 @@ public class AdminRoleController extends Controller {
      * @author wyq
      * 新建
      */
-    @Permissions("manage:permission")
+    @Permissions("manage:permission:update")
     @Before(Tx.class)
     public void add(@Para("")AdminRole adminRole){
         renderJson(adminRoleService.save(adminRole));
@@ -53,7 +60,7 @@ public class AdminRoleController extends Controller {
      * @author wyq
      * 编辑角色
      */
-    @Permissions("manage:permission")
+    @Permissions("manage:permission:update")
     @NotNullValidate(value = "roleId",message = "角色id不能为空")
     @NotNullValidate(value = "roleName",message = "角色名称不能为空")
     public void update(@Para("")AdminRole adminRole){
@@ -69,7 +76,7 @@ public class AdminRoleController extends Controller {
      * 修改角色菜单
      * @author zhangzhiwei
      */
-    @Permissions("manage:permission")
+    @Permissions("manage:permission:update")
     public void updateRoleMenu(){
         adminRoleService.updateRoleMenu(JSON.parseObject(getRawData()));
         renderJson(R.ok());
@@ -87,7 +94,7 @@ public class AdminRoleController extends Controller {
      * @param roleId 角色id
      * 复制
      */
-    @Permissions("manage:permission")
+    @Permissions("manage:permission:update")
     public void copy(@Para("roleId")Integer roleId){
         adminRoleService.copy(roleId);
         renderJson(R.ok());
@@ -98,7 +105,7 @@ public class AdminRoleController extends Controller {
      * @param roleId 角色id
      * 删除
      */
-    @Permissions("manage:permission")
+    @Permissions("manage:permission:update")
     public void delete(@Para("roleId")Integer roleId){
         renderJson(adminRoleService.delete(roleId) ? R.ok() : R.error());
     }
@@ -108,7 +115,7 @@ public class AdminRoleController extends Controller {
      * @param roleId 角色项目管理角色id
      * 删除
      */
-    @Permissions("manage:permission")
+    @Permissions("manage:permission:update")
     public void deleteWorkRole(@Para("roleId")Integer roleId){
         renderJson(adminRoleService.deleteWorkRole(roleId) ? R.ok() : R.error());
     }
@@ -117,7 +124,7 @@ public class AdminRoleController extends Controller {
      * @author wyq
      * 关联员工
      */
-    @Permissions("manage:permission")
+    @Permissions("manage:permission:update")
     public void relatedUser(@Para("")AdminUserRole adminUserRole){
         renderJson(adminRoleService.relatedUser(adminUserRole));
     }
@@ -126,7 +133,7 @@ public class AdminRoleController extends Controller {
      * @author wyq
      * 解除角色关联员工
      */
-    @Permissions("manage:permission")
+    @Permissions("manage:permission:update")
     public void unbindingUser(@Para("") AdminUserRole adminUserRole){
         renderJson(adminRoleService.unbindingUser(adminUserRole));
     }
@@ -135,7 +142,6 @@ public class AdminRoleController extends Controller {
      * 项目管理角色列表
      * @author wyq
      */
-    @Permissions("manage:permission")
     public void queryProjectRoleList(){
         renderJson(adminRoleService.queryProjectRoleList());
     }
@@ -145,9 +151,16 @@ public class AdminRoleController extends Controller {
      * 设置项目管理角色
      * @author wyq
      */
-    @Permissions("manage:permission")
+    @Permissions("manage:work:update")
     public void setWorkRole(){
         JSONObject jsonObject = JSON.parseObject(getRawData());
         renderJson(adminRoleService.setWorkRole(jsonObject));
+    }
+
+    /**
+     * 查询角色类型列表
+     */
+    public void getRoleTypeList(){
+        renderJson(adminRoleService.getRoleTypeList());
     }
 }

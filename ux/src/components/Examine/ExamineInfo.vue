@@ -119,7 +119,7 @@ export default {
   filters: {
     statusIcon: function(status) {
       // 0失败，1通过，2撤回，3创建，4待审核
-      // JAVA 0 未审核 1 审核通过 2 审核拒绝 3 审核中 4 已撤回 5 创建
+      // JAVA 0 未审核 1 审核通过 2 审核拒绝 3 审核中 4 已撤回 5 创建 6 待提交
       if (status == 2) {
         return require('@/assets/img/check_fail.png')
       } else if (status == 1) {
@@ -128,7 +128,7 @@ export default {
         return require('@/assets/img/check_revoke.png')
       } else if (status == 3) {
         return require('@/assets/img/check_create.png')
-      } else if (status == 0) {
+      } else if (status == 0 || status == 6) {
         return require('@/assets/img/check_wait.png')
       } else if (status == 5) {
         return require('@/assets/img/check_create.png')
@@ -223,20 +223,6 @@ export default {
     },
     // 获取状态名称
     getStatusName(status) {
-      // 0拒绝，1通过，2撤回，3创建，4待审核
-      // if (status == 0) {
-      //   return '拒绝'
-      // } else if (status == 1) {
-      //   return '通过'
-      // } else if (status == 2) {
-      //   return '撤回'
-      // } else if (status == 3) {
-      //   return '创建'
-      // } else if (status == 4) {
-      //   return '待审核'
-      // } else if (status == 5) {
-      //   return '审核中'
-      // }
       if (status == 0) {
         return '未审核'
       } else if (status == 1) {
@@ -249,6 +235,8 @@ export default {
         return '撤回'
       } else if (status == 5) {
         return '创建'
+      } else if (status == 6) {
+        return '待提交'
       }
       return ''
     },

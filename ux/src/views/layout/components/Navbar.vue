@@ -18,6 +18,22 @@
         </router-link>
       </flexbox>
     </div>
+
+    <el-popover placement="bottom"
+                :visible-arrow="false"
+                popper-class="no-padding-popover"
+                width="200"
+                trigger="hover">
+      <div class="auth-content">
+        <div class="title">您暂未开通授权</div>
+        <div class="detail">为了给您提供更好的服务支持<br>建议您购买官方授权</div>
+        <span class="phone">400-0812-558</span>
+      </div>
+      <button slot="reference"
+              type="text"
+              class="auth-button">开通授权</button>
+    </el-popover>
+
     <el-popover placement="bottom"
                 :visible-arrow="false"
                 popper-class="no-padding-popover"
@@ -30,7 +46,7 @@
              @click="handleClick('goout')"><i class="wukong wukong-goout"></i>退出登录</div>
         <div class="handel-item hr-top"
              style="pointer-events: none;"
-             :style="{'margin-bottom': manage ? '15px' : '0'}"><i class="wukong wukong-versions"></i>版本 V9.2.1.190820</div>
+             :style="{'margin-bottom': manage ? '15px' : '0'}"><i class="wukong wukong-versions"></i>版本 V9.2.1.190923</div>
         <div v-if="manage"
              class="handel-box">
           <el-button @click="enterSystemSet()"
@@ -79,15 +95,26 @@ export default {
   },
   components: {},
   computed: {
-    ...mapGetters(['userInfo', 'lang', 'logo', 'crm', 'bi', 'manage']),
+    ...mapGetters([
+      'userInfo',
+      'lang',
+      'logo',
+      'crm',
+      'bi',
+      'manage',
+      'oa',
+      'project'
+    ]),
     items() {
       var tempsItems = []
-      tempsItems.push({
-        title: '办公',
-        type: 0,
-        path: '/workbench',
-        icon: 'workbench'
-      })
+      if (this.oa) {
+        tempsItems.push({
+          title: '办公',
+          type: 0,
+          path: '/workbench',
+          icon: 'workbench'
+        })
+      }
       if (this.crm) {
         tempsItems.push({
           title: '客户管理',
@@ -104,12 +131,14 @@ export default {
           icon: 'statistics'
         })
       }
-      tempsItems.push({
-        title: '项目管理',
-        type: 2,
-        path: '/project',
-        icon: 'project'
-      })
+      if (this.project) {
+        tempsItems.push({
+          title: '项目管理',
+          type: 2,
+          path: '/project',
+          icon: 'project'
+        })
+      }
       return tempsItems
     }
   },
@@ -273,6 +302,46 @@ export default {
   &.active {
     font-weight: bold;
     color: #3e84e9;
+  }
+}
+
+.auth-button {
+  background: linear-gradient(to right, #d9ac7c, #c28e5c);
+  color: white;
+  padding: 5px 15px;
+  font-size: 12px;
+  height: 24px;
+  outline: none;
+  margin: 0;
+  border: none;
+  border-radius: 12px;
+  transform: scale(0.9);
+  margin-right: 15px;
+  cursor: pointer;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.auth-content {
+  text-align: center;
+  color: #333;
+  padding: 30px 20px;
+  .title {
+    font-size: 16px;
+    font-weight: 600px;
+  }
+  .detail {
+    transform: scale(0.9);
+    margin-top: 8px;
+    font-size: 12px;
+    margin-bottom: 15px;
+  }
+  .phone {
+    background: linear-gradient(to right, #f2dfb2, #e5c78a);
+    border-radius: 4px;
+    padding: 5px 17px;
+    font-size: 12px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.12);
+    line-height: 17px;
   }
 }
 </style>

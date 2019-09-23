@@ -13,7 +13,11 @@
                      @click="customerSettingSave">保存</el-button>
         </div>
         <div class="customer-setting">
-          <label>客户公海规则设置</label>
+          <label class="label">客户公海规则设置<el-tooltip effect="dark"
+                        content="客户自动进入公海的天数设置"
+                        placement="top">
+              <i class="wukong wukong-help_tips"></i>>
+            </el-tooltip></label>
           <div class="customer-radio">
             <el-radio-group v-model="customerData.type">
               <el-radio :label="0">不启用</el-radio>
@@ -30,6 +34,27 @@
                              :min="0"
                              size="small"></el-input-number>
             <span>&nbsp;天未成交</span>
+          </div>
+        </div>
+
+        <div class="customer-setting">
+          <label class="label">提前提醒设置<el-tooltip effect="dark"
+                        content="提醒时间不能大于公海回收时间"
+                        placement="top">
+              <i class="wukong wukong-help_tips"></i>>
+            </el-tooltip></label>
+          <div class="customer-radio">
+            <el-radio-group v-model="customerData.putInPoolRemindConfig">
+              <el-radio :label="0">不提醒</el-radio>
+              <el-radio :label="1">提醒</el-radio>
+            </el-radio-group>
+            <br />
+            <span>提前</span>
+            <el-input-number v-model="customerData.putInPoolRemindDays"
+                             controls-position="right"
+                             :min="0"
+                             size="small"></el-input-number>
+            <span>&nbsp;天提醒</span>
           </div>
         </div>
       </div>
@@ -52,7 +77,9 @@ export default {
       customerData: {
         type: 0,
         followupDay: 0,
-        dealDay: 0
+        dealDay: 0,
+        putInPoolRemindConfig: 0,
+        putInPoolRemindDays: 0
       }
     }
   },
@@ -74,6 +101,8 @@ export default {
           this.customerData.type = res.data.customerConfig
           this.customerData.followupDay = res.data.followupDay
           this.customerData.dealDay = res.data.dealDay
+          this.customerData.putInPoolRemindConfig = res.data.putInPoolRemindConfig
+          this.customerData.putInPoolRemindDays = res.data.putInPoolRemindDays
         })
         .catch(() => {
           this.loading = false
@@ -149,8 +178,20 @@ export default {
 }
 .customer-setting > label {
   padding-right: 30px;
+  width: 170px;
+  display: inline-block;
 }
 .customer-radio > .el-radio-group {
   margin-bottom: 30px;
+}
+// 提示标志
+.wukong-help_tips {
+  color: #999;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.wukong-help_tips:hover {
+  color: $xr-color-primary;
 }
 </style>

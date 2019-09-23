@@ -33,7 +33,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordCount,
-      (SELECT COUNT(*) FROM 72crm_crm_business_change WHERE TO_DAYS(create_time) = TO_DAYS(now()) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_business_change as a inner join 72crm_crm_business as b on a.business_id = b.business_id WHERE TO_DAYS(a.create_time) = TO_DAYS(now()) AND b.owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordStatusCount
@@ -73,7 +73,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordCount,
-      (SELECT COUNT(*) FROM 72crm_crm_business_change WHERE  to_days(NOW()) - TO_DAYS(create_time) = 1 AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_business_change as a inner join 72crm_crm_business as b on a.business_id = b.business_id WHERE to_days(NOW()) - TO_DAYS(a.create_time) = 1 AND b.owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordStatusCount
@@ -121,7 +121,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordCount,
-      (SELECT COUNT(*) FROM 72crm_crm_business_change WHERE  YEARWEEK(date_format(create_time,'%Y-%m-%d')) = YEARWEEK(now()) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_business_change as a inner join 72crm_crm_business as b on a.business_id = b.business_id WHERE YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now()) AND b.owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordStatusCount
@@ -161,7 +161,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordCount,
-      (SELECT COUNT(*) FROM 72crm_crm_business_change WHERE  YEARWEEK(date_format(create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1 AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_business_change as a inner join 72crm_crm_business as b on a.business_id = b.business_id WHERE  YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1 AND b.owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordStatusCount
@@ -201,7 +201,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordCount,
-      (SELECT COUNT(*) FROM 72crm_crm_business_change WHERE  date_format(create_time,'%Y-%m')=date_format(now(),'%Y-%m') AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_business_change as a inner join 72crm_crm_business as b on a.business_id = b.business_id WHERE date_format(a.create_time,'%Y-%m')=date_format(now(),'%Y-%m') AND b.owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordStatusCount
@@ -241,7 +241,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordCount,
-      (SELECT COUNT(*) FROM 72crm_crm_business_change WHERE  date_format(create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_business_change as a inner join 72crm_crm_business as b on a.business_id = b.business_id WHERE date_format(a.create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') AND b.owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordStatusCount
@@ -281,7 +281,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordCount,
-      (SELECT COUNT(*) FROM 72crm_crm_business_change WHERE  QUARTER(create_time)=QUARTER(now()) AND YEAR(create_time)=YEAR(NOW()) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_business_change as a inner join 72crm_crm_business as b on a.business_id = b.business_id WHERE  QUARTER(a.create_time)=QUARTER(now()) AND YEAR(a.create_time)=YEAR(NOW()) AND b.owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordStatusCount
@@ -321,7 +321,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordCount,
-      (SELECT COUNT(*) FROM 72crm_crm_business_change WHERE  QUARTER(create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER)) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_business_change as a inner join 72crm_crm_business as b on a.business_id = b.business_id WHERE  QUARTER(a.create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(a.create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER)) AND b.owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordStatusCount
@@ -362,7 +362,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordCount,
-      (SELECT COUNT(*) FROM 72crm_crm_business_change WHERE  YEAR(create_time)=YEAR(NOW()) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_business_change as a inner join 72crm_crm_business as b on a.business_id = b.business_id WHERE YEAR(a.create_time)=YEAR(NOW()) AND b.owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordStatusCount
@@ -402,7 +402,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordCount,
-      (SELECT COUNT(*) FROM 72crm_crm_business_change WHERE  YEAR(create_time)=YEAR(date_sub(now(),interval 1 year)) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_business_change as a inner join 72crm_crm_business as b on a.business_id = b.business_id WHERE  YEAR(a.create_time)=YEAR(date_sub(now(),interval 1 year)) AND b.owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordStatusCount
@@ -443,7 +443,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordCount,
-      (SELECT COUNT(*) FROM 72crm_crm_business_change WHERE  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_business_change as a inner join 72crm_crm_business as b on a.business_id = b.business_id WHERE  TO_DAYS(a.create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(a.create_time) <= TO_DAYS(#para(endTime)) AND b.owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as recordStatusCount
@@ -702,5 +702,93 @@
             and  TO_DAYS(return_time) <= TO_DAYS(#para(endTime))
           #end
     #end
-
+    #sql ("queryRecordCount")
+        SELECT types as crmType,COUNT(types) as count FROM 72crm_admin_record WHERE
+            create_user_id in ( #for(x:userIds)
+                                      #(for.index == 0 ? "" : ",")
+                                      #para(x)
+                                      #end)
+        #if(type == 1)
+          AND TO_DAYS(create_time) = TO_DAYS(now())
+        #end
+        #if(type == 2)
+        AND to_days(NOW()) - TO_DAYS(create_time) = 1
+        #end
+        #if(type == 3)
+        AND   YEARWEEK(date_format(create_time,'%Y-%m-%d')) = YEARWEEK(now())
+        #end
+        #if(type == 4)
+        AND  YEARWEEK(date_format(create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
+        #end
+        #if(type == 5)
+        AND  date_format(create_time,'%Y-%m')=date_format(now(),'%Y-%m')
+        #end
+        #if(type == 6)
+        AND  date_format(create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+        #end
+        #if(type == 7)
+        AND  QUARTER(create_time)=QUARTER(now())
+        #end
+        #if(type == 8)
+        AND  QUARTER(create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER))
+        #end
+        #if(type == 9)
+        AND   YEAR(create_time)=YEAR(NOW())
+        #end
+        #if(type == 10)
+        AND  YEAR(create_time)=YEAR(date_sub(now(),interval 1 year))
+        #end
+        #if(type == 11)
+        AND  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime))
+        #end
+        group by types
+    #end
+    #sql ("queryRecordList")
+      select a.record_id,b.img as user_img,b.realname,a.create_time,a.content,a.category,a.next_time,a.batch_id,a.business_ids,a.contacts_ids,a.types,a.types_id,
+      (case a.types
+         when 'crm_customer' then (select customer_name from `72crm_crm_customer` where customer_id = a.types_id)
+         when 'crm_leads' then (select leads_name from `72crm_crm_leads` where leads_id = a.types_id)
+         when 'crm_business' then (select business_name from `72crm_crm_business` where business_id = a.types_id)
+         when 'crm_contract' then (select name from `72crm_crm_contract` where contract_id = a.types_id)
+         when 'crm_contacts' then (select name from `72crm_crm_contacts` where contacts_id = a.types_id)
+      end) as 'typesName'
+      from 72crm_admin_record as a inner join 72crm_admin_user as b on a.create_user_id = b.user_id where a.types = #para(crmType)
+        and a.create_user_id in ( #for(x:userIds)
+        #(for.index == 0 ? "" : ",")
+        #para(x)
+        #end)
+      #if(type == 1)
+      AND TO_DAYS(a.create_time) = TO_DAYS(now())
+      #end
+      #if(type == 2)
+      AND to_days(NOW()) - TO_DAYS(a.create_time) = 1
+      #end
+      #if(type == 3)
+      AND   YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now())
+      #end
+      #if(type == 4)
+      AND  YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
+      #end
+      #if(type == 5)
+      AND  date_format(a.create_time,'%Y-%m')=date_format(now(),'%Y-%m')
+      #end
+      #if(type == 6)
+      AND  date_format(a.create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+      #end
+      #if(type == 7)
+      AND  QUARTER(a.create_time)=QUARTER(now())
+      #end
+      #if(type == 8)
+      AND  QUARTER(a.create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER))
+      #end
+      #if(type == 9)
+      AND   YEAR(a.create_time)=YEAR(NOW())
+      #end
+      #if(type == 10)
+      AND  YEAR(a.create_time)=YEAR(date_sub(now(),interval 1 year))
+      #end
+      #if(type == 11)
+      AND  TO_DAYS(a.create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(a.create_time) <= TO_DAYS(#para(endTime))
+      #end
+    #end
 #end

@@ -30,7 +30,7 @@ public class OaExamineCategoryController extends Controller {
      *
      * @author hmb
      */
-    @Permissions("manage:oa")
+    @Permissions("manage:oa:examine")
     public void setExamineCategory() {
         JSONObject jsonObject = JSON.parseObject(getRawData());
         OaExamineCategory oaExamineCategory = new OaExamineCategory();
@@ -39,12 +39,12 @@ public class OaExamineCategoryController extends Controller {
         oaExamineCategory.setTitle(jsonObject.getString("title"));
         oaExamineCategory.setRemarks(jsonObject.getString("remarks"));
         oaExamineCategory.setExamineType(jsonObject.getInteger("examineType"));
-        if (jsonObject.getJSONArray("user_ids") != null) {
-            List<Integer> list = jsonObject.getJSONArray("user_ids").toJavaList(Integer.class);
+        if (jsonObject.getJSONArray("userIds") != null) {
+            List<Integer> list = jsonObject.getJSONArray("userIds").toJavaList(Integer.class);
             oaExamineCategory.setUserIds(TagUtil.fromSet(new HashSet<>(list)));
         }
-        if (jsonObject.getJSONArray("dept_ids") != null) {
-            List<Integer> list = jsonObject.getJSONArray("dept_ids").toJavaList(Integer.class);
+        if (jsonObject.getJSONArray("deptIds") != null) {
+            List<Integer> list = jsonObject.getJSONArray("deptIds").toJavaList(Integer.class);
             oaExamineCategory.setDeptIds(TagUtil.fromSet(new HashSet<>(list)));
         }
         oaExamineCategory.setCreateTime(new Date());
@@ -88,7 +88,7 @@ public class OaExamineCategoryController extends Controller {
      *
      * @author hmb
      */
-    @Permissions("manage:oa")
+    @Permissions("manage:oa:examine")
     public void deleteExamineCategory() {
         String id = getPara("id");
         renderJson(oaExamineCategoryService.deleteExamineCategory(id));
@@ -126,7 +126,7 @@ public class OaExamineCategoryController extends Controller {
     /**
      * 启用/禁用
      */
-    @Permissions("manage:oa")
+    @Permissions("manage:oa:examine")
     public void updateStatus() {
         String id = getPara("id");
         renderJson(oaExamineCategoryService.updateStatus(id));

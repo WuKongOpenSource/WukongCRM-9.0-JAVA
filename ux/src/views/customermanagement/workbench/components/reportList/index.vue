@@ -6,7 +6,8 @@
         <div class="header"
              @click="showDview = false">
           <span class="title">{{title}}</span>
-          <el-input class="search-input"
+          <el-input v-if="placeholder"
+                    class="search-input"
                     :placeholder="placeholder"
                     v-model="inputContent"
                     @keyup.enter.native="searchInput">
@@ -32,7 +33,7 @@
                     @sort-change="sortChange">
             <el-table-column v-for="(item, index) in showFieldList"
                              :key="index"
-                             sortable="custom"
+                             :sortable="sortable"
                              show-overflow-tooltip
                              :fixed="index==0"
                              :prop="item.prop"
@@ -75,10 +76,11 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column>
+            <el-table-column v-if="showFillColumn">
             </el-table-column>
           </el-table>
-          <div class="p-contianer">
+          <div class="p-contianer"
+               v-if="showPagination">
             <el-pagination class="p-bar"
                            @size-change="handleSizeChange"
                            @current-change="handleCurrentChange"
@@ -98,6 +100,14 @@
                         @handle="handleHandle"
                         class="d-view">
       </c-r-m-all-detail>
+
+      <record-list v-if="recordShow"
+                   :crmType="rowType"
+                   :params="recordParams"
+                   @handle="getList"
+                   @hide="recordShow = false">
+
+      </record-list>
     </div>
   </transition>
 </template>
@@ -110,11 +120,13 @@ import Lockr from 'lockr'
 import { getDateFromTimestamp } from '@/utils'
 import moment from 'moment'
 import CRMAllDetail from '@/views/customermanagement/components/CRMAllDetail'
+import RecordList from './components/recordList'
 
 export default {
   name: 'report-list', // 简报列表
   components: {
-    CRMAllDetail
+    CRMAllDetail,
+    RecordList
   },
   computed: {
     ...mapGetters(['crm', 'CRMConfig']),
@@ -129,6 +141,24 @@ export default {
         return true
       }
       return false
+    },
+    sortable() {
+      if (this.fieldList && this.fieldList.length) {
+        return false
+      }
+      return 'custom'
+    },
+    showFillColumn() {
+      if (this.fieldList && this.fieldList.length) {
+        return false
+      }
+      return true
+    },
+    showPagination() {
+      if (this.fieldList && this.fieldList.length) {
+        return false
+      }
+      return true
     }
   },
   watch: {},
@@ -152,7 +182,10 @@ export default {
       rowType: '', //详情类型
       showDview: false,
       /** 格式化规则 */
-      formatterRules: {}
+      formatterRules: {},
+
+      recordParams: {},
+      recordShow: false
     }
   },
   props: {
@@ -210,13 +243,17 @@ export default {
 
       if (this.sortData.order) {
         params.sortField = this.sortData.prop
-        params.order = this.sortData.order == "ascending" ? 2 : 1
+        params.order = this.sortData.order == 'ascending' ? 2 : 1
       }
 
       this.request({ ...params, ...this.params })
         .then(res => {
-          this.list = res.data.list
-          this.total = res.data.totalRow
+          if (res.data.list) {
+            this.list = res.data.list
+            this.total = res.data.totalRow
+          } else {
+            this.list = res.data
+          }
           this.loading = false
         })
         .catch(() => {
@@ -276,6 +313,17 @@ export default {
      */
     fieldFormatter(row, column) {
       // 如果需要格式化
+      if (this.fieldList && this.fieldList.length) {
+        if (column.property == 'crmType') {
+          return {
+            crm_leads: '线索',
+            crm_customer: '客户',
+            crm_contacts: '联系人',
+            crm_business: '商机',
+            crm_contract: '合同'
+          }[row[column.property]]
+        }
+      }
       return row[column.property] || '--'
     },
 
@@ -370,7 +418,10 @@ export default {
         } else {
           this.showDview = false
         }
-      } else if (this.crmType === 'business' || this.crmType === 'business_status') {
+      } else if (
+        this.crmType === 'business' ||
+        this.crmType === 'business_status'
+      ) {
         if (column.property === 'customerName') {
           this.rowID = row.customerId
           this.rowType = 'customer'
@@ -425,6 +476,14 @@ export default {
         } else {
           this.showDview = false
         }
+      } else if (this.crmType === 'record') {
+        if (column.property === 'count' && row.count) {
+          this.rowType = row.crmType
+          this.recordParams = { crmType: row.crmType, ...this.params }
+          this.recordShow = true
+        } else {
+          this.recordShow = false
+        }
       }
     },
 
@@ -453,13 +512,15 @@ export default {
      */
     cellStyle({ row, column, rowIndex, columnIndex }) {
       if (
-        column.property === 'customerName' ||
-        column.property === 'businessName' ||
-        column.property === 'name' ||
-        column.property === 'contactsName' ||
-        column.property === 'num' ||
-        column.property === 'contractNum' ||
-        column.property === 'number'
+        (column.property === 'customerName' ||
+          column.property === 'businessName' ||
+          column.property === 'name' ||
+          column.property === 'contactsName' ||
+          column.property === 'num' ||
+          column.property === 'contractNum' ||
+          column.property === 'number' ||
+          (this.crmType === 'record' && column.property === 'count')) &&
+        row[column.property]
       ) {
         return { color: '#3E84E9', cursor: 'pointer' }
       } else {

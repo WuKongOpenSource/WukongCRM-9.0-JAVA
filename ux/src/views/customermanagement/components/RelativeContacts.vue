@@ -263,6 +263,9 @@ export default {
         this.createActionInfo.data['customer'] = this.detail
       } else if (this.crmType == 'business') {
         this.createActionInfo.data['customer'] = this.detail
+        this.createActionInfo.relativeData = {
+          businessId: this.detail.businessId
+        }
       }
       this.isCreate = true
     },

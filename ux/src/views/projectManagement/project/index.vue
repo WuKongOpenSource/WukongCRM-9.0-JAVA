@@ -35,7 +35,7 @@
                  @click="archiveProject">归档项目</p>
               <p v-if="canUpdateWork"
                  @click="deleteProject">删除项目</p>
-              <p @click="exitProject">退出项目</p>
+              <p v-if="projectData.isOpen == 0" @click="exitProject">退出项目</p>
             </div>
             <img src="@/assets/img/project/t_set.png"
                  slot="reference"
@@ -128,9 +128,7 @@ export default {
      * 可以编辑项目
      */
     canUpdateWork() {
-      return (
-        this.isOpen != 1 && this.permission.work && this.permission.work.update
-      )
+      return this.permission.work && this.permission.work.update
     }
   },
 

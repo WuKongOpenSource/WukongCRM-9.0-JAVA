@@ -8,6 +8,10 @@
    #sql("queryExamineStepByExamineIdOrderByStepNum")
         SELECT * FROM 72crm_admin_examine_step WHERE examine_id = ? ORDER BY step_num LIMIT 0,1
    #end
+   #sql ("queryExamineStepOrderId")
+   select order_id from 72crm_admin_examine_log
+   where record_id = ? and is_recheck = 0 and examine_status !=0 order by order_id desc limit 1
+   #end
    #sql("queryExamineStepByNextExamineIdOrderByStepId")
         SELECT * FROM 72crm_admin_examine_step WHERE examine_id = ?
         and step_num =  (SELECT step_num FROM 72crm_admin_examine_step where step_id = ?) + 1

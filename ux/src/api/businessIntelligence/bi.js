@@ -37,18 +37,6 @@ export function biReceivablesStatistics(data) {
 }
 
 /**
- * 回款统计列表
- * @param {*} data
- */
-export function biReceivablesStatisticList(data) {
-  return request({
-    url: 'bi/queryByMonth',
-    method: 'post',
-    data: data
-  })
-}
-
-/**
  * 员工客户分析
  * @param {*} data
  */

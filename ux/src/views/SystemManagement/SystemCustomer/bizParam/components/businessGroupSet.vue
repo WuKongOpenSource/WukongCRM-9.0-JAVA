@@ -11,6 +11,7 @@
       <el-table :data="businessData"
                 style="width: 100%"
                 stripe
+                :height="tableHeight"
                 :header-cell-style="headerCellStyle">
         <el-table-column v-for="(item, index) in businessList"
                          :key="index"
@@ -22,7 +23,7 @@
         </el-table-column>
         <el-table-column fixed="right"
                          label="操作"
-                         width="100">
+                         width="120">
           <template slot-scope="scope">
             <el-button @click="businessEdit(scope.row)"
                        type="text"
@@ -33,6 +34,17 @@
           </template>
         </el-table-column>
       </el-table>
+      <div class="p-contianer">
+        <el-pagination class="p-bar"
+                       @size-change="handleSizeChange"
+                       @current-change="handleCurrentChange"
+                       :current-page="currentPage"
+                       :page-sizes="pageSizes"
+                       :page-size.sync="pageSize"
+                       layout="total, sizes, prev, pager, next, jumper"
+                       :total="total">
+        </el-pagination>
+      </div>
     </div>
     <business-dialog @businessClose="businessClose"
                      @businessSubmit="businessSubmit"
@@ -65,6 +77,7 @@ export default {
   data() {
     return {
       loading: false, // 展示加载中效果
+      tableHeight: document.documentElement.clientHeight - 320, // 表的高度
 
       // 商机组设置
       /** 商机组每行的信息 */
@@ -78,7 +91,11 @@ export default {
       ],
       // 添加商机组
       businessDialogVisible: false,
-      businessTitle: '添加商机组'
+      businessTitle: '添加商机组',
+      currentPage: 1,
+      pageSize: 10,
+      pageSizes: [10, 20, 30, 40],
+      total: 0
     }
   },
   methods: {
@@ -90,18 +107,34 @@ export default {
     },
 
     /**
+     * 更改每页展示数量
+     */
+    handleSizeChange(val) {
+      this.pageSize = val
+      this.getBusinessGroupList()
+    },
+
+    /**
+     * 更改当前页数
+     */
+    handleCurrentChange(val) {
+      this.currentPage = val
+      this.getBusinessGroupList()
+    },
+
+    /**
      * 商机组列表
      */
     getBusinessGroupList() {
       this.loading = true
       businessGroupList({
-        page: 1,
-        limit: 100,
-        search: ''
+        page: this.currentPage,
+        limit: this.pageSize
       })
         .then(res => {
           this.loading = false
           this.businessData = res.data.list
+          this.total = res.data.totalRow
         })
         .catch(() => {
           this.loading = false
@@ -220,6 +253,10 @@ export default {
     }
   },
   created() {
+    /** 控制table的高度 */
+    window.onresize = () => {
+      this.tableHeight = document.documentElement.clientHeight - 320
+    }
     this.getBusinessGroupList()
   }
 }
@@ -245,5 +282,16 @@ export default {
   flex: 1;
   overflow: auto;
   box-sizing: border-box;
+}
+
+.p-contianer {
+  position: relative;
+  background-color: white;
+  height: 44px;
+  .p-bar {
+    float: right;
+    margin: 5px 100px 0 0;
+    font-size: 14px !important;
+  }
 }
 </style>

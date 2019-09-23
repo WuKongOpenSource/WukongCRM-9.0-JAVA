@@ -133,6 +133,8 @@ import XhExpenses from './xhExpenses' // 报销事项
 import XhLeaves from './xhLeaves' // 出差事项
 import RelatedBusiness from './relatedBusiness'
 
+import { isArray } from '@/utils/types'
+
 import {
   regexIsNumber,
   regexIsCRMNumber,
@@ -498,7 +500,11 @@ export default {
                       })
                       .join(',')
                   } else if (rule.item.fieldName == 'categoryId') {
-                    postValue = element.value[element.value.length - 1]
+                    if (value && value.length) {
+                      postValue = value[value.length - 1]
+                    } else {
+                      postValue = ''
+                    }
                   } else if (rule.item.formType == 'checkbox') {
                     postValue = value.join(',')
                   }

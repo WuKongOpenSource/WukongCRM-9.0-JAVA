@@ -7,8 +7,22 @@
     delete from 72crm_crm_business_product where business_id = ?
     #end
 
-    #sql("queryById")
-    select * from businessview where business_id = ?
+    #sql("queryInformationById")
+        select a.business_name,c.name as type_name,d.name status_name,a.deal_date,b.customer_name,a.money,a.remark,a.batch_id
+        from `72crm_crm_business` as a
+                 left join `72crm_crm_customer` b on a.customer_id = b.customer_id
+                 left join `72crm_crm_business_status` c on c.status_id = a.status_id
+                 left join `72crm_crm_business_type` d on d.type_id = a.type_id
+        where business_id = ?;
+    #end
+
+    #sql ("queryById")
+    select a.*,b.customer_name,c.name as typeName,d.name as statusName,e.realname as owner_user_name
+    from 72crm_crm_business as a left join 72crm_crm_customer as b on a.customer_id = b.customer_id
+    left join 72crm_crm_business_type as c on a.type_id = c.type_id
+    left join 72crm_crm_business_status as d on a.status_id = d.status_id
+    left join 72crm_admin_user as e on a.owner_user_id = e.user_id
+    where a.business_id = ?
     #end
 
     #sql("queryByName")
@@ -30,13 +44,13 @@
     #end
 
     #sql ("queryProduct")
-    select b.product_id,b.name,b.name as productName,c.name as category_name,b.单位 as unit,a.price,a.sales_price,a.num,a.discount,a.subtotal,b.是否上下架
-    from 72crm_crm_business_product as a inner join productview as b inner join 72crm_crm_product_category as c
-    where a.product_id = b.product_id and b.category_id = c.category_id and a.business_id = ?
+        select b.product_id,b.name,b.name as productName,c.name as category_name,a.price,a.sales_price,a.num,a.discount,a.subtotal,(select value from `72crm_admin_fieldv` as d where d.batch_id = b.batch_id and d.name = '单位') as 'unit',(select value from `72crm_admin_fieldv` as d where d.batch_id = b.batch_id and d.name = '是否上下架') as '是否上下架'
+        from 72crm_crm_business_product as a inner join 72crm_crm_product as b inner join 72crm_crm_product_category as c
+        where a.product_id = b.product_id and b.category_id = c.category_id and a.business_id = ?;
     #end
 
     #sql ("queryContract")
-    select a.contract_id,a.num,a.name as contract_name,b.customer_name,a.money,a.start_time,a.end_time
+    select a.contract_id,a.num,a.name as contract_name,b.customer_name,a.money,a.start_time,a.end_time,a.check_status
     from 72crm_crm_contract as a left join 72crm_crm_customer as b on a.customer_id = b.customer_id
     where a.business_id = ?
     #end
@@ -53,10 +67,14 @@
     where a.business_id in (?)
     #end
 
-    #sql ("queryBusinessStatus")
-    select b.status_id,b.name,b.rate,b.order_num,a.status_id as current_status_id,a.is_end
+    #sql ("queryBusinessStatusList")
+    select b.status_id,b.name,b.rate,b.order_num
     from 72crm_crm_business as a inner join 72crm_crm_business_status as b on a.type_id = b.type_id
     where a.business_id = ?
+    #end
+
+    #sql ("queryBusinessStatus")
+    select business_id,status_id,is_end,status_remark from 72crm_crm_business where business_id = ?
     #end
 
     #sql ("queryOrderId")

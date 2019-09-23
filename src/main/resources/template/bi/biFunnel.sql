@@ -99,49 +99,54 @@
     #end
     #sql("sellFunnelList")
         SELECT
-         business_id,business_name,create_time,create_user_id,
-        create_user_name,customer_id,customer_name,
-        deal_date,money,owner_user_id,owner_user_name,
-        status_id,status_name,type_id,type_name
-        FROM businessview
+         a.business_id,a.business_name,a.create_time,a.create_user_id,
+        b.realname as create_user_name,a.customer_id,d.customer_name,
+         a.deal_date,a.money,a.owner_user_id,c.realname as owner_user_name,
+         a.status_id,e.name as status_name,a.type_id,f.name as type_name
+        FROM 72crm_crm_business  a
+        left join 72crm_admin_user b on a.create_user_id = b.user_id
+        left join 72crm_admin_user c on a.owner_user_id = c.user_id
+        left join 72crm_crm_customer d on d.customer_id = a.customer_id
+        left join 72crm_crm_business_status e on e.status_id = a.status_id
+        left join 72crm_crm_business_type f on f.type_id = a.type_id
         where
-        owner_user_id in (#for(x:userIds)
+        a.owner_user_id in (#for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)
         #if(type == 1)
-          and to_days(NOW()) = TO_DAYS(create_time)
+          and to_days(NOW()) = TO_DAYS(a.create_time)
           #end
            #if(type == 2)
-          and to_days(NOW()) - TO_DAYS(create_time) = 1
+          and to_days(NOW()) - TO_DAYS(a.create_time) = 1
           #end
            #if(type == 3)
-          and YEARWEEK(date_format(create_time,'%Y-%m-%d')) = YEARWEEK(now())
+          and YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now())
           #end
            #if(type == 4)
-          and YEARWEEK(date_format(create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
+          and YEARWEEK(date_format(a.create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
           #end
            #if(type == 5)
-          and date_format(create_time,'%Y-%m')=date_format(now(),'%Y-%m')
+          and date_format(a.create_time,'%Y-%m')=date_format(now(),'%Y-%m')
           #end
            #if(type == 6)
-          and date_format(create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+          and date_format(a.create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
           #end
            #if(type == 7)
-          and QUARTER(create_time)=QUARTER(now()) AND YEAR(create_time)=YEAR(NOW())
+          and QUARTER(a.create_time)=QUARTER(now()) AND YEAR(a.create_time)=YEAR(NOW())
           #end
            #if(type == 8)
-          and QUARTER(create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
+          and QUARTER(a.create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(a.create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
           #end
            #if(type == 9)
-          and YEAR(create_time)=YEAR(NOW())
+          and YEAR(a.create_time)=YEAR(NOW())
           #end
            #if(type == 10)
-          and YEAR(create_time)=YEAR(date_sub(now(),interval 1 year))
+          and YEAR(a.create_time)=YEAR(date_sub(now(),interval 1 year))
           #end
            #if(type == 11)
-            and  TO_DAYS(create_time) >= TO_DAYS(#para(startTime))
-            and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime))
+            and  TO_DAYS(a.create_time) >= TO_DAYS(#para(startTime))
+            and  TO_DAYS(a.create_time) <= TO_DAYS(#para(endTime))
           #end
     #end
 #end

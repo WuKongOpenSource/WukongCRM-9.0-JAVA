@@ -13,12 +13,6 @@ const cache = {
       if (userInfo) {
         store.commit('SET_USERINFO', userInfo)
       }
-      const authList = Lockr.get('authList')
-      if (authList) {
-        store.commit('SET_CRM', authList.crm)
-        store.commit('SET_BI', authList.bi)
-        store.commit('SET_MANAGE', authList.manage)
-      }
     }
     store.commit('SET_APPNAME', Lockr.get('systemName'))
     store.commit('SET_APPLOGO', Lockr.get('systemLogo'))

@@ -1,19 +1,30 @@
 import {
   crmSettingRecordListAPI
 } from '@/api/customermanagement/common'
+import { mapGetters } from 'vuex'
 
 export default {
   data() {
     return {
       /** 记录类型 */
       followTypes: [],
-      followType: '',
+      followType: ''
+    }
+  },
+
+  computed: {
+    ...mapGetters([
+      'oa'
+    ]),
+    showOAPermission() {
+      return this.oa
     }
   },
 
   created() {
     this.getFollowLogType()
   },
+
   methods: {
     /**
      * 获取详情
@@ -37,6 +48,6 @@ export default {
     },
   },
 
-  deactivated: function () {}
+  deactivated: function () { }
 
 }

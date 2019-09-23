@@ -1,19 +1,9 @@
 package com.kakarote.crm9.common.config.druid;
 
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.druid.filter.FilterChain;
 import com.alibaba.druid.filter.FilterEventAdapter;
 import com.alibaba.druid.proxy.jdbc.*;
-import com.alibaba.druid.sql.SQLUtils;
-import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.expr.SQLQueryExpr;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
-import com.kakarote.crm9.erp.admin.service.AdminUserService;
-import com.kakarote.crm9.utils.BaseUtil;
-
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 @SuppressWarnings("all")

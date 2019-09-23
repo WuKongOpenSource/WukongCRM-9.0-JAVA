@@ -245,7 +245,7 @@ export default {
         })
           .then(res => {
             this.loading = false
-            this.$message.success(res.data)
+            this.$message.success('操作成功')
             this.close()
           })
           .catch(err => {

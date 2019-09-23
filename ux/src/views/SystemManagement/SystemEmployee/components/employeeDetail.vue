@@ -21,14 +21,17 @@
             <el-button type="primary"
                        size="medium"
                        @click="editBtn"> 编 辑 </el-button>
-            <el-dropdown trigger="click"
+            <el-dropdown v-if="userUpdateAuth || userEnablesAuth"
+                         trigger="click"
                          @command="handleCommand">
               <el-button size="medium">
                 更 多<i class="el-icon-arrow-down el-icon--right"></i>
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="reset">重置密码</el-dropdown-item>
-                <el-dropdown-item command="status">{{data.status === 0 ? '激 活' : '禁 用'}}</el-dropdown-item>
+                <el-dropdown-item v-if="userUpdateAuth"
+                                  command="reset">重置密码</el-dropdown-item>
+                <el-dropdown-item v-if="userEnablesAuth"
+                                  command="status">{{data.status === 0 ? '激 活' : '禁 用'}}</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </div>
@@ -53,6 +56,7 @@
 
 <script>
 import SlideView from '@/components/SlideView'
+import { mapGetters } from 'vuex'
 
 export default {
   /** 审批详情 */
@@ -87,7 +91,17 @@ export default {
       ]
     }
   },
-  computed: {},
+  computed: {
+    ...mapGetters(['manage']),
+    // 员工编辑操作权限
+    userUpdateAuth() {
+      return this.manage && this.manage.users && this.manage.users.userUpdate
+    },
+    // 员工禁用启用权限
+    userEnablesAuth() {
+      return this.manage && this.manage.users && this.manage.users.userEnables
+    }
+  },
   mounted() {},
   methods: {
     editBtn() {

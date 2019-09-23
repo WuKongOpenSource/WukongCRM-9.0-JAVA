@@ -6,7 +6,7 @@
     <el-container>
       <el-aside width="auto"
                 class="aside-container">
-        <sidebar :items="managerRouterItems"
+        <sidebar :items="routerItems"
                  createButtonTitle=""
                  mainRouter="manager"></sidebar>
       </el-aside>
@@ -21,6 +21,7 @@
 import { mapGetters } from 'vuex'
 import { ManagerNavbar, Sidebar, AppMain } from './components'
 import { managerRouterMenu } from '@/router/modules/manager'
+import { adminGroupsTypeListAPI } from '@/api/systemManagement/RoleAuthorization'
 
 export default {
   name: 'Layout',
@@ -30,22 +31,90 @@ export default {
     AppMain
   },
   computed: {
-    ...mapGetters(['manage']),
-    managerRouterItems() {
-      for (let index = 0; index < managerRouterMenu.length; index++) {
-        const routerMenuItem = managerRouterMenu[index]
-        routerMenuItem.hidden = this.manage[routerMenuItem.meta.subType]
-          ? false
-          : true
-      }
-      return managerRouterMenu
-    }
+    ...mapGetters(['manage'])
   },
   data() {
-    return {}
+    return {
+      routerItems: []
+    }
   },
+
+  mounted() {
+    this.routerItems = this.filterAsyncRouter(managerRouterMenu, {
+      manage: this.manage
+    })
+    this.getAuthMenu()
+  },
+
   methods: {
-    navClick(index) {}
+    filterAsyncRouter(routers, authInfo) {
+      const res = []
+      routers.forEach(router => {
+        const tmp = {
+          ...router
+        }
+        if (this.checkAuth(tmp, authInfo)) {
+          if (tmp.children) {
+            tmp.children = this.filterAsyncRouter(tmp.children, authInfo)
+          }
+          res.push(tmp)
+        }
+      })
+      return res
+    },
+
+    checkAuth(router, authInfo) {
+      if (router.meta) {
+        const metaInfo = router.meta
+        if (!metaInfo.requiresAuth) {
+          return true
+        } else {
+          if (metaInfo.index == 0) {
+            return authInfo[metaInfo.type] ? true : false
+          } else if (metaInfo.index == 1) {
+            if (authInfo[metaInfo.type]) {
+              return authInfo[metaInfo.type][metaInfo.subType] ? true : false
+            }
+            return false
+          } else {
+            var typeAuth = authInfo[metaInfo.type]
+            for (let index = 0; index < metaInfo.subType.length; index++) {
+              const field = metaInfo.subType[index]
+              typeAuth = typeAuth[field]
+              if (typeAuth && metaInfo.subType.length - 1 == index) {
+                return true
+              } else if (!typeAuth) {
+                return false
+              }
+            }
+          }
+        }
+      }
+      return true
+    },
+
+    navClick(index) {},
+
+    getAuthMenu() {
+      adminGroupsTypeListAPI()
+        .then(res => {
+          for (let index = 0; index < this.routerItems.length; index++) {
+            const menuItem = this.routerItems[index]
+            if (menuItem.meta.icon == 'contacts' && !menuItem.hidden) {
+              menuItem.children = res.data.map(item => {
+                return {
+                  name: 'role-auth',
+                  path: `role-auth/${item.roleType}/${encodeURI(item.name)}`,
+                  meta: {
+                    title: item.name
+                  }
+                }
+              })
+            }
+          }
+        })
+        .catch(err => {})
+    }
   }
 }
 </script>
@@ -67,5 +136,9 @@ export default {
 
 #manager-main-container {
   max-height: 100%;
+}
+
+.el-container {
+  overflow: hidden;
 }
 </style>

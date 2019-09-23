@@ -4,37 +4,39 @@
       <span>产品类别设置</span>
     </div>
     <div class="product-setting">
-      <div>
-        <span class="el-icon-plus"
-              style="color: #409EFF;"></span>
-        <el-button @click.native="handleTreeSetDrop({type:'create-one'})"
-                   type="text">新增一级分类</el-button>
-      </div>
-      <div class="tree-box">
-        <el-tree :data="treeData"
-                 default-expand-all
-                 :props="defaultProps">
-          <flexbox slot-scope="{ node, data }"
-                   class="node-data">
-            <img class="node-img"
-                 v-if="node.expanded"
-                 src="@/assets/img/fold.png">
-            <img class="node-img"
-                 v-if="!node.expanded"
-                 src="@/assets/img/unfold.png">
-            <div class="node-label">{{ node.label }}</div>
-            <el-dropdown trigger="click"
-                         @command="handleTreeSetDrop">
-              <div @click.stop="getChild(node)"
-                   class="node-label-set">设置</div>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item v-for="(item, index) in treeSetTypes"
-                                  :key="index"
-                                  :command="item">{{item.name}}</el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </flexbox>
-        </el-tree>
+      <div class="product-setting-con">
+        <div>
+          <span class="el-icon-plus"
+                style="color: #409EFF;"></span>
+          <el-button @click.native="handleTreeSetDrop({type:'create-one'})"
+                     type="text">新增一级分类</el-button>
+        </div>
+        <div class="tree-box">
+          <el-tree :data="treeData"
+                   default-expand-all
+                   :props="defaultProps">
+            <flexbox slot-scope="{ node, data }"
+                     class="node-data">
+              <img class="node-img"
+                   v-if="node.expanded"
+                   src="@/assets/img/fold.png">
+              <img class="node-img"
+                   v-if="!node.expanded"
+                   src="@/assets/img/unfold.png">
+              <div class="node-label">{{ node.label }}</div>
+              <el-dropdown trigger="click"
+                           @command="handleTreeSetDrop">
+                <div @click.stop="getChild(node)"
+                     class="node-label-set">设置</div>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item v-for="(item, index) in treeSetTypes"
+                                    :key="index"
+                                    :command="item">{{item.name}}</el-dropdown-item>
+                </el-dropdown-menu>
+              </el-dropdown>
+            </flexbox>
+          </el-tree>
+        </div>
       </div>
     </div>
     <el-dialog title="提示"
@@ -250,7 +252,6 @@ export default {
         })
     }
   }
-
 }
 </script>
 
@@ -273,9 +274,9 @@ export default {
   display: flex;
   flex-direction: column;
   margin: 30px;
+  position: relative;
 }
 .tree-box {
-  flex: 1;
   overflow: auto;
 }
 .tree-box /deep/ .el-tree-node__expand-icon {
@@ -305,5 +306,14 @@ export default {
 
 .node-data:hover .node-label-set {
   display: block;
+}
+
+.product-setting-con {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: auto;
 }
 </style>

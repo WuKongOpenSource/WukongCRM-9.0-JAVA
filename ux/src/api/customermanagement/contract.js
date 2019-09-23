@@ -81,7 +81,7 @@ export function crmContractTransfer(data) {
 
 /**
  * 合同下回款
- * @param {*} data 
+ * @param {*} data
  */
 export function crmContractQueryReceivables(data) {
   return request({
@@ -93,7 +93,7 @@ export function crmContractQueryReceivables(data) {
 
 /**
  * 合同下回款计划
- * @param {*} data 
+ * @param {*} data
  */
 export function crmContractQueryReceivablesPlan(data) {
   return request({
@@ -105,7 +105,7 @@ export function crmContractQueryReceivablesPlan(data) {
 
 /**
  * 跟进记录
- * @param {*} data 
+ * @param {*} data
  */
 export function crmContractRecordSave(data) {
   return request({
@@ -154,6 +154,18 @@ export function crmContractTeamMembers(data) {
 export function crmContractUpdateMembers(data) {
   return request({
     url: 'CrmContract/updateMembers',
+    method: 'post',
+    data: data
+  })
+}
+
+/**
+ * 新建回款查询回款计划
+ * @param {*} data
+ */
+export function crmQueryReceivablesPlansByContractId(data) {
+  return request({
+    url: 'CrmContract/queryReceivablesPlansByContractId',
     method: 'post',
     data: data
   })

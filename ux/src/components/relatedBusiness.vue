@@ -19,6 +19,7 @@
       </crm-relative>
       <p class="add-file"
          slot="reference"
+         v-if="showCRMPermission"
          @click="showRelative = true">
         <img src="@/assets/img/relevance_business.png"
              alt="">
@@ -56,7 +57,8 @@
                     @close="crmrelativeClose"
                     @changeCheckout="checkInfos">
       </crm-relative>
-      <p class="add-file"
+      <p v-if="showCRMPermission"
+         class="add-file"
          @click="showTaskRelative = true"
          slot="reference">
         <img src="@/assets/img/relevance_business.png"
@@ -73,6 +75,7 @@ import { editTaskRelation } from '@/api/oamanagement/task'
 import CrmRelative from '@/components/CreateCom/CrmRelative'
 import RelatedBusinessCell from '@/views/OAManagement/components/relatedBusinessCell'
 import { objDeepCopy } from '@/utils'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -94,6 +97,12 @@ export default {
       showRelative: false,
       // 展示任务相关
       showTaskRelative: false
+    }
+  },
+  computed: {
+    ...mapGetters(['crm']),
+    showCRMPermission() {
+      return this.crm
     }
   },
   watch: {

@@ -4,6 +4,7 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.kit.Kv;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
@@ -12,6 +13,7 @@ import com.kakarote.crm9.common.annotation.LoginFormCookie;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
@@ -87,7 +89,7 @@ public class CrmContactsController extends Controller {
      * 根据联系人id查询商机
      */
     public void queryBusiness(BasePageRequest<CrmContacts> basePageRequest) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CONTACTS_TYPE_KEY.getSign()), basePageRequest.getData().getContactsId());
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_CONTACTS), basePageRequest.getData().getContactsId());
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -150,7 +152,7 @@ public class CrmContactsController extends Controller {
     @NotNullValidate(value = "content", message = "内容不能为空")
     @NotNullValidate(value = "category", message = "跟进类型不能为空")
     public void addRecord(@Para("") AdminRecord adminRecord) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CONTACTS_TYPE_KEY.getSign()), adminRecord.getTypesId());
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_CONTACTS), adminRecord.getTypesId());
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -163,7 +165,7 @@ public class CrmContactsController extends Controller {
      * 查看跟进记录
      */
     public void getRecord(BasePageRequest<CrmContacts> basePageRequest) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CONTACTS_TYPE_KEY.getSign()), basePageRequest.getData().getContactsId());
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_CONTACTS), basePageRequest.getData().getContactsId());
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -177,7 +179,10 @@ public class CrmContactsController extends Controller {
      */
     @Permissions("crm:contacts:excelexport")
     public void batchExportExcel(@Para("ids") String contactsIds) throws IOException {
-        List<Record> recordList = crmContactsService.exportContacts(contactsIds);
+        Map<String, AdminField> fieldMap = adminSceneService.getAdminFieldMap(3);
+        String[] contactsIdsArr = contactsIds.split(",");
+        Kv kv = Kv.by("ids", contactsIdsArr).set("fieldMap",fieldMap);
+        List<Record> recordList = crmContactsService.exportContacts(kv);
         export(recordList);
         renderNull();
     }
@@ -191,7 +196,8 @@ public class CrmContactsController extends Controller {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         jsonObject.fluentPut("excel", "yes").fluentPut("type", "3");
         AdminSceneService adminSceneService = new AdminSceneService();
-        List<Record> recordList = (List<Record>) adminSceneService.filterConditionAndGetPageList(basePageRequest).get("data");
+        JSONObject data = (JSONObject)adminSceneService.filterConditionAndGetPageList(basePageRequest).get("data");
+        List<Record> recordList = data.getJSONArray("list").toJavaList(Record.class);
         export(recordList);
         renderNull();
     }
@@ -221,6 +227,13 @@ public class CrmContactsController extends Controller {
             writer.merge(12 + fieldList.size(), "联系人信息");
             HttpServletResponse response = getResponse();
             List<Map<String, Object>> list = new ArrayList<>();
+            if (recordList.size() == 0){
+                Record record = new Record().set("name","").set("customer_name","").set("next_time","").set("telephone","").set("mobile","").set("email","").set("post","").set("address","").set("remark","").set("create_user_name","").set("owner_user_name","").set("create_time","").set("update_time","");
+                for (Record field : fieldList) {
+                    record.set(field.getStr("name"),"");
+                }
+                list.add(record.getColumns());
+            }
             for (Record record : recordList) {
                 list.add(record.remove("batch_id", "contacts_name", "customer_id", "contacts_id", "owner_user_id", "create_user_id", "field_batch_id").getColumns());
             }
@@ -247,9 +260,9 @@ public class CrmContactsController extends Controller {
             response.setHeader("Content-Disposition", "attachment;filename=contacts.xls");
             ServletOutputStream out = response.getOutputStream();
             writer.flush(out);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             // 关闭writer，释放内存
             writer.close();
         }

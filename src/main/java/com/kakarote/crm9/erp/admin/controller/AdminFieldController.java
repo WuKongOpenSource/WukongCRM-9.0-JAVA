@@ -60,7 +60,7 @@ public class AdminFieldController extends Controller {
      * @author zhangzhiwei
      * 保存自定义字段E
      */
-    @Permissions("manage:crm")
+    @Permissions("manage:crm:field")
     public void save() {
         String str=getRawData();
         JSONObject jsonObject= JSON.parseObject(str);
@@ -135,7 +135,12 @@ public class AdminFieldController extends Controller {
      */
     public void information(@Para("types")Integer types,@Para("id")Integer id){
         List<Record> recordList;
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.getSign(types)), id);
+        boolean auth;
+        if(types.equals(2)){
+            auth = AuthUtil.isPoolAuth(id);
+        }else {
+            auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.parse(types)), id);
+        }
         if(auth){renderJson(R.noAuth()); return; }
         if (1 == types){
             recordList = crmLeadsService.information(id);

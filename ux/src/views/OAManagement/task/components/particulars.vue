@@ -150,7 +150,7 @@
                              :taskData="taskData">
                     <div slot="editIndex">
                       <span class="el-icon-plus"></span>
-                      <span class="label">添加标签</span>
+                      <span class="label">标签</span>
                     </div>
                   </tag-index>
                 </div>

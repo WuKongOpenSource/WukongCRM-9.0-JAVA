@@ -127,6 +127,10 @@ export default {
           this.list[data.index].childWCCount = data.value.subdonecount
           this.list[data.index].childAllCount =
             data.value.allcount
+        } else if (data.type == 'change-main-user') {
+          this.list[data.index].mainUser = data.value
+        } else if (data.type == 'change-label') {
+          this.list[data.index].labelList = data.value
         }
       }
     },

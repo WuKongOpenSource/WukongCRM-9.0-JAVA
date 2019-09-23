@@ -20,6 +20,18 @@ export function crmIndexIndexListAPI(data) {
   })
 }
 
+/**
+ * 简报跟进记录数量
+ * @param {*} data 
+ */
+export function crmQueryRecordConuntAPI(data) {
+  return request({
+    url: 'Crm/Instrument/queryRecordConunt',
+    method: 'post',
+    data: data
+  })
+}
+
 // 业绩指标
 export function crmIndexAchievementData(data) {
   return request({
@@ -42,6 +54,15 @@ export function crmIndexFunnel(data) {
 export function crmIndexSaletrend(data) {
   return request({
     url: 'Crm/Instrument/sellMonth',
+    method: 'post',
+    data: data
+  })
+}
+
+// 获取简报 跟进记录信息
+export function crmIndexGetRecordListAPI(data) {
+  return request({
+    url: 'Crm/Instrument/queryRecordList',
     method: 'post',
     data: data
   })

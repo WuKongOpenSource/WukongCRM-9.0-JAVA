@@ -98,7 +98,7 @@ export default {
       list: [],
       fieldList: [
         { field: 'month', name: '时间' },
-        { field: 'receivables', name: '回款金额(元)' },
+        { field: 'receivables', name: '合同金额(元)' },
         { field: 'achievement', name: '目标(元)' },
         { field: 'rate', name: '完成率(%)' }
       ],
@@ -185,8 +185,20 @@ export default {
     /** 顶部操作 */
     handleClick(type) {
       if (type === 'search') {
+        this.refreshTableHeadAndChartInfo()
         this.getAhievementDatalist()
       }
+    },
+    /**
+     * 刷新表头和图标关键字
+     */
+    refreshTableHeadAndChartInfo() {
+      this.fieldList[1].name =
+        this.typeSelect == 1 ? '合同金额(元)' : '回款金额(元)'
+      this.axisOption.legend.data[0] =
+        this.typeSelect == 1 ? '合同金额' : '回款金额'
+      this.axisOption.series[0].name =
+        this.typeSelect == 1 ? '合同金额' : '回款金额'
     },
     /** 柱状图 */
     initAxis() {
@@ -202,7 +214,7 @@ export default {
           }
         },
         legend: {
-          data: ['回款金额', '目标', '完成率'],
+          data: ['合同金额', '目标', '完成率'],
           bottom: '0px',
           itemWidth: 14
         },
@@ -290,7 +302,7 @@ export default {
         ],
         series: [
           {
-            name: '回款金额',
+            name: '合同金额',
             type: 'bar',
             yAxisIndex: 0,
             barWidth: 15,

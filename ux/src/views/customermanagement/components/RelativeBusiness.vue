@@ -272,6 +272,9 @@ export default {
       /** 客户 和 联系人 下可新建商机  */
       if (this.crmType == 'contacts') {
         this.createActionInfo.data['customer'] = this.detail
+        this.createActionInfo.relativeData = {
+          contactsId: this.detail.contactsId
+        }
       } else if (this.crmType == 'customer') {
         this.createActionInfo.data['customer'] = this.detail
       }

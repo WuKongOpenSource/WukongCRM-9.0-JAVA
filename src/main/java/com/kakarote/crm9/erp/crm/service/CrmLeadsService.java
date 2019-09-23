@@ -8,6 +8,7 @@ import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Aop;
 import com.jfinal.log.Log;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
@@ -16,6 +17,7 @@ import com.kakarote.crm9.erp.admin.entity.AdminFile;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
+import com.kakarote.crm9.erp.admin.service.AdminSceneService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.common.CrmParamValid;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
@@ -35,9 +37,7 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
 
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CrmLeadsService {
@@ -89,7 +89,7 @@ public class CrmLeadsService {
         if (crmLeads.getLeadsId() != null) {
             crmLeads.setCustomerId(0);
             crmLeads.setUpdateTime(DateUtil.date());
-            crmRecordService.updateRecord(new CrmLeads().dao().findById(crmLeads.getLeadsId()), crmLeads, CrmEnum.LEADS_TYPE_KEY.getTypes());
+            crmRecordService.updateRecord(new CrmLeads().dao().findById(crmLeads.getLeadsId()), crmLeads, CrmEnum.CRM_LEADS);
             return crmLeads.update() ? R.ok() : R.error();
         } else {
             crmLeads.setCreateTime(DateUtil.date());
@@ -100,7 +100,7 @@ public class CrmLeadsService {
             }
             crmLeads.setBatchId(batchId);
             boolean save = crmLeads.save();
-            crmRecordService.addRecord(crmLeads.getLeadsId(), CrmEnum.LEADS_TYPE_KEY.getTypes());
+            crmRecordService.addRecord(crmLeads.getLeadsId(), CrmEnum.CRM_LEADS);
             return save ? R.ok() : R.error();
         }
     }
@@ -127,7 +127,10 @@ public class CrmLeadsService {
      * 根据线索id查询
      */
     public Record queryById(Integer leadsId) {
-        return Db.findFirst(Db.getSql("crm.leads.queryById"), leadsId);
+        Record record = Db.findFirst(Db.getSql("crm.leads.queryById"), leadsId);
+        List<Record> recordList = Db.find("select name,value from `72crm_admin_fieldv` where batch_id = ?", record.getStr("batch_id"));
+        recordList.forEach(field->record.set(field.getStr("name"),field.getStr("value")));
+        return record;
     }
 
     /**
@@ -165,7 +168,7 @@ public class CrmLeadsService {
         String[] ids = leadsIds.split(",");
         int update = Db.update(Db.getSqlPara("crm.leads.updateOwnerUserId", Kv.by("ownerUserId", ownerUserId).set("ids", ids)));
         for (String id : ids) {
-            crmRecordService.addConversionRecord(Integer.valueOf(id), CrmEnum.LEADS_TYPE_KEY.getTypes(), ownerUserId);
+            crmRecordService.addConversionRecord(Integer.valueOf(id), CrmEnum.CRM_LEADS, ownerUserId);
         }
         return update > 0 ? R.ok() : R.error();
     }
@@ -178,7 +181,7 @@ public class CrmLeadsService {
     public R translate(String leadsIds) {
         String[] leadsIdsArr = leadsIds.split(",");
         for (String leadsId : leadsIdsArr) {
-            Record crmLeads = Db.findFirst("select * from leadsview where leads_id = ?", Integer.valueOf(leadsId));
+            Record crmLeads = queryById(Integer.valueOf(leadsId));
             if (1 == crmLeads.getInt("is_transform")) {
                 return R.error("已转化线索不能再次转化");
             }
@@ -244,10 +247,14 @@ public class CrmLeadsService {
                         adminFieldv.setName(customerField.getName());
                         adminFieldvList.add(adminFieldv);
                     }
-                };
-            };
+                }
+            }
             crmCustomer.save();
-            crmRecordService.addConversionCustomerRecord(crmCustomer.getCustomerId(), CrmEnum.CUSTOMER_TYPE_KEY.getTypes(), crmCustomer.getCustomerName());
+            boolean isMaxOwner = Aop.get(CrmCustomerService.class).isMaxOwner(crmLeads.getInt("owner_user_id"),new String[]{crmCustomer.getCustomerId().toString()});
+            if (!isMaxOwner){
+                return R.error("该员工拥有客户数已达上限");
+            }
+            crmRecordService.addConversionCustomerRecord(crmCustomer.getCustomerId(), CrmEnum.CRM_CUSTOMER.getType()+"", crmCustomer.getCustomerName());
             adminFieldService.save(adminFieldvList, customerBatchId);
             Db.update("update 72crm_crm_leads set is_transform = 1,update_time = ?,customer_id = ? where leads_id = ?",
                     DateUtil.date(), crmCustomer.getCustomerId(), Integer.valueOf(leadsId));
@@ -288,7 +295,7 @@ public class CrmLeadsService {
      * 查询编辑字段
      */
     public List<Record> queryField(Integer leadsId) {
-        Record leads = Db.findFirst("select * from leadsview where leads_id = ?",leadsId);
+        Record leads = queryById(leadsId);
         return adminFieldService.queryUpdateField(1,leads);
     }
 
@@ -331,9 +338,8 @@ public class CrmLeadsService {
      * @author wyq
      * 线索导出
      */
-    public List<Record> exportLeads(String leadsIds) {
-        String[] leadsIdsArr = leadsIds.split(",");
-        return Db.find(Db.getSqlPara("crm.leads.excelExport", Kv.by("ids", leadsIdsArr)));
+    public List<Record> exportLeads(Kv kv) {
+        return Db.find(Db.getSqlPara("crm.leads.excelExport",kv));
     }
 
     /**
@@ -396,6 +402,10 @@ public class CrmLeadsService {
                                 .fluentPut("owner_user_id", ownerUserId));
                     } else if (number > 0 && repeatHandling == 1) {
                         Record leads = Db.findFirst("select leads_id,batch_id from 72crm_crm_leads where leads_name = ?", leadsName);
+                        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_LEADS),leads.getInt("leads_id"));
+                        if (auth){
+                            return R.error("第"+errNum+1+"行数据无操作权限，不能覆盖");
+                        }
                         object.fluentPut("entity", new JSONObject().fluentPut("leads_id", leads.getInt("leads_id"))
                                 .fluentPut("leads_name", leadsName)
                                 .fluentPut("telephone", leadsList.get(kv.getInt("telephone")))
@@ -403,7 +413,6 @@ public class CrmLeadsService {
                                 .fluentPut("address", leadsList.get(kv.getInt("address")))
                                 .fluentPut("next_time", leadsList.get(kv.getInt("next_time")))
                                 .fluentPut("remark", leadsList.get(kv.getInt("remark")))
-                                .fluentPut("owner_user_id", ownerUserId)
                                 .fluentPut("batch_id", leads.getStr("batch_id")));
                     } else if (number > 0 && repeatHandling == 2) {
                         continue;

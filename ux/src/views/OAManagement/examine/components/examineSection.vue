@@ -35,6 +35,7 @@
 </template>
 
 <script>
+import { oaExamineDelete } from '@/api/oamanagement/examine'
 import ExamineCell from './examineCell'
 import ExamineDetail from './examineDetail'
 import CRMAllDetail from '@/views/customermanagement/components/CRMAllDetail'

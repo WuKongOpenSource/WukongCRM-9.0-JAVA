@@ -306,9 +306,6 @@ export default {
         this.$message.error('内容至少填写一项')
       }
     },
-    beforeRemove() {
-      return this.$confirm('此操作将永久删除该图片, 是否继续？')
-    },
     // 图片和附件
     // 上传图片
     imgFileUploadSuccess(response, file, fileList) {

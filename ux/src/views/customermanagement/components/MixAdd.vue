@@ -258,11 +258,10 @@ export default {
       }
     },
     barClick(item) {
+      this.showRelativeType = item.type
       if (item.type == 'business') {
-        this.showRelativeType = item.type
         item.show = true
       } else if (item.type == 'contacts') {
-        this.showRelativeType = item.type
         item.show = true
       }
     },
@@ -270,6 +269,17 @@ export default {
     uploadFile(event) {
       var files = event.target.files
       if (files.length) {
+        for (let index = 0; index < files.length; index++) {
+          const file = files[index]
+          if (
+            file.type.indexOf('image') == -1 &&
+            this.showRelativeType == 'img'
+          ) {
+            this.$message.error('请上传正确的文件类型')
+            return
+          }
+        }
+
         var type = event.target.accept == 'image/*' ? 'img' : 'file'
         var firstFile = files[0]
         this.sendFileRequest(firstFile, type, () => {

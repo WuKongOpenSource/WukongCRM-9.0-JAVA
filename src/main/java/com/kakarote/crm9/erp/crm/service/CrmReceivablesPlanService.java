@@ -130,6 +130,14 @@ public class CrmReceivablesPlanService {
     }
 
     /**
+     * 新建汇款时根据合同ID查询回款计划
+     * @author wyq
+     */
+    public R queryReceivablesPlansByContractId(Integer contractId){
+        return R.ok().put("data",Db.find(Db.getSql("crm.receivablesplan.queryReceivablesPlansByContractId"),contractId));
+    }
+
+    /**
      * 根据合同id和客户id查询未使用的回款计划
      */
     public R queryByContractAndCustomer(CrmReceivablesPlan receivablesPlan) {

@@ -5,9 +5,6 @@
    #sql("totalRowSql")
     select count(*) from contractview
    #end
-   #sql("queryProductById")
-    select * from 72crm_crm_product where batch_id = ?
-   #end
    #sql("queryById")
     select cc.* ,ccu.customer_name as customerName , cb.business_name as businessName from 72crm_crm_contract as cc
     left join 72crm_crm_customer as ccu on ccu.customer_id = cc.customer_id left join 72crm_crm_business as cb on cb.business_id = cc.business_id
@@ -53,10 +50,13 @@
     #sql ("deleteMember")
     update 72crm_crm_contract set rw_user_id = replace(rw_user_id,?,','),ro_user_id = replace(ro_user_id,?,',') where contract_id = ?
     #end
-     #sql ("queryByContractId")
-    select *,
-    ( select IFNULL(sum(money),0) from 72crm_crm_receivables where contract_id =  crt.contract_id and check_status = 2) as receivablesMoney
-    from contractview as crt where crt.contract_id = ?
+    #sql ("queryByContractId")
+      select crt.*,ccc.customer_name,cau.realname as ownerUserName,ccb.business_name,
+      ( select IFNULL(sum(money),0) from 72crm_crm_receivables where contract_id =  crt.contract_id and check_status = 2) as receivablesMoney
+      from 72crm_crm_contract as crt left join 72crm_admin_user as cau on crt.owner_user_id = cau.user_id
+      left join 72crm_crm_customer as ccc on crt.customer_id = ccc.customer_id
+      left join 72crm_crm_business as ccb on crt.business_id = ccb.business_id
+      where crt.contract_id = ?
     #end
     #sql ("deleteByContractId")
     delete from 72crm_crm_contract_product where contract_id = ?
@@ -66,6 +66,10 @@
     #end
     #sql ("updateCheckStatusById")
       update 72crm_crm_contract set check_status = ? where contract_id = ?
+    #end
+
+    #sql ("queryContractConfig")
+    select status,value as contractDay from 72crm_admin_config where name = 'expiringContractDays' limit 1
     #end
 
     #sql ("setContractConfig")

@@ -19,4 +19,8 @@
     and (b.main_user_id = #para(userId) or b.owner_user_id like concat('%,',#para(userId),',%'))
     #end
   #end
+
+  #sql ("queryLabelIdList")
+  select label_id from `72crm_task` where create_user_id = ? or main_user_id = ? or owner_user_id like concat('%,',?,',%') and ishidden = 0
+  #end
 #end

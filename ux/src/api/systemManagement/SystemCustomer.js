@@ -192,3 +192,42 @@ export function crmSettingContractDayAPI(data) {
     data: data
   })
 }
+
+/**
+ * 拥有、锁定客户数限制
+ * @param {*} data
+ */
+export function crmSettingCustomerConfigListAPI(data) {
+  return request({
+    url: 'CrmCustomer/queryCustomerSetting',
+    method: 'post',
+    data: data
+  })
+}
+
+/**
+ * 拥有、锁定客户数限制 - 创建 编辑
+ * @param {*} data
+ */
+export function crmSettingCustomerConfigSetAPI(data) {
+  return request({
+    url: 'CrmCustomer/customerSetting',
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: data
+  })
+}
+
+/**
+ * 拥有、锁定客户数限制 - 删除
+ * @param {*} data
+ */
+export function crmSettingCustomerConfigDelAPI(data) {
+  return request({
+    url: 'CrmCustomer/deleteCustomerSetting',
+    method: 'post',
+    data: data
+  })
+}

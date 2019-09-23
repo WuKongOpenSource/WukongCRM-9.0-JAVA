@@ -8,23 +8,22 @@ import com.alibaba.fastjson.JSONObject;
 import com.jfinal.kit.Kv;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
-import com.kakarote.crm9.common.annotation.LoginFormCookie;
-import com.kakarote.crm9.common.annotation.NotNullValidate;
-import com.kakarote.crm9.common.annotation.Permissions;
+import com.kakarote.crm9.common.annotation.*;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
-import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.CrmBusiness;
 import com.kakarote.crm9.erp.crm.entity.CrmContract;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
+import com.kakarote.crm9.erp.crm.entity.CrmCustomerSetting;
 import com.kakarote.crm9.erp.crm.service.CrmBusinessService;
 import com.kakarote.crm9.erp.crm.service.CrmContactsService;
 import com.kakarote.crm9.erp.crm.service.CrmContractService;
 import com.kakarote.crm9.erp.crm.service.CrmCustomerService;
 import com.kakarote.crm9.utils.AuthUtil;
+import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
@@ -42,6 +41,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -112,6 +112,11 @@ public class CrmCustomerController extends Controller {
     @Permissions("crm:customer:read")
     @NotNullValidate(value = "customerId", message = "客户id不能为空")
     public void queryById(@Para("customerId") Integer customerId) {
+        boolean auth = AuthUtil.isPoolAuth(customerId);
+        if (auth) {
+            renderJson(R.ok().put("data",new Record().set("dataAuth",0)));
+            return;
+        }
         renderJson(R.ok().put("data", crmCustomerService.queryById(customerId)));
     }
 
@@ -129,7 +134,7 @@ public class CrmCustomerController extends Controller {
      * 根据客户id查询联系人
      */
     public void queryContacts(BasePageRequest<CrmCustomer> basePageRequest) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CUSTOMER_TYPE_KEY.getSign()), basePageRequest.getData().getCustomerId());
+        boolean auth = AuthUtil.isPoolAuth(basePageRequest.getData().getCustomerId());
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -152,7 +157,7 @@ public class CrmCustomerController extends Controller {
      * 根据客户id查找商机
      */
     public void queryBusiness(BasePageRequest<CrmCustomer> basePageRequest) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CUSTOMER_TYPE_KEY.getSign()), basePageRequest.getData().getCustomerId());
+        boolean auth = AuthUtil.isPoolAuth(basePageRequest.getData().getCustomerId());
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -165,7 +170,7 @@ public class CrmCustomerController extends Controller {
      * 根据客户id查询合同
      */
     public void queryContract(BasePageRequest<CrmCustomer> basePageRequest) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CUSTOMER_TYPE_KEY.getSign()), basePageRequest.getData().getCustomerId());
+        boolean auth = AuthUtil.isPoolAuth(basePageRequest.getData().getCustomerId());
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -174,19 +179,11 @@ public class CrmCustomerController extends Controller {
     }
 
     /**
-     * @author zxy
-     * 条件查询客户公海
-     */
-    public void queryPageGH(BasePageRequest basePageRequest) {
-        renderJson(R.ok().put("data", crmCustomerService.queryPageGH(basePageRequest)));
-    }
-
-    /**
      * @author wyq
      * 根据客户id查询回款计划
      */
     public void queryReceivablesPlan(BasePageRequest<CrmCustomer> basePageRequest) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CUSTOMER_TYPE_KEY.getSign()), basePageRequest.getData().getCustomerId());
+        boolean auth = AuthUtil.isPoolAuth(basePageRequest.getData().getCustomerId());
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -199,7 +196,7 @@ public class CrmCustomerController extends Controller {
      * 根据客户id查询回款
      */
     public void queryReceivables(BasePageRequest<CrmCustomer> basePageRequest) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CUSTOMER_TYPE_KEY.getSign()), basePageRequest.getData().getCustomerId());
+        boolean auth = AuthUtil.isPoolAuth(basePageRequest.getData().getCustomerId());
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -219,6 +216,14 @@ public class CrmCustomerController extends Controller {
     }
 
     /**
+     * @author wyq
+     * 设置成交状态
+     */
+    public void setDealStatus(@Para("ids")String ids,@Para("dealStatus")String dealStatus){
+        renderJson(crmCustomerService.setDealStatus(ids,dealStatus));
+    }
+
+    /**
      * 客户转移
      *
      * @author wyq
@@ -227,28 +232,38 @@ public class CrmCustomerController extends Controller {
     @NotNullValidate(value = "customerIds", message = "客户id不能为空")
     @NotNullValidate(value = "newOwnerUserId", message = "新负责人不能为空")
     @NotNullValidate(value = "transferType", message = "移除方式不能为空")
-    @Before(Tx.class)
     public void transfer(@Para("") CrmCustomer crmCustomer) {
         String[] customerIdsArr = crmCustomer.getCustomerIds().split(",");
-        for (String customerId : customerIdsArr) {
-            crmCustomer.setCustomerId(Integer.valueOf(customerId));
-            renderJson(crmCustomerService.updateOwnerUserId(crmCustomer));
-            String changeType = crmCustomer.getChangeType();
-            if (StrUtil.isNotEmpty(changeType)) {
-                String[] changeTypeArr = changeType.split(",");
-                for (String type : changeTypeArr) {
-                    if ("1".equals(type)) {//更新联系人负责人
-                        renderJson(crmContactsService.updateOwnerUserId(crmCustomer.getCustomerId(), crmCustomer.getNewOwnerUserId()) ? R.ok() : R.error());
-                    }
-                    if ("2".equals(type)) {//更新商机负责人
-                        renderJson(crmBusinessService.updateOwnerUserId(crmCustomer));
-                    }
-                    if ("3".equals(type)) {//更新合同负责人
-                        renderJson(crmContractService.updateOwnerUserId(crmCustomer));
+        Db.tx(()->{
+            for (String customerId : customerIdsArr) {
+                if(Db.queryInt("select count(*) from `72crm_crm_customer` where find_in_set(?,ro_user_id) and customer_id = ?",BaseUtil.getUserId(),customerId)>0){
+                    renderJson(R.error("没有权限"));
+                    return false;
+                }
+                crmCustomer.setCustomerId(Integer.valueOf(customerId));
+                renderJson(crmCustomerService.updateOwnerUserId(crmCustomer));
+                String changeType = crmCustomer.getChangeType();
+                if (StrUtil.isNotEmpty(changeType)) {
+                    String[] changeTypeArr = changeType.split(",");
+                    for (String type : changeTypeArr) {
+                        //更新联系人负责人
+                        if ("1".equals(type)) {
+                            renderJson(crmContactsService.updateOwnerUserId(crmCustomer.getCustomerId(), crmCustomer.getNewOwnerUserId()));
+                        }
+                        //更新商机负责人
+                        if ("2".equals(type)) {
+                            renderJson(crmBusinessService.updateOwnerUserId(crmCustomer));
+                        }
+                        //更新合同负责人
+                        if ("3".equals(type)) {
+                            renderJson(crmContractService.updateOwnerUserId(crmCustomer));
+                        }
                     }
                 }
             }
-        }
+            return true;
+        });
+
     }
 
     /**
@@ -257,7 +272,7 @@ public class CrmCustomerController extends Controller {
      */
     @NotNullValidate(value = "customerId", message = "客户id不能为空")
     public void getMembers(@Para("customerId") Integer customerId) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CUSTOMER_TYPE_KEY.getSign()), customerId);
+        boolean auth = AuthUtil.isPoolAuth(customerId);
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -279,7 +294,8 @@ public class CrmCustomerController extends Controller {
         if (StrUtil.isNotEmpty(changeType)) {
             String[] changeTypeArr = changeType.split(",");
             for (String type : changeTypeArr) {
-                if ("2".equals(type)) {//更新商机
+                //更新商机
+                if ("2".equals(type)) {
                     CrmBusiness crmBusiness = new CrmBusiness();
                     crmBusiness.setIds(crmCustomerService.getBusinessIdsByCustomerIds(crmCustomer.getIds()));
                     crmBusiness.setMemberIds(crmCustomer.getMemberIds());
@@ -287,7 +303,8 @@ public class CrmCustomerController extends Controller {
                     crmBusiness.setTransferType(crmCustomer.getTransferType());
                     crmBusinessService.addMember(crmBusiness);
                 }
-                if ("3".equals(type)) {//更新合同
+                //更新合同
+                if ("3".equals(type)) {
                     CrmContract crmContract = new CrmContract();
                     crmContract.setIds(crmCustomerService.getContractIdsByCustomerIds(crmCustomer.getIds()));
                     crmContract.setMemberIds(crmCustomer.getMemberIds());
@@ -326,7 +343,7 @@ public class CrmCustomerController extends Controller {
      * @author zxy
      * 客户保护规则设置
      */
-    @Permissions("manage:crm")
+    @Permissions("manage:crm:setting")
     @NotNullValidate(value = "followupDay", message = "跟进天数不能为空")
     @NotNullValidate(value = "dealDay", message = "成交天数不能为空")
     @NotNullValidate(value = "type", message = "启用状态不能为空")
@@ -337,7 +354,9 @@ public class CrmCustomerController extends Controller {
         Integer dealDay = getParaToInt("dealDay");
         //启用状态
         Integer type = getParaToInt("type");
-        renderJson(crmCustomerService.updateRulesSetting(dealDay, followupDay, type));
+        Integer remindConfig = getParaToInt("putInPoolRemindConfig");
+        Integer remindDay = getParaToInt("putInPoolRemindDays");
+        renderJson(crmCustomerService.updateRulesSetting(dealDay, followupDay, type, remindDay,remindConfig));
     }
 
     /**
@@ -356,7 +375,7 @@ public class CrmCustomerController extends Controller {
     @NotNullValidate(value = "content", message = "内容不能为空")
     @NotNullValidate(value = "category", message = "跟进类型不能为空")
     public void addRecord(@Para("") AdminRecord adminRecord) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CUSTOMER_TYPE_KEY.getSign()), adminRecord.getTypesId());
+        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_CUSTOMER), adminRecord.getTypesId());
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -369,7 +388,7 @@ public class CrmCustomerController extends Controller {
      * 查看跟进记录
      */
     public void getRecord(BasePageRequest<CrmCustomer> basePageRequest) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CUSTOMER_TYPE_KEY.getSign()), basePageRequest.getData().getCustomerId());
+        boolean auth = AuthUtil.isPoolAuth(basePageRequest.getData().getCustomerId());
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -397,7 +416,8 @@ public class CrmCustomerController extends Controller {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         jsonObject.fluentPut("excel", "yes").fluentPut("type", 2);
         AdminSceneService adminSceneService = new AdminSceneService();
-        List<Record> recordList = (List<Record>) adminSceneService.filterConditionAndGetPageList(basePageRequest).get("data");
+        JSONObject data = (JSONObject)adminSceneService.filterConditionAndGetPageList(basePageRequest).get("data");
+        List<Record> recordList = data.getJSONArray("list").toJavaList(Record.class);
         export(recordList);
         renderNull();
     }
@@ -422,15 +442,15 @@ public class CrmCustomerController extends Controller {
         JSONObject jsonObject = basePageRequest.getJsonObject();
         jsonObject.fluentPut("excel", "yes").fluentPut("type", 8);
         AdminSceneService adminSceneService = new AdminSceneService();
-        List<Record> recordList = (List<Record>) adminSceneService.filterConditionAndGetPageList(basePageRequest).get("data");
+        JSONObject data = (JSONObject)adminSceneService.filterConditionAndGetPageList(basePageRequest).get("data");
+        List<Record> recordList = data.getJSONArray("list").toJavaList(Record.class);
         export(recordList);
         renderNull();
     }
 
     private void export(List<Record> recordList) throws IOException {
-        ExcelWriter writer = null;
+        ExcelWriter writer = ExcelUtil.getWriter();
         try {
-            writer = ExcelUtil.getWriter();
             AdminFieldService adminFieldService = new AdminFieldService();
             List<Record> fieldList = adminFieldService.customFieldList("2");
             List<Record> customerFields = adminFieldService.list("2");
@@ -441,7 +461,7 @@ public class CrmCustomerController extends Controller {
             writer.addHeaderAlias("mobile", kv.getStr("mobile"));
             writer.addHeaderAlias("website", kv.getStr("website"));
             writer.addHeaderAlias("next_time", kv.getStr("next_time"));
-            writer.addHeaderAlias("deal_status", kv.getStr("deal_status"));
+            writer.addHeaderAlias("deal_status", "成交状态");
             writer.addHeaderAlias("create_user_name", "创建人");
             writer.addHeaderAlias("owner_user_name", "负责人");
             writer.addHeaderAlias("address", "省市区");
@@ -458,8 +478,15 @@ public class CrmCustomerController extends Controller {
             writer.merge(fieldList.size() + 15, "客户信息");
             HttpServletResponse response = getResponse();
             List<Map<String, Object>> list = new ArrayList<>();
+            if (recordList.size() == 0){
+                Record record = new Record().set("customer_name","").set("telephone","").set("mobile","").set("website","").set("next_time","").set("deal_status","").set("create_user_name","").set("owner_user_name","").set("address","").set("location","").set("detail_address","").set("lng","").set("lat","").set("create_time","").set("update_time","").set("remark","");
+                for (Record field : fieldList) {
+                    record.set(field.getStr("name"),"");
+                }
+                list.add(record.getColumns());
+            }
             for (Record record : recordList) {
-                list.add(record.remove("batch_id", "create_user_id", "customer_id", "is_lock", "owner_user_id", "ro_user_id", "rw_user_id", "followup", "field_batch_id").getColumns());
+                list.add(record.remove("batch_id", "create_user_id", "customer_id", "is_lock", "owner_user_id", "ro_user_id", "rw_user_id", "followup", "field_batch_id", "business_count", "pool_day").getColumns());
             }
             writer.write(list, true);
             writer.setRowHeight(0, 20);
@@ -484,9 +511,9 @@ public class CrmCustomerController extends Controller {
             response.setHeader("Content-Disposition", "attachment;filename=customer.xls");
             ServletOutputStream out = response.getOutputStream();
             writer.flush(out);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             // 关闭writer，释放内存
             writer.close();
         }
@@ -501,19 +528,6 @@ public class CrmCustomerController extends Controller {
     public void updateCustomerByIds() {
         String ids = get("ids");
         renderJson(crmCustomerService.updateCustomerByIds(ids));
-    }
-
-    /**
-     * 领取或分配客户
-     *
-     * @author zxy
-     */
-    @Permissions("crm:customer:distribute")
-    public void getCustomersByIds() {
-        String ids = get("ids");
-        Long userId = getLong("userId");
-        /* JSONObject jsonObject= JSON.parseObject(getRawData());*/
-        renderJson(crmCustomerService.getCustomersByIds(ids, userId));
     }
 
     /**
@@ -622,5 +636,24 @@ public class CrmCustomerController extends Controller {
             }
             return true;
         });
+    }
+
+    @NotNullValidate(value = "customerNum", message = "请填写客户数量",type = HttpEnum.JSON)
+    public void customerSetting(@RequestBody CrmCustomerSetting customerSetting){
+        renderJson(crmCustomerService.customerSetting(customerSetting));
+    }
+    @NotNullValidate("type")
+    public void queryCustomerSetting(BasePageRequest<CrmCustomerSetting> pageRequest){
+        renderJson(R.ok().put("data",crmCustomerService.queryCustomerSetting(pageRequest)));
+    }
+
+    @NotNullValidate("settingId")
+    public void editCustomerSetting(@Para("settingId") Integer settingId){
+        renderJson(crmCustomerService.queryEditCustomerSetting(settingId));
+    }
+
+    @NotNullValidate("settingId")
+    public void deleteCustomerSetting(@Para("settingId") Integer settingId){
+        renderJson(crmCustomerService.deleteCustomerSetting(settingId));
     }
 }

@@ -2,6 +2,9 @@ package com.kakarote.crm9.erp.work.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.kakarote.crm9.common.annotation.HttpEnum;
+import com.kakarote.crm9.common.annotation.NotNullValidate;
+import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.work.entity.Work;
 import com.kakarote.crm9.erp.work.service.WorkService;
@@ -25,6 +28,7 @@ public class WorkController extends Controller {
      * 设置项目
      * @param work 项目对象
      */
+    @Permissions({"project:projectManage:save"})
     public void setWork(@Para("") Work work){
         renderJson(workService.setWork(work));
     }
@@ -201,5 +205,13 @@ public class WorkController extends Controller {
      */
     public void activation(@Para("taskId") Integer taskId){
         renderJson(workService.activation(taskId));
+    }
+
+    /**
+     * @author wyq
+     * 查询有项目模块查看权限的员工
+     */
+    public void queryProjectUser(){
+        renderJson(workService.queryProjectUser());
     }
 }

@@ -7,6 +7,7 @@ import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
 import com.jfinal.plugin.activerecord.Record;
+import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.bi.service.BiWorkService;
 import com.kakarote.crm9.utils.R;
@@ -28,6 +29,7 @@ public class BiWorkController extends Controller {
      * 查询日志统计信息
      * @author zhang
      */
+    @Permissions("bi:oa:read")
     public void logStatistics(@Para("deptId")Integer deptId, @Para("userId")Long userId, @Para("type")String type){
         renderJson(R.ok().put("data",biWorkService.logStatistics(deptId,userId,type)));
     }
@@ -71,6 +73,7 @@ public class BiWorkController extends Controller {
      * 查询审批统计信息
      * @author zhang
      */
+    @Permissions("bi:oa:read")
     public void examineStatistics(@Para("deptId")Integer deptId, @Para("userId")Long userId, @Para("type")String type){
         renderJson(R.ok().put("data",biWorkService.examineStatistics(deptId,userId,type)));
     }
