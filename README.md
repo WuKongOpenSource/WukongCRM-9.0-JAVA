@@ -77,7 +77,7 @@ Uncomment the above code, comment undertow references; change the packaging meth
 <dependency>
     <groupId>com.jfinal</groupId>
     <artifactId>jfinal-undertow</artifactId>
-    <version>1.6</version>
+    <version>1.9</version>
 </dependency>
 ```
 
@@ -187,7 +187,7 @@ UI框架：Element-UI 2.6.3
 <dependency>
     <groupId>com.jfinal</groupId>
     <artifactId>jfinal-undertow</artifactId>
-    <version>1.6</version>
+    <version>1.9</version>
 </dependency>
 ```
 
