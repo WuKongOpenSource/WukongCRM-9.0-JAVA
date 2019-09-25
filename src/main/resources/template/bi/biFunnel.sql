@@ -102,7 +102,12 @@
          a.business_id,a.business_name,a.create_time,a.create_user_id,
         b.realname as create_user_name,a.customer_id,d.customer_name,
          a.deal_date,a.money,a.owner_user_id,c.realname as owner_user_name,
-         a.status_id,e.name as status_name,a.type_id,f.name as type_name
+         a.status_id,
+         CASE WHEN a.is_end = 0 THEN e.name
+             WHEN a.is_end = 1 THEN '赢单'
+             WHEN a.is_end = 2 THEN '输单'
+             WHEN a.is_end = 3 THEN '无效' END as status_name,
+         a.type_id,f.name as type_name
         FROM 72crm_crm_business  a
         left join 72crm_admin_user b on a.create_user_id = b.user_id
         left join 72crm_admin_user c on a.owner_user_id = c.user_id

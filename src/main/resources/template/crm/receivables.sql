@@ -34,7 +34,7 @@
        )
      #end
      #sql("queryReceivablesById")
-     select a.*,b.customer_name,c.num as contractNum,c.name as contractName,c.money as contractMoney,d.realname as ownerUserName from
+     select a.*,b.customer_name,c.num as contract_num,c.name as contract_name,c.money as contract_money,d.realname as owner_user_name from
      (select * from 72crm_crm_receivables where receivables_id = ?)as a left join 72crm_crm_customer as b on a.customer_id = b.customer_id
      left join 72crm_crm_contract as c on a.contract_id = c.contract_id
      left join 72crm_admin_user as d on a.owner_user_id = d.user_id

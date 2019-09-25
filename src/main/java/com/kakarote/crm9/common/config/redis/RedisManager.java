@@ -102,11 +102,11 @@ public class RedisManager {
     }
 
     private String decrypt(String str){
-        RSA rsa=SecureUtil.rsa("PRIVATE_KEY","PUBILC_KEY");
+        RSA rsa=SecureUtil.rsa(BaseConstant.PRIVATE_KEY,BaseConstant.PUBILC_KEY);
         return rsa.decryptFromBcdToStr(str,KeyType.PrivateKey, CharsetUtil.CHARSET_UTF_8);
     }
     private String encrypt(String key){
-        RSA rsa=SecureUtil.rsa("PRIVATE_KEY","PUBILC_KEY");
+        RSA rsa=SecureUtil.rsa(BaseConstant.PRIVATE_KEY,BaseConstant.PUBILC_KEY);
         return rsa.encryptHex(key,CharsetUtil.CHARSET_UTF_8,KeyType.PublicKey);
     }
 

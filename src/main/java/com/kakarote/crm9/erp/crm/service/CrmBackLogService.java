@@ -267,7 +267,7 @@ public class CrmBackLogService {
             return R.ok().put("data",new ArrayList<>());
         }
         JSONObject data = jsonObject.getJSONObject("data")!=null ? jsonObject.getJSONObject("data") : new JSONObject();
-        data.fluentPut("backLog",new JSONObject().fluentPut("name","a.receivables_id").fluentPut("condition","in").fluentPut("value",StrUtil.join(",",receivablesIds)));
+        data.fluentPut("backLog",new JSONObject().fluentPut("name","receivables_id").fluentPut("condition","in").fluentPut("value",StrUtil.join(",",receivablesIds)));
         jsonObject.fluentPut("data",data).fluentPut("search","").fluentPut("type",7);
         basePageRequest.setJsonObject(jsonObject);
         return adminSceneService.getCrmPageList(basePageRequest);

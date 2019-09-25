@@ -1,6 +1,7 @@
 package com.kakarote.crm9.common.config;
 
 import cn.hutool.core.util.ClassLoaderUtil;
+import com.alibaba.druid.wall.WallFilter;
 import com.jfinal.aop.Aop;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.druid.DruidConfig;

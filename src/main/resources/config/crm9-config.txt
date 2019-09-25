@@ -1,5 +1,5 @@
-#database
-mysql.jdbcUrl = jdbc:mysql://127.0.0.1:3306/crm9?characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull&tinyInt1isBit=false
+﻿#数据库链接
+mysql.jdbcUrl = jdbc:mysql://192.168.1.116:3306/crm20190923?characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull&tinyInt1isBit=false
 mysql.user = root
-mysql.password = 123456
-jfinal.devMode = false
+mysql.password = Admin001m
+jfinal.devMode = true

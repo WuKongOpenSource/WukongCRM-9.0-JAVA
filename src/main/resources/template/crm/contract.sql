@@ -6,8 +6,9 @@
     select count(*) from contractview
    #end
    #sql("queryById")
-    select cc.* ,ccu.customer_name as customerName , cb.business_name as businessName from 72crm_crm_contract as cc
-    left join 72crm_crm_customer as ccu on ccu.customer_id = cc.customer_id left join 72crm_crm_business as cb on cb.business_id = cc.business_id
+    select cc.* ,ccu.customer_name as customerName, cb.business_name as businessName
+    from 72crm_crm_contract as cc left join 72crm_crm_customer as ccu on ccu.customer_id = cc.customer_id
+    left join 72crm_crm_business as cb on cb.business_id = cc.business_id
     where cc.contract_id = ?
    #end
 
@@ -51,11 +52,13 @@
     update 72crm_crm_contract set rw_user_id = replace(rw_user_id,?,','),ro_user_id = replace(ro_user_id,?,',') where contract_id = ?
     #end
     #sql ("queryByContractId")
-      select crt.*,ccc.customer_name,cau.realname as ownerUserName,ccb.business_name,
+      select crt.*,ccc.customer_name,cau.realname as ownerUserName,ccb.business_name,a.name as contacts_name,b.realname as company_user_name,
       ( select IFNULL(sum(money),0) from 72crm_crm_receivables where contract_id =  crt.contract_id and check_status = 2) as receivablesMoney
       from 72crm_crm_contract as crt left join 72crm_admin_user as cau on crt.owner_user_id = cau.user_id
       left join 72crm_crm_customer as ccc on crt.customer_id = ccc.customer_id
       left join 72crm_crm_business as ccb on crt.business_id = ccb.business_id
+      left join 72crm_crm_contacts as a on crt.contacts_id = a.contacts_id
+      left join 72crm_admin_user as b on crt.company_user_id = b.user_id
       where crt.contract_id = ?
     #end
     #sql ("deleteByContractId")

@@ -100,10 +100,11 @@ public class InstrumentController extends Controller {
             userIds = record.getStr("userIds");
             deptIds = record.getStr("deptIds");
             allUsetIds = record.getStr("arrUserIds");
-        }
-        if (StrUtil.isEmpty(userIds)){
-            renderJson(R.ok());
-            return;
+        }else {
+            if (StrUtil.isEmpty(userIds)){
+                renderJson(R.ok());
+                return;
+            }
         }
         renderJson(instrumentService.queryPerformance(startTime, endTime, userIds,deptIds, status,type,allUsetIds));
     }

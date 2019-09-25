@@ -120,7 +120,7 @@ public class CrmRecordService<T>{
         crmActionRecord.setTypes(crmEnum.getType() + "");
         crmActionRecord.setActionId(actionId);
         ArrayList<String> strings = new ArrayList<>();
-        strings.add("新建了" + crmEnum.getName());
+        strings.add("新建了" + crmEnum.getRemarks());
         crmActionRecord.setContent(JSON.toJSONString(strings));
         crmActionRecord.save();
     }

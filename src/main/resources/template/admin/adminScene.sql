@@ -80,12 +80,12 @@
             #end
             GROUP BY b.batch_id
         ) `z` ON `a`.`batch_id` = `z`.`field_batch_id`
+      ) as views
         where 1=1
          #for(query : queryList) #if(query.get("type")==2||query.get("type")==0) #(query.get("sql")) #end #end
         ORDER BY
         #(orderByKey) #(orderByType)
         #if(field) #if(page&&limit) LIMIT #(page),#(limit) #end #end
-      ) as views
     #end
     #sql ("queryCrmPageListByFieldType2")
       #(select) FROM (

@@ -449,10 +449,11 @@
       SELECT count(1) as `count`,cau.realname,coe.create_user_id,cad.name as structureName
       FROM
         72crm_oa_examine_travel as coet
-         LEFT JOIN 72crm_oa_examine as coe on coe.examine_id = coet.examine_id
+      LEFT JOIN 72crm_oa_examine as coe on coe.examine_id = coet.examine_id
+      left join `72crm_oa_examine_category` a on coe.category_id = a.category_id
       LEFT JOIN 72crm_admin_user as cau on cau.user_id = coe.create_user_id
        left join 72crm_admin_dept as cad on cad.dept_id = cau.dept_id
-      WHERE
+      WHERE a.type = 3 and
          coe.create_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
@@ -557,9 +558,9 @@
        #sql("portrait")
         SELECT count(*) as allCustomer,
         sum(case when a.deal_status = '已成交' then 1 else 0 end) as dealCustomer,
-        (case when (b.`value` = '') then '未知' else b.`value` end) as industry
+        (case when (b.`value` = '' or b.value is null) then '未知' else b.`value` end) as industry
         FROM 72crm_crm_customer as a
-        LEFT JOIN 72crm_admin_fieldv as b on a.batch_id=b.batch_id and b.`name`='客户行业'
+        INNER JOIN 72crm_admin_fieldv as b on a.batch_id=b.batch_id and b.`name`='客户行业'
          where   a.owner_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)

@@ -108,8 +108,7 @@ public class BiEmployeeService {
         StringBuffer sqlStringBuffer = new StringBuffer();
         for (int i=1; i <= cycleNum;i++){
             sqlStringBuffer.append("select '").append(beginTime).append("'as type,count(contract_id) as contractNum,IFNULL(SUM(IFNULL(money,0)),0) " +
-                    "as contractMoney,IFNULL(SUM(IFNULL((select money from 72crm_crm_receivables as b where b.contract_id = a.contract_id),0)),0)" +
-                    "" +
+                    "as contractMoney,IFNULL((select SUM(IFNULL(money,0)) from 72crm_crm_receivables as b where b.contract_id = a.contract_id),0)" +
                     " as receivablesMoney from 72crm_crm_contract as a where DATE_FORMAT(order_date,'").append(sqlDateFormat)
                     .append("') = '").append(beginTime).append("' and check_status = 2 and owner_user_id in (").append(userIds).append(")");
             if (i != cycleNum){

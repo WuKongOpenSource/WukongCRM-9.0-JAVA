@@ -3,6 +3,7 @@ package com.kakarote.crm9.erp.bi.service;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jfinal.aop.Inject;
+import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.erp.bi.common.BiTimeUtil;
@@ -38,7 +39,7 @@ public class BiCustomerService {
             sqlStringBuffer.append("select '").append(beginTime).append("' as type,IFNULL((select count(customer_id) from 72crm_crm_customer where DATE_FORMAT(create_time,'")
                     .append(sqlDateFormat).append("') = '").append(beginTime).append("' and owner_user_id in (").append(userIds)
                     .append(")),0) as customerNum,IFNULL(count(DISTINCT a.customer_id),0) as dealCustomerNum from 72crm_crm_customer as a left join 72crm_crm_contract as b on a.customer_id = b.customer_id where DATE_FORMAT(b.order_date,'")
-                    .append(sqlDateFormat).append("') = '").append(beginTime).append("' and b.owner_user_id in (").append(userIds).append(")");
+                    .append(sqlDateFormat).append("') = '").append(beginTime).append("' and a.owner_user_id in (").append(userIds).append(")");
             if (i != cycleNum){
                 sqlStringBuffer.append(" union all ");
             }
@@ -68,8 +69,9 @@ public class BiCustomerService {
         for (int i=1; i <= userIdsArr.length;i++){
             sqlStringBuffer.append("select (select realname from 72crm_admin_user where user_id = ").append(userIdsArr[i-1])
                     .append(") as realname,count(a.customer_id) as customerNum,IFNULL((select count(distinct b.customer_id) from " +
-                    "72crm_crm_contract as b left join 72crm_crm_customer as c on b.customer_id = c.customer_id where " +
-                    "c.customer_id = a.customer_id and b.check_status = 2 ),0) as dealCustomerNum,(select IFNULL(SUM(money),0) " +
+                    "72crm_crm_customer as b left join 72crm_crm_contract as c on b.customer_id = c.customer_id where " +
+                    "c.check_status = 2 and b.owner_user_id = ").append(userIdsArr[i-1]).append(" and DATE_FORMAT(c.order_date,'")
+                    .append(sqlDateFormat).append("') between '").append(beginTime).append("' and '").append(finalTime).append("'),0) as dealCustomerNum,(select IFNULL(SUM(money),0) " +
                     "from 72crm_crm_contract where DATE_FORMAT(order_date,'").append(sqlDateFormat).append("') between '")
                     .append(beginTime).append("' and '").append(finalTime).append("' and owner_user_id = ").append(userIdsArr[i-1])
                     .append(" ) as contractMoney,(select IFNULL(SUM(d.money),0) from 72crm_crm_receivables as d left join 72crm_crm_contract" +
@@ -163,15 +165,10 @@ public class BiCustomerService {
         if (StrUtil.isEmpty(userIds)){
             userIds = "0";
         }
+        String[] idsArr = userIds.split(",");
         Integer beginTime = record.getInt("beginTime");
         Integer finalTime = record.getInt("finalTime");
-        StringBuffer sqlStringBuffer = new StringBuffer();
-        sqlStringBuffer.append("select category,IFNULL(count(record_id),0) as recordNum,IFNULL(count(record_id)*100/(select count(*) from 72crm_admin_record where DATE_FORMAT(create_time,'")
-                .append(sqlDateFormat).append("') between '").append(beginTime).append("' and '").append(finalTime).append("' and create_user_id in (")
-                .append(userIds).append(")),0) as proportion from 72crm_admin_record where (DATE_FORMAT(create_time,'").append(sqlDateFormat)
-                .append("') between '").append(beginTime).append("' and '").append(finalTime).append("') and create_user_id in (").append(userIds)
-                .append(") group by category");
-        List<Record> recordList = Db.find(sqlStringBuffer.toString());
+        List<Record> recordList = Db.find(Db.getSqlPara("bi.customer.customerRecodCategoryStats", Kv.by("sqlDateFormat",sqlDateFormat).set("ids",idsArr).set("beginTime",beginTime).set("finalTime",finalTime)));
         return R.ok().put("data",recordList);
     }
 
@@ -221,14 +218,10 @@ public class BiCustomerService {
         if (StrUtil.isEmpty(userIds)){
             userIds = "0";
         }
+        String[] idsArr = userIds.split(",");
         Integer beginTime = record.getInt("beginTime");
         Integer finalTime = record.getInt("finalTime");
-        StringBuffer sqlStringBuffer = new StringBuffer();
-        sqlStringBuffer.append("select x.*,(select value from 72crm_admin_fieldv as a where name = '客户行业' and a.batch_id = x.batch_id) as '客户行业',(select value from 72crm_admin_fieldv as b where name = '客户来源' and b.batch_id = x.batch_id) as '客户来源' from (select a.batch_id,a.customer_name,b.name as contract_name,b.money as contract_money,IFNULL(c.money,0) as receivables_money,d.realname AS owner_user_name,e.realname AS create_user_name,a.create_time,a.update_time,b.order_date from 72crm_crm_customer as a inner join 72crm_crm_contract as b on a.customer_id = b.customer_id left join 72crm_crm_receivables as c on b.contract_id = c.contract_id left join 72crm_admin_user as d on a.owner_user_id = d.user_id left join 72crm_admin_user as e on a.create_user_id = e.user_id where DATE_FORMAT(a.create_time,'")
-                .append(sqlDateFormat).append("') between '").append(beginTime)
-                .append("' and '").append(finalTime).append("' and b.check_status = 2 and a.owner_user_id in (")
-                .append(userIds).append(")) as x");
-        List<Record> recordList = Db.find(sqlStringBuffer.toString());
+        List<Record> recordList = Db.find(Db.getSqlPara("bi.customer.customerConversionInfo", Kv.by("sqlDateFormat",sqlDateFormat).set("ids",idsArr).set("beginTime",beginTime).set("finalTime",finalTime)));
         return R.ok().put("data",recordList);
     }
 
@@ -271,6 +264,12 @@ public class BiCustomerService {
         Record record = new Record();
         record.set("deptId",deptId).set("userId",userId).set("type",type).set("startTime",startTime).set("endTime",endTime);
         biTimeUtil.analyzeType(record);
+        String userIds = record.getStr("userIds");
+        if (StrUtil.isEmpty(userIds)){
+            userIds = "0";
+        }
+        String[] idsArr = userIds.split(",");
+        record.set("ids",idsArr);
         List<Record> recordList = Db.find(Db.getSqlPara("bi.customer.poolTable",record));
         return R.ok().put("data",recordList);
     }
@@ -292,7 +291,7 @@ public class BiCustomerService {
         Integer beginTime = record.getInt("beginTime");
         StringBuffer sqlStringBuffer = new StringBuffer();
         for (int i=1; i <= cycleNum;i++){
-            sqlStringBuffer.append("select '").append(beginTime).append("' as type,IFNULL(AVG(TIMESTAMPDIFF(DAY,a.create_time,b.order_date)),0)" +
+            sqlStringBuffer.append("select '").append(beginTime).append("' as type,IFNULL(TRUNCATE(AVG(TIMESTAMPDIFF(DAY,a.create_time,b.order_date)),1),0)" +
                     " as cycle, count(a.customer_id) as customerNum from 72crm_crm_customer as a left join 72crm_crm_contract as b on " +
                     "a.customer_id = b.customer_id where DATE_FORMAT(a.create_time,'").append(sqlDateFormat).append("') = '").append(beginTime)
                     .append("' and b.check_status = 2 and a.owner_user_id in (").append(userIds).append(")");
@@ -323,7 +322,7 @@ public class BiCustomerService {
         StringBuffer sqlStringBuffer = new StringBuffer();
         String[] userIdsArr = userIds.split(",");
         for (int i=1; i<=userIdsArr.length;i++){
-            sqlStringBuffer.append("select a.realname,IFNULL(AVG(TIMESTAMPDIFF(DAY,b.create_time,c.order_date)),0) as cycle, count(b.customer_id) " +
+            sqlStringBuffer.append("select a.realname,IFNULL(TRUNCATE(AVG(TIMESTAMPDIFF(DAY,b.create_time,c.order_date)),1),0) as cycle, count(b.customer_id) " +
                     "as customerNum from 72crm_admin_user as a left join 72crm_crm_customer as b on a.user_id = b.owner_user_id left join " +
                     "72crm_crm_contract as c on b.customer_id = c.customer_id where DATE_FORMAT(b.create_time,'").append(sqlDateFormat)
                     .append("') between '").append(beginTime).append("' and '").append(finalTime).append("' and c.check_status = 2 and a.user_id = ")
@@ -354,7 +353,7 @@ public class BiCustomerService {
         String[] districtArr = new String[]{"北京","上海","天津","广东","浙江","海南","福建","湖南","湖北","重庆","辽宁","吉林","黑龙江","河北","河南","山东","陕西","甘肃","青海","新疆","山西","四川","贵州","安徽","江西","江苏","云南","内蒙古","广西","西藏","宁夏"};
         StringBuffer sqlStringBuffer = new StringBuffer();
         for (int i=1; i <= districtArr.length;i++){
-            sqlStringBuffer.append("select '").append(districtArr[i-1]).append("' as type,IFNULL(AVG(TIMESTAMPDIFF(DAY,a.create_time,b.order_date)),0)" +
+            sqlStringBuffer.append("select '").append(districtArr[i-1]).append("' as type,IFNULL(TRUNCATE(AVG(TIMESTAMPDIFF(DAY,a.create_time,b.order_date)),1),0)" +
                     " as cycle, count(a.customer_id) as customerNum from 72crm_crm_customer as a left join 72crm_crm_contract as b on " +
                     "a.customer_id = b.customer_id where DATE_FORMAT(a.create_time,'").append(sqlDateFormat).append("') between '").append(beginTime)
                     .append("' and '").append(finalTime).append("' and b.check_status = 2 and a.owner_user_id in (").append(userIds)
@@ -388,7 +387,7 @@ public class BiCustomerService {
         }
         StringBuffer sqlStringBuffer = new StringBuffer();
         for (int i=1; i <= productList.size();i++){
-            sqlStringBuffer.append("select '").append(productList.get(i-1).getStr("name")).append("' as productName,IFNULL(AVG(TIMESTAMPDIFF(DAY,a.create_time,b.order_date)),0)" +
+            sqlStringBuffer.append("select '").append(productList.get(i-1).getStr("name")).append("' as productName,IFNULL(TRUNCATE(AVG(TIMESTAMPDIFF(DAY,a.create_time,b.order_date)),1),0)" +
                     " as cycle, count(a.customer_id) as customerNum from 72crm_crm_customer as a left join 72crm_crm_contract as b on " +
                     "a.customer_id = b.customer_id left join 72crm_crm_contract_product as c on b.contract_id = c.contract_id where DATE_FORMAT(a.create_time,'")
                     .append(sqlDateFormat).append("') between '").append(beginTime).append("' and '").append(finalTime)

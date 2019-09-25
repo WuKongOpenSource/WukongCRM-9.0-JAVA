@@ -99,6 +99,9 @@ public class InstrumentService{
             Record r = getTime(type);
             startTime = r.getStr("startTime");
             endTime = r.getStr("endTime");
+        }else {
+            startTime = DateUtil.format(DateUtil.parse(startTime,"yyyy-MM-dd"),"yyyyMM");
+            endTime = DateUtil.format(DateUtil.parse(endTime,"yyyy-MM-dd"),"yyyyMM");
         }
         //status 1 合同 2.回款
         Record record = Db.findFirst(Db.getSqlPara("crm.Instrument.queryMoneys", Kv.by("startTime", startTime).set("endTime", endTime).set("userIds", allUsetIdss)));
@@ -123,37 +126,37 @@ public class InstrumentService{
                     if(sta <= 1 && en >= 1){
                         money = money.add(new BigDecimal(start.getStr("january")));
                     }
-                    if(sta <= 2 && en >= 1){
+                    if(sta <= 2 && en >= 2){
                         money = money.add(new BigDecimal(start.getStr("february")));
                     }
-                    if(sta <= 3 && en >= 1){
+                    if(sta <= 3 && en >= 3){
                         money = money.add(new BigDecimal(start.getStr("march")));
                     }
-                    if(sta <= 4 && en >= 1){
+                    if(sta <= 4 && en >= 4){
                         money = money.add(new BigDecimal(start.getStr("april")));
                     }
-                    if(sta <= 5 && en >= 1){
+                    if(sta <= 5 && en >= 5){
                         money = money.add(new BigDecimal(start.getStr("may")));
                     }
-                    if(sta <= 6 && en >= 1){
+                    if(sta <= 6 && en >= 6){
                         money = money.add(new BigDecimal(start.getStr("june")));
                     }
-                    if(sta <= 7 && en >= 1){
+                    if(sta <= 7 && en >= 7){
                         money = money.add(new BigDecimal(start.getStr("july")));
                     }
-                    if(sta <= 8 && en >= 1){
+                    if(sta <= 8 && en >= 8){
                         money = money.add(new BigDecimal(start.getStr("august")));
                     }
-                    if(sta <= 9 && en >= 1){
+                    if(sta <= 9 && en >= 9){
                         money = money.add(new BigDecimal(start.getStr("september")));
                     }
-                    if(sta <= 10 && en >= 1){
+                    if(sta <= 10 && en >= 10){
                         money = money.add(new BigDecimal(start.getStr("october")));
                     }
-                    if(sta <= 11 && en >= 1){
+                    if(sta <= 11 && en >= 11){
                         money = money.add(new BigDecimal(start.getStr("november")));
                     }
-                    if(sta <= 12 && en >= 1){
+                    if(sta <= 12 && en >= 12){
                         money = money.add(new BigDecimal(start.getStr("december")));
                     }
                 }
@@ -407,24 +410,6 @@ public class InstrumentService{
         record.set("startTime", startTime);
         record.set("endTime", endTime);
         return record;
-    }
-
-    /**
-     * 销售漏斗
-     */
-    public R queryBusiness(String userIds, String deptIds, Integer typeId, Date startTime, Date endTime){
-        String[] userIdss = userIds.split(",");
-        String[] deptIdss = deptIds.split(",");
-        Record record = Db.findFirst(Db.getSqlPara("crm.Instrument.queryBusiness",
-                Kv.by("userIds", userIdss).set("typeId", typeId)
-                        .set("startTime", startTime).set("endTime", endTime).set("deptIds", deptIdss)));
-        List<Record> records = Db.find(Db.getSqlPara("crm.Instrument.queryBusinessStatistics",
-                Kv.by("userIds", userIdss).set("typeId", typeId)
-                        .set("startTime", startTime).set("endTime", endTime).set("deptIds", deptIdss)));
-        if(record != null){
-            record.set("record", records);
-        }
-        return R.ok().put("data", record);
     }
 
     /**

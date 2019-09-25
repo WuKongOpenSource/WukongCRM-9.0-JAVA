@@ -180,10 +180,10 @@ public class BiRankingService {
         return R.ok().put("data",list);
     }
     public R addressAnalyse(){
-        String [] addResss = biTimeUtil.getAddress();
+        String [] addressArr = biTimeUtil.getAddress();
         List<Record> list = new ArrayList<>();
-        for (String addRess: addResss) {
-            list.add(Db.findFirst(Db.getSqlPara("bi.ranking.addressAnalyse",Kv.by("address",addRess))));
+        for (String address: addressArr) {
+            list.add(Db.findFirst(Db.getSqlPara("bi.ranking.addressAnalyse",Kv.by("address",address))));
         }
         return R.ok().put("data",list);
     }

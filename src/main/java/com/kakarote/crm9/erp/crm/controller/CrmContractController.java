@@ -213,7 +213,7 @@ public class CrmContractController extends Controller {
      * 新建汇款时根据合同ID查询回款计划
      * @author wyq
      */
-    public void queryReceivablesPlansByContractId(Integer contractId){
+    public void queryReceivablesPlansByContractId(@Para("contractId") Integer contractId){
         renderJson(receivablesPlanService.queryReceivablesPlansByContractId(contractId));
     }
 

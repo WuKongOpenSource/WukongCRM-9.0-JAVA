@@ -165,29 +165,44 @@ public class BiTimeUtil {
     }
 
     public Integer analyzeType(String type){
-        Integer status;
-        if ("year".equals(type)){
-            status = 9;
-        }else if ("lastYear".equals(type)){
-            status = 10;
-        }else if ("quarter".equals(type)){
-            status = 7;
-        }else if ("lastQuarter".equals(type)){
-            status = 8;
-        }else if ("month".equals(type)){
-            status = 5;
-        }else if ("lastMonth".equals(type)){
-            status = 6;
-        }else if ("week".equals(type)){
-            status = 3;
-        }else if ("lastWeek".equals(type)){
-            status = 4;
-        }else if ("today".equals(type)){
-            status = 1;
-        }else if ("yesterday".equals(type)){
-            status = 2;
-        }else {
-            status = 11;
+        int status;
+        if (type == null){
+            return 11;
+        }
+        switch(type){
+            case "year":
+                status = 9;
+                break;
+            case "lastYear":
+                status = 10;
+                break;
+            case "quarter":
+                status = 7;
+                break;
+            case "lastQuarter":
+                status = 8;
+                break;
+            case "month":
+                status = 5;
+                break;
+            case "lastMonth":
+                status = 6;
+                break;
+            case "week":
+                status = 3;
+                break;
+            case "lastWeek":
+                status = 4;
+                break;
+            case "today":
+                status = 1;
+                break;
+            case "yesterday":
+                status = 2;
+                break;
+            default:
+                status = 11;
+                break;
         }
         return status;
     }

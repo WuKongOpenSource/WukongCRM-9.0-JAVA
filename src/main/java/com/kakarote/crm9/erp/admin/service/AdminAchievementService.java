@@ -2,6 +2,7 @@ package com.kakarote.crm9.erp.admin.service;
 
 import cn.hutool.core.util.StrUtil;
 import com.kakarote.crm9.erp.admin.entity.CrmAchievement;
+import com.kakarote.crm9.erp.bi.common.MonthEnum;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.Db;
@@ -9,6 +10,7 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class AdminAchievementService {
@@ -32,7 +34,10 @@ public class AdminAchievementService {
             Record recordInfo = Db.findFirst(Db.getSql("admin.achievement.queryDeptInfo"),achievement.getYear(),achievement.getType(),record.get("dept_id"),achievement.getStatus());
             if (recordInfo == null) {
                 recordInfo = new Record();
-                recordInfo.set("november",0).set("yeartarget",0).set("may",0).set("august",0).set("february",0).set("july",0).set("april",0).set("march",0).set("june",0).set("september",0).set("january",0).set("december",0).set("october",0).set("obj_id",deptId).set("year",achievement.getYear()).set("type",achievement.getType()).set("status",achievement.getStatus());
+                for(MonthEnum monthEnum : MonthEnum.values()){
+                    recordInfo.set(monthEnum.getName(),0);
+                }
+                recordInfo.set("yeartarget",0).set("obj_id",deptId).set("year",achievement.getYear()).set("type",achievement.getType()).set("status",achievement.getStatus());
             }
             record.setColumns(recordInfo);
             deptList.add(record);
@@ -42,7 +47,10 @@ public class AdminAchievementService {
                     Record info = Db.findFirst(Db.getSql("admin.achievement.queryDeptInfo"),achievement.getYear(), achievement.getType(), record1.get("dept_id"), achievement.getStatus());
                     if (info == null) {
                         info = new Record();
-                        info.set("november",0).set("yeartarget",0).set("may",0).set("august",0).set("february",0).set("july",0).set("april",0).set("march",0).set("june",0).set("september",0).set("january",0).set("december",0).set("october",0).set("obj_id",record1.get("dept_id")).set("year",achievement.getYear()).set("type",achievement.getType()).set("status",achievement.getStatus());
+                        for(MonthEnum monthEnum : MonthEnum.values()){
+                            info.set(monthEnum.getName(),0);
+                        }
+                        info.set("yeartarget",0).set("obj_id",record1.get("dept_id")).set("year",achievement.getYear()).set("type",achievement.getType()).set("status",achievement.getStatus());
                     }
                     record1.setColumns(info);
                 });
@@ -61,7 +69,10 @@ public class AdminAchievementService {
                     Record info = Db.findFirst(Db.getSql("admin.achievement.queryUserInfo"),achievement.getYear(), achievement.getType(), record.get("user_id"), achievement.getStatus());
                     if (info == null) {
                         info = new Record();
-                        info.set("november",0).set("yeartarget",0).set("may",0).set("august",0).set("february",0).set("july",0).set("april",0).set("march",0).set("june",0).set("september",0).set("january",0).set("december",0).set("october",0).set("obj_id",record.get("user_id")).set("year",achievement.getYear()).set("type",achievement.getType()).set("status",achievement.getStatus());
+                        for(MonthEnum monthEnum : MonthEnum.values()){
+                            info.set(monthEnum.getName(),0);
+                        }
+                        info.set("yeartarget",0).set("obj_id",record.get("user_id")).set("year",achievement.getYear()).set("type",achievement.getType()).set("status",achievement.getStatus());
                     }
                     record.setColumns(info);
                 });

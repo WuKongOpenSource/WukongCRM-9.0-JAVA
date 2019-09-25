@@ -192,7 +192,7 @@ public class CrmReceivablesService {
         list.add(new Record().set("customer_id",receivables.getInt("customer_id")).set("customer_name",receivables.getStr("customer_name")));
         receivables.set("customer_id",list);
         list = new ArrayList<>();
-        list.add(new Record().set("contract_id", receivables.getStr("contract_id")).set("contract_num", receivables.getStr("contractNum")));
+        list.add(new Record().set("contract_id", receivables.getStr("contract_id")).set("contract_num", receivables.getStr("contract_num")));
         receivables.set("contract_id",list);
         return adminFieldService.queryUpdateField(7,receivables);
     }

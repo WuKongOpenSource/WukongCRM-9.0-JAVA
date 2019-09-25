@@ -85,6 +85,7 @@ public class BaseUtil {
         String proxy=request.getHeader("proxy_url")!=null?"/"+request.getHeader("proxy_url"):"";
         return "http://" + request.getServerName()+":"+ request.getServerPort()+ request.getContextPath()+proxy+"/";
     }
+
     public static String getLoginAddress(HttpServletRequest request){
         String ip = request.getHeader("x-forwarded-for");
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
