@@ -3,41 +3,41 @@
 -- ----------------------------
 DROP TABLE IF EXISTS `72crm_crm_customer_setting`;
 CREATE TABLE `72crm_crm_customer_setting` (
-  `setting_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Ö÷¼üID',
-  `setting_name` varchar(255) DEFAULT NULL COMMENT '¹æÔòÃû³Æ',
-  `customer_num` int(11) DEFAULT NULL COMMENT '¿ÉÓµÓĞ¿Í»§ÊıÁ¿',
-  `customer_deal` int(1) DEFAULT '0' COMMENT '³É½»¿Í»§ÊÇ·ñÕ¼ÓÃÊıÁ¿ 0 ²»Õ¼ÓÃ 1 Õ¼ÓÃ',
-  `type` int(1) DEFAULT NULL COMMENT 'ÀàĞÍ 1 ÓµÓĞ¿Í»§ÊıÏŞÖÆ 2 Ëø¶¨¿Í»§ÊıÏŞÖÆ',
+  `setting_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ä¸»é”®ID',
+  `setting_name` varchar(255) DEFAULT NULL COMMENT 'è§„åˆ™åç§°',
+  `customer_num` int(11) DEFAULT NULL COMMENT 'å¯æ‹¥æœ‰å®¢æˆ·æ•°é‡',
+  `customer_deal` int(1) DEFAULT '0' COMMENT 'æˆäº¤å®¢æˆ·æ˜¯å¦å ç”¨æ•°é‡ 0 ä¸å ç”¨ 1 å ç”¨',
+  `type` int(1) DEFAULT NULL COMMENT 'ç±»å‹ 1 æ‹¥æœ‰å®¢æˆ·æ•°é™åˆ¶ 2 é”å®šå®¢æˆ·æ•°é™åˆ¶',
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`setting_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COMMENT='Ô±¹¤ÓµÓĞÒÔ¼°Ëø¶¨¿Í»§ÊıÏŞÖÆ';
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COMMENT='å‘˜å·¥æ‹¥æœ‰ä»¥åŠé”å®šå®¢æˆ·æ•°é™åˆ¶';
 
 -- ----------------------------
 -- Table structure for 72crm_crm_customer_settinguser
 -- ----------------------------
 DROP TABLE IF EXISTS `72crm_crm_customer_settinguser`;
 CREATE TABLE `72crm_crm_customer_settinguser` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Ö÷¼üID',
-  `setting_id` int(11) NOT NULL COMMENT '¿Í»§¹æÔòÏŞÖÆID',
-  `user_id` bigint(20) DEFAULT NULL COMMENT 'ÓÃ»§id',
-  `dept_id` int(11) DEFAULT NULL COMMENT '²¿ÃÅID',
-  `type` int(1) DEFAULT NULL COMMENT '1 Ô±¹¤ 2 ²¿ÃÅ',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ä¸»é”®ID',
+  `setting_id` int(11) NOT NULL COMMENT 'å®¢æˆ·è§„åˆ™é™åˆ¶ID',
+  `user_id` bigint(20) DEFAULT NULL COMMENT 'ç”¨æˆ·id',
+  `dept_id` int(11) DEFAULT NULL COMMENT 'éƒ¨é—¨ID',
+  `type` int(1) DEFAULT NULL COMMENT '1 å‘˜å·¥ 2 éƒ¨é—¨',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COMMENT='Ô±¹¤ÓµÓĞÒÔ¼°Ëø¶¨¿Í»§Ô±¹¤¹ØÁª±í';
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COMMENT='å‘˜å·¥æ‹¥æœ‰ä»¥åŠé”å®šå®¢æˆ·å‘˜å·¥å…³è”è¡¨';
 
 ALTER TABLE `72crm_crm_business_product`
-MODIFY COLUMN `discount`  decimal(10,2) NOT NULL COMMENT 'ÕÛ¿Û' AFTER `num`;
+MODIFY COLUMN `discount`  decimal(10,2) NOT NULL COMMENT 'æŠ˜æ‰£' AFTER `num`;
 
 ALTER TABLE `72crm_admin_user`
-MODIFY COLUMN `parent_id`  bigint(20) NULL DEFAULT NULL COMMENT 'Ö±ÊôÉÏ¼¶ID' AFTER `status`;
+MODIFY COLUMN `parent_id`  bigint(20) NULL DEFAULT NULL COMMENT 'ç›´å±ä¸Šçº§ID' AFTER `status`;
 
-UPDATE `72crm_admin_role` SET `remark` = 'project',`role_type` = 8 WHERE `role_name` = 'ÏîÄ¿¹ÜÀíÔ±';
-UPDATE `72crm_admin_role` SET `remark` = 'admin' WHERE `role_name` = '³¬¼¶¹ÜÀíÔ±' AND `role_id` = 1;
-alter table 72crm_admin_role modify column role_type int(1) comment '0¡¢×Ô¶¨Òå½ÇÉ«1¡¢¹ÜÀí½ÇÉ« 2¡¢¿Í»§¹ÜÀí½ÇÉ« 3¡¢ÈËÊÂ½ÇÉ« 4¡¢²ÆÎñ½ÇÉ« 5¡¢ÏîÄ¿½ÇÉ« 6¡¢ÏîÄ¿×Ô¶¨Òå½ÇÉ« 7¡¢°ì¹«½ÇÉ« 8¡¢ÏîÄ¿¹ÜÀí½ÇÉ«';
+UPDATE `72crm_admin_role` SET `remark` = 'project',`role_type` = 8 WHERE `role_name` = 'é¡¹ç›®ç®¡ç†å‘˜';
+UPDATE `72crm_admin_role` SET `remark` = 'admin' WHERE `role_name` = 'è¶…çº§ç®¡ç†å‘˜' AND `role_id` = 1;
+alter table 72crm_admin_role modify column role_type int(1) comment '0ã€è‡ªå®šä¹‰è§’è‰²1ã€ç®¡ç†è§’è‰² 2ã€å®¢æˆ·ç®¡ç†è§’è‰² 3ã€äººäº‹è§’è‰² 4ã€è´¢åŠ¡è§’è‰² 5ã€é¡¹ç›®è§’è‰² 6ã€é¡¹ç›®è‡ªå®šä¹‰è§’è‰² 7ã€åŠå…¬è§’è‰² 8ã€é¡¹ç›®ç®¡ç†è§’è‰²';
 UPDATE `72crm_admin_role` SET `role_type` = 2 WHERE `role_type` IN (0,3,4);
 UPDATE `72crm_admin_role` SET `role_type` = 7 WHERE `role_id` = 7;
 DELETE FROM `72crm_admin_menu` WHERE `menu_id` = 100 AND `realm` = 'product';
-UPDATE `72crm_admin_menu` SET `menu_id`='101', `parent_id`='2', `menu_name`='Ô±¹¤Òµ¼¨·ÖÎö', `realm`='contract', `menu_type`='1', `sort`='0', `status`='1', `remarks`=NULL WHERE (`menu_id`='101');
+UPDATE `72crm_admin_menu` SET `menu_id`='101', `parent_id`='2', `menu_name`='å‘˜å·¥ä¸šç»©åˆ†æ', `realm`='contract', `menu_type`='1', `sort`='0', `status`='1', `remarks`=NULL WHERE (`menu_id`='101');
 DELETE FROM `72crm_admin_menu` WHERE `menu_id` = 105 AND `realm` = 'read';
 DELETE FROM `72crm_admin_menu` WHERE `menu_id` = 111 AND `realm` = 'customer';
 DELETE FROM `72crm_admin_menu` WHERE `menu_id` = 112 AND `realm` = 'read';
@@ -58,50 +58,50 @@ DELETE FROM `72crm_admin_menu` WHERE `menu_id` = 96 AND `realm` = 'user';
 DELETE FROM `72crm_admin_menu` WHERE `menu_id` = 37 AND `realm` = 'pool';
 DELETE FROM `72crm_admin_menu` WHERE `menu_id` = 38 AND `realm` = 'distribute';
 DELETE FROM `72crm_admin_menu` WHERE `menu_id` = 39 AND `realm` = 'receive';
-UPDATE `72crm_admin_menu` SET `menu_id`='1', `parent_id`='0', `menu_name`='¿Í»§¹ÜÀí', `realm`='crm', `menu_type`='0', `sort`='0', `status`='1', `remarks`=NULL WHERE (`menu_id`='1');
+UPDATE `72crm_admin_menu` SET `menu_id`='1', `parent_id`='0', `menu_name`='å®¢æˆ·ç®¡ç†', `realm`='crm', `menu_type`='0', `sort`='0', `status`='1', `remarks`=NULL WHERE (`menu_id`='1');
 DELETE FROM `72crm_admin_role_menu` WHERE `menu_id` NOT IN (SELECT `menu_id` FROM `72crm_admin_menu`);
 DELETE FROM `72crm_admin_role_menu` WHERE `menu_id` IN (2,3,146,147);
-UPDATE `72crm_admin_menu` SET `menu_id`='1', `parent_id`='0', `menu_name`='È«²¿', `realm`='crm', `menu_type`='0', `sort`='0', `status`='1', `remarks`=NULL WHERE (`menu_id`='1');
-UPDATE `72crm_admin_menu` SET `menu_id`='2', `parent_id`='0', `menu_name`='È«²¿', `realm`='bi', `menu_type`='0', `sort`='0', `status`='1', `remarks`=NULL WHERE (`menu_id`='2');
-UPDATE `72crm_admin_menu` SET `menu_id`='3', `parent_id`='0', `menu_name`='È«²¿', `realm`='manage', `menu_type`='0', `sort`='0', `status`='1', `remarks`=NULL WHERE (`menu_id`='3');
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('148', '0', 'È«²¿', 'oa', '0', '0', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('149', '0', 'È«²¿', 'project', '0', '0', '1', 'ÏîÄ¿¹ÜÀí½ÇÉ«È¨ÏŞ');
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('150', '148', 'Í¨Ñ¶Â¼', 'book', '1', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('151', '150', '²é¿´', 'read', '3', '0', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('152', '149', 'ÏîÄ¿¹ÜÀí', 'projectManage', '1', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('153', '152', 'ĞÂ½¨ÏîÄ¿', 'save', '3', '2', '1', 'projectSave');
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('160', '3', 'ÆóÒµÊ×Ò³', 'system', '1', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('161', '160', '²é¿´', 'read', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('162', '160', '±à¼­', 'update', '3', '2', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('163', '3', 'Ó¦ÓÃ¹ÜÀí', 'configSet', '1', '2', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('164', '163', '²é¿´', 'read', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('165', '163', 'Í£ÓÃ/ÆôÓÃ', 'update', '3', '2', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('166', '3', 'Ô±¹¤Óë²¿ÃÅ¹ÜÀí', 'users', '1', '3', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('167', '166', '²¿ÃÅ/Ô±¹¤²é¿´', 'read', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('168', '166', 'Ô±¹¤ĞÂ½¨', 'userSave', '3', '2', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('169', '166', 'Ô±¹¤½ûÓÃ/¼¤»î', 'userEnables', '3', '3', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('170', '166', 'Ô±¹¤²Ù×÷', 'userUpdate', '3', '4', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('171', '166', '²¿ÃÅĞÂ½¨', 'deptSave', '3', '5', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('172', '166', '²¿ÃÅ±à¼­', 'deptUpdate', '3', '6', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('173', '166', '²¿ÃÅÉ¾³ı', 'deptDelete', '3', '7', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('174', '3', '½ÇÉ«È¨ÏŞ¹ÜÀí', 'permission', '1', '4', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('175', '174', '½ÇÉ«È¨ÏŞÉèÖÃ', 'update', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('176', '3', '¹¤×÷Ì¨ÉèÖÃ', 'oa', '1', '5', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('177', '176', '°ì¹«ÉóÅú¹ÜÀí', 'examine', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('178', '3', 'ÉóÅúÁ÷³Ì¹ÜÀí', 'examineFlow', '1', '6', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('179', '178', 'ÉóÅúÁ÷³Ì¹ÜÀí', 'update', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('180', '3', '¿Í»§¹ÜÀíÉèÖÃ', 'crm', '1', '7', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('181', '180', '×Ô¶¨Òå×Ö¶ÎÉèÖÃ', 'field', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('182', '180', '¿Í»§¹«º£¹æÔò', 'pool', '3', '2', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('183', '180', 'ÒµÎñ²ÎÊıÉèÖÃ', 'setting', '3', '3', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('184', '180', 'Òµ¼¨Ä¿±êÉèÖÃ', 'achievement', '3', '4', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('185', '3', 'ÏîÄ¿¹ÜÀíÉèÖÃ', 'work', '1', '8', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('186', '185', 'ÏîÄ¿¹ÜÀí', 'update', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('187', '148', '¹«¸æ', 'announcement', '1', '2', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('188', '187', 'ĞÂ½¨', 'save', '3', '1', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('189', '187', '±à¼­', 'update', '3', '2', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('190', '187', 'É¾³ı', 'delete', '3', '3', '1', NULL);
-INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('191', '10', 'ÉèÖÃ³É½»×´Ì¬', 'dealStatus', '3', '0', '1', NULL);
+UPDATE `72crm_admin_menu` SET `menu_id`='1', `parent_id`='0', `menu_name`='å…¨éƒ¨', `realm`='crm', `menu_type`='0', `sort`='0', `status`='1', `remarks`=NULL WHERE (`menu_id`='1');
+UPDATE `72crm_admin_menu` SET `menu_id`='2', `parent_id`='0', `menu_name`='å…¨éƒ¨', `realm`='bi', `menu_type`='0', `sort`='0', `status`='1', `remarks`=NULL WHERE (`menu_id`='2');
+UPDATE `72crm_admin_menu` SET `menu_id`='3', `parent_id`='0', `menu_name`='å…¨éƒ¨', `realm`='manage', `menu_type`='0', `sort`='0', `status`='1', `remarks`=NULL WHERE (`menu_id`='3');
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('148', '0', 'å…¨éƒ¨', 'oa', '0', '0', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('149', '0', 'å…¨éƒ¨', 'project', '0', '0', '1', 'é¡¹ç›®ç®¡ç†è§’è‰²æƒé™');
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('150', '148', 'é€šè®¯å½•', 'book', '1', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('151', '150', 'æŸ¥çœ‹', 'read', '3', '0', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('152', '149', 'é¡¹ç›®ç®¡ç†', 'projectManage', '1', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('153', '152', 'æ–°å»ºé¡¹ç›®', 'save', '3', '2', '1', 'projectSave');
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('160', '3', 'ä¼ä¸šé¦–é¡µ', 'system', '1', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('161', '160', 'æŸ¥çœ‹', 'read', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('162', '160', 'ç¼–è¾‘', 'update', '3', '2', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('163', '3', 'åº”ç”¨ç®¡ç†', 'configSet', '1', '2', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('164', '163', 'æŸ¥çœ‹', 'read', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('165', '163', 'åœç”¨/å¯ç”¨', 'update', '3', '2', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('166', '3', 'å‘˜å·¥ä¸éƒ¨é—¨ç®¡ç†', 'users', '1', '3', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('167', '166', 'éƒ¨é—¨/å‘˜å·¥æŸ¥çœ‹', 'read', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('168', '166', 'å‘˜å·¥æ–°å»º', 'userSave', '3', '2', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('169', '166', 'å‘˜å·¥ç¦ç”¨/æ¿€æ´»', 'userEnables', '3', '3', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('170', '166', 'å‘˜å·¥æ“ä½œ', 'userUpdate', '3', '4', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('171', '166', 'éƒ¨é—¨æ–°å»º', 'deptSave', '3', '5', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('172', '166', 'éƒ¨é—¨ç¼–è¾‘', 'deptUpdate', '3', '6', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('173', '166', 'éƒ¨é—¨åˆ é™¤', 'deptDelete', '3', '7', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('174', '3', 'è§’è‰²æƒé™ç®¡ç†', 'permission', '1', '4', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('175', '174', 'è§’è‰²æƒé™è®¾ç½®', 'update', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('176', '3', 'å·¥ä½œå°è®¾ç½®', 'oa', '1', '5', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('177', '176', 'åŠå…¬å®¡æ‰¹ç®¡ç†', 'examine', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('178', '3', 'å®¡æ‰¹æµç¨‹ç®¡ç†', 'examineFlow', '1', '6', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('179', '178', 'å®¡æ‰¹æµç¨‹ç®¡ç†', 'update', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('180', '3', 'å®¢æˆ·ç®¡ç†è®¾ç½®', 'crm', '1', '7', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('181', '180', 'è‡ªå®šä¹‰å­—æ®µè®¾ç½®', 'field', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('182', '180', 'å®¢æˆ·å…¬æµ·è§„åˆ™', 'pool', '3', '2', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('183', '180', 'ä¸šåŠ¡å‚æ•°è®¾ç½®', 'setting', '3', '3', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('184', '180', 'ä¸šç»©ç›®æ ‡è®¾ç½®', 'achievement', '3', '4', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('185', '3', 'é¡¹ç›®ç®¡ç†è®¾ç½®', 'work', '1', '8', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('186', '185', 'é¡¹ç›®ç®¡ç†', 'update', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('187', '148', 'å…¬å‘Š', 'announcement', '1', '2', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('188', '187', 'æ–°å»º', 'save', '3', '1', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('189', '187', 'ç¼–è¾‘', 'update', '3', '2', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('190', '187', 'åˆ é™¤', 'delete', '3', '3', '1', NULL);
+INSERT INTO `72crm_admin_menu` (`menu_id`, `parent_id`, `menu_name`, `realm`, `menu_type`, `sort`, `status`, `remarks`) VALUES ('191', '10', 'è®¾ç½®æˆäº¤çŠ¶æ€', 'dealStatus', '3', '0', '1', NULL);
 INSERT INTO `72crm_admin_role_menu` (`role_id`, `menu_id`) VALUES ('3', '166');
 INSERT INTO `72crm_admin_role_menu` (`role_id`, `menu_id`) VALUES ('3', '167');
 INSERT INTO `72crm_admin_role_menu` (`role_id`, `menu_id`) VALUES ('3', '168');
@@ -153,12 +153,12 @@ INSERT INTO `72crm_admin_role_menu` (`role_id`, `menu_id`) VALUES ('2', '185');
 INSERT INTO `72crm_admin_role_menu` (`role_id`, `menu_id`) VALUES ('2', '186');
 
 INSERT INTO `72crm_admin_config` VALUES (null, '1', 'putInPoolRemindDays', '2', null);
-INSERT INTO `72crm_admin_config` VALUES (null, '1', 'oa', '1', '°ì¹«¹ÜÀí');
-INSERT INTO `72crm_admin_config` VALUES (null, '1', 'crm', '1', '¿Í»§¹ÜÀí');
-INSERT INTO `72crm_admin_config` VALUES (null, '1', 'project', '1', 'ÏîÄ¿¹ÜÀí');
-INSERT INTO `72crm_admin_config` VALUES (null, '0', 'hrm', '2', 'ÈËÁ¦×ÊÔ´¹ÜÀí');
-INSERT INTO `72crm_admin_config` VALUES (null, '0', 'jxc', '2', '½øÏú´æ¹ÜÀí');
+INSERT INTO `72crm_admin_config` VALUES (null, '1', 'oa', '1', 'åŠå…¬ç®¡ç†');
+INSERT INTO `72crm_admin_config` VALUES (null, '1', 'crm', '1', 'å®¢æˆ·ç®¡ç†');
+INSERT INTO `72crm_admin_config` VALUES (null, '1', 'project', '1', 'é¡¹ç›®ç®¡ç†');
+INSERT INTO `72crm_admin_config` VALUES (null, '0', 'hrm', '2', 'äººåŠ›èµ„æºç®¡ç†');
+INSERT INTO `72crm_admin_config` VALUES (null, '0', 'jxc', '2', 'è¿›é”€å­˜ç®¡ç†');
 
-DELETE FROM 72crm_admin_field WHERE field_name = 'deal_status' AND name = '³É½»×´Ì¬' AND label = 2;
+DELETE FROM 72crm_admin_field WHERE field_name = 'deal_status' AND name = 'æˆäº¤çŠ¶æ€' AND label = 2;
 
 UPDATE 72crm_admin_field SET field_name = 'end_time' WHERE field_name = 'end_tme';

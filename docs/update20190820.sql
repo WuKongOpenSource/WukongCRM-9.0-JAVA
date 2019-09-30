@@ -1,11 +1,11 @@
 ALTER TABLE `72crm_admin_field`
-ADD COLUMN `relevant`  int(11) NULL COMMENT 'Ö»ÓĞÏßË÷ĞèÒª£¬×°»»¿Í»§µÄ×Ô¶¨Òå×Ö¶ÎID' AFTER `field_type`;
+ADD COLUMN `relevant`  int(11) NULL COMMENT 'åªæœ‰çº¿ç´¢éœ€è¦ï¼Œè£…æ¢å®¢æˆ·çš„è‡ªå®šä¹‰å­—æ®µID' AFTER `field_type`;
 
 ALTER TABLE `72crm_crm_contract`
-ADD COLUMN `total_price`  decimal(10,2) NULL COMMENT '²úÆ·×Ü½ğ¶î' AFTER `discount_rate`;
+ADD COLUMN `total_price`  decimal(10,2) NULL COMMENT 'äº§å“æ€»é‡‘é¢' AFTER `discount_rate`;
 
 ALTER TABLE `72crm_crm_business`
-ADD COLUMN `total_price`  decimal(10,2) NULL COMMENT '²úÆ·×Ü½ğ¶î' AFTER `discount_rate`;
+ADD COLUMN `total_price`  decimal(10,2) NULL COMMENT 'äº§å“æ€»é‡‘é¢' AFTER `discount_rate`;
 
-INSERT INTO `72crm_admin_menu` VALUES ('146', '2', '°ì¹«·ÖÎö', 'oa', '1', '10', '1', null);
-INSERT INTO `72crm_admin_menu` VALUES ('147', '146', '²é¿´', 'read', '3', '1', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('146', '2', 'åŠå…¬åˆ†æ', 'oa', '1', '10', '1', null);
+INSERT INTO `72crm_admin_menu` VALUES ('147', '146', 'æŸ¥çœ‹', 'read', '3', '1', '1', null);

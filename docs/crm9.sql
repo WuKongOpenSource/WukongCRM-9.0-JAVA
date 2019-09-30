@@ -190,9 +190,9 @@ INSERT INTO `72crm_admin_field` VALUES ('24', 'email', '电子邮箱', '14', '3'
 INSERT INTO `72crm_admin_field` VALUES ('25', 'post', '职务', '1', '3', null, null, '255', '', '0', '0', '5', null, '1', '2019-07-01 17:10:21', null, '1', null);
 INSERT INTO `72crm_admin_field` VALUES ('26', 'address', '地址', '1', '3', null, null, '255', '', '0', '0', '6', null, '1', '2019-07-01 17:10:21', null, '1', null);
 INSERT INTO `72crm_admin_field` VALUES ('27', 'next_time', '下次联系时间', '13', '3', null, null, null, '', '0', '0', '7', null, '1', '2019-07-01 17:10:21', null, '1', null);
-INSERT INTO `72crm_admin_field` VALUES ('28', '备注', '备注', '1', '3', null, null, '255', '', '0', '0', '8', null, '1', '2019-07-01 17:10:21', null, '0', null);
+INSERT INTO `72crm_admin_field` VALUES ('28', 'remark', '备注', '1', '3', null, null, '255', '', '0', '0', '8', null, '1', '2019-07-01 17:10:21', null, '1', null);
 INSERT INTO `72crm_admin_field` VALUES ('29', '是否关键决策人', '是否关键决策人', '3', '3', null, null, null, '', '0', '0', '9', '是,否', '3', '2019-07-01 17:10:21', null, '0', null);
-INSERT INTO `72crm_admin_field` VALUES ('30', '性别', '性别', '3', '3', null, null, null, '', '0', '0', '10', '男,女', '3', '2019-07-01 17:10:21', null, '1', null);
+INSERT INTO `72crm_admin_field` VALUES ('30', '性别', '性别', '3', '3', null, null, null, '', '0', '0', '10', '男,女', '3', '2019-07-01 17:10:21', null, '0', null);
 INSERT INTO `72crm_admin_field` VALUES ('31', 'name', '产品名称', '1', '4', null, null, '255', '', '0', '0', '0', null, '1', '2019-07-01 17:22:28', null, '1', null);
 INSERT INTO `72crm_admin_field` VALUES ('32', 'category_id', '产品类型', '19', '4', null, null, null, '', '0', '1', '1', null, '3', '2019-07-01 17:55:24', null, '1', null);
 INSERT INTO `72crm_admin_field` VALUES ('33', 'num', '产品编码', '5', '4', null, null, '255', '', '1', '1', '2', null, '1', '2019-07-01 17:22:28', null, '1', null);
