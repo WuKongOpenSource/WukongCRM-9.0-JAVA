@@ -6,29 +6,31 @@
     <div class="message-body">
       <div class="message-content">
         <div class="message-body-side">
-          <div v-for="(item, index) in leftSides"
-               :key="index"
-               v-if="!item.hidden"
-               :class="leftType==item.infoType? 'side-item-select' : 'side-item-default'"
-               @click="sideClick(item)"
-               class="side-item">
-            {{item.name}}
-            <el-badge v-if="item.num > 0"
-                      :max="99"
-                      :value="item.num">
-            </el-badge>
+          <div
+            v-for="(item, index) in leftSides"
+            v-if="!item.hidden"
+            :key="index"
+            :class="leftType==item.infoType? 'side-item-select' : 'side-item-default'"
+            class="side-item"
+            @click="sideClick(item)">
+            {{ item.name }}
+            <el-badge
+              v-if="item.num > 0"
+              :max="99"
+              :value="item.num"/>
           </div>
         </div>
         <div class="message-body-content">
-          <c-r-m-message v-for="(item, index) in leftSides"
-                         :key="index"
-                         :crmType="item.crmType"
-                         :infoType="item.infoType"
-                         :infoTitle="item.name"
-                         :infoTips="item.tips"
-                         :show="leftType==item.infoType"
-                         v-show="leftType==item.infoType"
-                         @on-handle="messageHandle"></c-r-m-message>
+          <c-r-m-message
+            v-for="(item, index) in leftSides"
+            v-show="leftType==item.infoType"
+            :key="index"
+            :crm-type="item.crmType"
+            :info-type="item.infoType"
+            :info-title="item.name"
+            :info-tips="item.tips"
+            :show="leftType==item.infoType"
+            @on-handle="messageHandle"/>
         </div>
       </div>
     </div>
@@ -42,17 +44,10 @@ import { objDeepCopy } from '@/utils'
 
 export default {
   /** 客户管理 的 消息列表 */
-  name: 'message',
+  name: 'Message',
 
   components: {
     CRMMessage
-  },
-
-  watch: {
-    /** 变化就刷新数据 */
-    messageNum() {
-      this.refreshNum()
-    }
   },
 
   data() {
@@ -131,6 +126,13 @@ export default {
     ...mapGetters(['messageNum'])
   },
 
+  watch: {
+    /** 变化就刷新数据 */
+    messageNum() {
+      this.refreshNum()
+    }
+  },
+
   mounted() {
     this.refreshNum()
     /** 控制table的高度 */
@@ -161,8 +163,8 @@ export default {
      */
     messageHandle(data) {
       if (data.type == 'follow') {
-        let copyNum = objDeepCopy(this.messageNum)
-        let num = parseInt(copyNum[data.infoType]) - data.value
+        const copyNum = objDeepCopy(this.messageNum)
+        const num = parseInt(copyNum[data.infoType]) - data.value
         copyNum[data.infoType] = num > 0 ? num : 0
         this.$store.commit('SET_MESSAGENUM', copyNum)
       }

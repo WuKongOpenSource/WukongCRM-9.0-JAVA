@@ -2,29 +2,32 @@
   <div v-loading="loading">
     <div v-empty="list.length === 0">
       <div class="log-items">
-        <journal-cell v-for="(item, index) in list"
-                      :key="index"
-                      class="list-cell"
-                      :data="item"
-                      @on-handle="jourecallCellHandle"></journal-cell>
+        <journal-cell
+          v-for="(item, index) in list"
+          :key="index"
+          :data="item"
+          class="list-cell"
+          @on-handle="jourecallCellHandle"/>
         <div class="load">
-          <el-button type="text"
-                     :loading="loadMoreLoading">{{loadMoreLoading ? '加载更多' : '没有更多了'}}</el-button>
+          <el-button
+            :loading="loadMoreLoading"
+            type="text">{{ loadMoreLoading ? '加载更多' : '没有更多了' }}</el-button>
         </div>
       </div>
     </div>
-    <c-r-m-full-screen-detail :visible.sync="showFullDetail"
-                              :crmType="detailCRMType"
-                              :id="rowID"></c-r-m-full-screen-detail>
-    <new-dialog v-if="showNewDialog"
-                :formData="formData"
-                :dialogTitle="dialogTitle"
-                :imgFileList="imgFileList"
-                :accessoryFileList="accessoryFileList"
-                :newLoading="newLoading"
-                @close="showNewDialog=false"
-                @submitBtn="submitBtn">
-    </new-dialog>
+    <c-r-m-full-screen-detail
+      :visible.sync="showFullDetail"
+      :crm-type="detailCRMType"
+      :id="rowID"/>
+    <new-dialog
+      v-if="showNewDialog"
+      :form-data="formData"
+      :dialog-title="dialogTitle"
+      :img-file-list="imgFileList"
+      :accessory-file-list="accessoryFileList"
+      :new-loading="newLoading"
+      @close="showNewDialog=false"
+      @submitBtn="submitBtn"/>
   </div>
 </template>
 
@@ -33,11 +36,10 @@
 import { journalDelete, journalEdit } from '@/api/oamanagement/journal'
 import JournalCell from '@/views/OAManagement/journal/journalCell' // 办公日志
 import { crmQueryLogRelation } from '@/api/customermanagement/common'
-import { formatTimeToTimestamp } from '@/utils'
 
 export default {
   /** 日志 跟进记录*/
-  name: 'journal-log',
+  name: 'JournalLog',
   components: {
     JournalCell,
     CRMFullScreenDetail: () =>
@@ -51,11 +53,6 @@ export default {
     crmType: {
       type: String,
       default: ''
-    }
-  },
-  watch: {
-    id: function(val) {
-      this.refreshList()
     }
   },
   data() {
@@ -84,12 +81,17 @@ export default {
     }
   },
   computed: {},
+  watch: {
+    id: function(val) {
+      this.refreshList()
+    }
+  },
   mounted() {
     // 分批次加载
-    let dom = document.getElementById('follow-log-content')
+    const dom = document.getElementById('follow-log-content')
     dom.onscroll = () => {
-      let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
-      //滚动条到底部的条件
+      const scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+      // 滚动条到底部的条件
       if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
         if (!this.isPost) {
           this.isPost = true
@@ -108,7 +110,7 @@ export default {
   methods: {
     getList() {
       this.loading = true
-      let params = { page: this.page, limit: 10 }
+      const params = { page: this.page, limit: 10 }
       params[this.crmType + 'Ids'] = this.id
       crmQueryLogRelation(params)
         .then(res => {
@@ -134,13 +136,13 @@ export default {
     jourecallCellHandle(data) {
       // 编辑按钮
       if (data.type == 'edit') {
-        let val = data.data.item
+        const val = data.data.item
         this.showNewDialog = true
         this.dialogTitle = '编辑日志'
         this.formData = val
         this.imgFileList = []
         if (val.imgList) {
-          for (let item of val.imgList) {
+          for (const item of val.imgList) {
             item.url = item.filePath
             this.imgFileList.push(item)
           }
@@ -148,7 +150,7 @@ export default {
         // 附件
         this.accessoryFileList = []
         if (val.fileList) {
-          for (let item of val.fileList) {
+          for (const item of val.fileList) {
             item.url = item.filePath
             this.accessoryFileList.push(item)
           }
@@ -169,7 +171,7 @@ export default {
                 type: 'success',
                 message: '删除成功!'
               })
-              for (let i in this.list) {
+              for (const i in this.list) {
                 if (this.list[i].logId == data.data.item.logId) {
                   this.list.splice(i, 1)
                   break
@@ -193,41 +195,48 @@ export default {
     // 新建提交
     submitBtn(key, file, img, relevanceAll) {
       this.newLoading = true
-      let imgList = []
-      let fileList = []
+      console.log(relevanceAll, '==relevanceAll==')
+      const imgList = []
+      const fileList = []
       // 获取部门
-      let dep = []
+      const dep = []
       if (this.formData.depData) {
-        for (let j of this.formData.depData) {
+        for (const j of this.formData.depData) {
           dep.push(j.id)
         }
       }
       // 获取员工
-      let staff = []
+      const staff = []
       if (this.formData.sentWhoList) {
-        for (let h of this.formData.sentWhoList) {
+        for (const h of this.formData.sentWhoList) {
           staff.push(h.id)
         }
       }
-      for (let item of this.imgFileList) {
+      for (const item of this.imgFileList) {
         imgList.push(item.fileId)
       }
-      for (let item of this.accessoryFileList) {
+      for (const item of this.accessoryFileList) {
         fileList.push(item.fileId)
       }
-      let pramas = {
-        id: this.formData.logId,
+      let obj = {}
+      if (!relevanceAll) {
+        obj = {}
+      } else {
+        obj = relevanceAll
+      }
+      const pramas = {
+        logId: this.formData.logId,
         categoryId: key,
         content: this.formData.content,
         tomorrow: this.formData.tomorrow,
         question: this.formData.question,
         file: fileList.concat(imgList),
-        sendUserIds: staff,
-        sendStructureIds: dep,
-        customerIds: relevanceAll.customerIds,
-        contactsIds: relevanceAll.contactsIds,
-        businessIds: relevanceAll.businessIds,
-        contractIds: relevanceAll.contractIds
+        sendUserIds: staff.join(','),
+        sendStructureIds: dep.join(','),
+        customerIds: obj.customerIds.join(','),
+        contactsIds: obj.contactsIds.join(','),
+        businessIds: obj.businessIds.join(','),
+        contractIds: obj.contractIds.join(',')
       }
       journalEdit(pramas)
         .then(res => {
@@ -236,7 +245,7 @@ export default {
           this.$message.success('编辑成功')
           this.newLoading = false
         })
-        .catch(err => {
+        .catch(() => {
           this.newLoading = false
           this.$message.error('编辑失败')
         })

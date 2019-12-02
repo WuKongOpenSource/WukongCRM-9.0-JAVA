@@ -15,7 +15,7 @@ public class CrmCustomer extends BaseCrmCustomer<CrmCustomer> {
 	//权限（1.只读2.只写）
 	private Integer power;
 	//变更负责人
-	private Integer newOwnerUserId;
+	private Long newOwnerUserId;
 	private String ids;
 	private String memberIds;
 	private String customerIds;
@@ -54,11 +54,11 @@ public class CrmCustomer extends BaseCrmCustomer<CrmCustomer> {
 		this.power = power;
 	}
 
-	public Integer getNewOwnerUserId() {
+	public Long getNewOwnerUserId() {
 		return newOwnerUserId;
 	}
 
-	public void setNewOwnerUserId(Integer newOwnerUserId) {
+	public void setNewOwnerUserId(Long newOwnerUserId) {
 		this.newOwnerUserId = newOwnerUserId;
 	}
 

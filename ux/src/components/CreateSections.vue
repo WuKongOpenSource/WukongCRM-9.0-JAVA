@@ -1,25 +1,23 @@
 <template>
   <div class="section">
-    <div class="section-header"
-         v-if="title && title.length > 0">
-      <div class="section-mark"
-           :style="{ 'border-left-color': mColor }"></div>
-      <div class="section-title">{{title}}</div>
-      <slot name="header"></slot>
+    <div
+      v-if="title && title.length > 0"
+      class="section-header">
+      <div
+        :style="{ 'border-left-color': mColor }"
+        class="section-mark"/>
+      <div class="section-title">{{ title }}</div>
+      <slot name="header"/>
     </div>
     <div class="content">
-      <slot></slot>
+      <slot/>
     </div>
   </div>
 </template>
 <script type="text/javascript">
 export default {
-  name: 'create-sections',
+  name: 'CreateSections',
   components: {},
-  computed: {},
-  data() {
-    return {}
-  },
   props: {
     title: {
       type: String,
@@ -30,6 +28,10 @@ export default {
       default: '#46CDCF'
     }
   },
+  data() {
+    return {}
+  },
+  computed: {},
   mounted() {},
   methods: {}
 }

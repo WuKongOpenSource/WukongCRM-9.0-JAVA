@@ -1,27 +1,31 @@
 <template>
-  <el-popover placement="bottom"
-              :disabled="disabled"
-              width="300"
-              trigger="click">
-    <xh-user ref="xhuser"
-             v-if="!disabled&&showSelectView"
-             :infoType="infoType"
-             :infoParams="infoParams"
-             :radio="radio"
-             :selectedData="dataValue"
-             @changeCheckout="checkUsers"></xh-user>
+  <el-popover
+    :disabled="disabled"
+    placement="bottom"
+    width="300"
+    trigger="click">
+    <xh-user
+      v-if="!disabled&&showSelectView"
+      ref="xhuser"
+      :info-type="infoType"
+      :info-params="infoParams"
+      :radio="radio"
+      :selected-data="dataValue"
+      @changeCheckout="checkUsers"/>
     <div slot="reference">
-      <flexbox @click.native="focusClick"
-               wrap="wrap"
-               :class="[disabled ? 'is_disabled' : 'is_valid']"
-               class="user-container">
-        <div v-for="(item, index) in dataValue"
-             :key="index"
-             @click.stop="deleteuser(index)"
-             class="user-item">{{item.realname}}
-          <i class="delete-icon el-icon-close"></i>
+      <flexbox
+        :class="[disabled ? 'is_disabled' : 'is_valid']"
+        wrap="wrap"
+        class="user-container"
+        @click.native="focusClick">
+        <div
+          v-for="(item, index) in dataValue"
+          :key="index"
+          class="user-item"
+          @click.stop="deleteuser(index)">{{ item.realname }}
+          <i class="delete-icon el-icon-close"/>
         </div>
-        <div class="add-item">+{{placeholder}}</div>
+        <div class="add-item">+{{ placeholder }}</div>
       </flexbox>
     </div>
   </el-popover>
@@ -32,19 +36,11 @@ import XhUser from './XhUser'
 import arrayMixin from './arrayMixin'
 
 export default {
-  name: 'xh-user-cell', // 新建 user-cell
+  name: 'XhUserCell', // 新建 user-cell
   components: {
     XhUser
   },
   mixins: [arrayMixin],
-  computed: {},
-  watch: {},
-  data() {
-    return {
-      showPopover: false, // 展示popover
-      showSelectView: false // 展示选择内容列表
-    }
-  },
   props: {
     radio: {
       // 是否单选
@@ -58,7 +54,7 @@ export default {
     /** 获取不同的员工展示列表 */
     infoType: {
       type: String,
-      default: 'default' //返回全部  crm_contract crm_receivables oa_examine 合同审核人自选列表
+      default: 'default' // 返回全部  crm_contract crm_receivables oa_examine 合同审核人自选列表
     },
     /** 请求辅助参数 */
     infoParams: {
@@ -68,6 +64,14 @@ export default {
       }
     }
   },
+  data() {
+    return {
+      showPopover: false, // 展示popover
+      showSelectView: false // 展示选择内容列表
+    }
+  },
+  computed: {},
+  watch: {},
   mounted() {},
   methods: {
     /** 选中 */

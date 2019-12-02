@@ -2,27 +2,27 @@ package com.kakarote.crm9.erp.crm.controller;
 
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
-import cn.hutool.poi.excel.StyleSet;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.jfinal.kit.Kv;
-import com.jfinal.log.Log;
-import com.jfinal.plugin.activerecord.Db;
-import com.kakarote.crm9.common.annotation.LoginFormCookie;
-import com.kakarote.crm9.common.annotation.NotNullValidate;
-import com.kakarote.crm9.common.annotation.Permissions;
-import com.kakarote.crm9.erp.admin.entity.AdminField;
-import com.kakarote.crm9.erp.admin.service.AdminFieldService;
-import com.kakarote.crm9.erp.admin.service.AdminSceneService;
-import com.kakarote.crm9.erp.crm.entity.CrmProduct;
-import com.kakarote.crm9.erp.crm.service.CrmProductService;
-import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
-import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
+import com.jfinal.kit.Kv;
+import com.jfinal.log.Log;
+import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.upload.UploadFile;
+import com.kakarote.crm9.common.annotation.LoginFormCookie;
+import com.kakarote.crm9.common.annotation.NotNullValidate;
+import com.kakarote.crm9.common.annotation.Permissions;
+import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.erp.admin.entity.AdminField;
+import com.kakarote.crm9.erp.admin.service.AdminFieldService;
+import com.kakarote.crm9.erp.admin.service.AdminSceneService;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
+import com.kakarote.crm9.erp.crm.entity.CrmProduct;
+import com.kakarote.crm9.erp.crm.service.CrmProductService;
+import com.kakarote.crm9.utils.R;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -147,7 +147,7 @@ public class CrmProductController extends Controller {
         try {
             writer = ExcelUtil.getWriter();
             AdminFieldService adminFieldService = new AdminFieldService();
-            List<Record> fieldList = adminFieldService.customFieldList("4");
+            List<Record> fieldList = adminFieldService.customFieldList(CrmEnum.CRM_PRODUCT.getType());
             writer.addHeaderAlias("name", "产品名称");
             writer.addHeaderAlias("num", "产品编码");
             writer.addHeaderAlias("category_name", "产品类别");
@@ -210,12 +210,18 @@ public class CrmProductController extends Controller {
      */
     @LoginFormCookie
     public void downloadExcel() {
-        List<Record> recordList = adminFieldService.queryAddField(4);
+        List<Record> recordList = adminFieldService.queryAddField(CrmEnum.CRM_PRODUCT);
         recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType")) || "user".equals(record.getStr("formType")) || "structure".equals(record.getStr("formType")));
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("产品导入表");
-        sheet.setDefaultColumnWidth(12);
         sheet.setDefaultRowHeight((short)400);
+        CellStyle textStyle = wb.createCellStyle();
+        DataFormat format = wb.createDataFormat();
+        textStyle.setDataFormat(format.getFormat("@"));
+        for (int i=0;i < recordList.size();i++){
+            sheet.setDefaultColumnStyle(i,textStyle);
+            sheet.setColumnWidth(i,20*256);
+        }
         HSSFRow titleRow = sheet.createRow(0);
         CellStyle cellStyle = wb.createCellStyle();
         cellStyle.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
@@ -275,7 +281,7 @@ public class CrmProductController extends Controller {
      * 导入产品
      */
     @Permissions("crm:product:excelimport")
-    public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling, @Para("ownerUserId") Integer ownerUserId) {
+    public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling, @Para("ownerUserId") Long ownerUserId) {
         Db.tx(() -> {
             R result = crmProductService.uploadExcel(file, repeatHandling, ownerUserId);
             renderJson(result);

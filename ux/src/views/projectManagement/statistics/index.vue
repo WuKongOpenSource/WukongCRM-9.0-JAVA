@@ -3,35 +3,42 @@
     <div class="project-header">
       统计分析
     </div>
-    <div class="project-body"
-         v-loading="loading">
-      <statistical-overview class="statistical-overview"
-                            :data="detailData.taskStatistics"
-                            :list="detailData.ownerList">
-        <el-select v-model="workId"
-                   placeholder="请选择"
-                   class="project-body-select"
-                   @change="getDetail">
-          <el-option v-for="item in projectList"
-                     :key="item.workId"
-                     :label="item.name"
-                     :value="item.workId">
-          </el-option>
+    <div
+      v-loading="loading"
+      class="project-body">
+      <statistical-overview
+        :data="detailData.taskStatistics"
+        :list="detailData.ownerList"
+        class="statistical-overview">
+        <el-select
+          v-model="workId"
+          placeholder="请选择"
+          class="project-body-select"
+          @change="getDetail">
+          <el-option
+            v-for="item in projectList"
+            :key="item.workId"
+            :label="item.name"
+            :value="item.workId"/>
         </el-select>
       </statistical-overview>
-      <flexbox class="statistical-task"
-               v-if="workId != 'all'">
-        <statistical-task class="statistical-task-item"
-                          type="task"
-                          :list="detailData.classStatistics"
-                          title="任务列表"></statistical-task>
-        <statistical-task class="statistical-task-item"
-                          type="label"
-                          :list="detailData.labelStatistics"
-                          title="标签分析"></statistical-task>
+      <flexbox
+        v-if="workId != 'all'"
+        class="statistical-task">
+        <statistical-task
+          :list="detailData.classStatistics"
+          class="statistical-task-item"
+          type="task"
+          title="任务列表"/>
+        <statistical-task
+          :list="detailData.labelStatistics"
+          class="statistical-task-item"
+          type="label"
+          title="标签分析"/>
       </flexbox>
-      <statistical-member class="statistical-member"
-                          :list="detailData.memberTaskStatistics"></statistical-member>
+      <statistical-member
+        :list="detailData.memberTaskStatistics"
+        class="statistical-member"/>
     </div>
   </div>
 </template>
@@ -77,7 +84,7 @@ export default {
           this.detailData = res.data
           this.loading = false
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
         })
     },

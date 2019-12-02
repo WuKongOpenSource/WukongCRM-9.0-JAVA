@@ -1,32 +1,37 @@
 <template>
-  <el-dialog v-loading="loading"
-             :title="title"
-             :width="width"
-             :append-to-body="true"
-             @close="hiddenView"
-             :visible.sync="showDialog">
+  <el-dialog
+    v-loading="loading"
+    :title="title"
+    :width="width"
+    :append-to-body="true"
+    :visible.sync="showDialog"
+    @close="hiddenView">
     <flexbox class="content">
       <div class="cropper-box">
-        <vueCropper ref="cropper"
-                    :canMove="true"
-                    :autoCrop="true"
-                    :fixed="true"
-                    :fixedNumber="fixedNumber"
-                    @realTime="realTime"
-                    outputType="png"
-                    :img="cropperImg"></vueCropper>
+        <vueCropper
+          ref="cropper"
+          :can-move="true"
+          :auto-crop="true"
+          :fixed="true"
+          :fixed-number="fixedNumber"
+          :img="cropperImg"
+          output-type="png"
+          @realTime="realTime"/>
       </div>
       <div class="preview">
         <div class="preview-name">预览</div>
-        <img class="preview-img"
-             :style="{'width': previewWidth, 'height': previewHeight, 'border-radius': previewRadius}"
-             :src="previewImg" />
+        <img
+          :style="{'width': previewWidth, 'height': previewHeight, 'border-radius': previewRadius}"
+          :src="previewImg"
+          class="preview-img" >
       </div>
     </flexbox>
-    <div slot="footer"
-         class="dialog-footer">
-      <el-button type="primary"
-                 @click="submiteImage()">{{saveButtonTitle}}</el-button>
+    <div
+      slot="footer"
+      class="dialog-footer">
+      <el-button
+        type="primary"
+        @click="submiteImage()">{{ saveButtonTitle }}</el-button>
     </div>
   </el-dialog>
 </template>
@@ -34,30 +39,9 @@
 import { VueCropper } from 'vue-cropper'
 
 export default {
-  name: 'edit-image', // 处理头像
+  name: 'EditImage', // 处理头像
   components: {
     VueCropper
-  },
-  computed: {},
-  watch: {
-    show: {
-      handler(val) {
-        this.showDialog = val
-      },
-      deep: true,
-      immediate: true
-    },
-    image: function(val) {
-      this.cropperImg = val
-    }
-  },
-  data() {
-    return {
-      loading: false,
-      showDialog: false,
-      cropperImg: '',
-      previewImg: ''
-    }
   },
   props: {
     width: {
@@ -96,6 +80,27 @@ export default {
     },
     file: [File],
     image: String
+  },
+  data() {
+    return {
+      loading: false,
+      showDialog: false,
+      cropperImg: '',
+      previewImg: ''
+    }
+  },
+  computed: {},
+  watch: {
+    show: {
+      handler(val) {
+        this.showDialog = val
+      },
+      deep: true,
+      immediate: true
+    },
+    image: function(val) {
+      this.cropperImg = val
+    }
   },
   mounted() {
     this.cropperImg = this.image

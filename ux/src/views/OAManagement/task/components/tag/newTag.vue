@@ -1,39 +1,50 @@
 <template>
   <div class="new-tag-dialog">
     <div class="title">
-      <span class="el-icon-arrow-left"
-            @click="back"></span>
-      <span>{{newTagTitle}}</span>
-      <span class="el-icon-close rt"
-            @click="close"></span>
+      <span
+        class="el-icon-arrow-left"
+        @click="back"/>
+      <span>{{ newTagTitle }}</span>
+      <span
+        class="el-icon-close rt"
+        @click="close"/>
     </div>
     <div class="search">
-      <el-input size="mini"
-                v-model="input"
-                :maxlength="10"
-                placeholder="输入标签名，最多十个字符"></el-input>
-      <span class="checked-color"
-            :style="{'background': showBgColor}"></span>
+      <el-input
+        v-model="input"
+        :maxlength="10"
+        size="mini"
+        placeholder="输入标签名，最多十个字符"/>
+      <span
+        :style="{'background': showBgColor}"
+        class="checked-color"/>
     </div>
     <div class="color-box">
-      <span v-for="(item, index) in colorList"
-            :key="index"
-            :style="{'background': item}"
-            @click="changeColor(item)">
-      </span>
+      <span
+        v-for="(item, index) in colorList"
+        :key="index"
+        :style="{'background': item}"
+        @click="changeColor(item)"/>
     </div>
     <div class="footer">
-      <el-button type="primary"
-                 size="medium"
-                 @click="tagCreateSubmit">保存</el-button>
-      <el-button size="medium"
-                 @click="tagCancel">取消</el-button>
+      <el-button
+        type="primary"
+        size="medium"
+        @click="tagCreateSubmit">保存</el-button>
+      <el-button
+        size="medium"
+        @click="tagCancel">取消</el-button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
+  props: {
+    newTagTitle: String,
+    newTagInput: String,
+    bgColorProps: String
+  },
   data() {
     return {
       colorList: [
@@ -57,11 +68,6 @@ export default {
     bgColorProps: function(color) {
       this.showBgColor = color || '#53D397'
     }
-  },
-  props: {
-    newTagTitle: String,
-    newTagInput: String,
-    bgColorProps: String
   },
   mounted() {
     this.showBgColor = this.bgColorProps || '#53D397'

@@ -1,33 +1,39 @@
 <template>
   <div class="department">
-    <el-collapse v-model="activeNames"
-                 @change="handleChange">
-      <el-collapse-item :name="index"
-                        v-for="(item, index) in depData"
-                        :key="index">
+    <el-collapse
+      v-model="activeNames"
+      @change="handleChange">
+      <el-collapse-item
+        v-for="(item, index) in depData"
+        :name="index"
+        :key="index">
         <template slot="title">
-          <span class="title">{{item.name}} （{{item.userList.length}}人）</span>
+          <span class="title">{{ item.name }} （{{ item.userList.length }}人）</span>
         </template>
-        <div v-for="(k, j) in item.userList"
-             :key="j"
-             class="k-list">
+        <div
+          v-for="(k, j) in item.userList"
+          :key="j"
+          class="k-list">
           <div class="list-right">
-            <div class="k-realname">{{k.realname.substring(0, 6)}}</div>
+            <div class="k-realname">{{ k.realname.substring(0, 6) }}</div>
             <div class="content">
               <div v-if="k.deptName">
-                <img src="@/assets/img/structure.png"
-                     alt="">
-                <span>{{k.deptName}}</span>
+                <img
+                  src="@/assets/img/structure.png"
+                  alt="">
+                <span>{{ k.deptName }}</span>
               </div>
               <div v-if="k.postName">
-                <img src="@/assets/img/post.png"
-                     alt="">
-                <span>{{k.postName}}</span>
+                <img
+                  src="@/assets/img/post.png"
+                  alt="">
+                <span>{{ k.postName }}</span>
               </div>
               <div v-if="k.mobile">
-                <img src="@/assets/img/mobile.png"
-                     alt="">
-                <span>{{k.mobile}}</span>
+                <img
+                  src="@/assets/img/mobile.png"
+                  alt="">
+                <span>{{ k.mobile }}</span>
               </div>
             </div>
           </div>
@@ -39,13 +45,13 @@
 
 <script>
 export default {
+  props: {
+    depData: Array
+  },
   data() {
     return {
       activeNames: []
     }
-  },
-  props: {
-    depData: Array
   },
   mounted() {},
   methods: {

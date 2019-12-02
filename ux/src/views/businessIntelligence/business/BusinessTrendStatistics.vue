@@ -1,29 +1,31 @@
 <template>
-  <div v-loading="loading"
-       class="main-container">
-    <filtrate-handle-view class="filtrate-bar"
-                          moduleType="business"
-                          @load="loading=true"
-                          @change="searchClick">
-    </filtrate-handle-view>
+  <div
+    v-loading="loading"
+    class="main-container">
+    <filtrate-handle-view
+      class="filtrate-bar"
+      module-type="business"
+      @load="loading=true"
+      @change="searchClick"/>
     <div class="content">
       <div class="axis-content">
-        <div id="axismain"></div>
+        <div id="axismain"/>
       </div>
       <div class="table-content">
-        <el-table :data="list"
-                  height="400"
-                  stripe
-                  border
-                  highlight-current-row>
-          <el-table-column v-for="(item, index) in fieldList"
-                           :key="index"
-                           align="center"
-                           header-align="center"
-                           show-overflow-tooltip
-                           :prop="item.field"
-                           :label="item.name">
-          </el-table-column>
+        <el-table
+          :data="list"
+          height="400"
+          stripe
+          border
+          highlight-current-row>
+          <el-table-column
+            v-for="(item, index) in fieldList"
+            :key="index"
+            :prop="item.field"
+            :label="item.name"
+            align="center"
+            header-align="center"
+            show-overflow-tooltip/>
         </el-table>
       </div>
     </div>
@@ -40,7 +42,8 @@ import {
 
 export default {
   /** 新增商机数与金额趋势分析 */
-  name: 'business-trend-statistics',
+  name: 'BusinessTrendStatistics',
+  mixins: [base],
   data() {
     return {
       loading: false,
@@ -63,7 +66,6 @@ export default {
       ]
     }
   },
-  mixins: [base],
   computed: {},
   mounted() {
     this.initAxis()
@@ -87,9 +89,9 @@ export default {
           this.loading = false
           this.axisList = res.data || []
 
-          let moneyCounts = []
-          let numCounts = []
-          let xAxis = []
+          const moneyCounts = []
+          const numCounts = []
+          const xAxis = []
           for (let index = 0; index < this.axisList.length; index++) {
             const element = this.axisList[index]
             moneyCounts.push(element.businessMoney)
@@ -114,7 +116,7 @@ export default {
       let params = {}
 
       if (typeof dataIndex !== 'undefined') {
-        let dataItem = this.axisList[dataIndex]
+        const dataItem = this.axisList[dataIndex]
         params.userId = this.postParams.userId
         params.deptId = this.postParams.deptId
         params.startTime = dataItem.startTime

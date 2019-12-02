@@ -1,24 +1,27 @@
 <template>
-  <flexbox style="height:100%;"
-           direction="column"
-           align="stretch">
+  <flexbox
+    style="height:100%;"
+    direction="column"
+    align="stretch">
     <div class="sw-header">
       工作台
     </div>
     <div class="sw-body">
-      <flexbox align="stretch"
-               class="sw-box">
+      <flexbox
+        align="stretch"
+        class="sw-box">
         <div class="sw-body-side">
-          <div v-for="(item, index) in leftSides"
-               :key="index"
-               :class="leftType==item.type? 'side-item-select' : 'side-item-default'"
-               @click="sideClick(item)"
-               class="side-item">
-            {{item.name}}
+          <div
+            v-for="(item, index) in leftSides"
+            :key="index"
+            :class="leftType==item.type? 'side-item-select' : 'side-item-default'"
+            class="side-item"
+            @click="sideClick(item)">
+            {{ item.name }}
           </div>
         </div>
         <div class="sw-body-content">
-          <component :is="leftType"></component>
+          <component :is="leftType"/>
         </div>
       </flexbox>
     </div>
@@ -43,8 +46,8 @@ export default {
       ]
     }
   },
-  methods: {},
-  mounted() {}
+  mounted() {},
+  methods: {}
 }
 </script>
 

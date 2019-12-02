@@ -2,7 +2,11 @@ package com.kakarote.crm9.erp.oa.service;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.jfinal.aop.Aop;
+import com.jfinal.aop.Before;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.erp.admin.common.AdminMessageEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.crm.entity.CrmBusiness;
 import com.kakarote.crm9.erp.crm.entity.CrmContacts;
@@ -36,11 +40,11 @@ public class OaEventService {
     public List<Record> queryList(OaEvent oaEvent){
         Date startTime = oaEvent.getStartTime();
         Date endTime = oaEvent.getEndTime();
-        Integer userId = BaseUtil.getUserId().intValue();
+        Long userId = BaseUtil.getUserId();
         List<Record> recordList = Db.find(Db.getSql("oa.event.queryList"),endTime,startTime,userId,userId);
         if (recordList != null){
             for (Record record : recordList){
-                record.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", record.getInt("create_user_id")));
+                record.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", record.getLong("create_user_id")));
                 queryRelateList(record);
             }
         }
@@ -51,9 +55,10 @@ public class OaEventService {
      * @author wyq
      * 新增日程
      */
+    @Before(Tx.class)
     public R add(OaEvent oaEvent){
         if (oaEvent.getStartTime() != null && oaEvent.getEndTime() != null){
-            if((oaEvent.getStartTime().compareTo(oaEvent.getEndTime())) == 1){
+            if((oaEvent.getStartTime().compareTo(oaEvent.getEndTime())) > 0){
                 return R.error("结束时间早于开始时间");
             }
         }
@@ -62,14 +67,14 @@ public class OaEventService {
         oaEventRelation.setContactsIds(TagUtil.fromString(oaEvent.getContactsIds()));
         oaEventRelation.setBusinessIds(TagUtil.fromString(oaEvent.getBusinessIds()));
         oaEventRelation.setContractIds(TagUtil.fromString(oaEvent.getContractIds()));
-        oaEvent.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        oaEvent.setCreateUserId(BaseUtil.getUser().getUserId());
         oaEvent.setCreateTime(DateUtil.date());
         oaEvent.setOwnerUserIds(TagUtil.fromString(oaEvent.getOwnerUserIds()));
         oaEventRelation.setCreateTime(DateUtil.date());
         AdminUser user = BaseUtil.getUser();
         return Db.tx(() -> {
             oaEvent.save();
-            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),"");
+            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId(),oaEvent.getOwnerUserIds()),"");
             oaEventRelation.setEventId(oaEvent.getEventId());
             oaEventRelation.save();
             return true;
@@ -97,7 +102,7 @@ public class OaEventService {
         AdminUser user = BaseUtil.getUser();
         return Db.tx(() -> {
             oaEvent.update();
-            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),2,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),"");
+            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),2,oaActionRecordService.getJoinIds(user.getUserId(),oaEvent.getOwnerUserIds()),"");
             oaEventRelation.setEventId(oaEvent.getEventId());
             Record eventRelation= Db.findFirst("select eventrelation_id from 72crm_oa_event_relation where event_id = ?",oaEvent.getEventId());
             oaEventRelation.setEventrelationId(eventRelation.getInt("eventrelation_id"));
@@ -133,7 +138,7 @@ public class OaEventService {
     }
 
     public void queryRelateList(Record record){
-        if (record.getInt("create_user_id") == BaseUtil.getUser().getUserId().intValue()){
+        if (record.getLong("create_user_id") == BaseUtil.getUser().getUserId()){
             record.set("permission",Kv.by("is_update",1).set("is_delete",1));
         }else {
             record.set("permission",Kv.by("is_update",0).set("is_delete",0));
@@ -172,7 +177,7 @@ public class OaEventService {
 
     public Record queryById(Integer eventId){
         Record record = Db.findFirst(Db.getSql("oa.event.queryById"),eventId);
-        record.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", record.getInt("create_user_id")));
+        record.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", record.getLong("create_user_id")));
         queryRelateList(record);
         return record;
     }

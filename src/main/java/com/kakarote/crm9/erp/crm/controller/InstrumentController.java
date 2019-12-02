@@ -51,7 +51,7 @@ public class InstrumentController extends Controller {
      */
     public void queryBulletinInfo(BasePageRequest basePageRequest,@Para("deptId")String deptIds, @Para("userIds")String userIds, @Para("type")String type, @Para("label")Integer label) {
         if (userIds == null) {
-            userIds = BaseUtil.getUser().getUserId().intValue() + "";
+            userIds = BaseUtil.getUser().getUserId() + "";
         } else if (deptIds != null && StrUtil.isNotEmpty(deptIds)) {
             userIds = adminUserService.queryUserIdsByDept(deptIds) + "," + userIds;
         }

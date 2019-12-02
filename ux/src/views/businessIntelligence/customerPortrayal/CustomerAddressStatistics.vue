@@ -1,17 +1,20 @@
 <template>
-  <div v-loading="loading"
-       class="main-container">
+  <div
+    v-loading="loading"
+    class="main-container">
     <flexbox class="content">
       <flexbox-item>
         <div class="axis-content">
-          <div class="axismain"
-               id="allChart"></div>
+          <div
+            id="allChart"
+            class="axismain"/>
         </div>
       </flexbox-item>
       <flexbox-item>
         <div class="axis-content">
-          <div class="axismain"
-               id="dealChart"></div>
+          <div
+            id="dealChart"
+            class="axismain"/>
         </div>
       </flexbox-item>
     </flexbox>
@@ -21,21 +24,18 @@
 <script>
 import echarts from 'echarts'
 import 'echarts/map/js/china.js'
-import axios from 'axios'
 import { biAchievementAnalysisAPI } from '@/api/businessIntelligence/customerPortrayal'
 
 export default {
   /** 城市分布分析 */
-  name: 'customer-address-statistics',
+  name: 'CustomerAddressStatistics',
   data() {
     return {
       loading: false,
       allOption: null,
       dealOption: null,
       allChart: null,
-      dealChart: null,
-
-      list: []
+      dealChart: null
     }
   },
   computed: {},
@@ -49,11 +49,9 @@ export default {
       biAchievementAnalysisAPI()
         .then(res => {
           this.loading = false
-          // this.axisList = res.data || []
 
-          let allData = []
-          let dealData = []
-          let xAxis = []
+          const allData = []
+          const dealData = []
           for (let index = 0; index < res.data.length; index++) {
             const element = res.data[index]
             if (element.allCustomer) {
@@ -99,7 +97,9 @@ export default {
         tooltip: {
           trigger: 'item',
           formatter: function(data) {
-            return data.name + '<br/>' + (data.value || '-') + '（个）'
+            if (data.value) {
+              return data.name + '<br/>' + (data.value || '-') + '（个）'
+            }
           }
         },
         legend: {
@@ -125,7 +125,21 @@ export default {
           top: 'center',
           feature: {
             mark: { show: true },
-            dataView: { show: true, readOnly: false },
+            dataView: { show: true, readOnly: false, optionToContent: function(opt) {
+              var data = opt.series[0].data
+              var table = '<table style="width:100%;text-align:center"><tbody><tr>' +
+                 '<td>城市</td>' +
+                 '<td>客户数</td>' +
+                 '</tr>'
+              for (var i = 0, l = data.length; i < l; i++) {
+                table += '<tr>' +
+                 '<td>' + data[i].name + '</td>' +
+                 '<td>' + data[i].value + '</td>' +
+                 '</tr>'
+              }
+              table += '</tbody></table>'
+              return table
+            } },
             restore: { show: true },
             saveAsImage: { show: true }
           }
@@ -138,7 +152,7 @@ export default {
             showLegendSymbol: false,
             itemStyle: {
               normal: { label: { show: true }, borderColor: '#ccc' },
-              emphasis: { label: { show: true } }
+              emphasis: { label: { show: true }}
             },
             data: []
           }

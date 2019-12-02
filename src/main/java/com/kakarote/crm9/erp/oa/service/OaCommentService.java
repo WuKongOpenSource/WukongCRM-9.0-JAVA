@@ -1,7 +1,9 @@
 package com.kakarote.crm9.erp.oa.service;
 
+import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.tx.Tx;
+import com.kakarote.crm9.erp.admin.common.AdminMessageEnum;
 import com.kakarote.crm9.erp.work.entity.TaskComment;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
@@ -20,14 +22,12 @@ public class OaCommentService{
         boolean bol;
         if ( comment.getCommentId () == null ){
             comment.setCreateTime(new Date());
-            comment.setUserId(BaseUtil.getUser().getUserId().intValue());
+            comment.setUserId(BaseUtil.getUser().getUserId());
             bol = comment.save();
         }else {
             bol = comment.update ();
         }
-        if(comment.getMainId() == null){
-            comment.setMainId(0);
-        }
+
         return bol ? R.ok().put("data",comment) : R.error();
     }
 

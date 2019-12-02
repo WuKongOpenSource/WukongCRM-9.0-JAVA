@@ -1,64 +1,75 @@
 <template>
-  <div class="attachment"
-       v-loading="loading">
+  <div
+    v-loading="loading"
+    class="attachment">
     <div class="attachment-body">
-      <el-table :data="list"
-                :height="tableHeight"
-                align="center"
-                header-align="center"
-                stripe
-                style="width: 100%;border: 1px solid #E6E6E6;"
-                :header-cell-style="headerRowStyle"
-                :cell-style="cellStyle">
-        <el-table-column v-for="(item, index) in fieldList"
-                         :key="index"
-                         show-overflow-tooltip
-                         :prop="item.prop"
-                         :label="item.label">
-        </el-table-column>
-        <el-table-column label="操作"
-                         width="150">
+      <el-table
+        :data="list"
+        :height="tableHeight"
+        :header-cell-style="headerRowStyle"
+        :cell-style="cellStyle"
+        align="center"
+        header-align="center"
+        stripe
+        style="width: 100%;border: 1px solid #E6E6E6;">
+        <el-table-column
+          v-for="(item, index) in fieldList"
+          :key="index"
+          :prop="item.prop"
+          :label="item.label"
+          show-overflow-tooltip/>
+        <el-table-column
+          label="操作"
+          width="150">
           <template slot-scope="scope">
             <flexbox justify="center">
-              <el-button type="text"
-                         @click.native="handleFile('preview', scope)">预览</el-button>
-              <el-button type="text"
-                         @click.native="handleFile('edit', scope)">重命名</el-button>
-              <el-button type="text"
-                         @click.native="handleFile('delete', scope)">删除</el-button>
+              <el-button
+                type="text"
+                @click.native="handleFile('preview', scope)">预览</el-button>
+              <el-button
+                type="text"
+                @click.native="handleFile('edit', scope)">重命名</el-button>
+              <el-button
+                type="text"
+                @click.native="handleFile('delete', scope)">删除</el-button>
             </flexbox>
           </template>
         </el-table-column>
       </el-table>
     </div>
-    <el-dialog title="编辑"
-               width="30%"
-               :append-to-body="true"
-               :visible.sync="editDialog">
+    <el-dialog
+      :append-to-body="true"
+      :visible.sync="editDialog"
+      title="编辑"
+      width="30%">
       <el-form :model="editForm">
-        <el-form-item label="新名称"
-                      label-width="100">
-          <el-input v-model="editForm.name"
-                    autocomplete="off"></el-input>
+        <el-form-item
+          label="新名称"
+          label-width="100">
+          <el-input
+            v-model="editForm.name"
+            autocomplete="off"/>
         </el-form-item>
       </el-form>
-      <div slot="footer"
-           class="dialog-footer">
+      <div
+        slot="footer"
+        class="dialog-footer">
         <el-button @click="editDialog = false">取 消</el-button>
-        <el-button type="primary"
-                   @click="confirmEdit">确 定</el-button>
+        <el-button
+          type="primary"
+          @click="confirmEdit">确 定</el-button>
       </div>
     </el-dialog>
     <div class="p-contianer">
-      <el-pagination class="p-bar"
-                     @size-change="handleSizeChange"
-                     @current-change="handleCurrentChange"
-                     :current-page="currentPage"
-                     :page-sizes="pageSizes"
-                     :page-size.sync="pageSize"
-                     layout="total, sizes, prev, pager, next, jumper"
-                     :total="total">
-      </el-pagination>
+      <el-pagination
+        :current-page="currentPage"
+        :page-sizes="pageSizes"
+        :page-size.sync="pageSize"
+        :total="total"
+        class="p-bar"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"/>
     </div>
   </div>
 </template>
@@ -69,6 +80,10 @@ import { crmFileDelete, crmFileUpdate } from '@/api/common'
 import { workWorkFileListAPI } from '@/api/projectManagement/project'
 
 export default {
+
+  props: {
+    workId: [Number, String]
+  },
   data() {
     return {
       firstRequst: true,
@@ -85,12 +100,8 @@ export default {
       /** 重命名 弹窗 */
       editDialog: false,
       /** 编辑信息 */
-      editForm: { name: '', data: {} }
+      editForm: { name: '', data: {}}
     }
-  },
-
-  props: {
-    workId: [Number, String]
   },
 
   watch: {

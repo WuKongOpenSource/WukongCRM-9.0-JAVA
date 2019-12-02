@@ -1,13 +1,15 @@
 <template>
-  <div v-show="visible"
-       class="full-container">
-    <component v-if="id&&showDetail"
-               class="d-view"
-               v-bind:is="tabName"
-               :crmType="crmType"
-               :id="id"
-               @hide-view="hiddenView">
-    </component>
+  <div
+    v-show="visible"
+    class="full-container">
+    <component
+      v-if="id&&showDetail"
+      :is="tabName"
+      :crm-type="crmType"
+      :id="id"
+      class="d-view"
+      @handle="detailHandle"
+      @hide-view="hiddenView"/>
   </div>
 </template>
 
@@ -23,7 +25,7 @@ import MoneyDetail from '../money/MoneyDetail'
 import ExamineDetail from '@/views/OAManagement/examine/components/examineDetail'
 
 export default {
-  name: 'c-r-m-full-screen-detail', //客户管理下 重要提醒 回款计划提醒
+  name: 'CRMFullScreenDetail', // 客户管理下 重要提醒 回款计划提醒
   components: {
     ClueDetail,
     CustomerDetail,
@@ -34,21 +36,22 @@ export default {
     MoneyDetail,
     ExamineDetail
   },
-  watch: {
-    visible(val) {
-      this.showDetail = val
-      if (val) {
-        document.body.appendChild(this.$el)
-        this.$el.addEventListener('click', this.handleDocumentClick, false)
-        this.$el.style.zIndex = getMaxIndex()
-      }
+  props: {
+    /** 模块ID */
+    id: [String, Number],
+    /** 没有值就是全部类型 有值就是当个类型 */
+    crmType: {
+      type: String,
+      default: ''
     },
-    showDetail(val) {
-      if (!val) {
-        setTimeout(() => {
-          this.$emit('update:visible', false)
-        }, 350)
-      }
+    visible: {
+      type: Boolean,
+      default: false
+    }
+  },
+  data() {
+    return {
+      showDetail: false
     }
   },
   computed: {
@@ -73,22 +76,21 @@ export default {
       return ''
     }
   },
-  data() {
-    return {
-      showDetail: false
-    }
-  },
-  props: {
-    /** 模块ID */
-    id: [String, Number],
-    /** 没有值就是全部类型 有值就是当个类型 */
-    crmType: {
-      type: String,
-      default: ''
+  watch: {
+    visible(val) {
+      this.showDetail = val
+      if (val) {
+        document.body.appendChild(this.$el)
+        this.$el.addEventListener('click', this.handleDocumentClick, false)
+        this.$el.style.zIndex = getMaxIndex()
+      }
     },
-    visible: {
-      type: Boolean,
-      default: false
+    showDetail(val) {
+      if (!val) {
+        setTimeout(() => {
+          this.$emit('update:visible', false)
+        }, 350)
+      }
     }
   },
   mounted() {
@@ -96,6 +98,14 @@ export default {
       document.body.appendChild(this.$el)
       this.$el.addEventListener('click', this.handleDocumentClick, false)
       this.$el.style.zIndex = getMaxIndex()
+    }
+  },
+
+  beforeDestroy() {
+    // remove DOM node after destroy
+    if (this.$el && this.$el.parentNode) {
+      this.$el.parentNode.removeChild(this.$el)
+      this.$el.removeEventListener('click', this.handleDocumentClick, false)
     }
   },
   methods: {
@@ -107,14 +117,16 @@ export default {
       if (this.$el == e.target) {
         this.showDetail = false
       }
-    }
-  },
+    },
 
-  beforeDestroy() {
-    // remove DOM node after destroy
-    if (this.$el && this.$el.parentNode) {
-      this.$el.parentNode.removeChild(this.$el)
-      this.$el.removeEventListener('click', this.handleDocumentClick, false)
+    /**
+     * 详情操作
+     */
+    detailHandle(data) {
+      if (data.type === 'alloc' || data.type === 'get' || data.type === 'transfer' || data.type === 'transform' || data.type === 'delete' || data.type === 'put_seas') {
+        this.showDetail = false
+      }
+      this.$emit('handle', data)
     }
   }
 }

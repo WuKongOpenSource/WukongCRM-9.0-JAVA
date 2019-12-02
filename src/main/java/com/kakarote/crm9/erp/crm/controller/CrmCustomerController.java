@@ -5,9 +5,16 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Before;
+import com.jfinal.aop.Inject;
+import com.jfinal.core.Controller;
+import com.jfinal.core.paragetter.Para;
 import com.jfinal.kit.Kv;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
+import com.jfinal.upload.UploadFile;
 import com.kakarote.crm9.common.annotation.*;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
@@ -25,13 +32,6 @@ import com.kakarote.crm9.erp.crm.service.CrmCustomerService;
 import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
-import com.jfinal.aop.Before;
-import com.jfinal.aop.Inject;
-import com.jfinal.core.Controller;
-import com.jfinal.core.paragetter.Para;
-import com.jfinal.plugin.activerecord.Record;
-import com.jfinal.plugin.activerecord.tx.Tx;
-import com.jfinal.upload.UploadFile;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -41,7 +41,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -82,7 +81,7 @@ public class CrmCustomerController extends Controller {
      */
     @Permissions({"crm:pool:index"})
     public void queryPoolPageList(BasePageRequest basePageRequest) {
-        JSONObject jsonObject = basePageRequest.getJsonObject().fluentPut("type", 8);
+        JSONObject jsonObject = basePageRequest.getJsonObject().fluentPut("type", CrmEnum.CRM_CUSTOMER_POOL.getType());
         basePageRequest.setJsonObject(jsonObject);
         renderJson(adminSceneService.filterConditionAndGetPageList(basePageRequest));
     }
@@ -219,7 +218,7 @@ public class CrmCustomerController extends Controller {
      * @author wyq
      * 设置成交状态
      */
-    public void setDealStatus(@Para("ids")String ids,@Para("dealStatus")String dealStatus){
+    public void setDealStatus(@Para("ids")String ids,@Para("dealStatus")Integer dealStatus){
         renderJson(crmCustomerService.setDealStatus(ids,dealStatus));
     }
 
@@ -322,6 +321,7 @@ public class CrmCustomerController extends Controller {
      * @author wyq
      * 编辑团队成员
      */
+    @Permissions("crm:customer:teamsave")
     @NotNullValidate(value = "ids", message = "商机id不能为空")
     @NotNullValidate(value = "memberIds", message = "成员id不能为空")
     @NotNullValidate(value = "power", message = "读写权限不能为空")
@@ -333,6 +333,7 @@ public class CrmCustomerController extends Controller {
      * @author wyq
      * 删除团队成员
      */
+    @Permissions("crm:customer:teamsave")
     @NotNullValidate(value = "ids", message = "客户id不能为空")
     @NotNullValidate(value = "memberIds", message = "成员id不能为空")
     public void deleteMembers(@Para("") CrmCustomer crmCustomer) {
@@ -452,8 +453,8 @@ public class CrmCustomerController extends Controller {
         ExcelWriter writer = ExcelUtil.getWriter();
         try {
             AdminFieldService adminFieldService = new AdminFieldService();
-            List<Record> fieldList = adminFieldService.customFieldList("2");
-            List<Record> customerFields = adminFieldService.list("2");
+            List<Record> fieldList = adminFieldService.customFieldList(CrmEnum.CRM_CUSTOMER.getType());
+            List<Record> customerFields = adminFieldService.list(CrmEnum.CRM_CUSTOMER.getType());
             Kv kv = new Kv();
             customerFields.forEach(customerField -> kv.set(customerField.getStr("field_name"), customerField.getStr("name")));
             writer.addHeaderAlias("customer_name", kv.getStr("customer_name"));
@@ -560,12 +561,18 @@ public class CrmCustomerController extends Controller {
      */
     @LoginFormCookie
     public void downloadExcel() {
-        List<Record> recordList = adminFieldService.queryAddField(2);
+        List<Record> recordList = adminFieldService.queryAddField(CrmEnum.CRM_CUSTOMER);
         recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType")) || "user".equals(record.getStr("formType")) || "structure".equals(record.getStr("formType")));
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("客户导入表");
-        sheet.setDefaultColumnWidth(12);
         sheet.setDefaultRowHeight((short)400);
+        CellStyle textStyle = wb.createCellStyle();
+        DataFormat format = wb.createDataFormat();
+        textStyle.setDataFormat(format.getFormat("@"));
+        for (int i=0;i < recordList.size();i++){
+            sheet.setDefaultColumnStyle(i,textStyle);
+            sheet.setColumnWidth(i,20*256);
+        }
         HSSFRow titleRow = sheet.createRow(0);
         CellStyle cellStyle = wb.createCellStyle();
         cellStyle.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());

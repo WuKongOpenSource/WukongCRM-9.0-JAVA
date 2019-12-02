@@ -14,6 +14,9 @@
       #end
     #end
 
+    #sql ("queryIsAuth")
+    select count(*) from 72crm_crm_customer where owner_user_id in ( #fori(userIds) ) and customer_id = #para(customerId)
+    #end
     #sql ("queryIsRoUser")
     select count(*) from 72crm_crm_customer where find_in_set(?,ro_user_id) and customer_id = ?
     #end
@@ -91,18 +94,19 @@
 
     #sql ("queryContract")
     select a.contract_id,a.num,a.name as contract_name,b.customer_name,a.money,a.start_time,a.end_time,a.check_status,
-    ifnull((select sum(c.money) from `72crm_crm_receivables` c where c.contract_id = a.contract_id and c.check_status = 2),0) as receivablesMoneyCount
+    ifnull((select sum(c.money) from `72crm_crm_receivables` c where c.contract_id = a.contract_id and c.check_status = 1),0) as receivablesMoneyCount
     from 72crm_crm_contract as a inner join 72crm_crm_customer as b on a.customer_id = b.customer_id
-    where a.customer_id = #para(customerId)
+    where a.customer_id = #para(customerId) #(condition)
       #if(contractName)
       and a.name like CONCAT('%',#para(contractName),'%')
       #end
     #end
 
     #sql ("queryPassContract")
-    select a.contract_id,a.num,a.name as contract_name,b.customer_name,a.money,a.start_time,a.end_time,a.check_status
-    from 72crm_crm_contract as a inner join 72crm_crm_customer as b on a.customer_id = b.customer_id
-    where a.customer_id = #para(customerId) and a.check_status = #para(checkStatus)
+      select a.contract_id,a.num,a.name as contract_name,b.customer_name,a.money,a.start_time,a.end_time,a.check_status
+      from 72crm_crm_contract as a inner join 72crm_crm_customer as b on a.customer_id = b.customer_id
+      where a.customer_id = #para(customerId) and a.check_status = #para(checkStatus)
+     #(condition)
       #if(contractName)
       and a.name like CONCAT('%',#para(contractName),'%')
       #end
@@ -116,7 +120,7 @@
 
     #sql ("queryDealNum")
     select count(*) from 72crm_crm_customer
-    where deal_status = '已成交' and customer_id in (
+    where deal_status = 1 and customer_id in (
         #for(i : ids)
             #(for.index > 0 ? "," : "")#para(i)
         #end
@@ -183,7 +187,7 @@
     #sql ("selectOwnerUserId")
     select customer_id from 72crm_crm_customer as ccc
     WHERE owner_user_id != 0
-        and deal_status = '未成交'
+        and deal_status = 0
         and is_lock = 0
         and ((unix_timestamp(now()) - unix_timestamp(IFNULL((
 		SELECT car.create_time
@@ -290,7 +294,7 @@
     #sql("queryCustomerSettingNum")
       SELECT COUNT(*) FROM 72crm_crm_customer WHERE 1=1
       #if(deal==0)
-        and deal_status='未成交'
+        and deal_status=0
       #end
       #if(type==2)
         and is_lock='1'
@@ -307,5 +311,11 @@
         #if(deptId)
         and dept_id = #para(deptId)
         #end
+    #end
+    #sql ("queryFieldDuplicate")
+       select count(1) from `72crm_crm_customer` where #(key) = '#(value)'
+    #end
+    #sql ("queryFieldDuplicate1")
+       select count(*) from `72crm_admin_field` a left join `72crm_admin_fieldv` b on a.field_id = b.field_id where label = 2  and field_name = #para(key) and value = #para(value);
     #end
 #end

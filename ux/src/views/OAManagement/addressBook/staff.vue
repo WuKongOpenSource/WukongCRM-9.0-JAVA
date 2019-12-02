@@ -1,29 +1,34 @@
 <template>
   <div class="staff">
-    <div v-for="(item, index) in staffData"
-         :key="index"
-         class="staff-data">
-      <div class="item-title">{{item.letter}}</div>
-      <div v-for="(k, j) in item.list"
-           :key="j"
-           class="k-list">
+    <div
+      v-for="(item, index) in staffData"
+      :key="index"
+      class="staff-data">
+      <div class="item-title">{{ item.letter }}</div>
+      <div
+        v-for="(k, j) in item.list"
+        :key="j"
+        class="k-list">
         <div class="list-right">
-          <div class="k-realname">{{k.realname.substring(0, 6)}}</div>
+          <div class="k-realname">{{ k.realname.substring(0, 6) }}</div>
           <div class="content">
             <div v-if="k.deptName">
-              <img src="@/assets/img/structure.png"
-                   alt="">
-              <span>{{k.deptName}}</span>
+              <img
+                src="@/assets/img/structure.png"
+                alt="">
+              <span>{{ k.deptName }}</span>
             </div>
             <div v-if="k.postName">
-              <img src="@/assets/img/post.png"
-                   alt="">
-              <span>{{k.postName}}</span>
+              <img
+                src="@/assets/img/post.png"
+                alt="">
+              <span>{{ k.postName }}</span>
             </div>
             <div v-if="k.mobile">
-              <img src="@/assets/img/mobile.png"
-                   alt="">
-              <span>{{k.mobile}}</span>
+              <img
+                src="@/assets/img/mobile.png"
+                alt="">
+              <span>{{ k.mobile }}</span>
             </div>
           </div>
         </div>
@@ -34,11 +39,11 @@
 
 <script>
 export default {
-  data() {
-    return {}
-  },
   props: {
     staffData: Array
+  },
+  data() {
+    return {}
   },
   created() {},
   methods: {

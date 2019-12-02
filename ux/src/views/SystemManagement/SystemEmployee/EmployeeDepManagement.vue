@@ -3,44 +3,52 @@
     <p class="title"> 员工与部门管理 </p>
     <div class="system-content">
       <!-- 左边导航栏 -->
-      <div class="system-view-nav"
-           v-loading="depLoading">
-        <el-tree :data="treeData"
-                 node-key="id"
-                 ref="tree"
-                 @node-click="changeDepClick"
-                 :expand-on-click-node="false"
-                 default-expand-all
-                 highlight-current>
-          <flexbox class="node-data"
-                   slot-scope="{ node, data }">
-            <img class="node-img"
-                 @click="handleExpand('close',node, data)"
-                 v-if="node.expanded"
-                 src="@/assets/img/fold.png">
-            <img class="node-img"
-                 @click="handleExpand('open',node, data)"
-                 v-if="!node.expanded"
-                 src="@/assets/img/unfold.png">
+      <div
+        v-loading="depLoading"
+        class="system-view-nav">
+        <el-tree
+          ref="tree"
+          :data="treeData"
+          :expand-on-click-node="false"
+          node-key="id"
+          default-expand-all
+          highlight-current
+          @node-click="changeDepClick">
+          <flexbox
+            slot-scope="{ node, data }"
+            class="node-data">
+            <img
+              v-if="node.expanded"
+              class="node-img"
+              src="@/assets/img/fold.png"
+              @click="handleExpand('close',node, data)">
+            <img
+              v-if="!node.expanded"
+              class="node-img"
+              src="@/assets/img/unfold.png"
+              @click="handleExpand('open',node, data)">
             <div class="node-label">{{ node.label }}</div>
             <div class="node-label-set">
-              <el-button v-if="strucSaveAuth"
-                         type="text"
-                         size="mini"
-                         @click.stop="() => append(data)">
-                <i class="el-icon-plus"></i>
+              <el-button
+                v-if="strucSaveAuth"
+                type="text"
+                size="mini"
+                @click.stop="() => append(data)">
+                <i class="el-icon-plus"/>
               </el-button>
-              <el-button v-if="strucUpdateAuth"
-                         type="text"
-                         size="mini"
-                         @click.stop="() => edit(node, data)">
-                <i class="el-icon-edit"></i>
+              <el-button
+                v-if="strucUpdateAuth"
+                type="text"
+                size="mini"
+                @click.stop="() => edit(node, data)">
+                <i class="el-icon-edit"/>
               </el-button>
-              <el-button v-if="strucDeleteAuth"
-                         type="text"
-                         size="mini"
-                         @click.stop="() => remove(node, data)">
-                <i class="el-icon-close"></i>
+              <el-button
+                v-if="strucDeleteAuth"
+                type="text"
+                size="mini"
+                @click.stop="() => remove(node, data)">
+                <i class="el-icon-close"/>
               </el-button>
             </div>
           </flexbox>
@@ -48,274 +56,318 @@
       </div>
       <!-- 右边内容 -->
       <div class="system-view-table flex-index">
-        <div class="table-top"
-             v-if="selectionList.length === 0">
+        <div
+          v-if="selectionList.length === 0"
+          class="table-top">
           <div class="icon-search lt">
-            <el-input placeholder="请输入员工名称"
-                      v-model="importInput"
-                      @keyup.enter.native="searchClick">
-            </el-input>
-            <i class="el-icon-search"
-               @click="searchClick"></i>
+            <el-input
+              v-model="importInput"
+              placeholder="请输入员工名称"
+              @keyup.enter.native="searchClick"/>
+            <i
+              class="el-icon-search"
+              @click="searchClick"/>
           </div>
           <div class="status">
             <span>状态</span>
-            <el-select v-model="selectModel"
-                       :clearable="true"
-                       @change="statusChange"
-                       placeholder="请选择">
-              <el-option v-for="item in statusOptions"
-                         :key="item.value"
-                         :label="item.label"
-                         :value="item.value">
-              </el-option>
+            <el-select
+              v-model="selectModel"
+              :clearable="true"
+              placeholder="请选择"
+              @change="statusChange">
+              <el-option
+                v-for="item in statusOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"/>
             </el-select>
           </div>
-          <el-button v-if="userSaveAuth"
-                     type="primary"
-                     class="rt"
-                     @click="newBtn">新建员工</el-button>
+          <el-button
+            v-if="userSaveAuth"
+            type="primary"
+            class="rt"
+            @click="newBtn">新建员工</el-button>
         </div>
-        <flexbox v-if="selectionList.length > 0"
-                 class="selection-bar">
-          <div class="selected—title">已选中<span class="selected—count">{{selectionList.length}}</span>项</div>
+        <flexbox
+          v-if="selectionList.length > 0"
+          class="selection-bar">
+          <div class="selected—title">已选中<span class="selected—count">{{ selectionList.length }}</span>项</div>
           <flexbox class="selection-items-box">
-            <flexbox class="selection-item"
-                     v-for="(item, index) in selectionInfo"
-                     :key="index"
-                     @click.native="selectionBarClick(item.type)">
-              <img class="selection-item-icon"
-                   :src="item.icon" />
-              <div class="selection-item-name">{{item.name}}</div>
+            <flexbox
+              v-for="(item, index) in selectionInfo"
+              :key="index"
+              class="selection-item"
+              @click.native="selectionBarClick(item.type)">
+              <img
+                :src="item.icon"
+                class="selection-item-icon" >
+              <div class="selection-item-name">{{ item.name }}</div>
             </flexbox>
           </flexbox>
         </flexbox>
         <div class="flex-box">
-          <el-table :data="tableData"
-                    id="depTable"
-                    :height="tableHeight"
-                    v-loading="loading"
-                    @selection-change="handleSelectionChange"
-                    @row-click="rowClick">
-            <el-table-column v-if="tableUpdateAuth"
-                             type="selection"
-                             width="55"></el-table-column>
-            <el-table-column prop="realname"
-                             width="100"
-                             show-overflow-tooltip
-                             label="姓名">
+          <el-table
+            v-loading="loading"
+            id="depTable"
+            :data="tableData"
+            :height="tableHeight"
+            @selection-change="handleSelectionChange"
+            @row-click="rowClick">
+            <el-table-column
+              v-if="tableUpdateAuth"
+              type="selection"
+              width="55"/>
+            <el-table-column
+              prop="realname"
+              width="100"
+              show-overflow-tooltip
+              label="姓名">
               <template slot-scope="scope">
                 <div class="status-name">
-                  <div :style="{'background-color' : getStatusColor(scope.row.status)}"></div>
-                  {{scope.row.realname}}
+                  <div :style="{'background-color' : getStatusColor(scope.row.status)}"/>
+                  {{ scope.row.realname }}
                 </div>
               </template>
-              <template slot="header"
-                        slot-scope="scope">
-                <div class="table-head-name">{{scope.column.label}}</div>
+              <template
+                slot="header"
+                slot-scope="scope">
+                <div class="table-head-name">{{ scope.column.label }}</div>
               </template>
             </el-table-column>
-            <el-table-column v-for="(item, index) in fieldList"
-                             :key="index"
-                             :width="item.width"
-                             show-overflow-tooltip
-                             :prop="item.field"
-                             :label="item.value"
-                             :formatter="tableFormatter">
-              <template slot="header"
-                        slot-scope="scope">
-                <div class="table-head-name">{{scope.column.label}}</div>
+            <el-table-column
+              v-for="(item, index) in fieldList"
+              :key="index"
+              :width="item.width"
+              :prop="item.field"
+              :label="item.value"
+              :formatter="tableFormatter"
+              show-overflow-tooltip>
+              <template
+                slot="header"
+                slot-scope="scope">
+                <div class="table-head-name">{{ scope.column.label }}</div>
               </template>
             </el-table-column>
-            <el-table-column>
-            </el-table-column>
+            <el-table-column/>
           </el-table>
           <div class="p-contianer">
             <div class="status-des">
-              <div class="status-des-item"
-                   v-for="item in statusOptions"
-                   :key="item.value">
-                <div :style="{'background-color' : getStatusColor(item.value)}"></div>
-                {{item.label}}
+              <div
+                v-for="item in statusOptions"
+                :key="item.value"
+                class="status-des-item">
+                <div :style="{'background-color' : getStatusColor(item.value)}"/>
+                {{ item.label }}
               </div>
             </div>
-            <el-pagination class="p-bar"
-                           @size-change="handleSizeChange"
-                           @current-change="handleCurrentChange"
-                           :current-page="currentPage"
-                           :page-sizes="pageSizes"
-                           :page-size.sync="pageSize"
-                           layout="total, sizes, prev, pager, next, jumper"
-                           :total="total">
-            </el-pagination>
+            <el-pagination
+              :current-page="currentPage"
+              :page-sizes="pageSizes"
+              :page-size.sync="pageSize"
+              :total="total"
+              class="p-bar"
+              layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"/>
           </div>
         </div>
       </div>
     </div>
     <!-- 导航新增编辑弹出框 -->
-    <el-dialog :visible.sync="depCreateDialog"
-               width="30%"
-               :title="navBtnTitle"
-               :before-close="navHandleClose">
+    <el-dialog
+      :visible.sync="depCreateDialog"
+      :title="navBtnTitle"
+      :before-close="navHandleClose"
+      width="30%">
       <div class="nav-dialog-div">
-        <label>{{labelName}}：</label>
-        <el-input v-model="treeInput"
-                  placeholder="请输入内容"></el-input>
+        <label>{{ labelName }}：</label>
+        <el-input
+          v-model="treeInput"
+          placeholder="请输入内容"/>
       </div>
-      <div v-if="depSelect != 0"
-           class="nav-dialog-div">
+      <div
+        v-if="depSelect != 0"
+        class="nav-dialog-div">
         <label>上级部门：</label>
-        <el-select v-model="depSelect"
-                   :clearable="false"
-                   placeholder="请选择">
-          <el-option v-for="item in dialogOptions"
-                     :key="item.id"
-                     :label="item.name"
-                     :value="item.id">
-          </el-option>
+        <el-select
+          v-model="depSelect"
+          :clearable="false"
+          placeholder="请选择">
+          <el-option
+            v-for="item in dialogOptions"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"/>
         </el-select>
       </div>
-      <span slot="footer"
-            class="dialog-footer">
+      <span
+        slot="footer"
+        class="dialog-footer">
         <el-button @click="depCreateDialog = false">取 消</el-button>
-        <el-button type="primary"
-                   @click="submitDialog">确 定</el-button>
+        <el-button
+          type="primary"
+          @click="submitDialog">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 详情 -->
-    <employee-detail v-if="employeeDetailDialog"
-                     :data="dialogData"
-                     @edit="editBtn"
-                     @command="handleCommand"
-                     @hide-view="employeeDetailDialog=false"></employee-detail>
+    <employee-detail
+      v-if="employeeDetailDialog"
+      :data="dialogData"
+      @edit="editBtn"
+      @command="handleCommand"
+      @hide-view="employeeDetailDialog=false"/>
     <!-- 重置密码 -->
-    <el-dialog title="重置密码"
-               :visible.sync="resetPasswordVisible"
-               width="30%"
-               v-loading="loading"
-               :close-on-click-modal="false"
-               :modal-append-to-body="false"
-               :before-close="resetPasswordClose">
+    <el-dialog
+      v-loading="loading"
+      :visible.sync="resetPasswordVisible"
+      :close-on-click-modal="false"
+      :modal-append-to-body="false"
+      :before-close="resetPasswordClose"
+      title="重置密码"
+      width="30%">
       <div class="el-password">
-        <el-form ref="passForm"
-                 :model="passForm"
-                 :rules="rules">
-          <el-form-item label="密码"
-                        prop="password">
-            <el-input v-model="passForm.password"
-                      type="password"></el-input>
+        <el-form
+          ref="passForm"
+          :model="passForm"
+          :rules="rules">
+          <el-form-item
+            label="密码"
+            prop="password">
+            <el-input
+              v-model="passForm.password"
+              type="password"/>
           </el-form-item>
         </el-form>
       </div>
-      <span slot="footer"
-            class="dialog-footer">
+      <span
+        slot="footer"
+        class="dialog-footer">
         <el-button @click="resetPasswordClose">取 消</el-button>
-        <el-button type="primary"
-                   @click="passSubmit(passForm)">确 定</el-button>
+        <el-button
+          type="primary"
+          @click="passSubmit(passForm)">确 定</el-button>
       </span>
     </el-dialog>
 
     <!-- 重置登录账号 -->
-    <el-dialog title="重置登录账号"
-               :visible.sync="resetUserNameVisible"
-               width="30%"
-               v-loading="loading"
-               :close-on-click-modal="false"
-               :modal-append-to-body="false"
-               :before-close="()=>{resetUserNameVisible = false}">
+    <el-dialog
+      v-loading="loading"
+      :visible.sync="resetUserNameVisible"
+      :close-on-click-modal="false"
+      :modal-append-to-body="false"
+      :before-close="()=>{resetUserNameVisible = false}"
+      title="重置登录账号"
+      width="30%">
       <div class="el-password">
-        <el-form ref="resetUserNameForm"
-                 :model="resetUserNameForm"
-                 :rules="dialogRules">
-          <el-form-item label="新账号（手机号）"
-                        prop="username">
-            <el-input v-model="resetUserNameForm.username"></el-input>
+        <el-form
+          ref="resetUserNameForm"
+          :model="resetUserNameForm"
+          :rules="dialogRules">
+          <el-form-item
+            label="新账号（手机号）"
+            prop="username">
+            <el-input v-model="resetUserNameForm.username"/>
           </el-form-item>
-          <el-form-item label="新密码"
-                        prop="password">
-            <el-input v-model="resetUserNameForm.password"
-                      type="password"></el-input>
+          <el-form-item
+            label="新密码"
+            prop="password">
+            <el-input
+              v-model="resetUserNameForm.password"
+              type="password"/>
           </el-form-item>
         </el-form>
-        <div class="tips"
-             style="margin-top: 20px;">重置登录帐号后，员工需用新账号登录。请及时告知员工，确保正常使用</div>
+        <div
+          class="tips"
+          style="margin-top: 20px;">重置登录帐号后，员工需用新账号登录。请及时告知员工，确保正常使用</div>
       </div>
-      <span slot="footer"
-            class="dialog-footer">
+      <span
+        slot="footer"
+        class="dialog-footer">
         <el-button @click="()=>{resetUserNameVisible = false}">取 消</el-button>
-        <el-button type="primary"
-                   @click="passUserNameSubmit(resetUserNameForm)">确 定</el-button>
+        <el-button
+          type="primary"
+          @click="passUserNameSubmit(resetUserNameForm)">确 定</el-button>
       </span>
     </el-dialog>
 
     <!-- 新建和编辑 -->
-    <el-dialog :title="dialogTitle"
-               :visible.sync="employeeCreateDialog"
-               v-if="employeeCreateDialog"
-               width="60%"
-               :close-on-click-modal="false"
-               :modal-append-to-body="true"
-               v-loading="loading"
-               :append-to-body="true"
-               :before-close="newHandleClose">
+    <el-dialog
+      v-loading="loading"
+      v-if="employeeCreateDialog"
+      :title="dialogTitle"
+      :visible.sync="employeeCreateDialog"
+      :close-on-click-modal="false"
+      :modal-append-to-body="true"
+      :append-to-body="true"
+      :before-close="newHandleClose"
+      width="60%">
       <p class="new-dialog-title">基本信息</p>
-      <el-form :inline="true"
-               :model="formInline"
-               ref="dialogRef"
-               class="new-dialog-form"
-               label-width="80px"
-               :rules="dialogRules"
-               label-position="top">
-        <el-form-item :label="item.value"
-                      :prop="item.field"
-                      v-for="(item, index) in tableList"
-                      :key="index">
-          <span slot="label">{{item.value}}</span>
-          <el-tooltip v-if="item.tips"
-                      slot="label"
-                      effect="dark"
-                      :content="item.tips"
-                      placement="top">
-            <i class="wukong wukong-help_tips"></i>
+      <el-form
+        ref="dialogRef"
+        :inline="true"
+        :model="formInline"
+        :rules="dialogRules"
+        class="new-dialog-form"
+        label-width="80px"
+        label-position="top">
+        <el-form-item
+          v-for="(item, index) in tableList"
+          :label="item.value"
+          :prop="item.field"
+          :key="index">
+          <span slot="label">{{ item.value }}</span>
+          <el-tooltip
+            v-if="item.tips"
+            slot="label"
+            :content="item.tips"
+            effect="dark"
+            placement="top">
+            <i class="wukong wukong-help_tips"/>
           </el-tooltip>
           <template v-if="item.type == 'select'">
-            <el-select v-model="formInline[item.field]"
-                       filterable
-                       placeholder="请选择">
-              <el-option v-for="optionItem in optionsList[item.field].list"
-                         :key="optionItem.id"
-                         :label="optionItem.name"
-                         :value="optionItem.id">
-              </el-option>
+            <el-select
+              v-model="formInline[item.field]"
+              filterable
+              placeholder="请选择">
+              <el-option
+                v-for="optionItem in optionsList[item.field].list"
+                :key="optionItem.id"
+                :label="optionItem.name"
+                :value="optionItem.id"/>
             </el-select>
           </template>
           <template v-else-if="item.type == 'selectCheckout'">
-            <el-select v-model="formInline[item.field]"
-                       popper-class="select-popper-class"
-                       :popper-append-to-body="false"
-                       filterable
-                       multiple
-                       placeholder="请选择">
-              <el-option-group v-for="group in groupsList"
-                               :key="group.pid"
-                               :label="group.name">
-                <el-option v-for="item in group.list"
-                           :key="item.id"
-                           :label="item.title"
-                           :value="item.id">
-                </el-option>
+            <el-select
+              v-model="formInline[item.field]"
+              :popper-append-to-body="false"
+              popper-class="select-popper-class"
+              filterable
+              multiple
+              placeholder="请选择">
+              <el-option-group
+                v-for="group in groupsList"
+                :key="group.pid"
+                :label="group.name">
+                <el-option
+                  v-for="item in group.list"
+                  :key="item.id"
+                  :label="item.title"
+                  :value="item.id"/>
               </el-option-group>
             </el-select>
           </template>
-          <el-input v-else
-                    v-model="formInline[item.field]"
-                    :disabled="dialogTitle == '编辑员工' && item.field == 'username'"></el-input>
+          <el-input
+            v-else
+            v-model="formInline[item.field]"
+            :disabled="dialogTitle == '编辑员工' && item.field == 'username'"/>
         </el-form-item>
       </el-form>
-      <span slot="footer"
-            class="dialog-footer">
-        <el-button type="primary"
-                   @click="newDialogSubmit">保 存</el-button>
+      <span
+        slot="footer"
+        class="dialog-footer">
+        <el-button
+          type="primary"
+          @click="newDialogSubmit">保 存</el-button>
         <el-button @click="employeeCreateDialog = false">取 消</el-button>
       </span>
     </el-dialog>
@@ -338,9 +390,19 @@ import { usersList, depList } from '@/api/common' // 直属上级接口
 import EmployeeDetail from './components/employeeDetail'
 import { mapGetters } from 'vuex'
 
+var validateUsername = (rule, value, callback) => {
+  if (value && value === 'admin') {
+    callback()
+  } else if (value && /^1\d{10}$/.test(value)) {
+    callback()
+  } else {
+    callback(new Error('目前只支持中国大陆的手机号码'))
+  }
+}
+
 export default {
   /** 系统管理 的 员工部门管理 */
-  name: 'employee-dep-management',
+  name: 'EmployeeDepManagement',
   components: {
     EmployeeDetail
   },
@@ -392,7 +454,7 @@ export default {
       pageSize: 15,
       pageSizes: [15, 30, 45, 60],
       total: 0,
-      /**** */
+      /** ** */
       employeeDetailDialog: false,
       dialogData: {},
       // 新建和编辑
@@ -438,14 +500,13 @@ export default {
           { required: true, message: '姓名不能为空', trigger: 'blur' }
         ],
         password: [
-          { required: true, message: '密码不能为空', trigger: 'blur' },
-          { min: 6, max: 6, message: '长度为6个字符', trigger: 'blur' }
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, max: 12, message: '长度在 6 到 12 个字符', trigger: 'blur' }
         ],
         username: [
           { required: true, message: '手机号码不能为空', trigger: 'blur' },
           {
-            pattern: /^1\d{10}/,
-            message: '目前只支持中国大陆的手机号码',
+            validator: validateUsername,
             trigger: 'blur'
           }
         ],
@@ -579,6 +640,24 @@ export default {
       }
     }
   },
+  mounted() {
+    var self = this
+    /** 控制table的高度 */
+    window.onresize = function() {
+      self.tableHeight = document.documentElement.clientHeight - 260
+    }
+
+    // 部门树形列表
+    this.treeListFun()
+    this.getSelectUserList() // 直属上级列表
+    this.usersListFun()
+    this.getDepList()
+    // 角色列表
+    roleList().then(res => {
+      this.groupsList = res.data
+    })
+    document.getElementsByClassName('el-select-dropdown')[0].style.color = 'red'
+  },
   methods: {
     // 改变部门
     changeDepClick(data) {
@@ -630,10 +709,10 @@ export default {
           if (element.field === 'roleId') {
             detail[element.field] = this.dialogData.roleId
               ? this.dialogData.roleId
-                  .split(',')
-                  .map(function(item, index, array) {
-                    return parseInt(item)
-                  })
+                .split(',')
+                .map(function(item, index, array) {
+                  return parseInt(item)
+                })
               : []
           } else if (element.field === 'parentId') {
             detail.parentId = this.dialogData.parentId || ''
@@ -663,7 +742,7 @@ export default {
       this.getStructuresListBySuperior({ id: data.id, type: 'save' })
       this.depCreateDialog = true
     },
-    //获取新增部门 上级部门信息
+    // 获取新增部门 上级部门信息
     getStructuresListBySuperior(data) {
       this.dialogOptions = []
       depList(data).then(response => {
@@ -865,10 +944,10 @@ export default {
             if (element.field === 'roleId') {
               detail[element.field] = this.dialogData.roleId
                 ? this.dialogData.roleId
-                    .split(',')
-                    .map(function(item, index, array) {
-                      return parseInt(item)
-                    })
+                  .split(',')
+                  .map(function(item, index, array) {
+                    return parseInt(item)
+                  })
                 : []
             } else if (element.field === 'parentId') {
               detail.parentId = this.dialogData.parentId
@@ -925,7 +1004,7 @@ export default {
       this.$refs.resetUserNameForm.validate(valid => {
         if (valid) {
           if (this.selectionList.length > 0) {
-            val.id = this.selectionList[0].userId;
+            val.id = this.selectionList[0].userId
             this.loading = true
             adminUsersUsernameEditAPI(val)
               .then(res => {
@@ -983,7 +1062,7 @@ export default {
       usersList({ pageType: 0 })
         .then(res => {
           this.optionsList['parentId'].list = []
-          for (let i of res.data) {
+          for (const i of res.data) {
             this.optionsList['parentId'].list.push({
               id: i.userId,
               name: i.realname
@@ -1012,24 +1091,6 @@ export default {
       }
       return row[column.property]
     }
-  },
-  mounted() {
-    var self = this
-    /** 控制table的高度 */
-    window.onresize = function() {
-      self.tableHeight = document.documentElement.clientHeight - 260
-    }
-
-    // 部门树形列表
-    this.treeListFun()
-    this.getSelectUserList() // 直属上级列表
-    this.usersListFun()
-    this.getDepList()
-    // 角色列表
-    roleList().then(res => {
-      this.groupsList = res.data
-    })
-    document.getElementsByClassName('el-select-dropdown')[0].style.color = 'red'
   }
 }
 </script>

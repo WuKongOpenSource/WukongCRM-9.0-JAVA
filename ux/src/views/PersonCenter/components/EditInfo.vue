@@ -1,50 +1,60 @@
 <template>
   <!-- 新建和编辑 -->
-  <el-dialog title="编辑个人信息"
-             :visible.sync="showDialog"
-             width="500px"
-             v-loading="loading"
-             :before-close="hiddenView">
-    <el-form :model="ruleForm"
-             :rules="rules"
-             ref="ruleForm"
-             label-width="80px"
-             class="create-box"
-             label-position="top">
-      <el-form-item label="姓名"
-                    class="create-item"
-                    prop="realname">
-        <el-input v-model="ruleForm.realname"></el-input>
+  <el-dialog
+    v-loading="loading"
+    :visible.sync="showDialog"
+    :before-close="hiddenView"
+    title="编辑个人信息"
+    width="500px">
+    <el-form
+      ref="ruleForm"
+      :model="ruleForm"
+      :rules="rules"
+      label-width="80px"
+      class="create-box"
+      label-position="top">
+      <el-form-item
+        label="姓名"
+        class="create-item"
+        prop="realname">
+        <el-input v-model="ruleForm.realname"/>
       </el-form-item>
-      <el-form-item label="邮箱"
-                    class="create-item"
-                    prop="email">
-        <el-input v-model="ruleForm.email"></el-input>
+      <el-form-item
+        label="邮箱"
+        class="create-item"
+        prop="email">
+        <el-input v-model="ruleForm.email"/>
       </el-form-item>
-      <el-form-item label="性别"
-                    class="create-item"
-                    prop="sex">
-        <el-select v-model="ruleForm.sex"
-                   style="display: block;"
-                   placeholder="请选择">
-          <el-option v-for="item in [{ label: '男', value: 1 }, { label: '女', value: 2 }]"
-                     :key="item.value"
-                     :label="item.label"
-                     :value="item.value">
-          </el-option>
+      <el-form-item
+        label="性别"
+        class="create-item"
+        prop="sex">
+        <el-select
+          v-model="ruleForm.sex"
+          style="display: block;"
+          placeholder="请选择">
+          <el-option
+            v-for="item in [{ label: '男', value: 1 }, { label: '女', value: 2 }]"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"/>
         </el-select>
       </el-form-item>
-      <el-form-item label="手机号（登录名）"
-                    class="create-item"
-                    prop="username">
-        <el-input v-model="ruleForm.username"
-                  :disabled="true"></el-input>
+      <el-form-item
+        label="手机号（登录名）"
+        class="create-item"
+        prop="username">
+        <el-input
+          v-model="ruleForm.username"
+          :disabled="true"/>
       </el-form-item>
     </el-form>
-    <span slot="footer"
-          class="dialog-footer">
-      <el-button type="primary"
-                 @click="save">保 存</el-button>
+    <span
+      slot="footer"
+      class="dialog-footer">
+      <el-button
+        type="primary"
+        @click="save">保 存</el-button>
       <el-button @click="hiddenView">取 消</el-button>
     </span>
   </el-dialog>
@@ -55,24 +65,12 @@ import { adminUsersUpdate } from '@/api/personCenter/personCenter'
 import { regexIsCRMMobile, regexIsCRMEmail } from '@/utils'
 
 export default {
-  name: 'edit-info', // 编辑个人信息
+  name: 'EditInfo', // 编辑个人信息
   components: {},
-  computed: {
-    ...mapGetters(['userInfo'])
-  },
-  watch: {
+  props: {
     show: {
-      handler(val) {
-        this.showDialog = val
-        this.ruleForm = {
-          realname: this.userInfo.realname,
-          email: this.userInfo.email,
-          sex: this.userInfo.sex,
-          username: this.userInfo.username
-        }
-      },
-      deep: true,
-      immediate: true
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -109,10 +107,22 @@ export default {
       }
     }
   },
-  props: {
+  computed: {
+    ...mapGetters(['userInfo'])
+  },
+  watch: {
     show: {
-      type: Boolean,
-      default: false
+      handler(val) {
+        this.showDialog = val
+        this.ruleForm = {
+          realname: this.userInfo.realname,
+          email: this.userInfo.email,
+          sex: this.userInfo.sex,
+          username: this.userInfo.username
+        }
+      },
+      deep: true,
+      immediate: true
     }
   },
   mounted() {},

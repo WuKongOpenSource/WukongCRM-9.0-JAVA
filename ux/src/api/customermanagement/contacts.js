@@ -56,7 +56,7 @@ export function crmContactsTransfer(data) {
 
 /**
  * 联系人下商机
- * @param {*} data 
+ * @param {*} data
  */
 export function crmContactsQueryBusiness(data) {
   return request({
@@ -68,7 +68,7 @@ export function crmContactsQueryBusiness(data) {
 
 /**
  * 跟进记录
- * @param {*} data 
+ * @param {*} data
  */
 export function crmContactsRecordSave(data) {
   return request({

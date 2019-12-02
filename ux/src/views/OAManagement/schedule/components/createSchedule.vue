@@ -1,99 +1,116 @@
 <template>
-  <div class="create-schedule"
-       :style="{ 'z-index': zIndex }">
-    <div class="add-schedule"
-         v-loading="loading">
-      <div slot="header"
-           class="header">
-        <span class="text">{{text}}</span>
-        <img class="el-icon-close rt"
-             src="@/assets/img/task_close.png"
-             @click="close"
-             alt="">
+  <div
+    :style="{ 'z-index': zIndex }"
+    class="create-schedule">
+    <div
+      v-loading="loading"
+      class="add-schedule">
+      <div
+        slot="header"
+        class="header">
+        <span class="text">{{ text }}</span>
+        <img
+          class="el-icon-close rt"
+          src="@/assets/img/task_close.png"
+          alt=""
+          @click="close">
       </div>
       <div class="content">
-        <el-form ref="form"
-                 :model="formData"
-                 :rules="rules">
-          <el-form-item :prop="item.field"
-                        :class="'el-form-item'+'-'+item.field"
-                        :style="{'width': item.width}"
-                        :label="item.label"
-                        v-for="(item, index) in formList"
-                        :key="index">
+        <el-form
+          ref="form"
+          :model="formData"
+          :rules="rules">
+          <el-form-item
+            v-for="(item, index) in formList"
+            :prop="item.field"
+            :class="'el-form-item'+'-'+item.field"
+            :style="{'width': item.width}"
+            :label="item.label"
+            :key="index">
             <template v-if="item.type == 'time'">
-              <el-date-picker v-model="formData[item.field]"
-                              type="datetime"
-                              value-format="yyyy-MM-dd HH:mm:ss"
-                              placeholder="选择日期时间">
-              </el-date-picker>
+              <el-date-picker
+                v-model="formData[item.field]"
+                type="datetime"
+                value-format="yyyy-MM-dd HH:mm:ss"
+                placeholder="选择日期时间"/>
             </template>
             <template v-else-if="item.type == 'textarea'">
-              <el-input type="textarea"
-                        :autosize="{ minRows: 6}"
-                        placeholder="请输入内容"
-                        v-model="formData[item.field]"> </el-input>
+              <el-input
+                :autosize="{ minRows: 6}"
+                v-model="formData[item.field]"
+                type="textarea"
+                placeholder="请输入内容"/>
             </template>
             <template v-else-if="item.type == 'participant'">
-              <el-popover placement="bottom-end"
-                          width="280"
-                          trigger="click">
-                <xh-user ref="xhuser"
-                         :selectedData="colleaguesList"
-                         @changeCheckout="changeCheckout">
-                </xh-user>
-                <div class="select-box"
-                     slot="reference">
-                  <span v-for="(item, index) in colleaguesList"
-                        :key="index"
-                        class="select-box-span">
-                    {{item.realname}}
-                    <span class="el-icon-close"
-                          @click.stop="selectDelect(item, index)"> </span>
+              <el-popover
+                placement="bottom-end"
+                width="280"
+                trigger="click">
+                <xh-user
+                  ref="xhuser"
+                  :selected-data="colleaguesList"
+                  @changeCheckout="changeCheckout"/>
+                <div
+                  slot="reference"
+                  class="select-box">
+                  <span
+                    v-for="(item, index) in colleaguesList"
+                    :key="index"
+                    class="select-box-span">
+                    {{ item.realname }}
+                    <span
+                      class="el-icon-close"
+                      @click.stop="selectDelect(item, index)"/>
                   </span>
-                  <span class="el-icon-plus"></span>
+                  <span class="el-icon-plus"/>
                 </div>
               </el-popover>
             </template>
             <template v-else-if="item.type == 'select'">
-              <el-select v-model="formData[item.field]"
-                         placeholder="请选择">
-                <el-option v-for="item in options"
-                           :key="item.value"
-                           :label="item.label"
-                           :value="item.value">
-                </el-option>
+              <el-select
+                v-model="formData[item.field]"
+                placeholder="请选择">
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"/>
               </el-select>
             </template>
             <template v-else-if="item.type == 'color'">
-              <el-input placeholder="请输入内容"
-                        v-model="formData[item.field]">
-                <i slot="prefix"
-                   class="el-input__icon">
-                  <span class="bg-color"
-                        :style="{'background': formData.color}"></span>
+              <el-input
+                v-model="formData[item.field]"
+                placeholder="请输入内容">
+                <i
+                  slot="prefix"
+                  class="el-input__icon">
+                  <span
+                    :style="{'background': formData.color}"
+                    class="bg-color"/>
                 </i>
               </el-input>
               <div class="color-box">
-                <span v-for="(item, index) in colorList"
-                      :key="index"
-                      @click="changeColor(item)"
-                      :style="{'background': item}">
-                </span>
+                <span
+                  v-for="(item, index) in colorList"
+                  :key="index"
+                  :style="{'background': item}"
+                  @click="changeColor(item)"/>
               </div>
             </template>
-            <el-input v-else
-                      v-model="formData[item.field]"></el-input>
+            <el-input
+              v-else
+              v-model="formData[item.field]"/>
           </el-form-item>
         </el-form>
         <!-- 关联业务 -->
-        <related-business :allData="allData"
-                          @checkInfos="checkInfos">
-        </related-business>
+        <related-business
+          :all-data="allData"
+          @checkInfos="checkInfos"/>
       </div>
       <div class="footer">
-        <el-button type="primary"
-                   @click="onSubmit">保存</el-button>
+        <el-button
+          type="primary"
+          @click="onSubmit">保存</el-button>
         <el-button @click="close">取消</el-button>
       </div>
     </div>
@@ -103,7 +120,6 @@
 <script>
 // API
 import { scheduleAdd, scheduleEdit } from '@/api/oamanagement/schedule'
-import { usersList } from '@/api/common'
 // 关联业务 - 选中列表
 import relatedBusiness from '@/components/relatedBusiness'
 import XhUser from '@/components/CreateCom/XhUser'
@@ -113,6 +129,24 @@ export default {
   components: {
     relatedBusiness,
     XhUser
+  },
+  props: {
+    formData: {
+      type: Object,
+      default: () => {
+        return {
+          color: ''
+        }
+      }
+    },
+    text: {
+      type: String,
+      default: '创建日程'
+    },
+    appendToBody: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     var validateTime = (rule, value, callback) => {
@@ -211,24 +245,6 @@ export default {
       colleaguesList: []
     }
   },
-  props: {
-    formData: {
-      type: Object,
-      default: () => {
-        return {
-          color: ''
-        }
-      }
-    },
-    text: {
-      type: String,
-      default: '创建日程'
-    },
-    appendToBody: {
-      type: Boolean,
-      default: false
-    }
-  },
   created() {},
   mounted() {
     if (this.appendToBody) {
@@ -254,6 +270,12 @@ export default {
       this.$set(this.formData, 'color', '#3E8EF7')
     }
   },
+
+  beforeDestroy() {
+    if (this.appendToBody && this.$el && this.$el.parentNode) {
+      this.$el.parentNode.removeChild(this.$el)
+    }
+  },
   methods: {
     close() {
       if (this.$route.query.routerKey == 1) {
@@ -269,9 +291,9 @@ export default {
       this.$refs.form.validate(valid => {
         if (valid) {
           this.loading = true
-          let data = this.formData
-          let ownerUserIds = []
-          for (let item of this.colleaguesList) {
+          const data = this.formData
+          const ownerUserIds = []
+          for (const item of this.colleaguesList) {
             ownerUserIds.push(item.userId)
           }
           if (this.text == '创建日程') {
@@ -303,11 +325,11 @@ export default {
                 }
                 this.loading = false
               })
-              .catch(err => {
+              .catch(() => {
                 this.loading = false
               })
           } else {
-            let list = {
+            const list = {
               customerIds: [],
               contractIds: [],
               contactsIds: [],
@@ -315,29 +337,29 @@ export default {
             }
             // 客户
             if (this.allData.customer) {
-              for (let item of this.allData.customer) {
+              for (const item of this.allData.customer) {
                 list.customerIds.push(item.customerId)
               }
             }
             // 合同
             if (this.allData.contract) {
-              for (let item of this.allData.contract) {
+              for (const item of this.allData.contract) {
                 list.contractIds.push(item.contractId)
               }
             }
             // 联系人
             if (this.allData.contacts) {
-              for (let item of this.allData.contacts) {
+              for (const item of this.allData.contacts) {
                 list.contactsIds.push(item.contactsId)
               }
             }
             // 关联商机
             if (this.allData.business) {
-              for (let item of this.allData.business) {
+              for (const item of this.allData.business) {
                 list.businessIds.push(item.businessId)
               }
             }
-            let ids =
+            const ids =
               JSON.stringify(this.relevanceAll) == '{}'
                 ? list
                 : this.relevanceAll
@@ -358,7 +380,7 @@ export default {
                 this.$emit('onSubmit')
                 this.loading = false
               })
-              .catch(err => {
+              .catch(() => {
                 this.loading = false
               })
           }
@@ -373,7 +395,7 @@ export default {
     },
     // 附件 -- 删除
     onRemove(file) {
-      for (let i in this.fileList) {
+      for (const i in this.fileList) {
         if (this.fileList[i].uid == file.uid) {
           this.fileList.splice(i, 1)
         }
@@ -389,12 +411,6 @@ export default {
     selectDelect(value, index) {
       this.$refs.xhuser[0].cancelCheckItem(value)
       this.colleaguesList.splice(index, 1)
-    }
-  },
-
-  beforeDestroy() {
-    if (this.appendToBody && this.$el && this.$el.parentNode) {
-      this.$el.parentNode.removeChild(this.$el)
     }
   }
 }

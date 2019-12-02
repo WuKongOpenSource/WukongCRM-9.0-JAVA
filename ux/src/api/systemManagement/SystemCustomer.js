@@ -61,6 +61,17 @@ export function customFieldHandle(data) {
   })
 }
 
+export function oaFieldHandle(data) {
+  return request({
+    url: 'field/examineFieldSave',
+    method: 'post',
+    data: data,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}
+
 /** 自定义字段（字段数据）的详情 */
 export function customFieldList(data) {
   return request({
@@ -183,7 +194,7 @@ export function crmSettingRecordEditAPI(data) {
 
 /**
  * 合同到期提醒 设置
- * @param {*} data 
+ * @param {*} data
  */
 export function crmSettingContractDayAPI(data) {
   return request({

@@ -1,95 +1,111 @@
 <template>
-  <div class="project-list"
-       direction="column">
+  <div
+    class="project-list"
+    direction="column">
     <div class="nav-box">
       <div class="title">
         <flexbox class="title-left lt">
-          <i class="wukong wukong-subproject"
-             :style="{color : projectColor ? projectColor : '#4AB8B8'}"></i>
-          <span>{{projectName}}</span>
-          <el-popover placement="bottom-start"
-                      v-model="projectHandleShow"
-                      popper-class="project-settings-182"
-                      width="182">
+          <i
+            :style="{color : projectColor ? projectColor : '#4AB8B8'}"
+            class="wukong wukong-subproject"/>
+          <span>{{ projectName }}</span>
+          <el-popover
+            v-model="projectHandleShow"
+            placement="bottom-start"
+            popper-class="project-settings-182"
+            width="182">
             <div class="project-list-popover-btn-list">
-              <members-dep :userCheckedData="membersList"
-                           :closeDep="true"
-                           @popoverSubmit="userSelectChange">
-                <p slot="membersDep"
-                   v-if="canUpdateWork && projectData.isOpen != 1"
-                   @click="projectHandleShow = false">添加项目成员</p>
+              <members-dep
+                :user-checked-data="membersList"
+                :close-dep="true"
+                @popoverSubmit="userSelectChange">
+                <p
+                  v-if="canUpdateWork && projectData.isOpen != 1"
+                  slot="membersDep"
+                  @click="projectHandleShow = false">添加项目成员</p>
               </members-dep>
 
-              <project-settings v-if="canUpdateWork"
-                                :workId="workId"
-                                :title="projectName"
-                                :color="projectColor"
-                                :is-open="projectData.isOpen"
-                                :addMembersData="membersList"
-                                @close="projectHandleShow = false"
-                                @submite="setSubmite"
-                                @handle="projectSettingsHandle"
-                                @click="projectHandleShow = false">
-              </project-settings>
-              <p v-if="canUpdateWork"
-                 @click="archiveProject">归档项目</p>
-              <p v-if="canUpdateWork"
-                 @click="deleteProject">删除项目</p>
+              <project-settings
+                v-if="canUpdateWork"
+                :work-id="workId"
+                :title="projectName"
+                :color="projectColor"
+                :is-open="projectData.isOpen"
+                :add-members-data="membersList"
+                @close="projectHandleShow = false"
+                @submite="setSubmite"
+                @handle="projectSettingsHandle"
+                @click="projectHandleShow = false"/>
+              <p
+                v-if="canUpdateWork"
+                @click="archiveProject">归档项目</p>
+              <p
+                v-if="canUpdateWork"
+                @click="deleteProject">删除项目</p>
               <p v-if="projectData.isOpen == 0" @click="exitProject">退出项目</p>
             </div>
-            <img src="@/assets/img/project/t_set.png"
-                 slot="reference"
-                 class="img-right">
+            <img
+              slot="reference"
+              src="@/assets/img/project/t_set.png"
+              class="img-right">
           </el-popover>
         </flexbox>
         <div class="title-right rt">
           <!-- 人员列表 -->
-          <img src="@/assets/img/project/task_circle.png"
-               alt=""
-               @click="membersShow = true">
+          <img
+            src="@/assets/img/project/task_circle.png"
+            alt=""
+            @click="membersShow = true">
           <!-- 筛选 -->
-          <img src="@/assets/img/project/project_filtrate.png"
-               alt=""
-               v-show="screeningButtonShow"
-               @click="screeningShow = true">
+          <img
+            v-show="screeningButtonShow"
+            src="@/assets/img/project/project_filtrate.png"
+            alt=""
+            @click="screeningShow = true">
         </div>
       </div>
       <div class="nav">
-        <el-tabs v-model="activeName"
-                 @tab-click="tabClick">
-          <el-tab-pane label="任务板"
-                       name="task-board"></el-tab-pane>
-          <el-tab-pane label="附件"
-                       name="attachment"></el-tab-pane>
-          <el-tab-pane label="任务统计"
-                       name="task-statistical"></el-tab-pane>
-          <el-tab-pane label="归档任务"
-                       name="archiving-task"></el-tab-pane>
+        <el-tabs
+          v-model="activeName"
+          @tab-click="tabClick">
+          <el-tab-pane
+            label="任务板"
+            name="task-board"/>
+          <el-tab-pane
+            label="附件"
+            name="attachment"/>
+          <el-tab-pane
+            label="任务统计"
+            name="task-statistical"/>
+          <el-tab-pane
+            label="归档任务"
+            name="archiving-task"/>
         </el-tabs>
       </div>
     </div>
     <div class="content">
       <keep-alive>
-        <component v-bind:is="activeName"
-                   :workId="workId"
-                   :permission="permission"></component>
+        <component
+          :is="activeName"
+          :work-id="workId"
+          :permission="permission"/>
       </keep-alive>
     </div>
 
     <!-- 筛选 -->
-    <task-screening v-if="screeningShow"
-                    :workId="workId"
-                    @close="screeningShow = false">
-    </task-screening>
+    <task-screening
+      v-if="screeningShow"
+      :work-id="workId"
+      @close="screeningShow = false"/>
 
     <!-- 人员列表 -->
-    <members :workId="workId"
-             :list="membersList"
-             :is-open="projectData.isOpen"
-             :permission="permission"
-             :visible.sync="membersShow"
-             @handle="membersHandle">
-    </members>
+    <members
+      :work-id="workId"
+      :list="membersList"
+      :is-open="projectData.isOpen"
+      :permission="permission"
+      :visible.sync="membersShow"
+      @handle="membersHandle"/>
   </div>
 </template>
 
@@ -123,15 +139,6 @@ export default {
     MembersDep
   },
 
-  computed: {
-    /**
-     * 可以编辑项目
-     */
-    canUpdateWork() {
-      return this.permission.work && this.permission.work.update
-    }
-  },
-
   data() {
     return {
       // 项目ID
@@ -155,6 +162,15 @@ export default {
 
       // 权限
       permission: {}
+    }
+  },
+
+  computed: {
+    /**
+     * 可以编辑项目
+     */
+    canUpdateWork() {
+      return this.permission.work && this.permission.work.update
     }
   },
 
@@ -184,14 +200,14 @@ export default {
         workId: this.workId
       })
         .then(res => {
-          let data = res.data
+          const data = res.data
           this.projectData = data
           this.projectColor = data.color
           this.projectName = data.name
 
           this.permission = data.authList.work || {}
         })
-        .catch(err => {})
+        .catch(() => {})
     },
 
     tabClick(val) {
@@ -209,7 +225,7 @@ export default {
           this.membersList = res.data || []
           this.$bus.$emit('members-update', this.membersList)
         })
-        .catch(err => {})
+        .catch(() => {})
     },
 
     /**
@@ -229,7 +245,7 @@ export default {
           this.$bus.$emit('members-update', res.data)
           this.$message.success('添加成功')
         })
-        .catch(err => {})
+        .catch(() => {})
     },
 
     /**
@@ -254,7 +270,7 @@ export default {
               })
               this.$bus.$emit('delete-project', this.workId)
             })
-            .catch(err => {})
+            .catch(() => {})
         })
         .catch(() => {
           this.$message({
@@ -282,7 +298,7 @@ export default {
               })
               this.$bus.$emit('delete-project', this.workId)
             })
-            .catch(err => {})
+            .catch(() => {})
         })
         .catch(() => {
           this.$message({
@@ -310,7 +326,7 @@ export default {
               })
               this.$bus.$emit('delete-project', this.workId)
             })
-            .catch(err => {})
+            .catch(() => {})
         })
         .catch(() => {
           this.$message({

@@ -1,14 +1,14 @@
 <template>
-  <component v-if="id&&visible"
-             class="d-view"
-             v-bind:is="tabName"
-             :crmType="crmType"
-             :id="id"
-             :listenerIDs="listenerIDs"
-             :noListenerIDs="noListenerIDs"
-             @handle="detailHandle"
-             @hide-view="hiddenView">
-  </component>
+  <component
+    v-if="id&&visible"
+    :is="tabName"
+    :crm-type="crmType"
+    :id="id"
+    :listener-ids="listenerIDs"
+    :no-listener-ids="noListenerIDs"
+    class="d-view"
+    @handle="detailHandle"
+    @hide-view="hiddenView"/>
 </template>
 
 <script type="text/javascript">
@@ -22,7 +22,7 @@ import ProductDetail from '../product/ProductDetail'
 import MoneyDetail from '../money/MoneyDetail'
 
 export default {
-  name: 'c-r-m-all-detail', //详情
+  name: 'CRMAllDetail', // 详情
   components: {
     ClueDetail,
     CustomerDetail,
@@ -31,31 +31,6 @@ export default {
     ContractDetail,
     ProductDetail,
     MoneyDetail
-  },
-  watch: {
-    crmType: function(type) {
-      if (this.crmType == 'leads') {
-        this.tabName = 'clue-detail'
-      } else if (this.crmType == 'customer') {
-        this.tabName = 'customer-detail'
-      } else if (this.crmType == 'contacts') {
-        this.tabName = 'contacts-detail'
-      } else if (this.crmType == 'business') {
-        this.tabName = 'business-detail'
-      } else if (this.crmType == 'contract') {
-        this.tabName = 'contract-detail'
-      } else if (this.crmType == 'product') {
-        this.tabName = 'product-detail'
-      } else if (this.crmType == 'receivables') {
-        this.tabName = 'money-detail'
-      }
-    }
-  },
-  computed: {},
-  data() {
-    return {
-      tabName: '' // 组件名
-    }
   },
   props: {
     /** 模块ID */
@@ -90,10 +65,41 @@ export default {
       }
     }
   },
+  data() {
+    return {
+      tabName: '' // 组件名
+    }
+  },
+  computed: {},
+  watch: {
+    crmType: function(type) {
+      if (this.crmType == 'leads') {
+        this.tabName = 'clue-detail'
+      } else if (this.crmType == 'customer') {
+        this.tabName = 'customer-detail'
+      } else if (this.crmType == 'contacts') {
+        this.tabName = 'contacts-detail'
+      } else if (this.crmType == 'business') {
+        this.tabName = 'business-detail'
+      } else if (this.crmType == 'contract') {
+        this.tabName = 'contract-detail'
+      } else if (this.crmType == 'product') {
+        this.tabName = 'product-detail'
+      } else if (this.crmType == 'receivables') {
+        this.tabName = 'money-detail'
+      }
+    }
+  },
   mounted() {
     if (this.visible) {
       document.body.appendChild(this.$el)
       this.$el.style.zIndex = getMaxIndex()
+    }
+  },
+  destroyed() {
+    // remove DOM node after destroy
+    if (this.$el && this.$el.parentNode) {
+      this.$el.parentNode.removeChild(this.$el)
     }
   },
   methods: {
@@ -106,12 +112,6 @@ export default {
      */
     detailHandle(data) {
       this.$emit('handle', data)
-    }
-  },
-  destroyed() {
-    // remove DOM node after destroy
-    if (this.$el && this.$el.parentNode) {
-      this.$el.parentNode.removeChild(this.$el)
     }
   }
 }

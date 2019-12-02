@@ -1,31 +1,37 @@
 <template>
-  <el-dialog title="客户成交状态"
-             v-loading="loading"
-             :visible="visible"
-             @close="handleCancel"
-             :append-to-body="true"
-             width="400px">
+  <el-dialog
+    v-loading="loading"
+    :visible="visible"
+    :append-to-body="true"
+    title="客户成交状态"
+    width="400px"
+    @close="handleCancel">
     <div class="handle-box">
-      <flexbox class="handle-item"
-               align="stretch">
-        <div class="handle-item-name"
-             style="margin-top: 8px;">成交状态：</div>
-        <el-select v-model="status"
-                   class="handle-item-content"
-                   placeholder="请选择">
-          <el-option v-for="item in options"
-                     :key="item.value"
-                     :label="item.label"
-                     :value="item.value">
-          </el-option>
+      <flexbox
+        class="handle-item"
+        align="stretch">
+        <div
+          class="handle-item-name"
+          style="margin-top: 8px;">成交状态：</div>
+        <el-select
+          v-model="status"
+          class="handle-item-content"
+          placeholder="请选择">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"/>
         </el-select>
       </flexbox>
     </div>
-    <span slot="footer"
-          class="dialog-footer">
+    <span
+      slot="footer"
+      class="dialog-footer">
       <el-button @click.native="handleCancel">取消</el-button>
-      <el-button type="primary"
-                 @click.native="handleConfirm">保存</el-button>
+      <el-button
+        type="primary"
+        @click.native="handleConfirm">保存</el-button>
     </span>
   </el-dialog>
 </template>
@@ -35,10 +41,9 @@ import { crmCustomerDealStatusAPI } from '@/api/customermanagement/customer'
 
 export default {
   /** 客户管理  成交状态 操作*/
-  name: 'deal-status-handle',
+  name: 'DealStatusHandle',
   components: {},
   mixins: [],
-  watch: {},
   props: {
     visible: {
       type: Boolean,
@@ -60,26 +65,28 @@ export default {
   data() {
     return {
       loading: true,
-      status: '已成交',
+      status: 1,
       options: [
         {
           label: '已成交',
-          value: '已成交'
+          value: 1
         },
         {
           label: '未成交',
-          value: '未成交'
+          value: 0
         }
       ]
     }
   },
   computed: {},
+  watch: {},
   mounted() {},
   methods: {
     /**
      * 取消选择
      */
     handleCancel() {
+      this.status = 1
       this.$emit('update:visible', false)
     },
 

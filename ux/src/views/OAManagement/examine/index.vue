@@ -3,50 +3,57 @@
     <div class="btn-select">
       <div class="select-group">
         <label>审批类型</label>
-        <el-select v-model="categoryType"
-                   placeholder="请选择"
-                   size="mini">
-          <el-option v-for="item in categoryOptions"
-                     :key="item.categoryId"
-                     :label="item.title"
-                     :value="item.categoryId">
-          </el-option>
+        <el-select
+          v-model="categoryType"
+          placeholder="请选择"
+          size="mini">
+          <el-option
+            v-for="item in categoryOptions"
+            :key="item.categoryId"
+            :label="item.title"
+            :value="item.categoryId"/>
         </el-select>
       </div>
-      <el-button type="primary"
-                 class="new-btn"
-                 @click="newBtn">新建审批</el-button>
+      <el-button
+        type="primary"
+        class="new-btn"
+        @click="newBtn">新建审批</el-button>
     </div>
-    <el-tabs v-model="activeName"
-             @tab-click="tabClick">
-      <el-tab-pane :name="item.key"
-                   v-for="(item, index) in tabsData"
-                   :key="index">
-        <el-badge slot="label"
-                  :hidden="item.key != 'examine' || messageOANum.examineNum == 0"
-                  :max="99"
-                  :value="messageOANum.examineNum">
-          <span>{{item.label}}</span>
+    <el-tabs
+      v-model="activeName"
+      @tab-click="tabClick">
+      <el-tab-pane
+        v-for="(item, index) in tabsData"
+        :name="item.key"
+        :key="index">
+        <el-badge
+          slot="label"
+          :hidden="item.key != 'examine' || messageOANum.examineNum == 0"
+          :max="99"
+          :value="messageOANum.examineNum">
+          <span>{{ item.label }}</span>
         </el-badge>
-        <v-content :by="item.key"
-                   :categoryId="categoryType"
-                   :ref="'tabcontent' + item.key"
-                   id="examine-list-box"
-                   @reset="reset"
-                   @edit="editDetail">
-        </v-content>
+        <v-content
+          id="examine-list-box"
+          :by="item.key"
+          :category-id="categoryType"
+          :ref="'tabcontent' + item.key"
+          @reset="reset"
+          @edit="editDetail"/>
       </el-tab-pane>
     </el-tabs>
-    <examine-category-select :show="showCategorySelect"
-                             @select="selcetExamineCategory"
-                             @close="showCategorySelect=false"></examine-category-select>
-    <examine-create-view v-if="isCreate"
-                         :categoryId="createInfo.categoryId"
-                         :type="createInfo.type"
-                         :categoryTitle="createInfo.title"
-                         :action="createAction"
-                         @save-success="createSaveSuccess"
-                         @hiden-view="hideView"></examine-create-view>
+    <examine-category-select
+      :show="showCategorySelect"
+      @select="selcetExamineCategory"
+      @close="showCategorySelect=false"/>
+    <examine-create-view
+      v-if="isCreate"
+      :category-id="createInfo.categoryId"
+      :type="createInfo.type"
+      :category-title="createInfo.title"
+      :action="createAction"
+      @save-success="createSaveSuccess"
+      @hiden-view="hideView"/>
   </div>
 </template>
 
@@ -77,7 +84,7 @@ export default {
       categoryOptions: [],
       // 新建
       showCategorySelect: false,
-      isCreate: false, //是创建
+      isCreate: false, // 是创建
       createAction: { type: 'save' },
       createInfo: {} // 创建所需要的id 标题名信息
     }

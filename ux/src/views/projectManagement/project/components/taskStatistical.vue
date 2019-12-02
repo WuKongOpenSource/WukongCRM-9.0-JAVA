@@ -1,22 +1,27 @@
 <template>
-  <div class="statistical"
-       v-loading="loading">
-    <statistical-overview class="statistical-overview"
-                          :data="detailData.taskStatistics"
-                          :list="detailData.ownerList"></statistical-overview>
+  <div
+    v-loading="loading"
+    class="statistical">
+    <statistical-overview
+      :data="detailData.taskStatistics"
+      :list="detailData.ownerList"
+      class="statistical-overview"/>
     <flexbox class="statistical-task">
-      <statistical-task class="statistical-task-item"
-                        type="task"
-                        :list="detailData.classStatistics"
-                        title="任务列表"></statistical-task>
-      <statistical-task class="statistical-task-item"
-                        type="label"
-                        :list="detailData.labelStatistics"
-                        title="标签分析"></statistical-task>
+      <statistical-task
+        :list="detailData.classStatistics"
+        class="statistical-task-item"
+        type="task"
+        title="任务列表"/>
+      <statistical-task
+        :list="detailData.labelStatistics"
+        class="statistical-task-item"
+        type="label"
+        title="标签分析"/>
     </flexbox>
 
-    <statistical-member class="statistical-member"
-                        :list="detailData.memberTaskStatistics"></statistical-member>
+    <statistical-member
+      :list="detailData.memberTaskStatistics"
+      class="statistical-member"/>
   </div>
 </template>
 
@@ -34,6 +39,10 @@ export default {
     StatisticalMember
   },
 
+  props: {
+    workId: [Number, String]
+  },
+
   data() {
     return {
       loading: false,
@@ -46,10 +55,6 @@ export default {
     workId() {
       this.getDetail(true)
     }
-  },
-
-  props: {
-    workId: [Number, String]
   },
 
   mounted() {},
@@ -76,7 +81,7 @@ export default {
           this.detailData = res.data
           this.loading = false
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
         })
     }

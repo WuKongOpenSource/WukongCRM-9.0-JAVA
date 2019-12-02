@@ -6,6 +6,7 @@ import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
+import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.work.entity.Task;
 import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
@@ -18,6 +19,9 @@ public class TrashService{
     @Inject
     private WorkbenchService workbenchService;
 
+    @Inject
+    private AdminFileService adminFileService;
+
     /**
      * 回收站列表
      */
@@ -26,7 +30,7 @@ public class TrashService{
         if(AuthUtil.isWorkAdmin()){
             recordList = Db.find(Db.getSqlPara("work.trash.queryList"));
         }else {
-            recordList = Db.find(Db.getSqlPara("work.trash.queryList", Kv.by("userId", BaseUtil.getUserId().intValue())));
+            recordList = Db.find(Db.getSqlPara("work.trash.queryList", Kv.by("userId", BaseUtil.getUserId())));
         }
         workbenchService.taskListTransfer(recordList);
         return R.ok().put("data", recordList);
@@ -38,13 +42,14 @@ public class TrashService{
         if(task==null){
             return R.error("任务不存在！");
         }
-//        int userId = BaseUtil.getUser().getUserId().intValue();
+//        int userId = BaseUtil.getUser().getUserId();
 //        if(task.getCreateUserId() != userId && (task.getMainUserId()!=null && task.getMainUserId() != userId)){
 //            return R.error("您无权删除任务！");
 //        }
         if(task.getIshidden() != 1){
             return R.error("任务不在回收站！");
         }
+        adminFileService.removeByBatchId(Db.queryStr("select batch_id from `72crm_task` where task_id = ?",taskId));
         return task.delete()?R.ok():R.error();
     }
 

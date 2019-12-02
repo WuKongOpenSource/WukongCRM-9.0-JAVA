@@ -1,27 +1,31 @@
 <template>
-  <el-dialog title="批量转移"
-             v-loading="loading"
-             :visible.sync="visible"
-             @close="handleCancel"
-             :append-to-body="true"
-             width="400px">
+  <el-dialog
+    v-loading="loading"
+    :visible.sync="visible"
+    :append-to-body="true"
+    title="批量转移"
+    width="400px"
+    @close="handleCancel">
     <div class="handle-box">
       <flexbox class="handle-item">
         <div class="handle-item-name">变更负责人为：</div>
-        <xh-user-cell class="handle-item-content"
-                      placeholder="点击选择"
-                      @value-change="userChage"></xh-user-cell>
+        <xh-user-cell
+          class="handle-item-content"
+          placeholder="点击选择"
+          @value-change="userChage"/>
       </flexbox>
-      <flexbox class="handle-item"
-               v-if="showRemoveType">
+      <flexbox
+        v-if="showRemoveType"
+        class="handle-item">
         <div class="handle-item-name">将原负责人：</div>
         <el-radio-group v-model="removeType">
           <el-radio :label="1">移出</el-radio>
           <el-radio :label="2">转为团队成员</el-radio>
         </el-radio-group>
       </flexbox>
-      <flexbox v-if="removeType == 2"
-               class="handle-item">
+      <flexbox
+        v-if="removeType == 2"
+        class="handle-item">
         <div class="handle-item-name">权限：</div>
         <el-radio-group v-model="handleType">
           <el-radio :label="1">只读</el-radio>
@@ -29,8 +33,9 @@
         </el-radio-group>
       </flexbox>
       <!-- 仅客户下可进行同时变成负责人 -->
-      <flexbox class="handle-item"
-               v-if="crmType === 'customer'">
+      <flexbox
+        v-if="crmType === 'customer'"
+        class="handle-item">
         <div class="handle-item-name">同时变更负责人至：</div>
         <el-checkbox-group v-model="addsTypes">
           <el-checkbox label="1">联系人</el-checkbox>
@@ -39,11 +44,13 @@
         </el-checkbox-group>
       </flexbox>
     </div>
-    <span slot="footer"
-          class="dialog-footer">
+    <span
+      slot="footer"
+      class="dialog-footer">
       <el-button @click.native="handleCancel">取消</el-button>
-      <el-button type="primary"
-                 @click.native="handleConfirm">保存</el-button>
+      <el-button
+        type="primary"
+        @click.native="handleConfirm">保存</el-button>
     </span>
   </el-dialog>
 </template>
@@ -58,22 +65,11 @@ import { crmLeadsTransfer } from '@/api/customermanagement/clue'
 
 export default {
   /** 客户管理 的 勾选后的 转移 操作*/
-  name: 'transfer-handle',
+  name: 'TransferHandle',
   components: {
     XhUserCell
   },
   mixins: [],
-  watch: {
-    dialogVisible: {
-      handler(val) {
-        this.visible = val
-        if (val) {
-        }
-      },
-      deep: true,
-      immediate: true
-    }
-  },
   props: {
     dialogVisible: {
       type: Boolean,
@@ -111,6 +107,15 @@ export default {
         return false
       }
       return true
+    }
+  },
+  watch: {
+    dialogVisible: {
+      handler(val) {
+        this.visible = val
+      },
+      deep: true,
+      immediate: true
     }
   },
   mounted() {

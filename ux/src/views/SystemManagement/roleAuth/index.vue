@@ -1,29 +1,36 @@
 <template>
   <div class="role-authorization">
-    <p class="title"
-       ref="title"> {{title}} </p>
+    <p
+      ref="title"
+      class="title"> {{ title }} </p>
     <div class="role-box">
       <!-- 左边导航 -->
-      <div class="nav"
-           v-loading="roleMenuLoading">
+      <div
+        v-loading="roleMenuLoading"
+        class="nav">
         <div class="nav-new-btn">
-          <el-button size="medium"
-                     @click="newRoleBtn"> 新建角色 </el-button>
+          <el-button
+            size="medium"
+            @click="newRoleBtn"> 新建角色 </el-button>
         </div>
         <!-- 角色列表 -->
         <div class="role-nav-box">
-          <div class="item-list"
-               v-for="(item, index) in roleList"
-               :key="index"
-               :class="{'item-list-hover' : item.roleId == roleActive.roleId}"
-               @click="roleMenuSelect(item)">
-            {{item.roleName}}
-            <div class="icon-close"
-                 v-if="item.remark != 'admin' && item.remark != 'project'">
-              <el-dropdown trigger="click"
-                           @command="roleHandleClick">
-                <i class="el-icon-arrow-down"
-                   @click="roleDropdownClick(item)"></i>
+          <div
+            v-for="(item, index) in roleList"
+            :key="index"
+            :class="{'item-list-hover' : item.roleId == roleActive.roleId}"
+            class="item-list"
+            @click="roleMenuSelect(item)">
+            {{ item.roleName }}
+            <div
+              v-if="item.remark != 'admin' && item.remark != 'project'"
+              class="icon-close">
+              <el-dropdown
+                trigger="click"
+                @command="roleHandleClick">
+                <i
+                  class="el-icon-arrow-down"
+                  @click="roleDropdownClick(item)"/>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item command="copy">复制</el-dropdown-item>
                   <el-dropdown-item command="edit">编辑</el-dropdown-item>
@@ -36,17 +43,21 @@
       </div>
 
       <!-- 角色编辑 -->
-      <el-dialog :title="roleTitle"
-                 :visible.sync="newRoleVisible"
-                 width="30%"
-                 :before-close="newRoleClose">
+      <el-dialog
+        :title="roleTitle"
+        :visible.sync="newRoleVisible"
+        :before-close="newRoleClose"
+        width="30%">
         <label class="label-title">角色名称</label>
-        <el-input v-model="role.title"
-                  class="input-role"></el-input>
-        <span slot="footer"
-              class="dialog-footer">
-          <el-button type="primary"
-                     @click="newRoleSubmit">确 定</el-button>
+        <el-input
+          v-model="role.title"
+          class="input-role"/>
+        <span
+          slot="footer"
+          class="dialog-footer">
+          <el-button
+            type="primary"
+            @click="newRoleSubmit">确 定</el-button>
           <el-button @click="newRoleClose">取 消</el-button>
         </span>
       </el-dialog>
@@ -54,90 +65,103 @@
       <!-- 右边内容 -->
       <div class="content-box">
         <el-tabs v-model="mainMenuIndex">
-          <el-tab-pane label="角色员工"
-                       name="user">
-            <div class="content-table"
-                 v-loading="userLoading">
+          <el-tab-pane
+            label="角色员工"
+            name="user">
+            <div
+              v-loading="userLoading"
+              class="content-table">
               <flexbox class="content-table-header">
                 <div class="content-table-header-reminder">
-                  <reminder v-if="showReminder"
-                            :content="getReminderContent()">
-                  </reminder>
+                  <reminder
+                    v-if="showReminder"
+                    :content="getReminderContent()"/>
                 </div>
-                <el-button size="medium"
-                           type="primary"
-                           @click="addEmployees"> 关联员工 </el-button>
+                <el-button
+                  size="medium"
+                  type="primary"
+                  @click="addEmployees"> 关联员工 </el-button>
               </flexbox>
-              <el-table :data="tableData"
-                        :height="tableHeight"
-                        style="width: 100%">
-                <el-table-column :prop="item.field"
-                                 show-overflow-tooltip
-                                 :label="item.label"
-                                 v-for="(item, index) in tableList"
-                                 :key="index">
-                  <template slot="header"
-                            slot-scope="scope">
-                    <div class="table-head-name">{{scope.column.label}}</div>
+              <el-table
+                :data="tableData"
+                :height="tableHeight"
+                style="width: 100%">
+                <el-table-column
+                  v-for="(item, index) in tableList"
+                  :prop="item.field"
+                  :label="item.label"
+                  :key="index"
+                  show-overflow-tooltip>
+                  <template
+                    slot="header"
+                    slot-scope="scope">
+                    <div class="table-head-name">{{ scope.column.label }}</div>
                   </template>
                 </el-table-column>
                 <el-table-column label="操作">
                   <template slot-scope="scope">
                     <!-- <span class="el-icon-edit content-table-span"
                       @click="editBtn(scope.row)"></span> -->
-                    <span class="el-icon-delete content-table-span"
-                          @click="delectEmployees(scope.row)"></span>
+                    <span
+                      class="el-icon-delete content-table-span"
+                      @click="delectEmployees(scope.row)"/>
                   </template>
                 </el-table-column>
               </el-table>
               <div class="p-contianer">
-                <el-pagination class="p-bar"
-                               @size-change="handleSizeChange"
-                               @current-change="handleCurrentChange"
-                               :current-page="currentPage"
-                               :page-sizes="pageSizes"
-                               :page-size.sync="pageSize"
-                               layout="total, sizes, prev, pager, next, jumper"
-                               :total="total">
-                </el-pagination>
+                <el-pagination
+                  :current-page="currentPage"
+                  :page-sizes="pageSizes"
+                  :page-size.sync="pageSize"
+                  :total="total"
+                  class="p-bar"
+                  layout="total, sizes, prev, pager, next, jumper"
+                  @size-change="handleSizeChange"
+                  @current-change="handleCurrentChange"/>
               </div>
             </div>
           </el-tab-pane>
-          <el-tab-pane v-if="roleActive && showRuleSet"
-                       label="角色权限"
-                       name="rule">
+          <el-tab-pane
+            v-if="roleActive && showRuleSet"
+            label="角色权限"
+            name="rule">
             <!-- 权限管理 -->
-            <div class="jurisdiction-box"
-                 v-loading="ruleLoading">
-              <el-button v-if="roleActive"
-                         size="medium"
-                         type="primary"
-                         class="jurisdiction-edit"
-                         @click="ruleSubmit"> 保存 </el-button>
+            <div
+              v-loading="ruleLoading"
+              class="jurisdiction-box">
+              <el-button
+                v-if="roleActive"
+                size="medium"
+                type="primary"
+                class="jurisdiction-edit"
+                @click="ruleSubmit"> 保存 </el-button>
               <el-tabs v-model="ruleMenuIndex">
-                <el-tab-pane v-for="(item, index) in ruleMenuList"
-                             :key="index"
-                             :label="item.label"
-                             :name="item.index">
-                  <div v-if="item.type == 'tree'"
-                       class="jurisdiction-content"
-                       :style="{ height: treeHeight + 'px'}">
+                <el-tab-pane
+                  v-for="(item, index) in ruleMenuList"
+                  :key="index"
+                  :label="item.label"
+                  :name="item.index">
+                  <div
+                    v-if="item.type == 'tree'"
+                    :style="{ height: treeHeight + 'px'}"
+                    class="jurisdiction-content">
                     <div class="jurisdiction-content-checkbox">
-                      <el-tree :data="item.data"
-                               show-checkbox
-                               node-key="menuId"
-                               style="height: 0;"
-                               :ref="'tree' + item.index"
-                               :indent="0"
-                               empty-text=""
-                               default-expand-all
-                               :expand-on-click-node="false"
-                               :props="defaultProps">
-                      </el-tree>
+                      <el-tree
+                        :data="item.data"
+                        :ref="'tree' + item.index"
+                        :indent="0"
+                        :expand-on-click-node="false"
+                        :props="defaultProps"
+                        show-checkbox
+                        node-key="menuId"
+                        style="height: 0;"
+                        empty-text=""
+                        default-expand-all/>
                     </div>
                   </div>
-                  <div v-else
-                       class="jurisdiction-content">
+                  <div
+                    v-else
+                    class="jurisdiction-content">
                     <div class="data-radio">
                       <el-radio-group v-model="item.value">
                         <el-radio :label="1">本人</el-radio>
@@ -157,9 +181,10 @@
       </div>
     </div>
     <!-- 关联员工 -->
-    <relate-empoyee :visible.sync="relateEmpoyeeShow"
-                    :role-id="roleId"
-                    @save="employeesSave"></relate-empoyee>
+    <relate-empoyee
+      :visible.sync="relateEmpoyeeShow"
+      :role-id="roleId"
+      @save="employeesSave"/>
   </div>
 </template>
 
@@ -230,8 +255,6 @@ export default {
     }
   },
 
-  watch: {},
-
   computed: {
     roleId() {
       if (this.roleActive) {
@@ -261,6 +284,8 @@ export default {
       return false
     }
   },
+
+  watch: {},
 
   mounted() {
     /** 控制table的高度 */
@@ -349,7 +374,7 @@ export default {
           this.getUserList(this.roleActive)
           this.roleMenuLoading = false
         })
-        .catch(err => {
+        .catch(() => {
           this.roleMenuLoading = false
         })
     },
@@ -546,7 +571,7 @@ export default {
     getRoleRulesInfo() {
       if (this.roleActive && this.ruleMenuList.length) {
         if (this.pid == 2) {
-          let lastItem = this.ruleMenuList[this.ruleMenuList.length - 1]
+          const lastItem = this.ruleMenuList[this.ruleMenuList.length - 1]
           if (lastItem.type != 'data') {
             this.ruleMenuList.push({
               label: '数据权限',
@@ -565,7 +590,7 @@ export default {
               element.data[0]
             )
             this.$nextTick(() => {
-              let treeRefs = this.$refs['tree' + element.index]
+              const treeRefs = this.$refs['tree' + element.index]
               if (treeRefs) {
                 if (
                   Object.prototype.toString.call(treeRefs) == '[object Array]'
@@ -664,7 +689,6 @@ export default {
       for (let index = 0; index < array.length; index++) {
         if (item == array[index]) {
           return true
-          break
         }
       }
       return false
@@ -692,7 +716,7 @@ export default {
           this.total = res.data.totalRow
           this.userLoading = false
         })
-        .catch(err => {
+        .catch(() => {
           this.userLoading = false
         })
     },
@@ -720,7 +744,7 @@ export default {
       for (let index = 0; index < this.ruleMenuList.length; index++) {
         const element = this.ruleMenuList[index]
         if (element.type == 'tree') {
-          let treeRefs = this.$refs['tree' + element.index]
+          const treeRefs = this.$refs['tree' + element.index]
           if (treeRefs) {
             if (Object.prototype.toString.call(treeRefs) == '[object Array]') {
               rules = rules.concat(treeRefs[0].getCheckedKeys())

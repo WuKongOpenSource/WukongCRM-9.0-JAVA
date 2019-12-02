@@ -1,57 +1,62 @@
 <template>
   <div>
     <div class="content-title">
-      <span>{{title}}</span>
-      <el-button type="primary"
-                 class="rt"
-                 size="medium"
-                 @click="addRule">添加规则</el-button>
+      <span>{{ title }}</span>
+      <el-button
+        type="primary"
+        class="rt"
+        size="medium"
+        @click="addRule">添加规则</el-button>
     </div>
     <div class="customer-table">
-      <el-table v-loading="loading"
-                :data="list"
-                style="width: 100%"
-                stripe
-                :height="tableHeight"
-                :header-cell-style="headerCellStyle">
-        <el-table-column v-for="(item, index) in fieldList"
-                         :key="index"
-                         show-overflow-tooltip
-                         :prop="item.field"
-                         :label="item.label"
-                         :formatter="fieldFormatter">
-
-        </el-table-column>
-        <el-table-column fixed="right"
-                         label="操作"
-                         width="120">
+      <el-table
+        v-loading="loading"
+        :data="list"
+        :height="tableHeight"
+        :header-cell-style="headerCellStyle"
+        style="width: 100%"
+        stripe>
+        <el-table-column
+          v-for="(item, index) in fieldList"
+          :key="index"
+          :prop="item.field"
+          :label="item.label"
+          :formatter="fieldFormatter"
+          show-overflow-tooltip/>
+        <el-table-column
+          fixed="right"
+          label="操作"
+          width="120">
           <template slot-scope="scope">
-            <el-button @click="handleEdit(scope.row)"
-                       type="text"
-                       size="small">编 辑</el-button>
-            <el-button type="text"
-                       size="small"
-                       @click="handleDelete(scope)">删 除</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="handleEdit(scope.row)">编 辑</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="handleDelete(scope)">删 除</el-button>
           </template>
         </el-table-column>
       </el-table>
       <div class="p-contianer">
-        <el-pagination class="p-bar"
-                       @size-change="handleSizeChange"
-                       @current-change="handleCurrentChange"
-                       :current-page="currentPage"
-                       :page-sizes="pageSizes"
-                       :page-size.sync="pageSize"
-                       layout="total, sizes, prev, pager, next, jumper"
-                       :total="total">
-        </el-pagination>
+        <el-pagination
+          :current-page="currentPage"
+          :page-sizes="pageSizes"
+          :page-size.sync="pageSize"
+          :total="total"
+          class="p-bar"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"/>
       </div>
     </div>
 
-    <edit-customer-limit :visible.sync="showAddEdit"
-                         :types="types"
-                         :action="action"
-                         @success="getList"></edit-customer-limit>
+    <edit-customer-limit
+      :visible.sync="showAddEdit"
+      :types="types"
+      :action="action"
+      @success="getList"/>
   </div>
 </template>
 
@@ -63,7 +68,7 @@ import {
 import EditCustomerLimit from './editCustomerLimit'
 
 export default {
-  name: 'customer-limit-set',
+  name: 'CustomerLimitSet',
 
   components: {
     EditCustomerLimit
@@ -71,6 +76,22 @@ export default {
 
   props: {
     types: [String, Number] // 1拥有客户上限2锁定客户上限
+  },
+
+  data() {
+    return {
+      loading: false, // 展示加载中效果
+      tableHeight: document.documentElement.clientHeight - 320, // 表的高度
+      // 设置
+      list: [],
+      // 添加 编辑
+      showAddEdit: false,
+      action: {},
+      currentPage: 1,
+      pageSize: 10,
+      pageSizes: [10, 20, 30, 40],
+      total: 0
+    }
   },
 
   computed: {
@@ -82,7 +103,7 @@ export default {
     },
 
     fieldList() {
-      let temps = [
+      const temps = [
         { label: '适用范围', field: 'range' },
         {
           label: {
@@ -102,7 +123,7 @@ export default {
           field: 'customerDeal'
         })
       }
-      
+
       return temps
     }
   },
@@ -113,21 +134,12 @@ export default {
       this.getList()
     }
   },
-
-  data() {
-    return {
-      loading: false, // 展示加载中效果
-      tableHeight: document.documentElement.clientHeight - 320, // 表的高度
-      // 设置
-      list: [],
-      // 添加 编辑
-      showAddEdit: false,
-      action: {},
-      currentPage: 1,
-      pageSize: 10,
-      pageSizes: [10, 20, 30, 40],
-      total: 0
+  created() {
+    /** 控制table的高度 */
+    window.onresize = () => {
+      this.tableHeight = document.documentElement.clientHeight - 320
     }
+    this.getList()
   },
 
   methods: {
@@ -235,13 +247,6 @@ export default {
           })
         })
     }
-  },
-  created() {
-    /** 控制table的高度 */
-    window.onresize = () => {
-      this.tableHeight = document.documentElement.clientHeight - 320
-    }
-    this.getList()
   }
 }
 </script>

@@ -1,144 +1,170 @@
 <template>
   <div style="margin-bottom:20px;min-width: 800px;">
-    <flexbox :gutter="0"
-             wrap="wrap">
-      <flexbox-item v-loading="jianbaoLoading"
-                    :span="1/2"
-                    style="padding-right:10px;padding-bottom:20px;">
-        <div class="card"
-             style="height: 350px;">
-          <flexbox class="mark-header"><img class="img-mark"
-                 src="@/assets/img/jianbao.png" />销售简报</flexbox>
-          <flexbox :gutter="0"
-                   wrap="wrap">
-            <flexbox-item :span="1/2"
-                          class="jianbao-icon-container"
-                          v-for="(item, index) in jianbaoItems"
-                          :key="index"
-                          @click.native="reportClick(item)">
-              <flexbox class="jianbao-icon-content"
-                       :style="{cursor: item.type ? 'pointer':'auto'}">
-                <img class="jianbao-icon"
-                     :src="item.icon" />
-                <div class="jianbao-title">{{item.title}}</div>
-                <div class="jianbao-value">{{item.value}}</div>
+    <flexbox
+      :gutter="0"
+      wrap="wrap">
+      <flexbox-item
+        v-loading="jianbaoLoading"
+        :span="1/2"
+        style="padding-right:10px;padding-bottom:20px;">
+        <div
+          class="card"
+          style="height: 350px;">
+          <flexbox class="mark-header"><img
+            class="img-mark"
+            src="@/assets/img/jianbao.png" >销售简报</flexbox>
+          <flexbox
+            :gutter="0"
+            wrap="wrap">
+            <flexbox-item
+              v-for="(item, index) in jianbaoItems"
+              :span="1/2"
+              :key="index"
+              class="jianbao-icon-container"
+              @click.native="reportClick(item)">
+              <flexbox
+                :style="{cursor: item.type ? 'pointer':'auto'}"
+                class="jianbao-icon-content">
+                <img
+                  :src="item.icon"
+                  class="jianbao-icon" >
+                <div class="jianbao-title">{{ item.title }}</div>
+                <div class="jianbao-value">{{ item.value }}</div>
               </flexbox>
             </flexbox-item>
           </flexbox>
 
         </div>
       </flexbox-item>
-      <flexbox-item v-loading="gaugeLoading"
-                    :span="1/2"
-                    style="padding-left:10px;padding-bottom:20px;">
-        <div class="card"
-             style="height: 350px;">
-          <flexbox class="mark-header"><img class="img-mark"
-                 src="@/assets/img/zhibiao.png" />业绩指标</flexbox>
+      <flexbox-item
+        v-loading="gaugeLoading"
+        :span="1/2"
+        style="padding-left:10px;padding-bottom:20px;">
+        <div
+          class="card"
+          style="height: 350px;">
+          <flexbox class="mark-header"><img
+            class="img-mark"
+            src="@/assets/img/zhibiao.png" >业绩指标</flexbox>
           <flexbox class="gaugeSelect">
-            <el-select style="display: block;width: 100px;"
-                       v-model="gaugeSelectValue"
-                       placeholder="请选择"
-                       @change="getCrmIndexAchievementData">
-              <el-option v-for="item in gaugeOptions"
-                         :key="item.value"
-                         :label="item.label"
-                         :value="item.value">
-              </el-option>
+            <el-select
+              v-model="gaugeSelectValue"
+              style="display: block;width: 100px;"
+              placeholder="请选择"
+              @change="getCrmIndexAchievementData">
+              <el-option
+                v-for="item in gaugeOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"/>
             </el-select>
           </flexbox>
-          <div class="gauge"
-               id="gaugemain"></div>
-          <flexbox justify="center"
-                   class="target-items">
+          <div
+            id="gaugemain"
+            class="gauge"/>
+          <flexbox
+            justify="center"
+            class="target-items">
             <div class="target-item">
               <div class="name">目标</div>
-              <div class="value">{{gaugeData.achievementMoneys}}元</div>
+              <div class="value">{{ gaugeData.achievementMoneys }}元</div>
             </div>
             <div class="target-item">
               <div class="name">合同金额</div>
-              <div class="value">{{gaugeData.contractMoneys}}元</div>
+              <div class="value">{{ gaugeData.contractMoneys }}元</div>
             </div>
             <div class="target-item">
               <div class="name">回款金额</div>
-              <div class="value">{{gaugeData.receivablesMoneys}}元</div>
+              <div class="value">{{ gaugeData.receivablesMoneys }}元</div>
             </div>
           </flexbox>
         </div>
       </flexbox-item>
-      <flexbox-item v-loading="funnelLoading"
-                    :span="1/2"
-                    style="padding-right:10px;padding-bottom:20px;">
-        <div class="card"
-             style="height: 400px;">
-          <flexbox class="mark-header"><img class="img-mark"
-                 src="@/assets/img/loudou.png" />销售漏斗
+      <flexbox-item
+        v-loading="funnelLoading"
+        :span="1/2"
+        style="padding-right:10px;padding-bottom:20px;">
+        <div
+          class="card"
+          style="height: 400px;">
+          <flexbox class="mark-header"><img
+            class="img-mark"
+            src="@/assets/img/loudou.png" >销售漏斗
           </flexbox>
           <flexbox class="funnelSelect">
-            <el-select v-model="businessStatusValue"
-                       placeholder="商机组"
-                       @change="getBusinessStatustatistics">
-              <el-option v-for="item in businessOptions"
-                         :key="item.typeId"
-                         :label="item.name"
-                         :value="item.typeId">
-              </el-option>
+            <el-select
+              v-model="businessStatusValue"
+              placeholder="商机组"
+              @change="getBusinessStatustatistics">
+              <el-option
+                v-for="item in businessOptions"
+                :key="item.typeId"
+                :label="item.name"
+                :value="item.typeId"/>
             </el-select>
           </flexbox>
-          <div id="funnelmain"
-               class="funnel"></div>
+          <div
+            id="funnelmain"
+            class="funnel"/>
           <div class="funnel-label">
-            <div>赢单：{{funnelData.winSingle}}元</div>
-            <div>输单：{{funnelData.loseSingle}}元</div>
+            <div>赢单：{{ funnelData.winSingle }}元</div>
+            <div>输单：{{ funnelData.loseSingle }}元</div>
           </div>
         </div>
       </flexbox-item>
-      <flexbox-item v-loading="trendLoading"
-                    :span="1/2"
-                    style="padding-left:10px;padding-bottom:20px;">
-        <div class="card"
-             style="height: 400px;">
-          <flexbox class="mark-header"><img class="img-mark"
-                 src="@/assets/img/qushi.png" />销售趋势</flexbox>
+      <flexbox-item
+        v-loading="trendLoading"
+        :span="1/2"
+        style="padding-left:10px;padding-bottom:20px;">
+        <div
+          class="card"
+          style="height: 400px;">
+          <flexbox class="mark-header"><img
+            class="img-mark"
+            src="@/assets/img/qushi.png" >销售趋势</flexbox>
           <flexbox style="position: relative;">
             <div class="trend-target-item">
               <div class="name">合同金额</div>
-              <div class="value">{{trendData.totlaContractMoney}}元</div>
+              <div class="value">{{ trendData.totlaContractMoney }}元</div>
             </div>
             <div class="trend-target-item">
               <div class="name">回款金额</div>
-              <div class="value">{{trendData.totlaReceivablesMoney}}元</div>
+              <div class="value">{{ trendData.totlaReceivablesMoney }}元</div>
             </div>
           </flexbox>
           <div class="trend-label">
             <flexbox class="label-item">
-              <div class="label-item-mark"
-                   style="background-color: #6ca2ff"></div>
+              <div
+                class="label-item-mark"
+                style="background-color: #6ca2ff"/>
               <div class="label-item-name">合同金额</div>
             </flexbox>
-            <flexbox class="label-item"
-                     style="margin-top:5px;">
-              <div class="label-item-mark"
-                   style="background-color: #ff7474"></div>
+            <flexbox
+              class="label-item"
+              style="margin-top:5px;">
+              <div
+                class="label-item-mark"
+                style="background-color: #ff7474"/>
               <div class="label-item-name">回款金额</div>
             </flexbox>
           </div>
           <div class="axismain-content">
-            <div id="axismain"></div>
+            <div id="axismain"/>
           </div>
         </div>
       </flexbox-item>
     </flexbox>
 
     <!-- 销售简报列表 -->
-    <report-list v-if="showReportList"
-                 :title="reportData.title"
-                 :placeholder="reportData.placeholder"
-                 :crmType="reportData.crmType"
-                 :request="reportData.request"
-                 :params="reportData.params"
-                 :fieldList="fieldReportList"
-                 @hide="showReportList = false"></report-list>
+    <report-list
+      v-if="showReportList"
+      :title="reportData.title"
+      :placeholder="reportData.placeholder"
+      :crm-type="reportData.crmType"
+      :request="reportData.request"
+      :params="reportData.params"
+      :field-list="fieldReportList"
+      @hide="showReportList = false"/>
   </div>
 </template>
 
@@ -153,15 +179,17 @@ import {
   crmQueryRecordConuntAPI
 } from '@/api/customermanagement/workbench'
 import { crmBusinessStatusList } from '@/api/customermanagement/business'
-import { formatTimeToTimestamp } from '@/utils'
-import moment from 'moment'
 import ReportList from './reportList'
 
 export default {
   /** 客户管理下的工作台-仪表盘 */
-  name: 'customer-dash',
+  name: 'CustomerDash',
   components: {
     ReportList
+  },
+  props: {
+    // 获取数据的员工 部门条件
+    data: Object
   },
   data() {
     return {
@@ -254,22 +282,18 @@ export default {
       axisOption: null
     }
   },
+  computed: {
+    /** 简报信息 */
+    gaugeOptions() {
+      return [{ label: '回款金额', value: 2 }, { label: '合同金额', value: 1 }]
+    }
+  },
   watch: {
     data: function(val) {
       this.getCrmIndexIndex()
       this.getBusinessStatusList()
       this.getCrmIndexAchievementData()
       this.getCrmIndexSaletrend()
-    }
-  },
-  props: {
-    // 获取数据的员工 部门条件
-    data: Object
-  },
-  computed: {
-    /** 简报信息 */
-    gaugeOptions() {
-      return [{ label: '回款金额', value: 2 }, { label: '合同金额', value: 1 }]
     }
   },
   mounted() {
@@ -344,7 +368,7 @@ export default {
     },
 
     getBaseParams() {
-      let params = {
+      const params = {
         userIds: this.data.users
           .map(function(item, index, array) {
             return item.userId
@@ -465,7 +489,7 @@ export default {
           for (let index = 0; index < res.data.list.length; index++) {
             const element = res.data.list[index]
             data.push({
-              name: (element.name || '') + '(' + element.orderNum + ')',
+              name: (element.name || '') + '(' + element.count + ')',
               value: element.money
             })
             sumMoney += parseFloat(element.money || 0)
@@ -561,10 +585,10 @@ export default {
             totlaContractMoney: res.data.totlaContractMoney,
             totlaReceivablesMoney: res.data.totlaReceivablesMoney
           }
-          let list = res.data.list || []
-          let contractList = []
-          let receivablesList = []
-          let xAxisData = []
+          const list = res.data.list || []
+          const contractList = []
+          const receivablesList = []
+          const xAxisData = []
           for (let index = 0; index < list.length; index++) {
             const element = list[index]
             contractList.push(element.contractMoneys)
@@ -584,10 +608,10 @@ export default {
         })
     },
     getTrendAxisInfo() {
-      let contractList = []
-      let receivablesList = []
+      const contractList = []
+      const receivablesList = []
       if (this.trendSelectValue == '月') {
-        let keys = [
+        const keys = [
           '1月',
           '2月',
           '3月',
@@ -602,15 +626,15 @@ export default {
           '12月'
         ]
         this.axisOption.xAxis[0].data = keys
-        for (let key in keys) {
+        for (const key in keys) {
           const element = this.trendData[keys[key]]
           contractList.push(element.contractMoneys)
           receivablesList.push(element.receivablesMoneys)
         }
       } else {
-        let keys = ['一季度', '二季度', '三季度', '四季度']
+        const keys = ['一季度', '二季度', '三季度', '四季度']
         this.axisOption.xAxis[0].data = keys
-        for (let key in keys) {
+        for (const key in keys) {
           const element = this.trendData[keys[key]]
           contractList.push(element.contractMoneys)
           receivablesList.push(element.receivablesMoneys)

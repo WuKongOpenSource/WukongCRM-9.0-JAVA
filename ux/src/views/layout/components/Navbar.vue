@@ -1,67 +1,79 @@
 <template>
   <div class="navbar">
-    <img class="logo"
-         :src="logo" />
+    <img
+      :src="logo"
+      class="logo" >
     <div class="nav-items-container">
       <flexbox style="width: auto;">
-        <router-link @click.native="navItemsClick(item.type)"
-                     class="nav-item"
-                     :style="{ 'color' : item.type == navIndexChild ? '#3E84E9' : '#333333' }"
-                     :to="item.path"
-                     v-for="(item, index) in items"
-                     :key="index">
-          <i class="wukong"
-             :class="'wukong-' + item.icon"
-             style="margin-right: 10px;"
-             :style="{ 'color': item.type == navIndexChild ? '#3E84E9' : '#333333'}"></i>
-          <div class="nav-item-title">{{item.title}}</div>
+        <router-link
+          v-for="(item, index) in items"
+          :style="{ 'color' : item.type == navIndexChild ? '#3E84E9' : '#333333' }"
+          :to="item.path"
+          :key="index"
+          class="nav-item"
+          @click.native="navItemsClick(item.type)">
+          <i
+            :class="'wukong-' + item.icon"
+            :style="{ 'color': item.type == navIndexChild ? '#3E84E9' : '#333333'}"
+            class="wukong"
+            style="margin-right: 10px;"/>
+          <div class="nav-item-title">{{ item.title }}</div>
         </router-link>
       </flexbox>
     </div>
 
-    <el-popover placement="bottom"
-                :visible-arrow="false"
-                popper-class="no-padding-popover"
-                width="200"
-                trigger="hover">
+    <el-popover
+      :visible-arrow="false"
+      placement="bottom"
+      popper-class="no-padding-popover"
+      width="200"
+      trigger="hover">
       <div class="auth-content">
         <div class="title">您暂未开通授权</div>
         <div class="detail">为了给您提供更好的服务支持<br>建议您购买官方授权</div>
         <span class="phone">400-0812-558</span>
       </div>
-      <button slot="reference"
-              type="text"
-              class="auth-button">开通授权</button>
+      <button
+        slot="reference"
+        type="text"
+        class="auth-button">开通授权</button>
     </el-popover>
 
-    <el-popover placement="bottom"
-                :visible-arrow="false"
-                popper-class="no-padding-popover"
-                width="200"
-                trigger="click">
+    <el-popover
+      :visible-arrow="false"
+      placement="bottom"
+      popper-class="no-padding-popover"
+      width="200"
+      trigger="click">
       <div class="handel-items">
-        <div class="handel-item"
-             @click="handleClick('person')"><i class="wukong wukong-personcenter"></i>个人中心</div>
-        <div class="handel-item"
-             @click="handleClick('goout')"><i class="wukong wukong-goout"></i>退出登录</div>
-        <div class="handel-item hr-top"
-             style="pointer-events: none;"
-             :style="{'margin-bottom': manage ? '15px' : '0'}"><i class="wukong wukong-versions"></i>版本 V9.2.1.190923</div>
-        <div v-if="manage"
-             class="handel-box">
-          <el-button @click="enterSystemSet()"
-                     type="primary"
-                     class="handel-button">进入企业管理后台</el-button>
+        <div
+          class="handel-item"
+          @click="handleClick('person')"><i class="wukong wukong-personcenter"/>个人中心</div>
+        <div
+          class="handel-item"
+          @click="handleClick('goout')"><i class="wukong wukong-goout"/>退出登录</div>
+        <div
+          :style="{'margin-bottom': manage ? '15px' : '0'}"
+          class="handel-item hr-top"
+          style="pointer-events: none;"><i class="wukong wukong-versions"/>版本 V9.2.2.191129</div>
+        <div
+          v-if="manage"
+          class="handel-box">
+          <el-button
+            type="primary"
+            class="handel-button"
+            @click="enterSystemSet()">进入企业管理后台</el-button>
         </div>
       </div>
-      <div slot="reference"
-           class="user-container">
-        <div v-photo="userInfo"
-             class="user-img div-photo"
-             :key="userInfo.img"
-             v-lazy:background-image="$options.filters.filterUserLazyImg(userInfo.img)">
-        </div>
-        <i class="el-icon-caret-bottom mark"></i>
+      <div
+        slot="reference"
+        class="user-container">
+        <div
+          v-photo="userInfo"
+          v-lazy:background-image="$options.filters.filterUserLazyImg(userInfo.img)"
+          :key="userInfo.img"
+          class="user-img div-photo"/>
+        <i class="el-icon-caret-bottom mark"/>
       </div>
     </el-popover>
 
@@ -71,19 +83,9 @@
 <script>
 import { mapGetters } from 'vuex'
 import { Loading } from 'element-ui'
+import { adminGroupsTypeListAPI } from '@/api/systemManagement/RoleAuthorization'
 
 export default {
-  data() {
-    return {
-      navIndexChild: 0
-    }
-  },
-  props: {
-    navIndex: {
-      type: [Number, String],
-      default: 0
-    }
-  },
   filters: {
     langName: function(value) {
       if (value) {
@@ -94,6 +96,18 @@ export default {
     }
   },
   components: {},
+  props: {
+    navIndex: {
+      type: [Number, String],
+      default: 0
+    }
+  },
+  data() {
+    return {
+      navIndexChild: 0,
+      authRedirect: ''
+    }
+  },
   computed: {
     ...mapGetters([
       'userInfo',
@@ -144,6 +158,17 @@ export default {
   },
   mounted() {
     this.navIndexChild = this.navIndex
+    if (
+      this.manage &&
+      (!this.manage.system ||
+        (this.manage.system && !this.manage.system.read)) &&
+        (!this.manage.configSet ||
+        (this.manage.configSet && !this.manage.configSet.read)) &&
+        (!this.manage.users ||
+        (this.manage.users && !this.manage.users.read))
+    ) {
+      this.getAuthPath()
+    }
   },
   methods: {
     navItemsClick(type) {
@@ -153,7 +178,7 @@ export default {
     },
     enterSystemSet() {
       this.$router.push({
-        name: 'manager'
+        path: this.authRedirect || '/manager'
       })
     },
     handleClick(type) {
@@ -188,6 +213,18 @@ export default {
     switchLang(item) {
       this.$store.commit('SET_LANG', item.lang)
       this.langName = item.name
+    },
+    getAuthPath() {
+      adminGroupsTypeListAPI()
+        .then(res => {
+          if (res.data && res.data.length) {
+            const item = res.data[0]
+            this.authRedirect = `/manager/role-auth/${item.roleType}/${encodeURI(
+              item.name
+            )}`
+          }
+        })
+        .catch(() => {})
     }
   }
 }

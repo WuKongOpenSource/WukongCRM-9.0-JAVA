@@ -1,32 +1,33 @@
 <template>
-  <div class="archiving-task"
-       v-loading="loading">
-    <div class="archiving-task-body"
-         v-empty="taskList">
+  <div
+    v-loading="loading"
+    class="archiving-task">
+    <div
+      v-empty="taskList"
+      class="archiving-task-body">
       <!-- 任务cell -->
-      <task-cell v-for="(item, index) in taskList"
-                 :key="index"
-                 :data="item"
-                 :dataIndex="index"
-                 @on-handle="taskCellHandle">
-      </task-cell>
+      <task-cell
+        v-for="(item, index) in taskList"
+        :key="index"
+        :data="item"
+        :data-index="index"
+        @on-handle="taskCellHandle"/>
     </div>
 
     <!-- 任务详情 -->
-    <particulars v-if="taskDetailShow"
-                 ref="particulars"
-                 :id="taskID"
-                 :detailIndex="detailIndex"
-                 @on-handle="detailHandle"
-                 @close="closeBtn">
-    </particulars>
+    <particulars
+      v-if="taskDetailShow"
+      ref="particulars"
+      :id="taskID"
+      :detail-index="detailIndex"
+      @on-handle="detailHandle"
+      @close="closeBtn"/>
 
   </div>
 </template>
 
 <script>
 import TaskCell from '@/views/projectManagement/components/taskCell'
-import axios from 'axios'
 import { workTaskArchListAPI } from '@/api/projectManagement/project'
 import { workTaskSaveAPI } from '@/api/projectManagement/task'
 import particulars from '@/views/projectManagement/components/particulars'
@@ -35,6 +36,10 @@ export default {
   components: {
     particulars,
     TaskCell
+  },
+
+  props: {
+    workId: [Number, String]
   },
 
   data() {
@@ -54,10 +59,6 @@ export default {
       this.taskList = []
       this.getList(true)
     }
-  },
-
-  props: {
-    workId: [Number, String]
   },
 
   activated() {
@@ -85,12 +86,12 @@ export default {
         .then(res => {
           this.loading = false
           // 完成状态 1正在进行2延期3归档 5结束
-          for (let item of res.data) {
+          for (const item of res.data) {
             item.checked = item.status == 5
           }
           this.taskList = res.data
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
         })
     },
@@ -104,7 +105,7 @@ export default {
         status: val.checked ? 5 : 1
       })
         .then(res => {})
-        .catch(err => {
+        .catch(() => {
           val.checked = false
         })
     },
@@ -129,7 +130,7 @@ export default {
         } else if (data.type == 'delete' || data.type == 'activate-task') {
           this.taskList.splice(data.index, 1)
         } else if (data.type == 'change-stop-time') {
-          let stopTime = new Date(data.value).getTime() / 1000 + 86399
+          const stopTime = new Date(data.value).getTime() / 1000 + 86399
           if (stopTime > new Date(new Date()).getTime() / 1000) {
             this.taskList[data.index].isEnd = false
           } else {
@@ -141,7 +142,7 @@ export default {
         } else if (data.type == 'change-name') {
           this.taskList[data.index].name = data.value
         } else if (data.type == 'change-comments') {
-          let commentCount = this.taskList[data.index].commentCount
+          const commentCount = this.taskList[data.index].commentCount
           if (data.value == 'add') {
             this.taskList[data.index].commentCount = commentCount + 1
           } else {
@@ -170,7 +171,7 @@ export default {
      * 详情页点击勾选
      */
     titleCheckbox(checked) {
-      for (let item of this.taskList) {
+      for (const item of this.taskList) {
         if (item.taskId == this.indexObjData.taskId) {
           this.$set(item, 'checked', checked)
         }
@@ -194,7 +195,7 @@ export default {
         !this.$refs.particulars.$el.contains(e.target)
       ) {
         let hidden = true
-        let items = document.getElementsByClassName('list-box')
+        const items = document.getElementsByClassName('list-box')
         for (let index = 0; index < items.length; index++) {
           const element = items[index]
           if (element.contains(e.target)) {

@@ -6,17 +6,20 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.jfinal.aop.Before;
-import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.SqlPara;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
-import com.kakarote.crm9.erp.admin.entity.*;
+import com.kakarote.crm9.erp.admin.entity.AdminField;
+import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
+import com.kakarote.crm9.erp.admin.entity.AdminFieldStyle;
+import com.kakarote.crm9.erp.admin.entity.AdminFieldv;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
+import com.kakarote.crm9.erp.crm.common.FormTypeEnum;
 import com.kakarote.crm9.utils.*;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,25 +31,25 @@ public class AdminFieldService {
      * @author wyq
      * 查询新增字段列表
      */
-    public List<Record> queryAddField(Integer label){
-        List<Record> fieldList = Db.find(Db.getSql("admin.field.queryAddField"),label);
+    public List<Record> queryAddField(CrmEnum crmEnum){
+        List<Record> fieldList = Db.find(Db.getSql("admin.field.queryAddField"),crmEnum.getType());
         recordToFormType(fieldList);
-        if (label == 2){
+        if (crmEnum == CrmEnum.CRM_CUSTOMER){
             Record map = new Record();
-            fieldList.add(map.set("field_name", "map_address").set("name", "地区定位").set("form_type", "map_address").set("is_null", 0));
-        }else if (label == 5){
-            fieldList.add(new Record().set("field_name","type_id").set("name","商机状态组").set("value","").set("form_type","business_type").set("setting",new String[0]).set("is_null",1).set("field_type",1));
-            fieldList.add(new Record().set("field_name","status_id").set("name","商机阶段").set("value","").set("form_type","business_status").set("setting",new String[0]).set("is_null",1).set("field_type",1));
-        }else if (label == 4){
+            fieldList.add(map.set("field_name", "map_address").set("name", "地区定位").set("form_type", "map_address").set("is_null", 0).set("field_type",FormTypeEnum.TEXT.getType()));
+        }else if (crmEnum == CrmEnum.CRM_BUSINESS){
+            fieldList.add(new Record().set("field_name","type_id").set("name","商机状态组").set("value","").set("form_type","business_type").set("setting",new String[0]).set("is_null",1).set("field_type",FormTypeEnum.TEXT.getType()));
+            fieldList.add(new Record().set("field_name","status_id").set("name","商机阶段").set("value","").set("form_type","business_status").set("setting",new String[0]).set("is_null",1).set("field_type",FormTypeEnum.TEXT.getType()));
+        }else if (crmEnum == CrmEnum.CRM_PRODUCT){
             fieldList.forEach(record -> {
-                if (record.getStr("field_name").equals("category")){
+                if ("category".equals(record.getStr("field_name"))){
                     record.set("value",new String[0]);
                 }
             });
         }
-        if (label == 5 || label == 6){
+        if (crmEnum == CrmEnum.CRM_BUSINESS || crmEnum == CrmEnum.CRM_CONTRACT){
             Record record = new Record();
-            fieldList.add(record.set("field_name","product").set("name","产品").set("value",Kv.by("discount_rate", "").set("product", new ArrayList<>()).set("total_price", "")).set("formType","product").set("setting",new String[]{}).set("is_null",0).set("field_type",1));
+            fieldList.add(record.set("field_name","product").set("name","产品").set("value",Kv.by("discount_rate", "").set("product", new ArrayList<>()).set("total_price", "")).set("formType","product").set("setting",new String[]{}).set("is_null",0).set("field_type",FormTypeEnum.TEXT.getType()));
         }
         return fieldList;
     }
@@ -57,22 +60,15 @@ public class AdminFieldService {
      */
     public List<Record> queryUpdateField(Integer label,Record record){
         List<Record> recordList = Db.find(Db.getSql("admin.field.queryAddField"),label);
-        recordList.forEach(r ->{
-            if (r.getInt("type") == 10 || r.getInt("type") == 12){
-                r.set("value",Db.queryStr("select value from 72crm_admin_fieldv where field_id = ? and batch_id = ?",r.getInt("field_id"),record.getStr("batch_id")));
-            }else {
-                r.set("value",record.get(r.getStr("field_name"))!=null ? record.get(r.getStr("field_name")):"");
-            }
-        });
         recordList.forEach(field ->{
-            if (field.getInt("type") == 8){
-                field.set("value",Db.find("select * from 72crm_admin_file where batch_id = ?",StrUtil.isNotEmpty(field.getStr("value"))?field.getStr("value"):""));
-            }
-            if (field.getInt("type") == 10){
-                field.set("value",Db.find("select user_id,realname from 72crm_admin_user where find_in_set(user_id,ifnull(?,0))",field.getStr("value")));
-            }
-            if (field.getInt("type") == 12){
-                field.set("value",Db.find("select dept_id,name from 72crm_admin_dept where find_in_set(dept_id,ifnull(?,0))",field.getStr("value")));
+            if (field.getInt("type") == FormTypeEnum.FILE.getType()){
+                field.set("value",Db.find("select file_id, name, size, create_user_id, create_time, file_path, file_type from 72crm_admin_file where batch_id = ?",StrUtil.isNotEmpty(record.get(field.getStr("field_name")))?record.get(field.getStr("field_name")):""));
+            }else if (field.getInt("type") == FormTypeEnum.USER.getType()){
+                field.set("value",Db.find("select user_id,realname from 72crm_admin_user where find_in_set(user_id,ifnull(?,0))",record.getStr(field.getStr("field_name"))));
+            }else if (field.getInt("type") == FormTypeEnum.STRUCTURE.getType()){
+                field.set("value",Db.find("select dept_id,name from 72crm_admin_dept where find_in_set(dept_id,ifnull(?,0))",record.getStr(field.getStr("field_name"))));
+            }else {
+                field.set("value",record.get(field.getStr("field_name"))!=null ? record.get(field.getStr("field_name")):"");
             }
         });
         recordToFormType(recordList);
@@ -152,57 +148,19 @@ public class AdminFieldService {
         return R.ok();
     }
 
-    public R verify(Kv kv) {
-        Integer number = 0;
-        if ("0".equals(kv.get("fieldType"))){
-            SqlPara sqlPara = Db.getSqlPara("admin.field.queryFieldIsExist", kv);
-            number = Db.queryInt(sqlPara.getSql(),sqlPara.getPara());
+    /**
+     * 查询唯一字段
+     * @author zhangzhiwei
+     * @param crmEnum 字段类型
+     * @param record 参数
+     * @return 数据库存在的数量
+     */
+    public Integer verify(CrmEnum crmEnum,Record record) {
+        if (record.get("field_type").equals(0)){
+            return Db.template("admin.field.queryFieldIsExist",record.getColumns()).queryInt();
         }else {
-            String type = kv.getStr("types");
-            String tableName;
-            String primaryKey;
-            switch (type) {
-                case "1":
-                    tableName = "leads";
-                    primaryKey = "leads_id";
-                    break;
-                case "2":
-                    tableName = "customer";
-                    primaryKey = "customer_id";
-                    break;
-                case "3":
-                    tableName = "contacts";
-                    primaryKey = "contacts_id";
-                    break;
-                case "4":
-                    tableName = "product";
-                    primaryKey = "product_id";
-                    break;
-                case "5":
-                    tableName = "business";
-                    primaryKey = "business_id";
-                    break;
-                case "6":
-                    tableName = "contract";
-                    primaryKey = "contract_id";
-                    break;
-                case "7":
-                    tableName = "receivables";
-                    primaryKey = "receivables_id";
-                    break;
-                case "8":
-                    tableName = "receivables_plan";
-                    primaryKey = "plan_id";
-                    break;
-                default:
-                    return R.error("type不符合要求");
-            }
-            if (!ParamsUtil.isValid(kv.getStr("fieldName"))){
-                return R.error("参数包含非法字段");
-            }
-            number = Db.queryInt("select count(*) from 72crm_crm_"+tableName+" where "+kv.getStr("fieldName")+" = ? and "+primaryKey+" != ?",kv.getStr("val"),kv.getStr("id")!=null?Integer.valueOf(kv.getStr("id")):0);
+            return Db.template("admin.field.queryFixedIsExist",record.set("tableName",crmEnum.getName()).getColumns()).queryInt();
         }
-        return number > 0 ? R.error("参数校验错误").put("error", kv.getStr("fieldName") + "：参数唯一") : R.ok();
     }
 
     /**
@@ -217,13 +175,15 @@ public class AdminFieldService {
             return false;
         }
         Db.deleteById("72crm_admin_fieldv", "batch_id", batchId);
+        List<AdminFieldv> adminFieldvs=new ArrayList<>();
         array.forEach(obj -> {
             AdminFieldv fieldv = TypeUtils.castToJavaBean(obj, AdminFieldv.class);
             fieldv.setId(null);
             fieldv.setCreateTime(DateUtil.date());
             fieldv.setBatchId(batchId);
-            fieldv.save();
+            adminFieldvs.add(fieldv);
         });
+        Db.batchSave(adminFieldvs,100);
         return true;
     }
 
@@ -295,55 +255,16 @@ public class AdminFieldService {
     public void recordToFormType(List<Record> recordList) {
         for (Record record : recordList) {
             Integer dataType = record.getInt("type");
-            if (1 == dataType) {
-                record.set("formType", "text");
-            } else if (2 == dataType) {
-                record.set("formType", "textarea");
-            } else if (3 == dataType) {
-                record.set("formType", "select");
-            } else if (4 == dataType) {
-                record.set("formType", "date");
-            } else if (5 == dataType) {
-                record.set("formType", "number");
-            } else if (6 == dataType) {
-                record.set("formType", "floatnumber");
-            } else if (7 == dataType) {
-                record.set("formType", "mobile");
-            } else if (8 == dataType) {
-                record.set("formType", "file");
-            } else if (9 == dataType) {
-                record.set("formType", "checkbox");
+            FormTypeEnum typeEnum = FormTypeEnum.parse(dataType);
+            record.set("formType", typeEnum.getFormType());
+            if(dataType == FormTypeEnum.CHECKBOX.getType()){
                 recordValueToArray(record);
-            } else if (10 == dataType) {
-                record.set("formType", "user");
+            }else if(dataType == FormTypeEnum.USER.getType()){
                 record.set("default_value", new ArrayList<>(0));
-            } else if (12 == dataType) {
-                record.set("formType", "structure");
+            }else if(dataType == FormTypeEnum.STRUCTURE.getType()){
                 record.set("default_value", new ArrayList<>(0));
-            } else if (13 == dataType) {
-                record.set("formType", "datetime");
-            } else if (14 == dataType) {
-                record.set("formType", "email");
-            } else if (15 == dataType) {
-                record.set("formType", "customer");
-            } else if (16 == dataType) {
-                record.set("formType", "business");
-            } else if (17 == dataType) {
-                record.set("formType", "contacts");
-            } else if (18 == dataType) {
-                record.set("formType", "map_address");
-            } else if (19 == dataType) {
-                record.set("formType", "category");
-            } else if (20 == dataType) {
-                record.set("formType", "contract");
-            } else if (21 == dataType) {
-                record.set("formType", "receivables_plan");
-            } else if (22 == dataType){
-                record.set("formType", "business_cause");
-            }else if (23 == dataType){
-                record.set("formType", "examine_cause");
             }
-            if (3 == dataType || 9 == dataType) {
+            if (FormTypeEnum.SELECT.getType() == dataType || FormTypeEnum.CHECKBOX.getType() == dataType) {
                 if (record.getStr("options") != null) {
                     record.set("setting", record.getStr("options").split(","));
                 }
@@ -362,17 +283,17 @@ public class AdminFieldService {
      * @author wyq
      * 查询fieldType为0的字段
      */
-    public List<Record> customFieldList(String label){
+    public List<Record> customFieldList(Integer label){
         List <Record> recordList = Db.find(Db.getSql("admin.field.customerFieldList"),label);
         recordToFormType(recordList);
         return recordList;
     }
 
-    public List<Record> list(String label) {
+    public List<Record> list(Integer label) {
         return list(label, null);
     }
 
-    public List<Record> list(String label, String categoryId) {
+    public List<Record> list(Integer label, String categoryId) {
         List<Record> recordList = Db.find(Db.getSqlPara("admin.field.list", Kv.by("label", label).set("categoryId", categoryId)));
         recordToFormType(recordList);
         if (categoryId == null) {
@@ -383,37 +304,8 @@ public class AdminFieldService {
     }
 
     public R setFelidStyle(Kv kv) {
-        int type;
         String types = kv.getStr("types");
-        switch (types) {
-            case "crm_leads":
-                type = 1;
-                break;
-            case "crm_customer":
-                type = 2;
-                break;
-            case "crm_contacts":
-                type = 3;
-                break;
-            case "crm_product":
-                type = 4;
-                break;
-            case "crm_business":
-                type = 5;
-                break;
-            case "crm_contract":
-                type = 6;
-                break;
-            case "crm_receivables":
-                type = 7;
-                break;
-            case "crm_customer_pool":
-                type = 8;
-                break;
-            default:
-                type = 0;
-                break;
-        }
+        int type=CrmEnum.parse(types).getType();
         AdminFieldStyle adminFleldStyle = AdminFieldStyle.dao.findFirst(AdminFieldStyle.dao.getSql("admin.field.queryFieldStyle"), type, kv.getStr("field"), BaseUtil.getUser().getUserId());
         if (adminFleldStyle != null) {
             adminFleldStyle.setStyle(new BigDecimal(kv.getStr("width")).intValue());
@@ -446,10 +338,10 @@ public class AdminFieldService {
         Integer number = Db.queryInt("select count(*) from 72crm_admin_field_sort where user_id = ? and label = ?", userId, adminFieldSort.getLabel());
         if (0 == number) {
             List<Record> fieldList;
-            if (adminFieldSort.getLabel() == 8){
-                fieldList = list("2");
+            if (adminFieldSort.getLabel() == CrmEnum.CRM_CUSTOMER_POOL.getType()){
+                fieldList = list(CrmEnum.CRM_CUSTOMER.getType());
             }else {
-                fieldList = list(adminFieldSort.getLabel().toString());
+                fieldList = list(adminFieldSort.getLabel());
             }
             List<AdminFieldSort> sortList = new LinkedList<>();
             FieldUtil fieldUtil = new FieldUtil(sortList, userId, adminFieldSort.getLabel());
@@ -458,11 +350,16 @@ public class AdminFieldService {
                     fieldUtil.add(record.getStr("field_name"), record.getStr("name"), record.getInt("field_id"));
                 }
             }
-            if (2 == adminFieldSort.getLabel() || 8 == adminFieldSort.getLabel()){
-                fieldUtil.add("dealStatus","成交状态");
-            }
-            if (5 == adminFieldSort.getLabel()) {
+            if (CrmEnum.CRM_CUSTOMER.getType() == adminFieldSort.getLabel()){
+                fieldUtil.add("dealStatus","成交状态").add("poolDay","距进入公海客户天数");
+            }else if (CrmEnum.CRM_BUSINESS.getType() == adminFieldSort.getLabel()){
                 fieldUtil.add("typeName", "商机状态组").add("statusName", "商机阶段");
+            }else if (CrmEnum.CRM_CONTRACT.getType() == adminFieldSort.getLabel()){
+                fieldUtil.add("receivedMoney","已收款金额").add("unreceivedMoney","未收款金额");
+            }else if (CrmEnum.CRM_RECEIVABLES.getType() == adminFieldSort.getLabel()){
+                fieldUtil.add("contractMoney","合同金额");
+            }else if (CrmEnum.CRM_CUSTOMER_POOL.getType() == adminFieldSort.getLabel()){
+                fieldUtil.add("dealStatus","成交状态");
             }
             fieldUtil.add("updateTime", "更新时间").add("createTime", "创建时间")
                     .add("ownerUserName", "负责人").add("createUserName", "创建人");
@@ -502,7 +399,7 @@ public class AdminFieldService {
     public R queryFieldConfig(AdminFieldSort adminFieldSort) {
         Long userId = BaseUtil.getUser().getUserId();
         //查出自定义字段，查看顺序表是否存在该字段，没有则插入，设为隐藏
-        List<Record> fieldList = customFieldList(adminFieldSort.getLabel().toString());
+        List<Record> fieldList = customFieldList(adminFieldSort.getLabel());
         for (Record record : fieldList) {
             String fieldName = record.getStr("name");
             Integer number = Db.queryInt("select count(*) as number from 72crm_admin_field_sort where user_id = ? and label = ? and field_name = ?", userId, adminFieldSort.getLabel(), fieldName);
@@ -550,29 +447,29 @@ public class AdminFieldService {
         recordList.forEach(record -> {
             Integer dataType = record.getInt("type");
             if(isDetail == 2){
-                if(10 == dataType){
+                if(FormTypeEnum.USER.getType() == dataType){
                     if(StrUtil.isNotEmpty(record.getStr("value"))){
                         record.set("value",TagUtil.toSet(record.getStr("value")));
                     }
-                }else if (12 == dataType) {
+                }else if (FormTypeEnum.STRUCTURE.getType() == dataType) {
                     if(StrUtil.isNotEmpty(record.getStr("value"))){
                         record.set("value", TagUtil.toSet(record.getStr("value")));
                     }
                 }
             }else {
-                if(10 == dataType){
+                if(FormTypeEnum.USER.getType() == dataType){
                     if(StrUtil.isNotEmpty(record.getStr("value"))){
                         record.set("value",Db.queryStr("select group_concat(realname) from `72crm_admin_user` where user_id in ("+record.getStr("value")+")"));
                     }
-                }else if (12 == dataType) {
+                }else if (FormTypeEnum.STRUCTURE.getType() == dataType) {
                     if(StrUtil.isNotEmpty(record.getStr("value"))){
                         record.set("value",Db.queryStr("select group_concat(name) from `72crm_admin_dept` where dept_id in ("+record.getStr("value")+")"));
                     }
                 }
             }
-            if(dataType == 8){
+            if(dataType == FormTypeEnum.FILE.getType()){
                 if(StrUtil.isNotEmpty(record.getStr("value"))){
-                    record.set("value",Db.find("select * from `72crm_admin_file` where batch_id = ?",record.getStr("value")));
+                    record.set("value",Db.find("select file_id, name, size, create_user_id, create_time, file_path, file_type from 72crm_admin_file where batch_id = ?",record.getStr("value")));
                 }
             }
         });

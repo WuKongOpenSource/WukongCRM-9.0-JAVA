@@ -1,40 +1,46 @@
 <template>
   <div>
-    <el-form ref="form"
-             v-if="examineInfo.examineType == 2"
-             :model="form"
-             :rules="rules"
-             label-position="top"
-             class="crm-create-box">
-      <el-form-item prop="name"
-                    class='crm-create-item'>
-        <div slot="label"
-             style="display: inline-block;">
+    <el-form
+      v-if="examineInfo.examineType == 2"
+      ref="form"
+      :model="form"
+      :rules="rules"
+      label-position="top"
+      class="crm-create-box">
+      <el-form-item
+        prop="name"
+        class="crm-create-item">
+        <div
+          slot="label"
+          style="display: inline-block;">
           <div style="margin:5px 0;font-size:12px;word-wrap:break-word;word-break:break-all;">
             审核人
-            <span style="color:#999;">
-            </span>
+            <span style="color:#999;"/>
           </div>
         </div>
-        <xh-user-cell :infoType="types"
-                      :value="draftUser ? [draftUser] : []"
-                      @value-change="fieldValueChange"></xh-user-cell>
+        <xh-user-cell
+          :info-type="types"
+          :value="draftUser ? [draftUser] : []"
+          @value-change="fieldValueChange"/>
       </el-form-item>
     </el-form>
-    <flexbox v-else-if="examineInfo.examineType == 1"
-             class="fixed-examine"
-             wrap="wrap">
-      <el-popover v-for="(item, index) in examineInfo.examineSteps"
-                  :key="index"
-                  placement="bottom"
-                  :disabled="item.userList.length==0"
-                  trigger="hover"
-                  :content="item.userList|contentFilters">
-        <div slot="reference"
-             class="fixed-examine-item">
-          <img src="@/assets/img/examine_head.png" />
-          <div class="detail">{{item|detail}}</div>
-          <div class="step">{{(index+1)|step}}</div>
+    <flexbox
+      v-else-if="examineInfo.examineType == 1"
+      class="fixed-examine"
+      wrap="wrap">
+      <el-popover
+        v-for="(item, index) in examineInfo.examineSteps"
+        :key="index"
+        :disabled="item.userList.length==0"
+        :content="item.userList|contentFilters"
+        placement="bottom"
+        trigger="hover">
+        <div
+          slot="reference"
+          class="fixed-examine-item">
+          <img src="@/assets/img/examine_head.png" >
+          <div class="detail">{{ item|detail }}</div>
+          <div class="step">{{ (index+1)|step }}</div>
         </div>
       </el-popover>
     </flexbox>
@@ -49,11 +55,10 @@ import { XhUserCell } from '@/components/CreateCom'
 import Nzhcn from 'nzh/cn'
 
 export default {
-  name: 'create-examine-info',
+  name: 'CreateExamineInfo',
   components: {
     XhUserCell
   },
-  computed: {},
   filters: {
     detail: function(data) {
       if (data.stepType == 2) {
@@ -77,6 +82,18 @@ export default {
         .join('、')
     }
   },
+  props: {
+    // CRM类型
+    types: {
+      type: String,
+      default: ''
+    },
+    // 办公审批 传ID
+    typesId: {
+      type: [String, Number],
+      default: ''
+    }
+  },
   data() {
     return {
       form: {
@@ -90,30 +107,19 @@ export default {
       draftUser: null
     }
   },
-  props: {
-    // CRM类型
-    types: {
-      type: String,
-      default: ''
-    },
-    // 办公审批 传ID
-    typesId: {
-      type: [String, Number],
-      default: ''
-    }
-  },
+  computed: {},
   mounted() {
     this.getDetail()
   },
   methods: {
     getDetail() {
-      let reqeust = {
+      const reqeust = {
         oa_examine: oaCreateExamineFlow,
         crm_contract: crmCreateExamineFlow,
         crm_receivables: crmCreateExamineFlow
       }[this.types]
 
-      let params = {}
+      const params = {}
       if (this.types == 'oa_examine') {
         params.categoryId = this.typesId
       } else {

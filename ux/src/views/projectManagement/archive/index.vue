@@ -3,58 +3,66 @@
     <div class="header">
       归档项目统计
     </div>
-    <div v-loading="loading"
-         class="content-body">
-      <el-table class="n-table--border"
-                id="crm-table"
-                v-loading="loading"
-                :data="list"
-                :height="tableHeight"
-                stripe
-                highlight-current-row
-                style="width: 100%">
-        <el-table-column prop="businessCheck"
-                         :resizable='false'
-                         label=""
-                         width="38">
-          <template slot="header"
-                    slot-scope="slot">
-            <i style="color:#999"
-               class="wukong wukong-subproject"></i>
+    <div
+      v-loading="loading"
+      class="content-body">
+      <el-table
+        v-loading="loading"
+        id="crm-table"
+        :data="list"
+        :height="tableHeight"
+        class="n-table--border"
+        stripe
+        highlight-current-row
+        style="width: 100%">
+        <el-table-column
+          :resizable="false"
+          prop="businessCheck"
+          label=""
+          width="38">
+          <template
+            slot="header"
+            slot-scope="slot">
+            <i
+              style="color:#999"
+              class="wukong wukong-subproject"/>
           </template>
           <template slot-scope="scope">
-            <i :style="{'color':scope.row.color}"
-               class="wukong wukong-subproject"></i>
+            <i
+              :style="{'color':scope.row.color}"
+              class="wukong wukong-subproject"/>
           </template>
         </el-table-column>
-        <el-table-column show-overflow-tooltip
-                         prop="name"
-                         label="项目名称">
-        </el-table-column>
-        <el-table-column show-overflow-tooltip
-                         width="200"
-                         prop="archiveTime"
-                         label="归档时间">
-        </el-table-column>
-        <el-table-column label="操作"
-                         width="100">
+        <el-table-column
+          show-overflow-tooltip
+          prop="name"
+          label="项目名称"/>
+        <el-table-column
+          show-overflow-tooltip
+          width="200"
+          prop="archiveTime"
+          label="归档时间"/>
+        <el-table-column
+          label="操作"
+          width="100">
           <template slot-scope="scope">
-            <el-button type="text"
-                       @click.native="recoverProject(scope.row, scope.$index)">恢复项目</el-button>
+            <el-button
+              type="text"
+              @click.native="recoverProject(scope.row, scope.$index)">恢复项目</el-button>
           </template>
         </el-table-column>
 
       </el-table>
       <div class="p-contianer">
-        <el-pagination class="p-bar"
-                       @size-change="handleSizeChange"
-                       @current-change="handleCurrentChange"
-                       :current-page="currentPage"
-                       :page-sizes="pageSizes"
-                       :page-size.sync="pageSize"
-                       layout="total, sizes, prev, pager, next, jumper"
-                       :total="total">
-        </el-pagination>
+        <el-pagination
+          :current-page="currentPage"
+          :page-sizes="pageSizes"
+          :page-size.sync="pageSize"
+          :total="total"
+          class="p-bar"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"/>
       </div>
     </div>
   </div>
@@ -119,7 +127,7 @@ export default {
           this.list = res.data.list
           this.loading = false
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
         })
     },
@@ -145,7 +153,7 @@ export default {
               this.$bus.$emit('recover-project', val.name, val.workId)
               this.loading = false
             })
-            .catch(err => {
+            .catch(() => {
               this.loading = false
             })
         })

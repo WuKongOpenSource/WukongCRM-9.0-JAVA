@@ -5,11 +5,11 @@ import request from '@/utils/request'
  * @param {*} data
  */
 export function workTasklableIndexAPI(data) {
-    return request({
-        url: 'taskLabel/getLabelList',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'taskLabel/getLabelList',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -17,11 +17,11 @@ export function workTasklableIndexAPI(data) {
  * @param {*} data
  */
 export function workTasklableReadAPI(data) {
-    return request({
-        url: 'taskLabel/queryById',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'taskLabel/queryById',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -29,11 +29,11 @@ export function workTasklableReadAPI(data) {
  * @param {*} data
  */
 export function workTasklableDeleteAPI(data) {
-    return request({
-        url: 'taskLabel/deleteLabel',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'taskLabel/deleteLabel',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -41,11 +41,11 @@ export function workTasklableDeleteAPI(data) {
  * @param {*} data
  */
 export function workTasklableSaveAPI(data) {
-    return request({
-        url: 'taskLabel/setLabel',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'taskLabel/setLabel',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -53,10 +53,10 @@ export function workTasklableSaveAPI(data) {
  * @param {*} data
  */
 export function workTasklableGetWokListAPI(data) {
-    return request({
-        url: 'taskLabel/getTaskList',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'taskLabel/getTaskList',
+    method: 'post',
+    data: data
+  })
 }
 

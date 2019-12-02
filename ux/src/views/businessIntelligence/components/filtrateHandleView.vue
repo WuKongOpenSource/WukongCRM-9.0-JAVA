@@ -1,79 +1,84 @@
 
 <template>
   <div class="filtrate-content">
-    <time-type-select v-if="!showYearSelect"
-                      @change="timeTypeChange"></time-type-select>
+    <time-type-select
+      v-if="!showYearSelect"
+      @change="timeTypeChange"/>
     <!-- 展示年筛选 -->
-    <el-date-picker v-if="showYearSelect"
-                    v-model="yearValue"
-                    type="year"
-                    :clearable="false"
-                    value-format="yyyy"
-                    :picker-options="pickerOptions"
-                    placeholder="选择年">
-    </el-date-picker>
+    <el-date-picker
+      v-if="showYearSelect"
+      v-model="yearValue"
+      :clearable="false"
+      :picker-options="pickerOptions"
+      type="year"
+      value-format="yyyy"
+      placeholder="选择年"/>
     <!-- 展示部门筛选 -->
-    <el-select v-model="structuresSelectValue"
-               @change="structuresValueChange"
-               placeholder="选择部门">
-      <el-option v-for="item in deptList"
-                 :key="item.id"
-                 :label="item.name"
-                 :value="item.id">
-      </el-option>
+    <el-select
+      v-model="structuresSelectValue"
+      placeholder="选择部门"
+      @change="structuresValueChange">
+      <el-option
+        v-for="item in deptList"
+        :key="item.id"
+        :label="item.name"
+        :value="item.id"/>
     </el-select>
-    <el-select v-if="showUserSelect"
-               v-model="userSelectValue"
-               :clearable="true"
-               placeholder="选择员工">
-      <el-option v-for="item in userOptions"
-                 :key="item.id"
-                 :label="item.realname"
-                 :value="item.id">
-      </el-option>
+    <el-select
+      v-if="showUserSelect"
+      v-model="userSelectValue"
+      :clearable="true"
+      placeholder="选择员工">
+      <el-option
+        v-for="item in userOptions"
+        :key="item.id"
+        :label="item.realname"
+        :value="item.id"/>
     </el-select>
     <!-- 展示商机状态筛选 -->
-    <el-select v-model="businessStatusValue"
-               v-if="showBusinessSelect"
-               placeholder="商机组">
-      <el-option v-for="item in businessOptions"
-                 :key="item.typeId"
-                 :label="item.name"
-                 :value="item.typeId">
-      </el-option>
+    <el-select
+      v-if="showBusinessSelect"
+      v-model="businessStatusValue"
+      placeholder="商机组">
+      <el-option
+        v-for="item in businessOptions"
+        :key="item.typeId"
+        :label="item.name"
+        :value="item.typeId"/>
     </el-select>
-    <el-cascader v-if="showProductSelect"
-                 style="width: 100%;"
-                 :options="productOptions"
-                 change-on-select
-                 :show-all-levels="false"
-                 :props="{
-                    children: 'children',
-                    label: 'label',
-                    value: 'categoryId'
-                  }"
-                 v-model="productValue">
-    </el-cascader>
-    <el-select v-model="customValue"
-               v-if="showCustomSelect"
-               placeholder="图标类型"
-               @change="customSelectChange">
-      <el-option v-for="item in customOptions"
-                 :key="item.value"
-                 :label="item.name"
-                 :value="item.value">
-      </el-option>
+    <el-cascader
+      v-if="showProductSelect"
+      :options="productOptions"
+      :show-all-levels="false"
+      :props="{
+        children: 'children',
+        label: 'label',
+        value: 'categoryId'
+      }"
+      v-model="productValue"
+      style="width: 100%;"
+      change-on-select/>
+    <el-select
+      v-if="showCustomSelect"
+      v-model="customValue"
+      placeholder="图标类型"
+      @change="customSelectChange">
+      <el-option
+        v-for="item in customOptions"
+        :key="item.value"
+        :label="item.name"
+        :value="item.value"/>
     </el-select>
-    <el-button @click.native="postFiltrateValue()"
-               type="primary">搜索</el-button>
-    <slot></slot>
+    <el-button
+      type="primary"
+      @click.native="postFiltrateValue()">搜索</el-button>
+    <slot/>
   </div>
 </template>
 
 <script type="text/javascript">
 import {
   adminStructuresSubIndex,
-  userListByStructid,
   getUserByDeptId
 } from '@/api/common'
 import { crmBusinessStatusList } from '@/api/customermanagement/business'
@@ -82,42 +87,8 @@ import timeTypeSelect from '@/components/timeTypeSelect'
 import moment from 'moment'
 
 export default {
-  name: 'filtrate-handle-view', // 筛选条件
+  name: 'FiltrateHandleView', // 筛选条件
   components: { timeTypeSelect },
-  watch: {},
-  data() {
-    return {
-      //年筛选
-      pickerOptions: {
-        disabledDate(time) {
-          return time.getTime() > Date.now()
-        }
-      },
-      yearValue: '',
-
-      /** 时间类型值 */
-      timeTypeValue: {},
-      /** 部门选择解析数据 */
-      structuresProps: {
-        children: 'children',
-        label: 'label',
-        value: 'id'
-      },
-      deptList: [], // 部门列表
-      structuresSelectValue: '',
-      /** 用户列表 */
-      userOptions: [],
-      userSelectValue: '',
-      /** 商机状态 */
-      businessOptions: [],
-      businessStatusValue: '',
-      /** 产品类别 */
-      productValue: [],
-      productOptions: [],
-      // 图标类型
-      customValue: ''
-    }
-  },
   props: {
     // 模块类型
     moduleType: {
@@ -156,6 +127,40 @@ export default {
       type: Boolean
     }
   },
+  data() {
+    return {
+      // 年筛选
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() > Date.now()
+        }
+      },
+      yearValue: '',
+
+      /** 时间类型值 */
+      timeTypeValue: {},
+      /** 部门选择解析数据 */
+      structuresProps: {
+        children: 'children',
+        label: 'label',
+        value: 'id'
+      },
+      deptList: [], // 部门列表
+      structuresSelectValue: '',
+      /** 用户列表 */
+      userOptions: [],
+      userSelectValue: '',
+      /** 商机状态 */
+      businessOptions: [],
+      businessStatusValue: '',
+      /** 产品类别 */
+      productValue: [],
+      productOptions: [],
+      // 图标类型
+      customValue: ''
+    }
+  },
+  watch: {},
   mounted() {
     // 自定义选择项 默认值
     if (this.showCustomSelect) {
@@ -182,6 +187,8 @@ export default {
       this.getProductCategoryIndex()
     }
   },
+
+  beforeDestroy() {},
   methods: {
     // 选择更改
     customSelectChange() {
@@ -262,7 +269,7 @@ export default {
         .catch(() => {})
     },
     postFiltrateValue() {
-      let params = {
+      const params = {
         deptId: this.structuresSelectValue
       }
 
@@ -296,9 +303,7 @@ export default {
       }
       this.$emit('change', params)
     }
-  },
-
-  beforeDestroy() {}
+  }
 }
 </script>
 <style lang="scss" scoped>

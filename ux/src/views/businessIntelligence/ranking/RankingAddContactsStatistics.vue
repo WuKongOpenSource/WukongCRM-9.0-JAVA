@@ -1,41 +1,45 @@
 <template>
-  <div v-loading="loading"
-       class="main-container">
-    <filtrate-handle-view class="filtrate-bar"
-                          :showUserSelect="false"
-                          moduleType="ranking"
-                          @load="loading=true"
-                          @change="getDataList">
-    </filtrate-handle-view>
+  <div
+    v-loading="loading"
+    class="main-container">
+    <filtrate-handle-view
+      :show-user-select="false"
+      class="filtrate-bar"
+      module-type="ranking"
+      @load="loading=true"
+      @change="getDataList"/>
     <div class="content">
       <div class="content-title">新增联系人数排行（按创建人、创建时间统计）</div>
-      <div class="axis-content"
-           v-empty="list.length === 0"
-           xs-empty-text="暂无排行">
-        <div id="axismain"></div>
+      <div
+        v-empty="list.length === 0"
+        class="axis-content"
+        xs-empty-text="暂无排行">
+        <div id="axismain"/>
       </div>
       <div class="table-content">
-        <el-table :data="list"
-                  height="400"
-                  stripe
-                  border
-                  highlight-current-row>
-          <el-table-column align="center"
-                           header-align="center"
-                           show-overflow-tooltip
-                           label="公司总排名">
+        <el-table
+          :data="list"
+          height="400"
+          stripe
+          border
+          highlight-current-row>
+          <el-table-column
+            align="center"
+            header-align="center"
+            show-overflow-tooltip
+            label="公司总排名">
             <template slot-scope="scope">
-              {{scope.$index + 1}}
+              {{ scope.$index + 1 }}
             </template>
           </el-table-column>
-          <el-table-column v-for="(item, index) in fieldList"
-                           :key="index"
-                           align="center"
-                           header-align="center"
-                           show-overflow-tooltip
-                           :prop="item.field"
-                           :label="item.name">
-          </el-table-column>
+          <el-table-column
+            v-for="(item, index) in fieldList"
+            :key="index"
+            :prop="item.field"
+            :label="item.name"
+            align="center"
+            header-align="center"
+            show-overflow-tooltip/>
         </el-table>
       </div>
     </div>
@@ -49,11 +53,11 @@ import { biRankingAddContactsAPI } from '@/api/businessIntelligence/ranking'
 
 export default {
   /** 新增联系人数排行 */
-  name: 'ranking-add-contacts-statistics',
+  name: 'RankingAddContactsStatistics',
+  mixins: [rankingMixins],
   data() {
     return {}
   },
-  mixins: [rankingMixins],
   computed: {},
   mounted() {
     this.fieldList = [
@@ -71,10 +75,10 @@ export default {
           this.loading = false
           this.list = res.data || []
 
-          let showData = []
-          let yAxis = []
+          const showData = []
+          const yAxis = []
 
-          let rankingIndex = res.data.length > 10 ? 10 : res.data.length
+          const rankingIndex = res.data.length > 10 ? 10 : res.data.length
           for (let index = 0; index < rankingIndex; index++) {
             const element = res.data[index]
             showData.splice(0, 0, parseFloat(element.count))

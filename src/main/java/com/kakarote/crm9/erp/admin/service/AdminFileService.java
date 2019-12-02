@@ -32,7 +32,7 @@ public class AdminFileService {
         AdminFile adminFile = new AdminFile();
         adminFile.setBatchId(batchId);
         adminFile.setCreateTime(new Date());
-        adminFile.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        adminFile.setCreateUserId(BaseUtil.getUser().getUserId());
         adminFile.setPath(file.getFile().getAbsolutePath());
         if(ClassLoaderUtil.isPresent("com.jfinal.server.undertow.UndertowServer")){
             adminFile.setFilePath(BaseUtil.getIpAddress() + prefix + "/" + file.getFileName());

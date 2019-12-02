@@ -37,7 +37,7 @@ public class BiController extends Controller {
     public void productStatistics(){
         Date startTime = getDate("startTime");
         Date endTime = getDate("endTime");
-        Integer userId = getInt("userId");
+        Long userId = getLong("userId");
         Integer deptId = getInt("deptId");
         renderJson(biService.queryProductSell(startTime,endTime,userId,deptId));
     }

@@ -1,17 +1,18 @@
 <template>
-  <div class="vux-flexbox"
-       :class="{
-    'vux-flex-col': orient === 'vertical',
-    'vux-flex-row': orient === 'horizontal'
-  }"
-       :style="styles">
-    <slot></slot>
+  <div
+    :class="{
+      'vux-flex-col': orient === 'vertical',
+      'vux-flex-row': orient === 'horizontal'
+    }"
+    :style="styles"
+    class="vux-flexbox">
+    <slot/>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'flexbox',
+  name: 'Flexbox',
   props: {
     gutter: {
       type: Number,

@@ -39,14 +39,14 @@ const oa = {
       commit
     }, type) {
       return new Promise((resolve, reject) => {
-        let params = {}
+        const params = {}
         if (type) {
           params.type = type
         }
         oaMessageNumAPI(params)
           .then(response => {
             if (type) {
-              let copyNum = objDeepCopy(state.messageOANum)
+              const copyNum = objDeepCopy(state.messageOANum)
               copyNum[type + 'Num'] = response.data[type + 'Num'] || 0
               commit('SET_MESSAGEOANUM', copyNum)
             } else {

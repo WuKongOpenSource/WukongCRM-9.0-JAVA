@@ -22,7 +22,7 @@ export function crmIndexIndexListAPI(data) {
 
 /**
  * 简报跟进记录数量
- * @param {*} data 
+ * @param {*} data
  */
 export function crmQueryRecordConuntAPI(data) {
   return request({

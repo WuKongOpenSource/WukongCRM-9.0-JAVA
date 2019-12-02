@@ -9,43 +9,43 @@ import com.jfinal.plugin.activerecord.IBean;
 @SuppressWarnings("serial")
 public abstract class BaseAdminConfig<M extends BaseAdminConfig<M>> extends Model<M> implements IBean {
 
-	public void setSettingId(Integer settingId) {
+	public void setSettingId(java.lang.Integer settingId) {
 		set("setting_id", settingId);
 	}
-
-	public Integer getSettingId() {
+	
+	public java.lang.Integer getSettingId() {
 		return getInt("setting_id");
 	}
 
-	public void setStatus(Integer status) {
+	public void setStatus(java.lang.Integer status) {
 		set("status", status);
 	}
-
-	public Integer getStatus() {
+	
+	public java.lang.Integer getStatus() {
 		return getInt("status");
 	}
 
-	public void setName(String name) {
+	public void setName(java.lang.String name) {
 		set("name", name);
 	}
-
-	public String getName() {
+	
+	public java.lang.String getName() {
 		return getStr("name");
 	}
 
-	public void setValue(String value) {
+	public void setValue(java.lang.String value) {
 		set("value", value);
 	}
-
-	public String getValue() {
+	
+	public java.lang.String getValue() {
 		return getStr("value");
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(java.lang.String description) {
 		set("description", description);
 	}
-
-	public String getDescription() {
+	
+	public java.lang.String getDescription() {
 		return getStr("description");
 	}
 

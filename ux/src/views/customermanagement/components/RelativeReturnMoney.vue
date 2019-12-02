@@ -1,69 +1,80 @@
 <template>
   <div class="rc-cont">
-    <flexbox v-if="!isSeas"
-             class="rc-head"
-             direction="row-reverse">
-      <el-button class="rc-head-item"
-                 @click.native="createClick('plan')"
-                 type="primary">新建回款计划</el-button>
+    <flexbox
+      v-if="!isSeas"
+      class="rc-head"
+      direction="row-reverse">
+      <el-button
+        class="rc-head-item"
+        type="primary"
+        @click.native="createClick('plan')">新建回款计划</el-button>
     </flexbox>
-    <el-table :data="palnList"
-              :height="tableHeight"
-              stripe
-              style="width: 100%;border: 1px solid #E6E6E6;"
-              :header-cell-style="headerRowStyle"
-              :cell-style="cellStyle">
-      <el-table-column v-for="(item, index) in planFieldList"
-                       :key="index"
-                       show-overflow-tooltip
-                       :prop="item.prop"
-                       :label="item.label">
-      </el-table-column>
-      <el-table-column label="操作"
-                       width="100">
+    <el-table
+      :data="palnList"
+      :height="tableHeight"
+      :header-cell-style="headerRowStyle"
+      :cell-style="planCellStyle"
+      stripe
+      style="width: 100%;border: 1px solid #E6E6E6;">
+      <el-table-column
+        v-for="(item, index) in planFieldList"
+        :key="index"
+        :prop="item.prop"
+        :label="item.label"
+        show-overflow-tooltip/>
+      <el-table-column
+        label="操作"
+        width="100">
         <template slot-scope="scope">
           <flexbox justify="center">
-            <el-button type="text"
-                       @click.native="handleFile('edit', scope)">编辑</el-button>
-            <el-button type="text"
-                       @click.native="handleFile('delete', scope)">删除</el-button>
+            <el-button
+              type="text"
+              @click.native="handleFile('edit', scope)">编辑</el-button>
+            <el-button
+              type="text"
+              @click.native="handleFile('delete', scope)">删除</el-button>
           </flexbox>
         </template>
       </el-table-column>
     </el-table>
 
-    <flexbox class="rc-head"
-             direction="row-reverse"
-             style="margin-top: 15px;">
-      <el-button v-if="!isSeas"
-                 class="rc-head-item"
-                 @click.native="createClick('money')"
-                 type="primary">新建回款</el-button>
+    <flexbox
+      class="rc-head"
+      direction="row-reverse"
+      style="margin-top: 15px;">
+      <el-button
+        v-if="!isSeas"
+        class="rc-head-item"
+        type="primary"
+        @click.native="createClick('money')">新建回款</el-button>
     </flexbox>
-    <el-table :data="list"
-              :height="tableHeight"
-              stripe
-              style="width: 100%;border: 1px solid #E6E6E6;"
-              :header-cell-style="headerRowStyle"
-              :cell-style="cellStyle"
-              @row-click="handleRowClick">
-      <el-table-column v-for="(item, index) in fieldList"
-                       :key="index"
-                       show-overflow-tooltip
-                       :prop="item.prop"
-                       :formatter="fieldFormatter"
-                       :label="item.label">
-      </el-table-column>
+    <el-table
+      :data="list"
+      :height="tableHeight"
+      :header-cell-style="headerRowStyle"
+      :cell-style="cellStyle"
+      stripe
+      style="width: 100%;border: 1px solid #E6E6E6;"
+      @row-click="handleRowClick">
+      <el-table-column
+        v-for="(item, index) in fieldList"
+        :key="index"
+        :prop="item.prop"
+        :formatter="fieldFormatter"
+        :label="item.label"
+        show-overflow-tooltip/>
     </el-table>
-    <c-r-m-full-screen-detail :visible.sync="showFullDetail"
-                              :crmType="showFullCrmType"
-                              :id="showFullId">
-    </c-r-m-full-screen-detail>
-    <c-r-m-create-view v-if="isCreate"
-                       :crm-type="createCrmType"
-                       :action="createActionInfo"
-                       @save-success="saveSuccess"
-                       @hiden-view="isCreate=false"></c-r-m-create-view>
+    <c-r-m-full-screen-detail
+      :visible.sync="showFullDetail"
+      :crm-type="showFullCrmType"
+      :id="showFullId"
+      @handle="detailHandle"/>
+    <c-r-m-create-view
+      v-if="isCreate"
+      :crm-type="createCrmType"
+      :action="createActionInfo"
+      @save-success="saveSuccess"
+      @hiden-view="isCreate=false"/>
   </div>
 </template>
 
@@ -82,44 +93,17 @@ import {
   crmReceivablesPlanDeleteAPI
 } from '@/api/customermanagement/money'
 /** 注意  需要删除接口 */
-import { timestampToFormatTime, objDeepCopy } from '@/utils'
+import { objDeepCopy } from '@/utils'
 
 export default {
-  name: 'relative-return-money', //相关回款  可能再很多地方展示 放到客户管理目录下
+  name: 'RelativeReturnMoney', // 相关回款  可能再很多地方展示 放到客户管理目录下
 
   components: {
     CRMCreateView,
     CRMFullScreenDetail: () => import('./CRMFullScreenDetail.vue')
   },
 
-  computed: {},
-
   mixins: [loading],
-
-  data() {
-    return {
-      list: [],
-      fieldList: [],
-      tableHeight: '250px',
-      showFullDetail: false,
-      showFullCrmType: 'receivables',
-      showFullId: '', // 查看全屏详情的 ID
-      createCrmType: 'receivables_plan', // 创建回款计划
-      isCreate: false, // 新建回款回款
-      palnList: [],
-      planFieldList: [],
-      createActionInfo: {} // 新建回款计划的时候 在客户 合同下导入关联信息
-    }
-  },
-
-  watch: {
-    id: function(val) {
-      this.list = []
-      this.palnList = []
-      this.getList()
-      this.getPlanList()
-    }
-  },
 
   props: {
     /** 模块ID */
@@ -143,6 +127,33 @@ export default {
     }
   },
 
+  data() {
+    return {
+      list: [],
+      fieldList: [],
+      tableHeight: '250px',
+      showFullDetail: false,
+      showFullCrmType: 'receivables',
+      showFullId: '', // 查看全屏详情的 ID
+      createCrmType: 'receivables_plan', // 创建回款计划
+      isCreate: false, // 新建回款回款
+      palnList: [],
+      planFieldList: [],
+      createActionInfo: {} // 新建回款计划的时候 在客户 合同下导入关联信息
+    }
+  },
+
+  computed: {},
+
+  watch: {
+    id: function(val) {
+      this.list = []
+      this.palnList = []
+      this.getList()
+      this.getPlanList()
+    }
+  },
+
   mounted() {
     this.planFieldList = [
       { prop: 'num', width: '200', label: '期数' },
@@ -162,7 +173,7 @@ export default {
       { prop: 'contractName', width: '200', label: '合同名称' },
       { prop: 'contractMoney', width: '200', label: '合同金额' },
       { prop: 'receivablesMoney', width: '200', label: '回款金额' },
-      { prop: 'num', width: '200', label: '期数' },
+      { prop: 'planNum', width: '200', label: '期数' },
       { prop: 'ownerUserName', width: '200', label: '负责人' },
       { prop: 'checkStatus', width: '200', label: '状态' },
       { prop: 'returnTime', width: '200', label: '回款日期' }
@@ -176,7 +187,7 @@ export default {
      */
     getPlanList() {
       this.loading = true
-      let request = {
+      const request = {
         customer: crmCustomerQueryReceivablesPlan,
         contract: crmContractQueryReceivablesPlan
       }[this.crmType]
@@ -195,7 +206,7 @@ export default {
      */
     getList() {
       this.loading = true
-      let request = {
+      const request = {
         customer: crmCustomerQueryReceivables,
         contract: crmContractQueryReceivables
       }[this.crmType]
@@ -234,11 +245,18 @@ export default {
      * 通过回调控制style
      */
     cellStyle({ row, column, rowIndex, columnIndex }) {
-      if (columnIndex == 1) {
-        return { color: '#3E84E9' }
+      if (columnIndex == 0) {
+        return { color: '#3E84E9', textAlign: 'center', cursor: 'pointer' }
       } else {
-        return ''
+        return { textAlign: 'center' }
       }
+    },
+
+    /**
+     * 通过回调控制style
+     */
+    planCellStyle({ row, column, rowIndex, columnIndex }) {
+      return { textAlign: 'center' }
     },
 
     /**
@@ -333,15 +351,17 @@ export default {
       if (status == 0) {
         return '待审核'
       } else if (status == 1) {
-        return '审核中'
-      } else if (status == 2) {
         return '通过'
-      } else if (status == 3) {
+      } else if (status == 2) {
         return '拒绝'
+      } else if (status == 3) {
+        return '审核中'
       } else if (status == 4) {
         return '撤回'
       } else if (status == 5) {
         return '未提交'
+      } else if (status == 6) {
+        return '已作废'
       }
       return ''
     },
@@ -354,10 +374,12 @@ export default {
     },
 
     /**
-     * 通过回调控制style
+     * 详情操作
      */
-    cellStyle({ row, column, rowIndex, columnIndex }) {
-      return { textAlign: 'center' }
+    detailHandle(data) {
+      if (data.type === 'delete') {
+        this.getList()
+      }
     }
   }
 }

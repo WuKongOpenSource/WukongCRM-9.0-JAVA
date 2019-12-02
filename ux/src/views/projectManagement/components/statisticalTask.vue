@@ -1,7 +1,8 @@
 <template>
   <create-sections :title="title">
-    <div class="barmain"
-         :id="'barmain' + id "></div>
+    <div
+      :id="'barmain' + id "
+      class="barmain"/>
   </create-sections>
 </template>
 <script type="text/javascript">
@@ -9,27 +10,10 @@ import CreateSections from '@/components/CreateSections'
 import echarts from 'echarts'
 
 export default {
-  name: 'statistical-task', // 柱状图
+  name: 'StatisticalTask', // 柱状图
 
   components: {
     CreateSections
-  },
-
-  computed: {},
-
-  data() {
-    return {
-      barOption: null,
-      barChart: null,
-
-      id: Math.ceil(Math.random() * 100)
-    }
-  },
-
-  watch: {
-    list() {
-      this.changeBarData()
-    }
   },
 
   props: {
@@ -46,6 +30,23 @@ export default {
     }
   },
 
+  data() {
+    return {
+      barOption: null,
+      barChart: null,
+
+      id: Math.ceil(Math.random() * 100)
+    }
+  },
+
+  computed: {},
+
+  watch: {
+    list() {
+      this.changeBarData()
+    }
+  },
+
   mounted() {
     this.initBar()
     this.changeBarData()
@@ -56,9 +57,9 @@ export default {
      * 修改bar数据
      */
     changeBarData() {
-      let xAxis = []
-      let undoneList = []
-      let doneList = []
+      const xAxis = []
+      const undoneList = []
+      const doneList = []
 
       for (let index = 0; index < this.list.length; index++) {
         const item = this.list[index]

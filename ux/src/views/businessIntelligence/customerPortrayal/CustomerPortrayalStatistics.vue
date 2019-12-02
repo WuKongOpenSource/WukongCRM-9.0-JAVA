@@ -1,31 +1,33 @@
 <template>
-  <div v-loading="loading"
-       class="main-container">
-    <filtrate-handle-view class="filtrate-bar"
-                          moduleType="portrait"
-                          @load="loading=true"
-                          @change="getDataList">
-    </filtrate-handle-view>
+  <div
+    v-loading="loading"
+    class="main-container">
+    <filtrate-handle-view
+      class="filtrate-bar"
+      module-type="portrait"
+      @load="loading=true"
+      @change="getDataList"/>
     <div class="content">
       <div class="axis-content">
-        <div id="axismain"></div>
+        <div id="axismain"/>
       </div>
       <div class="table-content">
-        <el-table :data="list"
-                  height="400"
-                  stripe
-                  border
-                  highlight-current-row>
-          <el-table-column v-for="(item, index) in fieldList"
-                           :key="index"
-                           :fixed="index==0?true: false"
-                           :min-width="index==0?180: 100"
-                           align="center"
-                           header-align="center"
-                           show-overflow-tooltip
-                           :prop="item.field"
-                           :label="item.name">
-          </el-table-column>
+        <el-table
+          :data="list"
+          height="400"
+          stripe
+          border
+          highlight-current-row>
+          <el-table-column
+            v-for="(item, index) in fieldList"
+            :key="index"
+            :fixed="index==0?true: false"
+            :min-width="index==0?180: 100"
+            :prop="item.field"
+            :label="item.name"
+            align="center"
+            header-align="center"
+            show-overflow-tooltip/>
         </el-table>
       </div>
     </div>
@@ -39,7 +41,9 @@ import { biAchievementPortraitAPI } from '@/api/businessIntelligence/customerPor
 
 export default {
   /** 客户画像分析 */
-  name: 'customer-portrayal-statistics',
+  name: 'CustomerPortrayalStatistics',
+  mixins: [base],
+  props: {},
   data() {
     return {
       loading: false,
@@ -53,8 +57,6 @@ export default {
       fieldList: []
     }
   },
-  props: {},
-  mixins: [base],
   computed: {},
   created() {
     this.type = this.$route.params.type
@@ -77,12 +79,12 @@ export default {
           this.loading = false
 
           // 图表信息
-          let allData = []
-          let dealData = []
-          let legendData = []
+          const allData = []
+          const dealData = []
+          const legendData = []
 
           // 表信息
-          let list = [
+          const list = [
             {
               name: '所有客户（个）'
             },
@@ -90,7 +92,7 @@ export default {
               name: '成交客户（个）'
             }
           ]
-          let fieldList = [
+          const fieldList = [
             {
               field: 'name',
               name: {
@@ -115,14 +117,14 @@ export default {
             legendData.push(element[this.type])
 
             // 处理表头逻辑
-            let fieldKey = 'value' + eIndex
+            const fieldKey = 'value' + eIndex
             if (fieldList.length <= res.data.length) {
               fieldList.push({
                 field: fieldKey,
                 name: element[this.type]
               })
             }
-            let keys = ['allCustomer', 'dealCustomer']
+            const keys = ['allCustomer', 'dealCustomer']
             for (let keyIndex = 0; keyIndex < keys.length; keyIndex++) {
               const keyElement = keys[keyIndex]
               list[keyIndex][fieldKey] = element[keyElement]

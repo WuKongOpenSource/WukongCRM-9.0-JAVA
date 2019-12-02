@@ -6,7 +6,7 @@
       LEFT JOIN 72crm_admin_user as cau on cau.user_id = cct.owner_user_id
        left join 72crm_admin_dept as cad on cad.dept_id = cau.dept_id
       WHERE
-        check_status = 2
+        check_status = 1
         and  cct.owner_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
@@ -56,7 +56,7 @@
       LEFT JOIN 72crm_admin_user as cau on cau.user_id = cct.owner_user_id
       left join 72crm_admin_dept as cad on cad.dept_id = cau.dept_id
       WHERE
-        check_status = 2
+        check_status = 1
         and  cct.owner_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
@@ -106,7 +106,7 @@
       LEFT JOIN 72crm_admin_user as cau on cau.user_id = cct.owner_user_id
        left join 72crm_admin_dept as cad on cad.dept_id = cau.dept_id
       WHERE
-        check_status = 2
+        check_status = 1
         and  cct.owner_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
@@ -157,7 +157,7 @@
       LEFT JOIN 72crm_admin_user as cau on cau.user_id = cct.owner_user_id
        left join 72crm_admin_dept as cad on cad.dept_id = cau.dept_id
       WHERE
-        check_status = 2
+        check_status = 1
         and  cct.owner_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
@@ -299,53 +299,54 @@
         ORDER BY count(1) DESC
   #end
   #sql ("customerGenjinCountRanKing")
-      SELECT count(1) as `count`,cau.realname,cct.owner_user_id,cad.name as structureName
-      FROM
-        72crm_crm_customer as cct
-      LEFT JOIN 72crm_admin_user as cau on cau.user_id = cct.owner_user_id
+      SELECT count(a.record_id) as `count`,cau.realname,cct.owner_user_id,cad.name as structureName
+      FROM 72crm_admin_user as cau
+      LEFT JOIN(select owner_user_id,customer_id from 72crm_crm_customer where
+        #if(type == 1)
+          to_days(NOW()) = TO_DAYS(update_time)
+          #end
+           #if(type == 2)
+          to_days(NOW()) - TO_DAYS(update_time) = 1
+          #end
+           #if(type == 3)
+          YEARWEEK(date_format(update_time,'%Y-%m-%d')) = YEARWEEK(now())
+          #end
+           #if(type == 4)
+          YEARWEEK(date_format(update_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
+          #end
+           #if(type == 5)
+          date_format(update_time,'%Y-%m')=date_format(now(),'%Y-%m')
+          #end
+           #if(type == 6)
+          date_format(update_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+          #end
+           #if(type == 7)
+          QUARTER(update_time)=QUARTER(now()) AND YEAR(cct.update_time)=YEAR(NOW())
+          #end
+           #if(type == 8)
+          QUARTER(update_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(update_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
+          #end
+           #if(type == 9)
+          YEAR(update_time)=YEAR(NOW())
+          #end
+           #if(type == 10)
+          YEAR(update_time)=YEAR(date_sub(now(),interval 1 year))
+          #end
+           #if(type == 11)
+            TO_DAYS(update_time) >= TO_DAYS(#para(startTime))
+            TO_DAYS(update_time) <= TO_DAYS(#para(endTime))
+          #end
+       ) as cct on cau.user_id = cct.owner_user_id
        left join 72crm_admin_dept as cad on cad.dept_id = cau.dept_id
+       left join 72crm_admin_record as a on cct.customer_id = a.types_id and a.types = 'crm_customer'
       WHERE
-         cct.owner_user_id in (
+         cau.user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
          #end
          )
-        #if(type == 1)
-          and to_days(NOW()) = TO_DAYS(update_time)
-          #end
-           #if(type == 2)
-          and to_days(NOW()) - TO_DAYS(update_time) = 1
-          #end
-           #if(type == 3)
-          and YEARWEEK(date_format(update_time,'%Y-%m-%d')) = YEARWEEK(now())
-          #end
-           #if(type == 4)
-          and YEARWEEK(date_format(update_time,'%Y-%m-%d')) = YEARWEEK(now()) -1
-          #end
-           #if(type == 5)
-          and date_format(update_time,'%Y-%m')=date_format(now(),'%Y-%m')
-          #end
-           #if(type == 6)
-          and date_format(update_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
-          #end
-           #if(type == 7)
-          and QUARTER(update_time)=QUARTER(now()) AND YEAR(update_time)=YEAR(NOW())
-          #end
-           #if(type == 8)
-          and QUARTER(update_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(update_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER))
-          #end
-           #if(type == 9)
-          and YEAR(update_time)=YEAR(NOW())
-          #end
-           #if(type == 10)
-          and YEAR(update_time)=YEAR(date_sub(now(),interval 1 year))
-          #end
-           #if(type == 11)
-            and  TO_DAYS(update_time) >= TO_DAYS(#para(startTime))
-            and  TO_DAYS(update_time) <= TO_DAYS(#para(endTime))
-          #end
-        GROUP BY cct.owner_user_id
-        ORDER BY count(1) DESC
+        GROUP BY cau.user_id
+        ORDER BY count(a.record_id) DESC
   #end
   #sql ("recordCountRanKing")
       SELECT count(1) as `count`,cau.realname,ccr.create_user_id,cad.name as structureName
@@ -403,7 +404,7 @@
       LEFT JOIN 72crm_crm_product as ccp on ccp.product_id = cccp.product_id
       LEFT JOIN 72crm_crm_product_category as ccpc ON ccpc.category_id = ccp.category_id
       WHERE
-        check_status = 2
+        check_status = 1
         and  cct.owner_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
@@ -507,7 +508,7 @@
       LEFT JOIN 72crm_crm_product_category as ccpc ON ccp.category_id = ccpc.category_id
       LEFT JOIN 72crm_admin_user as cau on cau.user_id = cct.owner_user_id
       where
-          cct.check_status = 2
+          cct.check_status = 1
         and  cct.owner_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
@@ -550,17 +551,17 @@
       #end
       #sql("addressAnalyse")
         SELECT  COUNT(1) as allCustomer,
-        ifnull((SELECT COUNT(1) FROM 72crm_crm_customer where deal_status = '已成交' and left(address,INSTR(address, ',') - 1) = left(ccc.address,INSTR(ccc.address, ',') - 1)) ,0)as dealCustomer,
+        ifnull((SELECT COUNT(1) FROM 72crm_crm_customer where deal_status = 0 and left(address,INSTR(address, ',') - 1) = left(ccc.address,INSTR(ccc.address, ',') - 1)) ,0)as dealCustomer,
         #para(address) as address
         FROM 72crm_crm_customer as ccc
         where  left(ccc.address,INSTR(ccc.address, ',') - 1) like concat('%',#para(address),'%')
       #end
        #sql("portrait")
         SELECT count(*) as allCustomer,
-        sum(case when a.deal_status = '已成交' then 1 else 0 end) as dealCustomer,
-        (case when (b.`value` = '' or b.value is null) then '未知' else b.`value` end) as industry
+        sum(a.deal_status) as dealCustomer,
+        (case when (IFNULL(b.`value`,'') = '') then '未知' else b.`value` end) as industry
         FROM 72crm_crm_customer as a
-        INNER JOIN 72crm_admin_fieldv as b on a.batch_id=b.batch_id and b.`name`='客户行业'
+        LEFT JOIN 72crm_admin_fieldv as b on a.batch_id=b.batch_id and b.`name`='客户行业'
          where   a.owner_user_id in (
          #for(i : userIds)
             #(for.index > 0 ? "," : "")#para(i)
@@ -600,12 +601,12 @@
             and  TO_DAYS(a.create_time) >= TO_DAYS(#para(startTime))
             and  TO_DAYS(a.create_time) <= TO_DAYS(#para(endTime))
           #end
-        GROUP BY b.value
+        GROUP BY IFNULL(b.value,'')
        #end
        #sql("portraitLevel")
          SELECT count(*) as allCustomer,
-        sum(case when a.deal_status = '已成交' then 1 else 0 end) as dealCustomer,
-        (case when (b.`value` = '') then '未知' else b.`value` end) as level
+        sum(a.deal_status) as dealCustomer,
+        (case when (IFNULL(b.`value`,'') = '') then '未知' else b.`value` end) as level
         FROM 72crm_crm_customer as a
         LEFT JOIN 72crm_admin_fieldv as b on a.batch_id=b.batch_id and b.`name`='客户级别'
         where   a.owner_user_id in (
@@ -647,12 +648,12 @@
             and  TO_DAYS(a.create_time) >= TO_DAYS(#para(startTime))
             and  TO_DAYS(a.create_time) <= TO_DAYS(#para(endTime))
           #end
-        GROUP BY b.`value`
+        GROUP BY IFNULL(b.value,'')
        #end
        #sql("portraitSource")
         SELECT count(*) as allCustomer,
-        sum(case when a.deal_status = '已成交' then 1 else 0 end) as dealCustomer,
-        (case when (b.`value` = '') then '未知' else b.`value` end) as source
+        sum(a.deal_status) as dealCustomer,
+        (case when (IFNULL(b.`value`,'') = '') then '未知' else b.`value` end) as source
         FROM 72crm_crm_customer as a
         LEFT JOIN 72crm_admin_fieldv as b on a.batch_id=b.batch_id and b.`name`='客户来源'
           where   a.owner_user_id in (
@@ -694,6 +695,6 @@
             and  TO_DAYS(a.create_time) >= TO_DAYS(#para(startTime))
             and  TO_DAYS(a.create_time) <= TO_DAYS(#para(endTime))
           #end
-        GROUP BY b.value
+        GROUP BY IFNULL(b.value,'')
        #end
 #end

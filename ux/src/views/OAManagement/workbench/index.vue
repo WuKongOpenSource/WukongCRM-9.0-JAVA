@@ -1,27 +1,35 @@
 <template>
   <div class="workbench">
     <div class="tabs-box">
-      <el-tabs v-model="activeName"
-               @tab-click="tabClick"
-               v-loading="loading">
-        <el-tab-pane :label="item.label"
-                     :name="item.key"
-                     v-for="(item, index) in tabsData"
-                     :key="index">
-          <tab-journal v-if="activeName == '1'"
-                       :journalData="listData">
-            <p class="load"
-               slot="load">
-              <el-button type="text"
-                         :loading="loadMoreLoading">{{loadText}}</el-button>
+      <el-tabs
+        v-loading="loading"
+        v-model="activeName"
+        @tab-click="tabClick">
+        <el-tab-pane
+          v-for="(item, index) in tabsData"
+          :label="item.label"
+          :name="item.key"
+          :key="index">
+          <tab-journal
+            v-if="activeName == '1'"
+            :journal-data="listData">
+            <p
+              slot="load"
+              class="load">
+              <el-button
+                :loading="loadMoreLoading"
+                type="text">{{ loadText }}</el-button>
             </p>
           </tab-journal>
-          <tabs-content v-else
-                        :listData="listData">
-            <p class="load"
-               slot="workbenchLoad">
-              <el-button type="text"
-                         :loading="loadMoreLoading">{{loadText}}</el-button>
+          <tabs-content
+            v-else
+            :list-data="listData">
+            <p
+              slot="workbenchLoad"
+              class="load">
+              <el-button
+                :loading="loadMoreLoading"
+                type="text">{{ loadText }}</el-button>
             </p>
           </tabs-content>
         </el-tab-pane>
@@ -29,14 +37,13 @@
     </div>
     <div class="right-content">
       <div class="task">
-        <v-task>
-        </v-task>
+        <v-task/>
       </div>
       <div class="schedule">
-        <v-schedule v-loading="scheduleLoading"
-                    :calendarArr="calendarArr"
-                    @changeMonth="changeMonth">
-        </v-schedule>
+        <v-schedule
+          v-loading="scheduleLoading"
+          :calendar-arr="calendarArr"
+          @changeMonth="changeMonth"/>
       </div>
     </div>
   </div>
@@ -86,7 +93,7 @@ export default {
     // 日程
     eventList({ month: moment(new Date()).format('YYYY-MM') })
       .then(res => {
-        for (let item of res.data) {
+        for (const item of res.data) {
           if (item.status == 1) {
             item.className = 'mark1'
           }
@@ -94,15 +101,15 @@ export default {
         this.calendarArr = res.data
         this.scheduleLoading = false
       })
-      .catch(err => {
+      .catch(() => {
         this.scheduleLoading = false
       })
     this.workbenchData(this.activeName, this.pageNum)
     // 分批次加载
-    for (let dom of document.getElementsByClassName('el-tabs__content')) {
+    for (const dom of document.getElementsByClassName('el-tabs__content')) {
       dom.onscroll = () => {
-        let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
-        //滚动条到底部的条件
+        const scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+        // 滚动条到底部的条件
         if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
           if (!this.isPost) {
             this.isPost = true
@@ -121,11 +128,11 @@ export default {
       workbenchList({
         type: type,
         page: page,
-        limit: 15
+        limit: 5
       })
         .then(res => {
           this.listData = this.listData.concat(res.data.list)
-          if (res.data.list.length < 15) {
+          if (res.data.lastPage === true) {
             this.loadText = '没有更多了'
             this.loadMoreLoading = false
           } else {
@@ -135,7 +142,7 @@ export default {
           this.isPost = false
           this.loading = false
         })
-        .catch(err => {
+        .catch(() => {
           this.loadText = ''
           this.loading = false
           this.isPost = false
@@ -154,7 +161,7 @@ export default {
       this.scheduleLoading = true
       eventList({ month: moment(monthDate).format('YYYY-MM') })
         .then(res => {
-          for (let item of res.data) {
+          for (const item of res.data) {
             if (item.status == 1) {
               item.className = 'mark1'
             }
@@ -163,12 +170,12 @@ export default {
           this.scheduleLoading = false
           // 切换月份去掉背景
           this.$nextTick(() => {
-            for (let item of document.getElementsByClassName('wh_item_date')) {
+            for (const item of document.getElementsByClassName('wh_item_date')) {
               item.classList.remove('wh_chose_day')
             }
           })
         })
-        .catch(err => {
+        .catch(() => {
           this.scheduleLoading = false
         })
     }

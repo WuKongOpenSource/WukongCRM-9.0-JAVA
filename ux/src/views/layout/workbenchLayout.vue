@@ -1,42 +1,51 @@
 <template>
   <el-container>
     <el-header class="nav-container">
-      <navbar :navIndex="0"
-              @nav-items-click="navClick"></navbar>
+      <navbar
+        :nav-index="0"
+        @nav-items-click="navClick"/>
     </el-header>
     <el-container>
-      <el-aside width="auto"
-                class="aside-container">
-        <sidebar :items="sidebarItems"
-                 createButtonTitle="快速创建"
-                 mainRouter="workbench">
-          <div slot="add"
-               class="quick-add">
+      <el-aside
+        width="auto"
+        class="aside-container">
+        <sidebar
+          :items="sidebarItems"
+          create-button-title="快速创建"
+          main-router="workbench">
+          <div
+            slot="add"
+            class="quick-add">
             <div class="quick-add-content">
-              <p v-for="(item, index) in list"
-                 :key="index"
-                 @click="addSkip(item)">
-                <i class="wukong"
-                   :class="'wukong-' + item.icon"></i>
-                <span>{{item.label}}</span>
+              <p
+                v-for="(item, index) in list"
+                :key="index"
+                @click="addSkip(item)">
+                <i
+                  :class="'wukong-' + item.icon"
+                  class="wukong"/>
+                <span>{{ item.label }}</span>
               </p>
             </div>
           </div>
         </sidebar>
       </el-aside>
-      <el-main id="workbench-main-container"
-               style="padding:15px;">
-        <app-main></app-main>
+      <el-main
+        id="workbench-main-container"
+        style="padding:15px;">
+        <app-main/>
       </el-main>
     </el-container>
-    <examine-category-select :show="showCategorySelect"
-                             @select="selcetExamineCategory"
-                             @close="showCategorySelect=false"></examine-category-select>
-    <examine-create-view v-if="isCreate"
-                         :categoryId="createInfo.categoryId"
-                         :type="createInfo.type"
-                         :categoryTitle="createInfo.title"
-                         @hiden-view="isCreate = false"></examine-create-view>
+    <examine-category-select
+      :show="showCategorySelect"
+      @select="selcetExamineCategory"
+      @close="showCategorySelect=false"/>
+    <examine-create-view
+      v-if="isCreate"
+      :category-id="createInfo.categoryId"
+      :type="createInfo.type"
+      :category-title="createInfo.title"
+      @hiden-view="isCreate = false"/>
   </el-container>
 </template>
 
@@ -89,7 +98,7 @@ export default {
       ],
       // 新建
       showCategorySelect: false,
-      isCreate: false, //是创建
+      isCreate: false, // 是创建
       createInfo: {} // 创建所需要的id 标题名信息
     }
   },
@@ -97,7 +106,7 @@ export default {
   computed: {
     ...mapGetters(['messageOANum', 'oaRouters']),
     sidebarItems() {
-      let workbenchMenus = this.oaRouters.children
+      const workbenchMenus = this.oaRouters.children
       for (let index = 0; index < workbenchMenus.length; index++) {
         const messageItem = workbenchMenus[index]
         if (messageItem.numType) {
@@ -119,19 +128,19 @@ export default {
     addSkip(val) {
       switch (val.label) {
         case '日志':
-          this.$router.push({ path: 'journal', query: { routerKey: 1 } })
+          this.$router.push({ path: 'journal', query: { routerKey: 1 }})
           break
         case '审批':
           this.showCategorySelect = true
           break
         case '任务':
-          this.$router.push({ path: 'task', query: { routerKey: 1 } })
+          this.$router.push({ path: 'task', query: { routerKey: 1 }})
           break
         case '日程':
-          this.$router.push({ path: 'schedule-new', query: { routerKey: 1 } })
+          this.$router.push({ path: 'schedule-new', query: { routerKey: 1 }})
           break
         case '公告':
-          this.$router.push({ path: 'notice-new', query: { routerKey: 1 } })
+          this.$router.push({ path: 'notice-new', query: { routerKey: 1 }})
           break
       }
     },

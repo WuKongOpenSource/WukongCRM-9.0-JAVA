@@ -1,7 +1,6 @@
 package com.kakarote.crm9.common.config;
 
 import cn.hutool.core.util.ClassLoaderUtil;
-import com.alibaba.druid.wall.WallFilter;
 import com.jfinal.aop.Aop;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.druid.DruidConfig;
@@ -16,9 +15,7 @@ import com.kakarote.crm9.common.interceptor.AuthInterceptor;
 import com.kakarote.crm9.common.interceptor.ErpInterceptor;
 import com.kakarote.crm9.erp._MappingKit;
 import com.kakarote.crm9.erp.admin.common.AdminRouter;
-import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.bi.common.BiRouter;
-import com.kakarote.crm9.erp.crm.common.CrmDirective;
 import com.kakarote.crm9.erp.crm.common.CrmRouter;
 import com.kakarote.crm9.erp.oa.common.OaRouter;
 import com.kakarote.crm9.erp.work.common.WorkRouter;
@@ -45,7 +42,6 @@ import java.util.Map;
 public class JfinalConfig extends JFinalConfig {
 
     public final static Prop prop = PropKit.use("config/crm9-config.txt");
-
     /**
      * 配置常量
      */
@@ -77,7 +73,7 @@ public class JfinalConfig extends JFinalConfig {
 
     @Override
     public void configEngine(Engine me) {
-        me.addSharedMethod(new com.jfinal.kit.StrKit());
+
     }
 
     /**
@@ -102,7 +98,7 @@ public class JfinalConfig extends JFinalConfig {
         arp.setCache(CaffeineCache.ME);
         arp.setDialect(new MysqlDialect());
         arp.setShowSql(true);
-        arp.getEngine().addDirective("CrmAuth", CrmDirective.class);
+        arp.getEngine().addDirective("fori", CrmDirective.class,true);
         me.add(arp);
         //扫描sql模板
         getSqlTemplate(PathKit.getRootClassPath() + "/template", arp);

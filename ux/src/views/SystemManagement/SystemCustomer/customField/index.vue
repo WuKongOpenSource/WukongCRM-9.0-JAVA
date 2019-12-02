@@ -2,37 +2,43 @@
   <div class="system-customer">
     <div class="title">客户管理</div>
     <div class="customer-content">
-      <div v-loading="loading"
-           class="system-view-table">
+      <div
+        v-loading="loading"
+        class="system-view-table">
         <div class="content-title">
           <span>自定义字段设置</span>
         </div>
         <div class="table-box">
-          <div v-for="(item, index) in tableList"
-               :key="index"
-               class="table-list">
-            <img class="table-item-icon"
-                 :src="getCustomFieldIcon(item.types)" />
-            <div class="table-item-label">{{item.name}}</div>
-            <div class="table-item-time">{{item.updateTime == 0 ? '暂无' : item.updateTime}}更新</div>
+          <div
+            v-for="(item, index) in tableList"
+            :key="index"
+            class="table-list">
+            <img
+              :src="getCustomFieldIcon(item.types)"
+              class="table-item-icon" >
+            <div class="table-item-label">{{ item.name }}</div>
+            <div class="table-item-time">{{ item.updateTime == 0 ? '暂无' : item.updateTime }}更新</div>
             <div class="table-right-btn">
-              <el-button style="font-weight: 400;"
-                         @click="handleCustomField('edit', item, index)"
-                         type="text">编 辑</el-button>
-              <el-button style="font-weight: 400;"
-                         @click="handleCustomField('preview', item, index)"
-                         type="text">预 览</el-button>
+              <el-button
+                style="font-weight: 400;"
+                type="text"
+                @click="handleCustomField('edit', item, index)">编 辑</el-button>
+              <el-button
+                style="font-weight: 400;"
+                type="text"
+                @click="handleCustomField('preview', item, index)">预 览</el-button>
             </div>
           </div>
         </div>
       </div>
     </div>
     <!-- 表单预览 -->
-    <preview-field-view v-if="showTablePreview"
-                        :types="tablePreviewData.types"
-                        :typesId="tablePreviewData.typesId"
-                        :label="tablePreviewData.label"
-                        @hiden-view="showTablePreview=false"></preview-field-view>
+    <preview-field-view
+      v-if="showTablePreview"
+      :types="tablePreviewData.types"
+      :types-id="tablePreviewData.typesId"
+      :label="tablePreviewData.label"
+      @hiden-view="showTablePreview=false"/>
   </div>
 </template>
 
@@ -41,7 +47,7 @@ import { customFieldIndex } from '@/api/systemManagement/SystemCustomer'
 import PreviewFieldView from '@/views/SystemManagement/components/previewFieldView'
 
 export default {
-  name: 'custom-field',
+  name: 'CustomField',
 
   components: {
     PreviewFieldView

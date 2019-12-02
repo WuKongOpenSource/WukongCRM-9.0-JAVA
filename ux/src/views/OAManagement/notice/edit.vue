@@ -1,46 +1,53 @@
 <template>
   <create-view :body-style="{height: '100%'}">
-    <div class="details-box"
-         v-loading="loading">
-      <div slot="header"
-           class="header">
+    <div
+      v-loading="loading"
+      class="details-box">
+      <div
+        slot="header"
+        class="header">
         <span class="text">编辑公告</span>
-        <img class="el-icon-close rt"
-             src="@/assets/img/task_close.png"
-             @click="close"
-             alt="">
+        <img
+          class="el-icon-close rt"
+          src="@/assets/img/task_close.png"
+          alt=""
+          @click="close">
       </div>
       <div class="content">
-        <el-form ref="form"
-                 :model="formData"
-                 :rules="rules">
-          <el-form-item :label="item.label"
-                        :class="'el-form-item' + item.field"
-                        :prop="item.field"
-                        v-for="(item, index) in formList"
-                        :key="index">
+        <el-form
+          ref="form"
+          :model="formData"
+          :rules="rules">
+          <el-form-item
+            v-for="(item, index) in formList"
+            :label="item.label"
+            :class="'el-form-item' + item.field"
+            :prop="item.field"
+            :key="index">
             <template v-if="item.type == 'date'">
-              <el-date-picker v-model="formData[item.field]"
-                              type="date"
-                              value-format="yyyy-MM-dd"
-                              placeholder="选择日期">
-              </el-date-picker>
+              <el-date-picker
+                v-model="formData[item.field]"
+                type="date"
+                value-format="yyyy-MM-dd"
+                placeholder="选择日期"/>
             </template>
             <template v-else-if="item.type == 'textarea'">
-              <el-input type="textarea"
-                        autosize
-                        placeholder="请输入内容"
-                        v-model="formData[item.field]">
-              </el-input>
+              <el-input
+                v-model="formData[item.field]"
+                type="textarea"
+                autosize
+                placeholder="请输入内容"/>
             </template>
-            <el-input v-else
-                      v-model="formData[item.field]"></el-input>
+            <el-input
+              v-else
+              v-model="formData[item.field]"/>
           </el-form-item>
         </el-form>
       </div>
       <div class="btn-box">
-        <el-button type="primary"
-                   @click="onSubmit">提交</el-button>
+        <el-button
+          type="primary"
+          @click="onSubmit">提交</el-button>
         <el-button @click="close">取消</el-button>
       </div>
     </div>
@@ -54,6 +61,10 @@ import { formatTimeToTimestamp } from '@/utils/index'
 export default {
   components: {
     CreateView
+  },
+  props: {
+    formData: Object,
+    loading: Boolean
   },
   data() {
     var validateTime = (rule, value, callback) => {
@@ -101,10 +112,6 @@ export default {
         ]
       }
     }
-  },
-  props: {
-    formData: Object,
-    loading: Boolean
   },
   methods: {
     onSubmit() {

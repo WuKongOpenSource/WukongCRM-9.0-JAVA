@@ -1,33 +1,35 @@
 <template>
-  <div v-loading="loading"
-       class="main-container">
-    <filtrate-handle-view class="filtrate-bar"
-                          moduleType="customer"
-                          :showCustomSelect="true"
-                          :customDefault="showType"
-                          :customOptions="[{name:'饼状图', value: 'pie'},{name:'柱状图', value: 'bar'}]"
-                          @load="loading=true"
-                          @change="getDataList"
-                          @typeChange="showTypeChange">
-    </filtrate-handle-view>
+  <div
+    v-loading="loading"
+    class="main-container">
+    <filtrate-handle-view
+      :show-custom-select="true"
+      :custom-default="showType"
+      :custom-options="[{name:'饼状图', value: 'pie'},{name:'柱状图', value: 'bar'}]"
+      class="filtrate-bar"
+      module-type="customer"
+      @load="loading=true"
+      @change="getDataList"
+      @typeChange="showTypeChange"/>
     <div class="content">
       <div class="axis-content">
-        <div id="axismain"></div>
+        <div id="axismain"/>
       </div>
       <div class="table-content">
-        <el-table :data="list"
-                  height="400"
-                  stripe
-                  border
-                  highlight-current-row>
-          <el-table-column v-for="(item, index) in fieldList"
-                           :key="index"
-                           align="center"
-                           header-align="center"
-                           show-overflow-tooltip
-                           :prop="item.field"
-                           :label="item.name">
-          </el-table-column>
+        <el-table
+          :data="list"
+          height="400"
+          stripe
+          border
+          highlight-current-row>
+          <el-table-column
+            v-for="(item, index) in fieldList"
+            :key="index"
+            :prop="item.field"
+            :label="item.name"
+            align="center"
+            header-align="center"
+            show-overflow-tooltip/>
         </el-table>
       </div>
     </div>
@@ -41,7 +43,8 @@ import { biCustomerRecordModeAPI } from '@/api/businessIntelligence/customer'
 
 export default {
   /** 客户跟进方式分析 */
-  name: 'customer-record-mode-statistics',
+  name: 'CustomerRecordModeStatistics',
+  mixins: [base],
   data() {
     return {
       loading: false,
@@ -60,7 +63,6 @@ export default {
       ]
     }
   },
-  mixins: [base],
   computed: {},
   mounted() {
     this.initPie()
@@ -85,9 +87,9 @@ export default {
           this.loading = false
           this.list = res.data || []
 
-          let pieData = []
-          let axisData = []
-          let legendData = []
+          const pieData = []
+          const axisData = []
+          const legendData = []
           for (let index = 0; index < this.list.length; index++) {
             const element = this.list[index]
             pieData.push({ name: element.category, value: element.proportion })

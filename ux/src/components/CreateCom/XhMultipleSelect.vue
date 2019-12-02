@@ -1,24 +1,29 @@
 <template>
-  <el-select style="width: 100%;"
-             v-model="dataValue"
-             @change="valueChange"
-             multiple
-             placeholder="请选择"
-             :disabled="disabled">
-    <el-option v-for="item in option"
-               :key="item.value"
-               :label="item.value"
-               :value="item.value">
-    </el-option>
+  <el-select
+    v-model="dataValue"
+    :disabled="disabled"
+    style="width: 100%;"
+    multiple
+    placeholder="请选择"
+    @change="valueChange">
+    <el-option
+      v-for="item in option"
+      :key="item.value"
+      :label="item.value"
+      :value="item.value"/>
   </el-select>
 </template>
 <script type="text/javascript">
 import arrayMixin from './arrayMixin'
 
 export default {
-  name: 'xh-multiple-select', // 新建 multiple select
+  name: 'XhMultipleSelect', // 新建 multiple select
   components: {},
   mixins: [arrayMixin],
+  props: {},
+  data() {
+    return {}
+  },
   computed: {
     option() {
       var array = []
@@ -32,10 +37,6 @@ export default {
     }
   },
   watch: {},
-  data() {
-    return {}
-  },
-  props: {},
   mounted() {},
   methods: {}
 }

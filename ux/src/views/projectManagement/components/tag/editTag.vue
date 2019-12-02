@@ -1,31 +1,38 @@
 <template>
   <div class="edit-tag-dialog">
     <div class="title">
-      <span class="el-icon-arrow-left"
-            @click="back"></span>
+      <span
+        class="el-icon-arrow-left"
+        @click="back"/>
       <span>标签管理</span>
-      <span class="el-icon-close rt"
-            @click="close"></span>
+      <span
+        class="el-icon-close rt"
+        @click="close"/>
     </div>
     <div class="search">
-      <el-input size="mini"
-                v-model="inputModel"
-                :maxlength="10"
-                placeholder="输入标签名，最多十个字符"></el-input>
+      <el-input
+        v-model="inputModel"
+        :maxlength="10"
+        size="mini"
+        placeholder="输入标签名，最多十个字符"/>
     </div>
     <div class="content">
-      <div v-for="(item, index) in list"
-           :key="index"
-           class="tag-list">
-        <span :style="{'background': item.color ? item.color: '#ccc'}"
-              class="tag-name">
-          {{item.name.length > 10 ? item.name.substring(0, 10) + '...' : item.name}}
+      <div
+        v-for="(item, index) in list"
+        :key="index"
+        class="tag-list">
+        <span
+          :style="{'background': item.color ? item.color: '#ccc'}"
+          class="tag-name">
+          {{ item.name.length > 10 ? item.name.substring(0, 10) + '...' : item.name }}
         </span>
         <div class="rt">
-          <span class="el-icon-edit"
-                @click="editBtn(item)"></span>
-          <span class="el-icon-delete"
-                @click="deleteBtn(item)"></span>
+          <span
+            class="el-icon-edit"
+            @click="editBtn(item)"/>
+          <span
+            class="el-icon-delete"
+            @click="deleteBtn(item)"/>
         </div>
       </div>
     </div>
@@ -34,14 +41,14 @@
 
 <script>
 export default {
+  props: {
+    editTagList: Array
+  },
   data() {
     return {
       inputModel: '',
       list: this.editTagList
     }
-  },
-  props: {
-    editTagList: Array
   },
   watch: {
     inputModel: function(newVal) {

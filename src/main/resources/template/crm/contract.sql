@@ -53,7 +53,8 @@
     #end
     #sql ("queryByContractId")
       select crt.*,ccc.customer_name,cau.realname as ownerUserName,ccb.business_name,a.name as contacts_name,b.realname as company_user_name,
-      ( select IFNULL(sum(money),0) from 72crm_crm_receivables where contract_id =  crt.contract_id and check_status = 2) as receivablesMoney
+      ( select count(1) from 72crm_crm_receivables where contract_id =  crt.contract_id ) as receivablesCount,
+      ( select IFNULL(sum(money),0) from 72crm_crm_receivables where contract_id =  crt.contract_id and check_status = 1) as receivablesMoney
       from 72crm_crm_contract as crt left join 72crm_admin_user as cau on crt.owner_user_id = cau.user_id
       left join 72crm_crm_customer as ccc on crt.customer_id = ccc.customer_id
       left join 72crm_crm_business as ccb on crt.business_id = ccb.business_id
@@ -81,5 +82,17 @@
     ,value = #para(contractDay)
     #end
      where name = 'expiringContractDays'
+    #end
+    #sql("queryContractByRecordId")
+      SELECT contract_id,name,owner_user_id FROM 72crm_crm_contract WHERE examine_record_id = ? limit 0,1
+    #end
+    #sql("contractDiscard")
+      update `72crm_crm_contract` set check_status = 6,update_time = now() where contract_id = #para(contractId)
+    #end
+    #sql ("queryIsAuth")
+     SELECT count(*) FROM 72crm_crm_contract WHERE owner_user_id in ( #fori(userIds) ) and contract_id = #para(contractId)
+    #end
+    #sql ("queryIsRoUser")
+    select count(*) from 72crm_crm_contract where find_in_set(?,ro_user_id) and contract_id = ?
     #end
 #end

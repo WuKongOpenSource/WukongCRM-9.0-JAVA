@@ -8,14 +8,23 @@ import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Before;
+import com.jfinal.aop.Inject;
+import com.jfinal.kit.Kv;
 import com.jfinal.log.Log;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Page;
+import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.SqlPara;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
+import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
-import com.kakarote.crm9.erp.admin.entity.AdminUser;
-import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
+import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.common.CrmParamValid;
 import com.kakarote.crm9.erp.crm.entity.CrmBusiness;
 import com.kakarote.crm9.erp.crm.entity.CrmContacts;
@@ -23,22 +32,13 @@ import com.kakarote.crm9.erp.crm.entity.CrmContactsBusiness;
 import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
 import com.kakarote.crm9.erp.oa.entity.OaEventRelation;
-import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.oa.service.OaActionRecordService;
 import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.R;
-import com.jfinal.aop.Before;
-import com.jfinal.aop.Inject;
-import com.jfinal.kit.Kv;
-import com.jfinal.plugin.activerecord.Db;
-import com.jfinal.plugin.activerecord.Page;
-import com.jfinal.plugin.activerecord.Record;
-import com.jfinal.plugin.activerecord.SqlPara;
-import com.jfinal.plugin.activerecord.tx.Tx;
+
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,9 +61,6 @@ public class CrmContactsService {
     @Inject
     private CrmParamValid crmParamValid;
 
-    @Inject
-    private AuthUtil authUtil;
-
     /**
      * @author wyq
      * 分页条件查询联系人
@@ -79,8 +76,7 @@ public class CrmContactsService {
         if (StrUtil.isEmpty(contactsName) && StrUtil.isEmpty(telephone) && StrUtil.isEmpty(mobile) && StrUtil.isEmpty(customerName)){
             return new Page<>();
         }
-        return Db.paginate(basePageRequest.getPage(),basePageRequest.getLimit(), Db.getSqlPara("crm.contact.getContactsPageList",
-                Kv.by("contactsName",contactsName).set("customerName",customerName).set("telephone",telephone).set("mobile",mobile)));
+        return Db.paginate(basePageRequest.getPage(),basePageRequest.getLimit(), Db.getSqlPara("crm.contact.getContactsPageList", Kv.by("contactsName",contactsName).set("customerName",customerName).set("telephone",telephone).set("mobile",mobile)));
     }
 
     /**
@@ -184,9 +180,9 @@ public class CrmContactsService {
         }else {
             crmContacts.setCreateTime(DateUtil.date());
             crmContacts.setUpdateTime(DateUtil.date());
-            crmContacts.setCreateUserId(BaseUtil.getUserId().intValue());
+            crmContacts.setCreateUserId(BaseUtil.getUserId());
             if (crmContacts.getOwnerUserId() == null){
-                crmContacts.setOwnerUserId(BaseUtil.getUserId().intValue());
+                crmContacts.setOwnerUserId(BaseUtil.getUserId());
             }
             crmContacts.setBatchId(batchId);
             boolean save = crmContacts.save();
@@ -242,7 +238,7 @@ public class CrmContactsService {
      * @param customerId 客户ID
      * @param ownerUserId 负责人ID
      */
-    public R updateOwnerUserId(Integer customerId,Integer ownerUserId){
+    public R updateOwnerUserId(Integer customerId,Long ownerUserId){
         List<Integer> contactsIdList = Db.query("select contacts_id from 72crm_crm_contacts where customer_id = ?",customerId);
         for (Integer contactsId : contactsIdList) {
             if (!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !AuthUtil.isRwAuth(contactsId, "contacts")) {
@@ -264,7 +260,7 @@ public class CrmContactsService {
         Record customer = new Record();
         customerList.add(customer.set("customer_id",contacts.getInt("customer_id")).set("customer_name",contacts.getStr("customer_name")));
         contacts.set("customer_id",customerList);
-        return adminFieldService.queryUpdateField(3,contacts);
+        return adminFieldService.queryUpdateField(CrmEnum.CRM_CONTACTS.getType(),contacts);
     }
 
     /**
@@ -275,18 +271,21 @@ public class CrmContactsService {
     public R addRecord(AdminRecord adminRecord){
         adminRecord.setTypes("crm_contacts");
         adminRecord.setCreateTime(DateUtil.date());
-        adminRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        adminRecord.setCreateUserId(BaseUtil.getUser().getUserId());
+        if (StrUtil.isEmpty(adminRecord.getCategory())){
+            return R.error("跟进类型不能为空");
+        }
         if (1 == adminRecord.getIsEvent()){
             OaEvent oaEvent = new OaEvent();
             oaEvent.setTitle(adminRecord.getContent());
             oaEvent.setStartTime(adminRecord.getNextTime());
             oaEvent.setEndTime(DateUtil.offsetDay(adminRecord.getNextTime(),1));
             oaEvent.setCreateTime(DateUtil.date());
-            oaEvent.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            oaEvent.setCreateUserId(BaseUtil.getUser().getUserId());
             oaEvent.save();
 
             AdminUser user = BaseUtil.getUser();
-            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),oaActionRecordService.getJoinIds(user.getDeptId(),""));
+            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId(),oaEvent.getOwnerUserIds()),oaActionRecordService.getJoinIds(Long.valueOf(user.getDeptId()),""));
             OaEventRelation oaEventRelation = new OaEventRelation();
             oaEventRelation.setEventId(oaEvent.getEventId());
             oaEventRelation.setContactsIds(","+adminRecord.getTypesId().toString()+",");
@@ -341,14 +340,13 @@ public class CrmContactsService {
      */
     public R getCheckingField(){
         return R.ok().put("data","联系人姓名,电话,手机");
-//        return R.ok().put("data",Db.getSql("crm.contacts.getCheckingField"));
     }
 
     /**
      * @author wyq
      * 导入联系人
      */
-    public R uploadExcel(UploadFile file, Integer repeatHandling, Integer ownerUserId) {
+    public R uploadExcel(UploadFile file, Integer repeatHandling, Long ownerUserId) {
         ExcelReader reader = ExcelUtil.getReader(FileUtil.file(file.getUploadPath() + "\\" + file.getFileName()));
         AdminFieldService adminFieldService = new AdminFieldService();
         Kv kv = new Kv();
@@ -356,9 +354,9 @@ public class CrmContactsService {
         try {
             List<List<Object>> read = reader.read();
             List<Object> list = read.get(1);
-            List<Record> recordList = adminFieldService.customFieldList("3");
+            List<Record> recordList = adminFieldService.customFieldList(CrmEnum.CRM_CONTACTS.getType());
             recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
-            List<Record> fieldList = adminFieldService.queryAddField(3);
+            List<Record> fieldList = adminFieldService.queryAddField(CrmEnum.CRM_CONTACTS);
             fieldList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
             fieldList.forEach(record -> {
                 if (record.getInt("is_null") == 1){
@@ -399,7 +397,7 @@ public class CrmContactsService {
                     Integer number = repeatField.getInt("number");
                     Integer customerId = Db.queryInt("select customer_id from 72crm_crm_customer where customer_name = ? limit 1",contactsList.get(kv.getInt("customer_id")));
                     if (customerId == null){
-                        return R.error("第"+errNum+1+"行填写的客户不存在");
+                        return R.error("第"+(errNum+1)+"行填写的客户不存在");
                     }
                     if (0 == number) {
                         object.fluentPut("entity", new JSONObject().fluentPut("name", contactsName)
@@ -416,7 +414,7 @@ public class CrmContactsService {
                         Record contacts = Db.findFirst(Db.getSqlPara("crm.contact.queryRepeatField",Kv.by("contactsName",contactsName).set("telephone",telephone).set("mobile",mobile)));
                         boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_CONTACTS),contacts.getInt("contacts_id"));
                         if (auth){
-                            return R.error("第"+errNum+1+"行数据无操作权限，不能覆盖");
+                            return R.error("第"+(errNum+1)+"行数据无操作权限，不能覆盖");
                         }
                         object.fluentPut("entity", new JSONObject().fluentPut("contacts_id", contacts.getInt("contacts_id"))
                                 .fluentPut("name", contactsName)

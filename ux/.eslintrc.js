@@ -10,6 +10,11 @@ module.exports = {
     es6: true,
   },
   extends: ['plugin:vue/recommended', 'eslint:recommended'],
+  globals: {
+    "BMap": "readonly",
+    "BMAP_STATUS_SUCCESS": "readonly",
+    "fullcalendar": "readonly"
+  },
 
   // add your custom rules here
   //it is base on https://github.com/vuejs/eslint-config-vue
@@ -17,11 +22,16 @@ module.exports = {
     "vue/max-attributes-per-line": [2, {
       "singleline": 10,
       "multiline": {
-        "max": 1,
+        "max": 10,
         "allowFirstLine": false
       }
     }],
+    "vue/html-closing-bracket-newline": [
+      "off"
+    ],
     "vue/name-property-casing": ["error", "PascalCase"],
+    'vue/no-v-html': 0,
+    'vue/require-default-prop': 0,
     'accessor-pairs': 2,
     'arrow-spacing': [2, {
       'before': true,
@@ -44,16 +54,16 @@ module.exports = {
     'curly': [2, 'multi-line'],
     'dot-location': [2, 'property'],
     'eol-last': 2,
-    'eqeqeq': [2, 'allow-null'],
+    'eqeqeq': [0, 'allow-null'],
     'generator-star-spacing': [2, {
       'before': true,
       'after': true
     }],
     'handle-callback-err': [2, '^(err|error)$'],
-    'indent': [0, 2, {
+    'indent': [2, 2, {
       'SwitchCase': 1
     }],
-    'jsx-quotes': [0, 'prefer-single'],
+    'jsx-quotes': [2, 'prefer-single'],
     'key-spacing': [2, {
       'beforeColon': false,
       'afterColon': true
@@ -74,7 +84,7 @@ module.exports = {
     'no-cond-assign': 2,
     'no-const-assign': 2,
     'no-control-regex': 2,
-    'no-delete-var': 2,
+    'no-delete-var': 0,
     'no-dupe-args': 2,
     'no-dupe-class-members': 2,
     'no-dupe-keys': 2,
@@ -91,7 +101,7 @@ module.exports = {
     'no-floating-decimal': 2,
     'no-func-assign': 2,
     'no-implied-eval': 2,
-    'no-inner-declarations': [0, 'functions'],
+    'no-inner-declarations': [2, 'functions'],
     'no-invalid-regexp': 2,
     'no-irregular-whitespace': 2,
     'no-iterator': 2,
@@ -104,8 +114,8 @@ module.exports = {
     'no-mixed-spaces-and-tabs': 2,
     'no-multi-spaces': 2,
     'no-multi-str': 2,
-    'no-multiple-empty-lines': [2, {
-      'max': 1
+    'no-multiple-empty-lines': [1, {
+      'max': 10
     }],
     'no-native-reassign': 2,
     'no-negated-in-lhs': 2,
@@ -118,7 +128,7 @@ module.exports = {
     'no-octal-escape': 2,
     'no-path-concat': 2,
     'no-proto': 2,
-    'no-redeclare': 2,
+    'no-redeclare': 0,
     'no-regex-spaces': 2,
     'no-return-assign': [2, 'except-parens'],
     'no-self-assign': 2,
@@ -159,7 +169,7 @@ module.exports = {
       }
     }],
     'padded-blocks': [2, 'never'],
-    'quotes': [0, 'single', {
+    'quotes': [2, 'single', {
       'avoidEscape': true,
       'allowTemplateLiterals': true
     }],
@@ -190,7 +200,6 @@ module.exports = {
     'object-curly-spacing': [2, 'always', {
       objectsInObjects: false
     }],
-    'array-bracket-spacing': [2, 'never']
+    'array-bracket-spacing': [2, 'never'],
   }
 }
-

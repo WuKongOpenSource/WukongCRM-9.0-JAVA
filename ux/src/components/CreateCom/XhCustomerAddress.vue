@@ -2,31 +2,35 @@
   <flexbox align="stretch">
     <flexbox-item style="margin-right: 50px;">
       <div class="area-title">定位</div>
-      <el-autocomplete style="width: 100%;"
-                       v-model="searchInput"
-                       :fetch-suggestions="querySearchAsync"
-                       placeholder="请输入详细位置名称"
-                       @blur="inputBlur"
-                       @focus="inputFocus"
-                       @select="handleSelect">
+      <el-autocomplete
+        v-model="searchInput"
+        :fetch-suggestions="querySearchAsync"
+        style="width: 100%;"
+        placeholder="请输入详细位置名称"
+        @blur="inputBlur"
+        @focus="inputFocus"
+        @select="handleSelect">
         <template slot-scope="{ item }">
-          <div class="name">{{ item.address + item.title}}</div>
+          <div class="name">{{ item.address + item.title }}</div>
         </template>
       </el-autocomplete>
-      <div id="choicemap"
-           class="map"></div>
+      <div
+        id="choicemap"
+        class="map"/>
       <div class="area-title">详细地址</div>
-      <el-input v-model="detailAddress"
-                placeholder=""></el-input>
+      <el-input
+        v-model="detailAddress"
+        placeholder=""/>
     </flexbox-item>
     <flexbox-item>
       <div class="area-title">省/市/区</div>
-      <v-distpicker :province="addressSelect.province"
-                    :city="addressSelect.city"
-                    :area="addressSelect.area"
-                    @province="selectProvince"
-                    @city="selectCity"
-                    @area="selectArea"></v-distpicker>
+      <v-distpicker
+        :province="addressSelect.province"
+        :city="addressSelect.city"
+        :area="addressSelect.area"
+        @province="selectProvince"
+        @city="selectCity"
+        @area="selectArea"/>
     </flexbox-item>
   </flexbox>
 </template>
@@ -34,18 +38,21 @@
 import VDistpicker from 'v-distpicker'
 
 export default {
-  name: 'xh-customer-address', // 新建 客户位置
+  name: 'XhCustomerAddress', // 新建 客户位置
   components: {
     VDistpicker
   },
-  computed: {},
-  watch: {
-    pointAddress: function(newValue) {
-      this.valueChange()
+  props: {
+    value: {
+      type: Object,
+      default: () => {
+        return {}
+      }
     },
-    detailAddress: function(newValue) {
-      this.valueChange()
-    }
+    /** 索引值 用于更新数据 */
+    index: Number,
+    /** 包含数据源 */
+    item: Object
   },
   data() {
     return {
@@ -66,17 +73,14 @@ export default {
       canExecute: true
     }
   },
-  props: {
-    value: {
-      type: Object,
-      default: () => {
-        return {}
-      }
+  computed: {},
+  watch: {
+    pointAddress: function(newValue) {
+      this.valueChange()
     },
-    /** 索引值 用于更新数据 */
-    index: Number,
-    /** 包含数据源 */
-    item: Object
+    detailAddress: function(newValue) {
+      this.valueChange()
+    }
   },
   mounted() {
     var map = new BMap.Map('choicemap', { enableMapClick: false })

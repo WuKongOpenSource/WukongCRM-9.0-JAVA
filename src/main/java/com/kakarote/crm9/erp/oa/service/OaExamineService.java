@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
@@ -16,6 +17,7 @@ import com.jfinal.plugin.activerecord.SqlPara;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
+import com.kakarote.crm9.erp.admin.common.AdminMessageEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminExamineLog;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
@@ -74,16 +76,16 @@ public class OaExamineService{
     public void transfer(List<Record> recordList){
         recordList.forEach(record -> {
             setRelation(record);
-            record.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", record.getInt("create_user_id")));
+            record.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", record.getLong("create_user_id")));
             String batchId = record.getStr("batch_id");
             adminFileService.queryByBatchId(batchId, record);
             setCountRecord(record);
             List<Integer> roles = BaseUtil.getUser().getRoles();
             Map<String,Integer> permission = new HashMap<>();
-            Integer createUserId = record.getInt("create_user_id");
+            Long createUserId = record.getLong("create_user_id");
             Integer examineStatus = record.getInt("examine_status");
             Long userId = BaseUtil.getUser().getUserId();
-            if((userId.equals(BaseConstant.SUPER_ADMIN_USER_ID) && (examineStatus == 4 || examineStatus == 2)) || (createUserId.equals(BaseUtil.getUser().getUserId().intValue()) && (examineStatus == 4 || examineStatus == 2))){
+            if((userId.equals(BaseConstant.SUPER_ADMIN_USER_ID) && (examineStatus == 4 || examineStatus == 2)) || (createUserId.equals(BaseUtil.getUser().getUserId()) && (examineStatus == 4 || examineStatus == 2))){
                 permission.put("isUpdate", 1);
             }else{
                 permission.put("isUpdate", 0);
@@ -163,7 +165,7 @@ public class OaExamineService{
         Integer recordId = null;
         //创建审批记录
         if(oaExamine.getExamineId() == null){
-            oaExamine.setCreateUserId(user.getUserId().intValue());
+            oaExamine.setCreateUserId(user.getUserId());
             oaExamine.setCreateTime(new Date());
             bol = oaExamine.save();
         }else{
@@ -202,7 +204,7 @@ public class OaExamineService{
                 checkUserIds = oaExamineStep.getCheckUserId();
             }
         }
-        if("0".equals(checkUserIds) && ! oaExamine.getCreateUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID.intValue())){
+        if("0".equals(checkUserIds) && ! oaExamine.getCreateUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID)){
             checkUserIds = BaseConstant.SUPER_ADMIN_USER_ID + "";
         }
         if(StrUtil.isEmpty(checkUserIds)){
@@ -225,7 +227,7 @@ public class OaExamineService{
                 oaExamineLog.save();
             }
         }
-        oaActionRecordService.addRecord(oaExamine.getExamineId(), OaEnum.EXAMINE_TYPE_KEY.getTypes(), oaExamine.getUpdateTime() == null ? 1 : 2, oaActionRecordService.getJoinIds(user.getUserId().intValue(), TagUtil.fromString(checkUserIds)), "");
+        oaActionRecordService.addRecord(oaExamine.getExamineId(), OaEnum.EXAMINE_TYPE_KEY.getTypes(), oaExamine.getUpdateTime() == null ? 1 : 2, oaActionRecordService.getJoinIds(user.getUserId(), TagUtil.fromString(checkUserIds)), "");
         if(jsonObject.get("oaExamineRelation") != null){
             OaExamineRelation oaExamineRelation = jsonObject.getObject("oaExamineRelation", OaExamineRelation.class);
             oaExamineRelation.setRId(null);
@@ -287,7 +289,7 @@ public class OaExamineService{
         //查询当前审批步骤
         OaExamineStep examineStep = OaExamineStep.dao.findById(examineRecord.getExamineStepId());
         //查询当前审核日志
-        Integer createUserId = examine.getCreateUserId();
+        Long createUserId = examine.getCreateUserId();
         Record log;
         if(examineCategory.getExamineType() == 1){
             log = Db.findFirst("select log_id,order_id from 72crm_oa_examine_log where record_id = ? and examine_step_id = ? and examine_user = ? and is_recheck = 0", examineRecord.getRecordId(), examineRecord.getExamineStepId(), auditUserId);
@@ -389,7 +391,7 @@ public class OaExamineService{
                             checkUserIds = nextExamineStep.getCheckUserId();
                         }
                     }
-                    if("0".equals(checkUserIds) && ! createUserId.equals(BaseConstant.SUPER_ADMIN_USER_ID.intValue())){
+                    if("0".equals(checkUserIds) && ! createUserId.equals(BaseConstant.SUPER_ADMIN_USER_ID)){
                         checkUserIds = BaseConstant.SUPER_ADMIN_USER_ID + "";
                     }
                 }
@@ -423,12 +425,13 @@ public class OaExamineService{
             }
 
         }
+
         return examineRecord.update() ? R.ok() : R.error();
     }
 
     public R queryOaExamineInfo(String id){
         Record oaExamineInfo = Db.findFirst(Db.getSql("oa.examine.queryExamineById"), id);
-        oaExamineInfo.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", oaExamineInfo.getInt("create_user_id")));
+        oaExamineInfo.set("createUser", Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", oaExamineInfo.getLong("create_user_id")));
         String batchId = oaExamineInfo.getStr("batch_id");
         setRelation(oaExamineInfo);
         Record first = Db.findFirst("select * from 72crm_oa_examine_record where examine_id = ?", id);

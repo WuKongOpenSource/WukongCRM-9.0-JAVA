@@ -52,7 +52,7 @@ export function roleList(data) {
 // 重置密码
 export function resetPassword(data) {
   return request({
-    url: 'admin/users/resetPassword',
+    url: 'system/user/resetPassword',
     method: 'post',
     data: data
   })
@@ -81,7 +81,7 @@ export function adminUsersUpdatePwd(data) {
  */
 export function adminUsersUsernameEditAPI(data) {
   return request({
-    url: 'admin/users/usernameEdit',
+    url: 'system/user/usernameEdit',
     method: 'post',
     data: data
   })

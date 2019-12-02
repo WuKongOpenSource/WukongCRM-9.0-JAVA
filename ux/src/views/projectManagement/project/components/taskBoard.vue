@@ -1,153 +1,187 @@
 <template>
-  <div class="content-box"
-       v-loading="loading">
-    <draggable :list="taskList"
-               :options="{ group: 'mission', forceFallback: false, dragClass: 'sortable-parent-drag', filter: '.ignore-elements'}"
-               handle=".board-column-wrapper"
-               @end="moveEndParentTask"
-               :move="moveParentTask"
-               id="task-board-body"
-               class="board-column-content-parent"
-               v-scrollx="{ ignoreClass :['ignoreClass']}">
-      <div class="board-column"
-           v-for="(item, index) in taskList"
-           :key="index"
-           :class="{'ignore-elements': item.classId == -1}">
-        <flexbox orient="vertical"
-                 align="stretch"
-                 class="board-column-wrapper ignoreClass">
+  <div
+    v-loading="loading"
+    class="content-box">
+    <draggable
+      v-scrollx="{ ignoreClass :['ignoreClass']}"
+      id="task-board-body"
+      :list="taskList"
+      :options="{ group: 'mission', forceFallback: false, dragClass: 'sortable-parent-drag', filter: '.ignore-elements'}"
+      :move="moveParentTask"
+      handle=".board-column-wrapper"
+      class="board-column-content-parent"
+      @end="moveEndParentTask">
+      <div
+        v-for="(item, index) in taskList"
+        :key="index"
+        :class="{'ignore-elements': item.classId == -1}"
+        class="board-column">
+        <flexbox
+          orient="vertical"
+          align="stretch"
+          class="board-column-wrapper ignoreClass">
           <div class="board-column-header">
             <div>
               <span class="text"> {{ item.className }} </span>
-              <span class="text-num">{{item.checkedNum}} / {{item.list.length}}</span>
-              <el-popover v-if="canUpdateTaskClass && item.classId != -1"
-                          placement="bottom-start"
-                          width="150"
-                          v-model="item.taskHandleShow"
-                          trigger="click">
+              <span class="text-num">{{ item.checkedNum }} / {{ item.list.length }}</span>
+              <el-popover
+                v-if="canUpdateTaskClass && item.classId != -1"
+                v-model="item.taskHandleShow"
+                placement="bottom-start"
+                width="150"
+                trigger="click">
                 <div class="omit-popover-box">
                   <!-- 重命名 -->
-                  <el-popover placement="bottom-start"
-                              width="250"
-                              v-model="item.renameShow"
-                              :visible-arrow="false"
-                              popper-class="task-board-rechristen-popover"
-                              trigger="click">
+                  <el-popover
+                    v-model="item.renameShow"
+                    :visible-arrow="false"
+                    placement="bottom-start"
+                    width="250"
+                    popper-class="task-board-rechristen-popover"
+                    trigger="click">
                     <div class="task-board-rechristen-box">
                       <div class="title">
                         <span>重命名</span>
-                        <span class="el-icon-close rt"
-                              @click="item.renameShow = false"></span>
+                        <span
+                          class="el-icon-close rt"
+                          @click="item.renameShow = false"/>
                       </div>
                       <div class="content">
-                        <el-input size="mini"
-                                  :value="item.className"
-                                  v-model="renameInput"></el-input>
+                        <el-input
+                          :value="item.className"
+                          v-model="renameInput"
+                          size="mini"/>
                         <div class="btn-box">
-                          <el-button size="mini"
-                                     type="primary"
-                                     @click="renameSubmit(item)">保存</el-button>
-                          <el-button size="mini"
-                                     @click="item.renameShow = false">取消</el-button>
+                          <el-button
+                            size="mini"
+                            type="primary"
+                            @click="renameSubmit(item)">保存</el-button>
+                          <el-button
+                            size="mini"
+                            @click="item.renameShow = false">取消</el-button>
                         </div>
                       </div>
                     </div>
-                    <p @click="renameTaskListClick(item)"
-                       slot="reference">重命名</p>
+                    <p
+                      slot="reference"
+                      @click="renameTaskListClick(item)">重命名</p>
                   </el-popover>
-                  <p v-if="canCreateTask"
-                     @click="createSubTaskClick(item)">新建任务</p>
-                  <p v-if="canUpdateTaskClass"
-                     @click="archiveTaskListClick(item)">归档已完成任务</p>
-                  <p v-if="canDeleteTaskClass"
-                     @click="delectTaskListClick(item, index)">删除列表</p>
+                  <p
+                    v-if="canCreateTask"
+                    @click="createSubTaskClick(item)">新建任务</p>
+                  <p
+                    v-if="canUpdateTaskClass"
+                    @click="archiveTaskListClick(item)">归档已完成任务</p>
+                  <p
+                    v-if="canDeleteTaskClass"
+                    @click="delectTaskListClick(item, index)">删除列表</p>
                 </div>
-                <img class="img-gd"
-                     ref="imgPopoverSlot"
-                     src="@/assets/img/project/task_ellipsis.png"
-                     slot="reference">
+                <img
+                  ref="imgPopoverSlot"
+                  slot="reference"
+                  class="img-gd"
+                  src="@/assets/img/project/task_ellipsis.png">
               </el-popover>
             </div>
-            <el-progress v-if="item.checkedNum == 0"
-                         :percentage="0"></el-progress>
-            <el-progress v-else
-                         :percentage="item.checkedNum / item.list.length * 100"></el-progress>
+            <el-progress
+              v-if="item.checkedNum == 0"
+              :percentage="0"/>
+            <el-progress
+              v-else
+              :percentage="item.checkedNum / item.list.length * 100"/>
           </div>
-          <draggable :list="item.list"
-                     :options="{ group: {
-                       name: 'missionSon',
-                       put: item.classId != -1
-                     }, forceFallback: false, dragClass: 'sortable-drag'}"
-                     @end="moveEndSonTask"
-                     class="board-column-content"
-                     :id="item.classId">
-            <div v-for="(element, i) in item.list"
-                 :key="i"
-                 :class="element.checked ? 'board-item board-item-active' : 'board-item'"
-                 :style="{'border-color': element.priority == 1 ? '#8bb5f0' : element.priority == 2 ? '#FF9668' : element.priority == 3 ? '#ED6363' : ''}"
-                 ref="taskRow"
-                 @click="showDetailView(element, index , i)">
-              <div v-if="element.mainUser"
-                   v-photo="element.mainUser"
-                   v-lazy:background-image="$options.filters.filterUserLazyImg(element.mainUser.img)"
-                   :key="element.mainUser.img"
-                   class="head-png div-photo"></div>
+          <draggable
+            :list="item.list"
+            :options="{ group: {
+              name: 'missionSon',
+              put: item.classId != -1
+            }, forceFallback: false, dragClass: 'sortable-drag'}"
+            :id="item.classId"
+            class="board-column-content"
+            @end="moveEndSonTask">
+            <div
+              v-for="(element, i) in item.list"
+              ref="taskRow"
+              :key="i"
+              :class="element.checked ? 'board-item board-item-active' : 'board-item'"
+              :style="{'border-color': element.priority == 1 ? '#8bb5f0' : element.priority == 2 ? '#FF9668' : element.priority == 3 ? '#ED6363' : ''}"
+              @click="showDetailView(element, index , i)">
+              <div
+                v-photo="element.mainUser"
+                v-lazy:background-image="$options.filters.filterUserLazyImg(element.mainUser.img)"
+                v-if="element.mainUser"
+                :key="element.mainUser.img"
+                class="head-png div-photo"/>
               <flexbox align="stretch">
-                <div @click.stop
-                     style="display: inline-block;">
-                  <el-checkbox v-model="element.checked"
-                               @change="checkboxChange(element, item)"></el-checkbox>
+                <div
+                  style="display: inline-block;"
+                  @click.stop>
+                  <el-checkbox
+                    v-model="element.checked"
+                    @change="checkboxChange(element, item)"/>
                 </div>
-                <div class="element-label">{{element.name}}</div>
+                <div class="element-label">{{ element.name }}</div>
               </flexbox>
               <div class="img-group">
-                <div class="img-box"
-                     v-if="element.stopTime">
-                  <i class="wukong wukong-time-task"
-                     :style="{'color': element.isEnd == 1 && !element.checked ? 'red': '#999'}"></i>
-                  <span :style="{'color': element.isEnd == 1 && !element.checked ? 'red': '#999'}">{{new Date(element.stopTime).getTime() | filterTimestampToFormatTime('MM-DD')}}截止</span>
+                <div
+                  v-if="element.stopTime"
+                  class="img-box">
+                  <i
+                    :style="{'color': element.isEnd == 1 && !element.checked ? 'red': '#999'}"
+                    class="wukong wukong-time-task"/>
+                  <span :style="{'color': element.isEnd == 1 && !element.checked ? 'red': '#999'}">{{ new Date(element.stopTime).getTime() | filterTimestampToFormatTime('MM-DD') }}截止</span>
                 </div>
-                <div class="img-box"
-                     v-if="element.childAllCount > 0">
-                  <i class="wukong wukong-sub-task"></i>
-                  <span>{{element.childWCCount}}/{{element.childAllCount}}</span>
+                <div
+                  v-if="element.childAllCount > 0"
+                  class="img-box">
+                  <i class="wukong wukong-sub-task"/>
+                  <span>{{ element.childWCCount }}/{{ element.childAllCount }}</span>
                 </div>
-                <div class="img-box"
-                     v-if="element.fileCount">
-                  <i class="wukong wukong-file"></i>
-                  <span>{{element.fileCount}}</span>
+                <div
+                  v-if="element.fileCount"
+                  class="img-box">
+                  <i class="wukong wukong-file"/>
+                  <span>{{ element.fileCount }}</span>
                 </div>
-                <div class="img-box"
-                     v-if="element.commentCount">
-                  <i class="wukong wukong-comment-task"></i>
-                  <span>{{element.commentCount}}</span>
+                <div
+                  v-if="element.commentCount"
+                  class="img-box">
+                  <i class="wukong wukong-comment-task"/>
+                  <span>{{ element.commentCount }}</span>
                 </div>
 
                 <template v-if="element.labelList.length <= 2">
-                  <div v-for="(k, j) in element.labelList"
-                       :key="j"
-                       class="item-label"
-                       :style="{'background': k.color}">
-                    {{k.labelName}}
+                  <div
+                    v-for="(k, j) in element.labelList"
+                    :key="j"
+                    :style="{'background': k.color}"
+                    class="item-label">
+                    {{ k.labelName }}
                   </div>
                 </template>
                 <template v-else>
-                  <div class="item-label"
-                       :style="{'background': element.labelList[0].color}">{{element.labelList[0].labelName}}</div>
-                  <div class="item-label"
-                       :style="{'background': element.labelList[1].color}">{{element.labelList[1].labelName}}</div>
-                  <el-tooltip placement="top"
-                              effect="light"
-                              popper-class="tooltip-change-border task-tooltip">
-                    <div slot="content"
-                         style="margin: 10px 10px 10px 0;">
-                      <div v-for="(k, j) in element.labelList"
-                           :key="j"
-                           style="display: inline-block; margin-right: 10px;">
-                        <span v-if="j >= 2"
-                              class="k-name"
-                              :style="{'background': k.color ? k.color: '#ccc'}"
-                              style="border-radius: 3px; color: #FFF; padding: 3px 10px;">{{k.labelName}}</span>
+                  <div
+                    :style="{'background': element.labelList[0].color}"
+                    class="item-label">{{ element.labelList[0].labelName }}</div>
+                  <div
+                    :style="{'background': element.labelList[1].color}"
+                    class="item-label">{{ element.labelList[1].labelName }}</div>
+                  <el-tooltip
+                    placement="top"
+                    effect="light"
+                    popper-class="tooltip-change-border task-tooltip">
+                    <div
+                      slot="content"
+                      style="margin: 10px 10px 10px 0;">
+                      <div
+                        v-for="(k, j) in element.labelList"
+                        :key="j"
+                        style="display: inline-block; margin-right: 10px;">
+                        <span
+                          v-if="j >= 2"
+                          :style="{'background': k.color ? k.color: '#ccc'}"
+                          class="k-name"
+                          style="border-radius: 3px; color: #FFF; padding: 3px 10px;">{{ k.labelName }}</span>
                       </div>
                     </div>
                     <div class="color-label-more">
@@ -160,114 +194,133 @@
             </div>
           </draggable>
           <!-- 新建任务 -->
-          <div class="new-task-input"
-               v-if="createSubTaskClassId == item.classId">
-            <el-input type="textarea"
-                      :rows="2"
-                      placeholder="请输入内容"
-                      v-model="subTaskContent"> </el-input>
+          <div
+            v-if="createSubTaskClassId == item.classId"
+            class="new-task-input">
+            <el-input
+              :rows="2"
+              v-model="subTaskContent"
+              type="textarea"
+              placeholder="请输入内容"/>
             <div class="img-box">
               <span class="stop-time">
-                <span v-if="subTaskStopTimeDate"
-                      class="bg-color">{{subTaskStopTimeDate | moment('MM-DD')}}<i class="el-icon-close"
-                     @click="subTaskStopTimeDate = ''"></i></span>
-                <i v-else
-                   class="wukong wukong-time-task">
-                </i>
-                <el-date-picker v-model="subTaskStopTimeDate"
-                                type="date"
-                                :style="{'width': subTaskStopTimeDate ? '54px' : '18px'}"
-                                value-format="yyyy-MM-dd"
-                                placeholder="选择日期">
-                </el-date-picker>
+                <span
+                  v-if="subTaskStopTimeDate"
+                  class="bg-color">{{ subTaskStopTimeDate | moment('MM-DD') }}<i
+                    class="el-icon-close"
+                    @click="subTaskStopTimeDate = ''"/></span>
+                <i
+                  v-else
+                  class="wukong wukong-time-task"/>
+                <el-date-picker
+                  v-model="subTaskStopTimeDate"
+                  :style="{'width': subTaskStopTimeDate ? '54px' : '18px'}"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="选择日期"/>
               </span>
 
-              <el-popover placement="bottom-start"
-                          width="250"
-                          style=""
-                          v-model="item.ownerListShow"
-                          trigger="click">
+              <el-popover
+                v-model="item.ownerListShow"
+                placement="bottom-start"
+                width="250"
+                style=""
+                trigger="click">
                 <div class="task-board-personnel-list-popover">
-                  <el-input size="mini"
-                            placeholder="搜索成员"></el-input>
+                  <el-input
+                    size="mini"
+                    placeholder="搜索成员"/>
                   <div class="list-box">
-                    <div v-for="(k, i) in ownerList"
-                         :key="i"
-                         @click="selectOwnerList(item, k)"
-                         :class="k.checked ? 'personnel-list personnel-list-active' : 'personnel-list'">
-                      <div v-photo="k"
-                           v-lazy:background-image="$options.filters.filterUserLazyImg(k.img)"
-                           :key="k.img"
-                           class="div-photo k-img"></div>
-                      <span>{{k.realname}}</span>
-                      <i class="el-icon-check"></i>
+                    <div
+                      v-for="(k, i) in ownerList"
+                      :key="i"
+                      :class="k.checked ? 'personnel-list personnel-list-active' : 'personnel-list'"
+                      @click="selectOwnerList(item, k)">
+                      <div
+                        v-photo="k"
+                        v-lazy:background-image="$options.filters.filterUserLazyImg(k.img)"
+                        :key="k.img"
+                        class="div-photo k-img"/>
+                      <span>{{ k.realname }}</span>
+                      <i class="el-icon-check"/>
                     </div>
                   </div>
                 </div>
-                <div v-if="selectMainUser"
-                     slot="reference"
-                     v-photo="selectMainUser"
-                     v-lazy:background-image="$options.filters.filterUserLazyImg(selectMainUser.img)"
-                     :key="selectMainUser.img"
-                     @click="showOwnerListClick(item)"
-                     class="div-photo head-img"></div>
-                <i v-else
-                   class="wukong wukong-user"
-                   @click="showOwnerListClick(item)"
-                   slot="reference"></i>
+                <div
+                  v-photo="selectMainUser"
+                  v-lazy:background-image="$options.filters.filterUserLazyImg(selectMainUser.img)"
+                  v-if="selectMainUser"
+                  slot="reference"
+                  :key="selectMainUser.img"
+                  class="div-photo head-img"
+                  @click="showOwnerListClick(item)"/>
+                <i
+                  v-else
+                  slot="reference"
+                  class="wukong wukong-user"
+                  @click="showOwnerListClick(item)"/>
               </el-popover>
             </div>
             <div class="btn-box">
-              <el-button size="mini"
-                         type="primary"
-                         @click="addSubTask(item)">确定</el-button>
-              <el-button size="mini"
-                         @click="createSubTaskClassId = 'hidden'">取消</el-button>
+              <el-button
+                size="mini"
+                type="primary"
+                @click="addSubTask(item)">确定</el-button>
+              <el-button
+                size="mini"
+                @click="createSubTaskClassId = 'hidden'">取消</el-button>
             </div>
           </div>
-          <div class="new-task"
-               @click="createSubTaskClick(item)"
-               v-else-if="canCreateTask && item.classId != -1">
-            <span class="el-icon-plus"></span>
+          <div
+            v-else-if="canCreateTask && item.classId != -1"
+            class="new-task"
+            @click="createSubTaskClick(item)">
+            <span class="el-icon-plus"/>
             <span>新建任务</span>
           </div>
         </flexbox>
       </div>
 
       <!-- 新建列表 -->
-      <div v-if="canCreateTaskClass"
-           class="board-column-new-list">
-        <div class="new-list"
-             v-if="!createTaskListShow && loading == false"
-             @click="createTaskListShow = true">
-          <span class="el-icon-plus"></span>
+      <div
+        v-if="canCreateTaskClass"
+        class="board-column-new-list">
+        <div
+          v-if="!createTaskListShow && loading == false"
+          class="new-list"
+          @click="createTaskListShow = true">
+          <span class="el-icon-plus"/>
           <span>新建列表</span>
         </div>
-        <div class="input-btn"
-             v-else-if="createTaskListShow && loading == false">
-          <el-input size="small"
-                    placeholder="列表名"
-                    v-model="taskListName"></el-input>
+        <div
+          v-else-if="createTaskListShow && loading == false"
+          class="input-btn">
+          <el-input
+            v-model="taskListName"
+            size="small"
+            placeholder="列表名"/>
           <div class="button-box">
-            <el-button size="mini"
-                       type="primary"
-                       @click="createTaskListSave">保存</el-button>
-            <el-button size="mini"
-                       @click="createTaskListShow = false">取消</el-button>
+            <el-button
+              size="mini"
+              type="primary"
+              @click="createTaskListSave">保存</el-button>
+            <el-button
+              size="mini"
+              @click="createTaskListShow = false">取消</el-button>
           </div>
         </div>
       </div>
     </draggable>
 
     <!-- 详情 -->
-    <particulars v-if="taskDetailShow"
-                 ref="particulars"
-                 :id="taskID"
-                 :detailIndex="detailIndex"
-                 :detailSection="detailSection"
-                 @on-handle="detailHandle"
-                 @close="closeBtn">
-    </particulars>
+    <particulars
+      v-if="taskDetailShow"
+      ref="particulars"
+      :id="taskID"
+      :detail-index="detailIndex"
+      :detail-section="detailSection"
+      @on-handle="detailHandle"
+      @close="closeBtn"/>
   </div>
 </template>
 <script>
@@ -275,7 +328,6 @@ import newDialog from '@/views/projectManagement/components/newDialog'
 import particulars from '@/views/projectManagement/components/particulars'
 import draggable from 'vuedraggable'
 import scrollx from '@/directives/scrollx'
-import { debounce } from 'throttle-debounce'
 
 import { workTaskSaveAPI } from '@/api/projectManagement/task'
 import {
@@ -287,7 +339,6 @@ import {
   workTaskUpdateClassOrderAPI,
   workWorkOwnerListAPI
 } from '@/api/projectManagement/project'
-import { timestampToFormatTime } from '@/utils'
 
 export default {
   components: {
@@ -298,6 +349,44 @@ export default {
 
   directives: {
     scrollx
+  },
+
+  props: {
+    workId: [String, Number],
+    permission: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    }
+  },
+
+  data() {
+    return {
+      loading: false,
+      // 新建任务弹出框
+      createTaskListShow: false,
+      createSubTaskClassId: 'hidden',
+      subTaskContent: '',
+      // 选中的人员数据
+      selectMainUser: null,
+      // 选择截止的时间
+      subTaskStopTimeDate: '',
+      // 人员列表
+      ownerList: [],
+      // 新建列表
+      taskListName: '',
+      // 重命名
+      renameInput: '',
+      // 主数据
+      taskList: [],
+      // 详情对应的任务对象数据 -- 用于更新数据
+      // 详情数据
+      taskID: '',
+      detailIndex: -1,
+      detailSection: -1,
+      taskDetailShow: false
+    }
   },
 
   computed: {
@@ -330,50 +419,12 @@ export default {
     }
   },
 
-  data() {
-    return {
-      loading: false,
-      // 新建任务弹出框
-      createTaskListShow: false,
-      createSubTaskClassId: 'hidden',
-      subTaskContent: '',
-      // 选中的人员数据
-      selectMainUser: null,
-      // 选择截止的时间
-      subTaskStopTimeDate: '',
-      // 人员列表
-      ownerList: [],
-      // 新建列表
-      taskListName: '',
-      // 重命名
-      renameInput: '',
-      // 主数据
-      taskList: [],
-      // 详情对应的任务对象数据 -- 用于更新数据
-      // 详情数据
-      taskID: '',
-      detailIndex: -1,
-      detailSection: -1,
-      taskDetailShow: false
-    }
-  },
-
   watch: {
     workId() {
       this.createTaskListShow = false
       this.taskDetailShow = false
       this.taskList = []
       this.getList()
-    }
-  },
-
-  props: {
-    workId: [String, Number],
-    permission: {
-      type: Object,
-      default: () => {
-        return {}
-      }
     }
   },
 
@@ -395,7 +446,7 @@ export default {
   },
 
   mounted() {
-    //为了防止火狐浏览器拖拽的时候以新标签打开
+    // 为了防止火狐浏览器拖拽的时候以新标签打开
     document.body.ondrop = function(event) {
       event.preventDefault()
       event.stopPropagation()
@@ -404,6 +455,11 @@ export default {
     document
       .getElementById('project-main-container')
       .addEventListener('click', this.taskShowHandle, false)
+  },
+
+  beforeDestroy() {
+    this.$bus.$off('search')
+    this.$bus.$off('members-update')
   },
 
   methods: {
@@ -420,9 +476,9 @@ export default {
       workTaskIndexAPI(params)
         .then(res => {
           this.loading = false
-          for (let item of res.data) {
+          for (const item of res.data) {
             item.checkedNum = 0
-            for (let i of item.list) {
+            for (const i of item.list) {
               if (i.status == 5) {
                 i.checked = true
                 item.checkedNum += 1
@@ -433,7 +489,7 @@ export default {
           }
           this.taskList = res.data
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
         })
     },
@@ -450,7 +506,7 @@ export default {
           })
         })
           .then(res => {})
-          .catch(err => {})
+          .catch(() => {})
       }
     },
 
@@ -468,24 +524,24 @@ export default {
      */
     moveEndSonTask(evt) {
       if (evt) {
-        let fromId = evt.from.id
-        let toId = evt.to.id
+        const fromId = evt.from.id
+        const toId = evt.to.id
 
         // 如果没有进行移动 不做处理
         if (fromId == toId && evt.oldIndex == evt.newIndex) {
           return
         }
 
-        let fromTask = this.taskList.filter(item => {
+        const fromTask = this.taskList.filter(item => {
           return item.classId == fromId
         })[0]
-        let fromList = fromTask.list
+        const fromList = fromTask.list
         this.updateTaskListCheckNum(fromTask)
 
-        let toTask = this.taskList.filter(item => {
+        const toTask = this.taskList.filter(item => {
           return item.classId == toId
         })[0]
-        let toList  = toTask.list
+        const toList = toTask.list
         this.updateTaskListCheckNum(toTask)
 
         let params = {}
@@ -510,7 +566,7 @@ export default {
         }
         workTaskUpdateOrderAPI(params)
           .then(res => {})
-          .catch(err => {})
+          .catch(() => {})
       }
     },
 
@@ -537,7 +593,7 @@ export default {
         status: element.checked ? 5 : 1
       })
         .then(res => {})
-        .catch(err => {
+        .catch(() => {
           if (element.checked) {
             value.checkedNum--
           } else {
@@ -564,9 +620,9 @@ export default {
             .then(res => {
               this.taskList.splice(index, 1)
               this.$message.success('删除成功')
-              val.taskHandleShow = false //隐藏弹出框
+              val.taskHandleShow = false // 隐藏弹出框
             })
-            .catch(err => {})
+            .catch(() => {})
         })
         .catch(() => {
           this.$message({
@@ -608,7 +664,7 @@ export default {
         .then(res => {
           val.className = this.renameInput
         })
-        .catch(err => {})
+        .catch(() => {})
       val.renameShow = false
     },
 
@@ -624,7 +680,7 @@ export default {
           this.taskListName = ''
           this.getList()
         })
-        .catch(err => {})
+        .catch(() => {})
       this.createTaskListShow = false
     },
 
@@ -645,7 +701,7 @@ export default {
           this.loading = false
           this.getList()
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
         })
     },
@@ -691,7 +747,7 @@ export default {
      */
     selectOwnerList(item, val) {
       this.selectMainUser = val
-      for (let item of this.ownerList) {
+      for (const item of this.ownerList) {
         if (item.userId == val.userId) {
           item.checked = true
         } else {
@@ -719,7 +775,7 @@ export default {
       if (data.index == 0 || data.index) {
         // 是否完成勾选
         if (data.type == 'title-check') {
-          let sectionItem = this.taskList[data.section]
+          const sectionItem = this.taskList[data.section]
           this.$set(sectionItem.list[data.index], 'checked', data.value)
           if (data.value) {
             sectionItem.checkedNum++
@@ -730,7 +786,7 @@ export default {
         } else if (data.type == 'delete') {
           this.taskList[data.section].list.splice(data.index, 1)
         } else if (data.type == 'change-stop-time') {
-          let stopTime = new Date(data.value).getTime() / 1000 + 86399
+          const stopTime = new Date(data.value).getTime() / 1000 + 86399
           if (stopTime > new Date(new Date()).getTime() / 1000) {
             this.taskList[data.section].list[data.index].isEnd = false
           } else {
@@ -742,7 +798,7 @@ export default {
         } else if (data.type == 'change-name') {
           this.taskList[data.section].list[data.index].name = data.value
         } else if (data.type == 'change-comments') {
-          let commentCount = this.taskList[data.section].list[data.index]
+          const commentCount = this.taskList[data.section].list[data.index]
             .commentCount
           if (data.value == 'add') {
             this.taskList[data.section].list[data.index].commentCount =
@@ -780,7 +836,7 @@ export default {
         !this.$refs.particulars.$el.contains(e.target)
       ) {
         let hidden = true
-        let items = document.getElementsByClassName('board-item')
+        const items = document.getElementsByClassName('board-item')
         for (let index = 0; index < items.length; index++) {
           const element = items[index]
           if (element.contains(e.target)) {
@@ -791,11 +847,6 @@ export default {
         this.taskDetailShow = !hidden
       }
     }
-  },
-
-  beforeDestroy() {
-    this.$bus.$off('search')
-    this.$bus.$off('members-update')
   }
 }
 </script>

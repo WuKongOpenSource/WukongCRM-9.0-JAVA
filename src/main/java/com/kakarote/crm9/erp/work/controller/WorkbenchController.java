@@ -20,7 +20,7 @@ public class WorkbenchController extends Controller{
      * 我的任务
      */
     public void myTask(){
-        renderJson(workbenchService.myTask(BaseUtil.getUser().getUserId().intValue()));
+        renderJson(workbenchService.myTask(BaseUtil.getUser().getUserId()));
     }
 
     /**

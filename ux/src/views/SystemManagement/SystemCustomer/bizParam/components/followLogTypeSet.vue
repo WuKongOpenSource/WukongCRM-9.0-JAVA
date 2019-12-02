@@ -2,21 +2,25 @@
   <div v-loading="loading">
     <div class="content-title">
       <span>跟进记录类型设置</span>
-      <el-button type="primary"
-                 class="rt"
-                 size="medium"
-                 @click="save">保存</el-button>
+      <el-button
+        type="primary"
+        class="rt"
+        size="medium"
+        @click="save">保存</el-button>
     </div>
     <div class="content-body">
-      <div v-for="(item, index) in list"
-           :key="index"
-           class="input-item">
-        <el-input v-model="item.value"></el-input>
-        <i class="el-icon-remove"
-           @click="deleteItem(item, index)"></i>
+      <div
+        v-for="(item, index) in list"
+        :key="index"
+        class="input-item">
+        <el-input v-model="item.value"/>
+        <i
+          class="el-icon-remove"
+          @click="deleteItem(item, index)"/>
       </div>
-      <el-button @click="addItem"
-                 type="text">+添加类型</el-button>
+      <el-button
+        type="text"
+        @click="addItem">+添加类型</el-button>
     </div>
   </div>
 </template>
@@ -28,7 +32,7 @@ import {
 } from '@/api/systemManagement/SystemCustomer'
 
 export default {
-  name: 'follow-log-type-set',
+  name: 'FollowLogTypeSet',
 
   components: {},
 
@@ -80,7 +84,7 @@ export default {
      * 保存操作
      */
     save() {
-      let value = []
+      const value = []
       for (let index = 0; index < this.list.length; index++) {
         const element = this.list[index]
         if (element.value) {

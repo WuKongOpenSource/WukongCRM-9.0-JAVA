@@ -1,79 +1,88 @@
 <template>
   <div class="edit-index">
-    <el-popover :placement="placement"
-                :width="popoverWidth"
-                v-model="tagShow"
-                trigger="click">
-      <div v-if="tagContent == 0"
-           class="tag-popover-box">
+    <el-popover
+      :placement="placement"
+      :width="popoverWidth"
+      v-model="tagShow"
+      trigger="click">
+      <div
+        v-if="tagContent == 0"
+        class="tag-popover-box">
         <div class="tag-top">
           <span>选择标签</span>
-          <span class="el-icon-close rt cursor-pointer"
-                @click="tagShow = false"></span>
+          <span
+            class="el-icon-close rt cursor-pointer"
+            @click="tagShow = false"/>
         </div>
-        <el-input placeholder="搜索标签"
-                  prefix-icon="el-icon-search"
-                  size="small"
-                  v-model="tagInputChange">
-        </el-input>
+        <el-input
+          v-model="tagInputChange"
+          placeholder="搜索标签"
+          prefix-icon="el-icon-search"
+          size="small"/>
         <div class="tag-content">
-          <div v-for="(item, index) in particularsTagList"
-               :key="index"
-               class="tag-list"
-               @click="tagBtn(item, particularsTagList)">
-            <i class="wukong wukong-black-label"
-               :style="{ 'color': item.color}"></i>
-            <span class="item-label">{{item.name}}</span>
-            <span class="el-icon-check rt"
-                  v-if="item.check"></span>
+          <div
+            v-for="(item, index) in particularsTagList"
+            :key="index"
+            class="tag-list"
+            @click="tagBtn(item, particularsTagList)">
+            <i
+              :style="{ 'color': item.color}"
+              class="wukong wukong-black-label"/>
+            <span class="item-label">{{ item.name }}</span>
+            <span
+              v-if="item.check"
+              class="el-icon-check rt"/>
           </div>
         </div>
         <div class="tag-footer">
-          <p class="footer-row cursor-pointer"
-             @click="createTagFun">
-            <span class="el-icon-plus"></span>
+          <p
+            class="footer-row cursor-pointer"
+            @click="createTagFun">
+            <span class="el-icon-plus"/>
             <span>创建新标签</span>
           </p>
-          <p class="footer-row cursor-pointer"
-             @click="managementTag">
-            <span class="el-icon-setting"></span>
+          <p
+            class="footer-row cursor-pointer"
+            @click="managementTag">
+            <span class="el-icon-setting"/>
             <span>标签管理</span>
           </p>
         </div>
       </div>
       <!-- 新建标签页 -->
-      <new-tag v-else-if="tagContent == 1"
-               :newTagTitle="newTagTitle"
-               :newTagInput="newTagInput"
-               :bgColorProps="bgColorProps"
-               @changeColor="changeColor"
-               @close="tagClose"
-               @tagCreateSubmit="tagCreateSubmit"
-               @tagCancel="tagCancel"
-               @back="back">
-      </new-tag>
+      <new-tag
+        v-else-if="tagContent == 1"
+        :new-tag-title="newTagTitle"
+        :new-tag-input="newTagInput"
+        :bg-color-props="bgColorProps"
+        @changeColor="changeColor"
+        @close="tagClose"
+        @tagCreateSubmit="tagCreateSubmit"
+        @tagCancel="tagCancel"
+        @back="back"/>
       <!-- 标签管理 -->
-      <editTag v-else-if="tagContent == 2"
-               :editTagList="editTagList"
-               @back="back"
-               @close="tagClose"
-               @editBtn="editBtn"
-               @deleteBtn="deleteBtn">
-      </editTag>
+      <editTag
+        v-else-if="tagContent == 2"
+        :edit-tag-list="editTagList"
+        @back="back"
+        @close="tagClose"
+        @editBtn="editBtn"
+        @deleteBtn="deleteBtn"/>
       <!-- 标签管理 - 编辑 -->
-      <new-tag v-else-if="tagContent == 3"
-               :newTagTitle="newTagTitle"
-               :newTagInput="newTagInput"
-               :bgColorProps="bgColorProps"
-               @changeColor="changeColor"
-               @close="tagClose"
-               @tagCreateSubmit="tagCreateSubmit"
-               @tagCancel="tagCancel"
-               @back="back">
-      </new-tag>
-      <span slot="reference"
-            @click="referenceFun">
-        <slot name="editIndex"></slot>
+      <new-tag
+        v-else-if="tagContent == 3"
+        :new-tag-title="newTagTitle"
+        :new-tag-input="newTagInput"
+        :bg-color-props="bgColorProps"
+        @changeColor="changeColor"
+        @close="tagClose"
+        @tagCreateSubmit="tagCreateSubmit"
+        @tagCancel="tagCancel"
+        @back="back"/>
+      <span
+        slot="reference"
+        @click="referenceFun">
+        <slot name="editIndex"/>
       </span>
     </el-popover>
   </div>
@@ -93,6 +102,15 @@ export default {
   components: {
     NewTag,
     EditTag
+  },
+  props: {
+    taskData: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    placement: String
   },
   data() {
     return {
@@ -117,16 +135,6 @@ export default {
       popoverWidth: '220'
     }
   },
-  mounted() {},
-  props: {
-    taskData: {
-      type: Object,
-      default: () => {
-        return {}
-      }
-    },
-    placement: String
-  },
   watch: {
     // 搜索标签
     tagInputChange: function(newVal) {
@@ -135,6 +143,7 @@ export default {
       })
     }
   },
+  mounted() {},
   methods: {
     // 创建新标签
     createTagFun() {
@@ -159,7 +168,7 @@ export default {
     // 标签点击变色
     tagBtn(value, values) {
       // 标签点击关联页面
-      let labelIds = values.filter(item => {
+      const labelIds = values.filter(item => {
         if (value.check) {
           return item.check && item.labelId != value.labelId
         } else {
@@ -175,8 +184,8 @@ export default {
             })
             .join(',')
         }).then(res => {
-          let list = this.taskData.labelList
-          for (let item in list) {
+          const list = this.taskData.labelList
+          for (const item in list) {
             if (value.labelId == list[item].labelId) {
               list.splice(item, 1)
               break
@@ -199,7 +208,7 @@ export default {
         })
       }
       // value.check = value.check ? false : true
-      for (let item in values) {
+      for (const item in values) {
         if (values[item].labelId == value.labelId) {
           document.getElementsByClassName('tag-list')[item].style.background =
             '#F7F8FA'
@@ -219,7 +228,7 @@ export default {
     },
     // 创建新标签 -- 提交
     tagCreateSubmit(val, color) {
-      let _this = this
+      const _this = this
       if (this.newTagTitle == '创建新标签') {
         workTasklableSaveAPI({
           name: val,
@@ -237,7 +246,7 @@ export default {
           labelId: this.editTagId,
           color: color
         }).then(res => {
-          for (let item of _this.editTagList) {
+          for (const item of _this.editTagList) {
             if (item.labelId == _this.editTagId) {
               item.name = val
               item.color = color
@@ -283,7 +292,7 @@ export default {
           workTasklableDeleteAPI({
             labelId: val.labelId
           }).then(res => {
-            for (let i in this.editTagList) {
+            for (const i in this.editTagList) {
               if (this.editTagList[i].labelId == val.labelId) {
                 this.editTagList.splice(i, 1)
               }
@@ -306,9 +315,9 @@ export default {
     tagListFun() {
       // 标签列表
       workTasklableIndexAPI().then(res => {
-        for (let item of res.data) {
+        for (const item of res.data) {
           if (this.taskData.labelList) {
-            for (let i of this.taskData.labelList) {
+            for (const i of this.taskData.labelList) {
               if (i.labelId == item.labelId) {
                 item.check = true
                 break

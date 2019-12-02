@@ -2,27 +2,28 @@
   <div class="address-book oa-bgcolor">
     <div class="header">
       <el-tabs v-model="activeName">
-        <el-tab-pane label="员工"
-                     name="1">
-          <el-input placeholder="搜索成员"
-                    prefix-icon="el-icon-search"
-                    @blur="blurFun"
-                    @keyup.enter.native="blurFun"
-                    v-model="userInput">
-          </el-input>
-          <v-staff v-loading="staffLoading"
-                   :staffData="staffData">
-          </v-staff>
+        <el-tab-pane
+          label="员工"
+          name="1">
+          <el-input
+            v-model="userInput"
+            placeholder="搜索成员"
+            prefix-icon="el-icon-search"
+            @blur="blurFun"
+            @keyup.enter.native="blurFun"/>
+          <v-staff
+            v-loading="staffLoading"
+            :staff-data="staffData"/>
         </el-tab-pane>
-        <el-tab-pane label="部门"
-                     name="2">
-          <el-input placeholder="搜索成员"
-                    prefix-icon="el-icon-search"
-                    @blur="blurFun"
-                    v-model="depInput">
-          </el-input>
-          <v-department :depData="depData">
-          </v-department>
+        <el-tab-pane
+          label="部门"
+          name="2">
+          <el-input
+            v-model="depInput"
+            placeholder="搜索成员"
+            prefix-icon="el-icon-search"
+            @blur="blurFun"/>
+          <v-department :dep-data="depData"/>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -63,7 +64,7 @@ export default {
       addresslist({
         search: this.userInput
       }).then(res => {
-        let words = [
+        const words = [
           '#',
           'A',
           'B',
@@ -92,9 +93,9 @@ export default {
           'Y',
           'Z'
         ]
-        
-        for (let key of words) {
-          let list = res.data[key]
+
+        for (const key of words) {
+          const list = res.data[key]
           if (list) {
             this.staffData.push({
               letter: key,

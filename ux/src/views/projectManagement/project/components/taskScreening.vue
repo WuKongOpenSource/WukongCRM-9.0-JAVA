@@ -1,39 +1,47 @@
 <template>
   <transition name="slide-fade">
-    <el-card class="project-screening"
-             :style="{ 'z-index': zIndex }">
+    <el-card
+      :style="{ 'z-index': zIndex }"
+      class="project-screening">
       <p class="header">
         <span class="label">任务筛选</span>
-        <el-button type="text"
-                   @click="resetBtn">重置</el-button>
-        <span class="rt el-icon-close"
-              @click="close"></span>
+        <el-button
+          type="text"
+          @click="resetBtn">重置</el-button>
+        <span
+          class="rt el-icon-close"
+          @click="close"/>
       </p>
       <div class="content">
-        <div v-for="(item, index) in menuList"
-             :key="index"
-             class="menu-list">
-          <p class="item-label"
-             @click="rowFun(item)">
-            {{item.label}}
-            <span :class="item.expand ? 'el-icon-arrow-right item-expand' : 'el-icon-arrow-down item-expand'"></span>
+        <div
+          v-for="(item, index) in menuList"
+          :key="index"
+          class="menu-list">
+          <p
+            class="item-label"
+            @click="rowFun(item)">
+            {{ item.label }}
+            <span :class="item.expand ? 'el-icon-arrow-right item-expand' : 'el-icon-arrow-down item-expand'"/>
           </p>
-          <div v-show="item.expand == false"
-               v-for="(val, i) in item.list"
-               :key="i"
-               :class="['item-list', val.checked ? 'item-list-active' : '']"
-               @click="rowChecked(val)">
-            <div v-if="val.type == 'user'"
-                 v-photo="val"
-                 v-lazy:background-image="$options.filters.filterUserLazyImg(val.img)"
-                 :key="val.img"
-                 class="div-photo"></div>
-            <i v-if="val.type == 'tag'"
-               style="margin-right:10px; vertical-align: text-top;"
-               :style="{color:val.color}"
-               class="wukong wukong-tag"></i>
-            <span>{{val.name}}</span>
-            <span class="el-icon-check rt"></span>
+          <div
+            v-for="(val, i) in item.list"
+            v-show="item.expand == false"
+            :key="i"
+            :class="['item-list', val.checked ? 'item-list-active' : '']"
+            @click="rowChecked(val)">
+            <div
+              v-photo="val"
+              v-lazy:background-image="$options.filters.filterUserLazyImg(val.img)"
+              v-if="val.type == 'user'"
+              :key="val.img"
+              class="div-photo"/>
+            <i
+              v-if="val.type == 'tag'"
+              :style="{color:val.color}"
+              style="margin-right:10px; vertical-align: text-top;"
+              class="wukong wukong-tag"/>
+            <span>{{ val.name }}</span>
+            <span class="el-icon-check rt"/>
           </div>
         </div>
       </div>
@@ -47,6 +55,10 @@ import { workTasklableIndexAPI } from '@/api/projectManagement/tag'
 import { getMaxIndex } from '@/utils/index'
 
 export default {
+
+  props: {
+    workId: [Number, String]
+  },
   data() {
     return {
       zIndex: getMaxIndex(),
@@ -125,10 +137,6 @@ export default {
       .getElementById('app')
       .addEventListener('click', this.taskShowHandle, false)
   },
-
-  props: {
-    workId: [Number, String]
-  },
   methods: {
     /**
      * 获取成员
@@ -161,7 +169,7 @@ export default {
             return item
           })
         })
-        .catch(err => {})
+        .catch(() => {})
     },
 
     close() {
@@ -170,7 +178,7 @@ export default {
 
     rowChecked(val) {
       if (val.type == 'time') {
-        for (let k of this.menuList[1].list) {
+        for (const k of this.menuList[1].list) {
           if (val.id == k.id) {
             k.checked = !k.checked
           } else {
@@ -182,15 +190,15 @@ export default {
       }
       // 过滤数据 -- 传值
       // 人员
-      let userIds = []
-      for (let item of this.menuList[0].list) {
+      const userIds = []
+      for (const item of this.menuList[0].list) {
         if (item.checked) {
           userIds.push(item.userId)
         }
       }
       // 时间
       let timeId = ''
-      for (let item of this.menuList[1].list) {
+      for (const item of this.menuList[1].list) {
         if (item.checked) {
           timeId = item.id
           break
@@ -198,8 +206,8 @@ export default {
       }
 
       // 标签
-      let tagIds = []
-      for (let item of this.menuList[2].list) {
+      const tagIds = []
+      for (const item of this.menuList[2].list) {
         if (item.checked) {
           tagIds.push(item.id)
         }
@@ -208,8 +216,8 @@ export default {
     },
 
     resetBtn() {
-      for (let item of this.menuList) {
-        for (let i of item.list) {
+      for (const item of this.menuList) {
+        for (const i of item.list) {
           i.checked = false
         }
       }

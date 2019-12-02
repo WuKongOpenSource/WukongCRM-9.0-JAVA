@@ -4,6 +4,7 @@ public enum OaEnum {
     /**
      * OaEnum
      */
+    COMMENT_TYPE_KEY( "评论", 6),
     LOG_TYPE_KEY ( "日志", 1 ),
     EXAMINE_TYPE_KEY ( "审批", 5 ),
     TASK_TYPE_KEY ( "任务", 4 ),

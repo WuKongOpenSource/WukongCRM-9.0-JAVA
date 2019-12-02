@@ -1,20 +1,25 @@
 <template>
-  <el-dialog :visible.sync="showDialog"
-             title="审批类型"
-             width="500px"
-             @close="closeView">
+  <el-dialog
+    :visible.sync="showDialog"
+    title="审批类型"
+    width="500px"
+    @close="closeView">
     <div class="title">请选择您的审批类型（管理后台可自定义配置审批类型）</div>
-    <div class="categorys"
-         v-loading="loading">
-      <flexbox wrap="wrap"
-               align="stretch">
-        <div v-for="(item, index) in categorys"
-             :key="index"
-             class="category-item"
-             @click="selectCategorys(item)">
-          <i class="wukong"
-             :class="item.iconClass"></i>
-          {{item.title}}
+    <div
+      v-loading="loading"
+      class="categorys">
+      <flexbox
+        wrap="wrap"
+        align="stretch">
+        <div
+          v-for="(item, index) in categorys"
+          :key="index"
+          class="category-item"
+          @click="selectCategorys(item)">
+          <i
+            :class="item.iconClass"
+            class="wukong"/>
+          {{ item.title }}
         </div>
       </flexbox>
     </div>
@@ -25,19 +30,19 @@
 import { oaExamineCategoryList } from '@/api/oamanagement/examine'
 
 export default {
-  name: 'examine-category-select',
+  name: 'ExamineCategorySelect',
   components: {},
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       loading: false,
       showDialog: false,
       categorys: []
-    }
-  },
-  props: {
-    show: {
-      type: Boolean,
-      default: false
     }
   },
   watch: {

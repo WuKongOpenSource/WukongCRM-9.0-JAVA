@@ -1,71 +1,82 @@
 <template>
   <create-view :body-style="{height: '100%'}">
-    <div class="details-box"
-         v-loading="loading">
-      <div slot="header"
-           class="header">
+    <div
+      v-loading="loading"
+      class="details-box">
+      <div
+        slot="header"
+        class="header">
         <span class="text">新建公告</span>
-        <img class="el-icon-close rt"
-             src="@/assets/img/task_close.png"
-             @click="close"
-             alt="">
+        <img
+          class="el-icon-close rt"
+          src="@/assets/img/task_close.png"
+          alt=""
+          @click="close">
       </div>
       <div class="content">
-        <el-form ref="form"
-                 :model="formData"
-                 :rules="rules">
-          <el-form-item :label="item.label"
-                        :class="'el-form-item' + item.field"
-                        :prop="item.field"
-                        v-for="(item, index) in formList"
-                        :key="index">
+        <el-form
+          ref="form"
+          :model="formData"
+          :rules="rules">
+          <el-form-item
+            v-for="(item, index) in formList"
+            :label="item.label"
+            :class="'el-form-item' + item.field"
+            :prop="item.field"
+            :key="index">
             <template v-if="item.type == 'date'">
-              <el-date-picker v-model="formData[item.field]"
-                              type="date"
-                              value-format="yyyy-MM-dd"
-                              placeholder="选择日期">
-              </el-date-picker>
+              <el-date-picker
+                v-model="formData[item.field]"
+                type="date"
+                value-format="yyyy-MM-dd"
+                placeholder="选择日期"/>
             </template>
             <template v-else-if="item.type == 'textarea'">
-              <el-input type="textarea"
-                        :autosize="{ minRows: 6}"
-                        placeholder="请输入内容"
-                        v-model="formData[item.field]">
-              </el-input>
+              <el-input
+                :autosize="{ minRows: 6}"
+                v-model="formData[item.field]"
+                type="textarea"
+                placeholder="请输入内容"/>
             </template>
             <template v-else-if="item.type =='plus'">
-              <members-dep :popoverDisplay="'block'"
-                           :title="'通知部门'"
-                           :userCheckedData="formData[item.field].staff"
-                           :depCheckedData="formData[item.field].dep"
-                           @popoverSubmit="popoverSubmit">
-                <flexbox slot="membersDep"
-                         wrap="wrap"
-                         class="user-container">
-                  <div v-for="(item, index) in formData[item.field].staff"
-                       :key="'user' + index"
-                       @click.stop="deleteuser(index)"
-                       class="user-item">{{item.realname}}
-                    <i class="delete-icon el-icon-close"></i>
+              <members-dep
+                :popover-display="'block'"
+                :title="'通知部门'"
+                :user-checked-data="formData[item.field].staff"
+                :dep-checked-data="formData[item.field].dep"
+                @popoverSubmit="popoverSubmit">
+                <flexbox
+                  slot="membersDep"
+                  wrap="wrap"
+                  class="user-container">
+                  <div
+                    v-for="(item, index) in formData[item.field].staff"
+                    :key="'user' + index"
+                    class="user-item"
+                    @click.stop="deleteuser(index)">{{ item.realname }}
+                    <i class="delete-icon el-icon-close"/>
                   </div>
-                  <div v-for="(item, index) in formData[item.field].dep"
-                       :key="'dep' + index"
-                       @click.stop="deleteDepuser(index)"
-                       class="user-item">{{item.name}}
-                    <i class="delete-icon el-icon-close"></i>
+                  <div
+                    v-for="(item, index) in formData[item.field].dep"
+                    :key="'dep' + index"
+                    class="user-item"
+                    @click.stop="deleteDepuser(index)">{{ item.name }}
+                    <i class="delete-icon el-icon-close"/>
                   </div>
                   <div class="add-item">+添加</div>
                 </flexbox>
               </members-dep>
             </template>
-            <el-input v-else
-                      v-model="formData[item.field]"></el-input>
+            <el-input
+              v-else
+              v-model="formData[item.field]"/>
           </el-form-item>
         </el-form>
       </div>
       <div class="btn-box">
-        <el-button type="primary"
-                   @click="onSubmit">提交</el-button>
+        <el-button
+          type="primary"
+          @click="onSubmit">提交</el-button>
         <el-button @click="close">取消</el-button>
       </div>
     </div>
@@ -74,7 +85,6 @@
 
 <script>
 import CreateView from '@/components/CreateView'
-import { usersList, depList } from '@/api/common'
 
 import membersDep from '@/components/selectEmployee/membersDep'
 // API
@@ -115,7 +125,7 @@ export default {
         { label: '结束时间', field: 'endTime', type: 'date' },
         { label: '公告正文', field: 'content', type: 'textarea' }
       ],
-      formData: { dep: { staff: [], dep: [] } },
+      formData: { dep: { staff: [], dep: [] }},
       rules: {
         title: [
           { required: true, message: '公告标题不能为空', trigger: 'blur' },
@@ -166,7 +176,7 @@ export default {
               }
               this.loading = false
             })
-            .catch(err => {
+            .catch(() => {
               this.$message.error('新建公告失败')
               this.loading = false
             })

@@ -66,7 +66,7 @@ public class AdminSysConfigController extends Controller {
      */
     @Clear
     public void querySysConfig(){
-        AdminConfig adminConfig=AdminConfig.dao.findFirst("SELECT value FROM `72crm_admin_config` where name = ? limit 0,1",SYS_CONFIG_KEY);
+        AdminConfig adminConfig=AdminConfig.getConfig(SYS_CONFIG_KEY);
         if(adminConfig==null|| StrUtil.isEmpty(adminConfig.getValue())){
             adminConfig=new AdminConfig();
             adminConfig.setValue("{\"name\":\"\",\"logo\":\"\"}");

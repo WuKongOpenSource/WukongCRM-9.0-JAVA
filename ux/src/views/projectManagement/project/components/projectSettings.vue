@@ -1,111 +1,131 @@
 <template>
   <div class="project-settings">
-    <el-popover placement="bottom-start"
-                width="400"
-                v-model="projectSetShow"
-                popper-class="project-settings-list-top"
-                trigger="click">
-      <div class="project-settings-box"
-           v-loading="loading">
+    <el-popover
+      v-model="projectSetShow"
+      placement="bottom-start"
+      width="400"
+      popper-class="project-settings-list-top"
+      trigger="click">
+      <div
+        v-loading="loading"
+        class="project-settings-box">
         <p class="project-settings-title-top">
           <span>项目设置</span>
-          <span class="el-icon-close rt"
-                @click="close"></span>
+          <span
+            class="el-icon-close rt"
+            @click="close"/>
         </p>
         <div class="content">
           <p class="title-checked">
-            <span :style="{color: tabType == 'base' ? '#3E84E9': '#333333'}"
-                  class="span-item"
-                  @click="tabType = 'base'">基础设置</span>
-            <span v-if="isOpen == 0"
-                  :style="{color: tabType == 'member' ? '#3E84E9': '#333333'}"
-                  class="span-item"
-                  @click="tabType = 'member'">成员管理</span>
+            <span
+              :style="{color: tabType == 'base' ? '#3E84E9': '#333333'}"
+              class="span-item"
+              @click="tabType = 'base'">基础设置</span>
+            <span
+              v-if="isOpen == 0"
+              :style="{color: tabType == 'member' ? '#3E84E9': '#333333'}"
+              class="span-item"
+              @click="tabType = 'member'">成员管理</span>
           </p>
           <!-- 基础设置 -->
-          <div class="infrastructure"
-               v-show="tabType == 'base'">
+          <div
+            v-show="tabType == 'base'"
+            class="infrastructure">
             <div class="row">
               <span class="label name">项目名称</span>
               <div class="color-dynamic">
-                <el-input size="mini"
-                          v-model="setTitle"></el-input>
-                <span class="dynamic-span"
-                      :style="{background: setColor}"></span>
+                <el-input
+                  v-model="setTitle"
+                  size="mini"/>
+                <span
+                  :style="{background: setColor}"
+                  class="dynamic-span"/>
               </div>
             </div>
             <div class="row">
               <span class="label">图标颜色</span>
               <div class="color-box">
-                <span v-for="(item, index) in colorList"
-                      :key="index"
-                      :style="{background: item}"
-                      @click="setColor = item"></span>
+                <span
+                  v-for="(item, index) in colorList"
+                  :key="index"
+                  :style="{background: item}"
+                  @click="setColor = item"/>
               </div>
             </div>
             <div class="row">
               <span class="label name">可见范围</span>
               <div class="color-dynamic">
-                <el-select v-model="setIsOpen"
-                           placeholder="请选择">
-                  <el-option v-for="item in openOptions"
-                             :key="item.value"
-                             :label="item.label"
-                             :value="item.value">
-                  </el-option>
+                <el-select
+                  v-model="setIsOpen"
+                  placeholder="请选择">
+                  <el-option
+                    v-for="item in openOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"/>
                 </el-select>
               </div>
             </div>
           </div>
-          <div v-show="tabType == 'member'"
-               class="add-members">
-            <members-dep :userCheckedData="membersList"
-                         :closeDep="true"
-                         :contentBlock="false"
-                         @popoverSubmit="userSelectChange">
-              <div slot="membersDep"
-                   class="img-span">
-                <img src="@/assets/img/project/project_add.png"
-                     alt="">
+          <div
+            v-show="tabType == 'member'"
+            class="add-members">
+            <members-dep
+              :user-checked-data="membersList"
+              :close-dep="true"
+              :content-block="false"
+              @popoverSubmit="userSelectChange">
+              <div
+                slot="membersDep"
+                class="img-span">
+                <img
+                  src="@/assets/img/project/project_add.png"
+                  alt="">
                 <span class="add-title">添加成员</span>
               </div>
             </members-dep>
 
             <div class="member-section">
-              <div v-for="(item, index) in membersList"
-                   :key="index"
-                   class="member-row">
-                <div v-photo="item"
-                     v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
-                     :key="item.img"
-                     class="div-photo"></div>
-                <span class="member-row-name">{{item.realname}}</span>
+              <div
+                v-for="(item, index) in membersList"
+                :key="index"
+                class="member-row">
+                <div
+                  v-photo="item"
+                  v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
+                  :key="item.img"
+                  class="div-photo"/>
+                <span class="member-row-name">{{ item.realname }}</span>
                 <div class="rt">
-                  <el-select v-model="item.roleId"
-                             placeholder="请选择"
-                             size="mini">
-                    <el-option v-for="val in optionList"
-                               :key="val.roleId"
-                               :label="val.roleName"
-                               :value="val.roleId">
-                    </el-option>
+                  <el-select
+                    v-model="item.roleId"
+                    placeholder="请选择"
+                    size="mini">
+                    <el-option
+                      v-for="val in optionList"
+                      :key="val.roleId"
+                      :label="val.roleName"
+                      :value="val.roleId"/>
                   </el-select>
-                  <span class="el-icon-close"
-                        @click="deleteMember(item, index)"></span>
+                  <span
+                    class="el-icon-close"
+                    @click="deleteMember(item, index)"/>
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div class="footer">
-          <el-button type="primary"
-                     @click="submite">确定</el-button>
+          <el-button
+            type="primary"
+            @click="submite">确定</el-button>
           <el-button @click="close">取消</el-button>
         </div>
       </div>
-      <p slot="reference"
-         class="title"
-         @click="projectSetting">项目设置</p>
+      <p
+        slot="reference"
+        class="title"
+        @click="projectSetting">项目设置</p>
     </el-popover>
   </div>
 </template>
@@ -122,6 +142,21 @@ import MembersDep from '@/components/selectEmployee/membersDep'
 export default {
   components: {
     MembersDep
+  },
+
+  props: {
+    workId: [Number, String],
+    title: String,
+    color: String,
+    isOpen: [Number, String],
+    // 人员数据
+    addMembersData: Array,
+    name: {
+      type: Array,
+      default: () => {
+        return []
+      }
+    }
   },
 
   data() {
@@ -174,24 +209,11 @@ export default {
     }
   },
 
-  props: {
-    workId: [Number, String],
-    title: String,
-    color: String,
-    isOpen: [Number, String],
-    // 人员数据
-    addMembersData: Array,
-    name: {
-      type: Array,
-      default: () => {
-        return []
-      }
-    }
-  },
-
   created() {
     this.membersList = this.addMembersData || []
   },
+
+  beforeDestroy() {},
 
   methods: {
     /**
@@ -202,7 +224,7 @@ export default {
         .then(res => {
           this.optionList = res.data || []
         })
-        .catch(err => {})
+        .catch(() => {})
     },
 
     /**
@@ -234,7 +256,7 @@ export default {
             this.$emit('submite', this.setTitle, this.setColor, this.setIsOpen)
             this.close()
           })
-          .catch(err => {
+          .catch(() => {
             this.loading = false
           })
       } else {
@@ -248,7 +270,7 @@ export default {
             this.$message.success('操作成功')
             this.close()
           })
-          .catch(err => {
+          .catch(() => {
             this.loading = false
           })
       }
@@ -279,7 +301,7 @@ export default {
           this.$emit('handle', 'member', res.data)
           this.$message.success('添加成功')
         })
-        .catch(err => {})
+        .catch(() => {})
     },
 
     /**
@@ -292,11 +314,9 @@ export default {
       }).then(res => {
         this.membersList.splice(index, 1)
         this.$message.success('删除成功')
-      }).catch(err => {})
+      }).catch(() => {})
     }
-  },
-
-  beforeDestroy() {}
+  }
 }
 </script>
 

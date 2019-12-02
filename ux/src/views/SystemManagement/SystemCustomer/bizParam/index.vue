@@ -4,19 +4,22 @@
     <div class="customer-content">
       <!-- 客户管理导航 -->
       <div class="system-view-nav">
-        <el-menu default-active="follow-log-type-set"
-                 @select="menuSelect">
-          <el-menu-item v-for="(item, index) in menuList"
-                        :key="index"
-                        :index="item.key">
-            <span slot="title">{{item.label}}</span>
+        <el-menu
+          default-active="follow-log-type-set"
+          @select="menuSelect">
+          <el-menu-item
+            v-for="(item, index) in menuList"
+            :key="index"
+            :index="item.key">
+            <span slot="title">{{ item.label }}</span>
           </el-menu-item>
         </el-menu>
       </div>
       <keep-alive>
-        <component v-bind:is="menuIndex"
-                   :types="types"
-                   class="system-view-content"></component>
+        <component
+          :is="menuIndex"
+          :types="types"
+          class="system-view-content"/>
       </keep-alive>
     </div>
   </div>
@@ -30,7 +33,7 @@ import ContractExpireSet from './components/contractExpireSet' // 合同到期�
 import CustomerLimitSet from './components/customerLimitSet' // 拥有/锁定客户数限制
 
 export default {
-  name: 'biz-param',
+  name: 'BizParam',
 
   components: {
     BusinessGroupSet,
@@ -51,7 +54,7 @@ export default {
         { label: '锁定客户数限制', key: 'lock' }
       ],
       menuIndex: 'follow-log-type-set',
-      types: '' //区分拥有客户 和 锁定客户
+      types: '' // 区分拥有客户 和 锁定客户
     }
   },
 

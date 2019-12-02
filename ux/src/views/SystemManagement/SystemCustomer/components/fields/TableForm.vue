@@ -1,26 +1,27 @@
 <template>
   <div class="box-wrapper">
     <div class="title">
-      <span>{{attr.isNull ? '*' : ''}}</span>{{attr.name}}<span v-if="attr.inputTips">{{'（'+attr.inputTips+'）'}}</span>
+      <span>{{ attr.isNull ? '*' : '' }}</span>{{ attr.name }}<span v-if="attr.inputTips">{{ '（'+attr.inputTips+'）' }}</span>
     </div>
     <ul class="table">
-      <draggable :list="attr.formValue"
-                 :options="{name: 'list'}">
-        <li v-for="(item, index) in attr.formValue"
-            :key="index"
-            @click.stop="selectItem(item, index)"
-            class="table-item"
-            :class="{'is-select': selectIndex === index}">
-          <div class="table-item-head">{{item.name}}</div>
-          <div class="table-item-body">
-
-          </div>
+      <draggable
+        :list="attr.formValue"
+        :options="{name: 'list'}">
+        <li
+          v-for="(item, index) in attr.formValue"
+          :key="index"
+          :class="{'is-select': selectIndex === index}"
+          class="table-item"
+          @click.stop="selectItem(item, index)">
+          <div class="table-item-head">{{ item.name }}</div>
+          <div class="table-item-body"/>
         </li>
       </draggable>
     </ul>
-    <span class="el-icon-delete control"
-          @click="handleDelete"
-          v-if="isShow"></span>
+    <span
+      v-if="isShow"
+      class="el-icon-delete control"
+      @click="handleDelete"/>
   </div>
 </template>
 
@@ -37,12 +38,12 @@ export default {
     draggable
   },
   mixins: [mixins],
-  computed: {},
   data() {
     return {
-      selectIndex: -1 //标示目前选中列
+      selectIndex: -1 // 标示目前选中列
     }
   },
+  computed: {},
   mounted() {},
   methods: {
     selectItem(item, index) {

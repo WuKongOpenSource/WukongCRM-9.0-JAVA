@@ -8,8 +8,8 @@
       #(select) FROM (
         SELECT
           `a`.*,
-          `b`.`realname` AS `create_user_name`,
-          `c`.`realname` AS `owner_user_name`,
+          (SELECT realname FROM 72crm_admin_user WHERE user_id=`a`.`create_user_id`) AS `create_user_name`,
+          (SELECT realname FROM 72crm_admin_user WHERE user_id=`a`.`owner_user_id`) AS `owner_user_name`,
           #if(label==3)
           `d`.`customer_name` AS `customer_name`,
           #elseif(label==4)
@@ -27,13 +27,12 @@
           `d`.`customer_name` AS `customer_name`,
           `e`.`name` AS `contract_name`,
           `e`.`num` AS `contract_num`,
+          `e`.`money` AS `contract_money`,
           `f`.`num` AS `plan_num`,
           #end
           `z`.*
         FROM
           `72crm_crm_#(realm)` as `a`
-        LEFT JOIN `72crm_admin_user` `b` ON `a`.`create_user_id` = `b`.`user_id`
-        LEFT JOIN `72crm_admin_user` `c` ON `a`.`owner_user_id` = `c`.`user_id`
         #if(label==3)
           LEFT JOIN `72crm_crm_customer` `d` ON `a`.`customer_id` = `d`.`customer_id`
         #elseif(label==4)
@@ -52,7 +51,7 @@
           LEFT JOIN `72crm_crm_contract` `e` ON `a`.`contract_id` = `e`.`contract_id`
           LEFT JOIN `72crm_crm_receivables_plan` `f` ON `a`.`plan_id` = `f`.`plan_id`
         #end
-        RIGHT JOIN (
+        JOIN (
           SELECT
             b.batch_id as field_batch_id
             #for(field : fieldMap)
@@ -66,7 +65,13 @@
                 #end
               #end
             #end
-            FROM 72crm_admin_fieldv AS a RIGHT JOIN (SELECT batch_id FROM 72crm_crm_#(realm) as a WHERE 1=1 #for(query : queryList) #if(query.get("type")==1) #(query.get("sql")) #end #end #if(orderByKey!="create_user_name"&&orderByKey!="owner_user_name") ORDER BY #(orderByKey) #(orderByType) #end #if(!field) #if(page&&limit) LIMIT #(page),#(limit) #end #end
+            FROM 72crm_admin_fieldv AS a RIGHT JOIN (SELECT batch_id FROM 72crm_crm_#(realm) as a
+            WHERE 1=1
+            #if(batchList&&batchList.size()>0)
+              and batch_id in ( #fori(batchList))
+            #end
+            #for(query : queryList) #if(query.get("type")==1) #(query.get("sql")) #end #end #if(orderByKey!="create_user_name"&&orderByKey!="owner_user_name") ORDER BY #(orderByKey) #(orderByType) #end #if(!field) #if(page&&limit) LIMIT #(page),#(limit) #end #end
+
             ) AS b ON a.batch_id = b.batch_id
             #if(fieldMap.containsKey("user"))
               left join 72crm_admin_user d on find_in_set(d.user_id,ifnull(a.value,0))
@@ -74,15 +79,11 @@
             #if(fieldMap.containsKey("dept"))
               left join 72crm_admin_dept c on find_in_set(c.dept_id,ifnull(a.value,0))
             #end
-            where 1=1
-            #if(field)
-              #for(query : queryList) #if(query.get("type")==0) and ((a.name='#(query.get("name"))' and a.value #(query.get("connector")) #(query.get("value"))) or a.name !='#(query.get("name"))') #end #end
-            #end
             GROUP BY b.batch_id
         ) `z` ON `a`.`batch_id` = `z`.`field_batch_id`
       ) as views
         where 1=1
-         #for(query : queryList) #if(query.get("type")==2||query.get("type")==0) #(query.get("sql")) #end #end
+         #for(query : queryList) #if(query.get("type")==2) #(query.get("sql")) #end #end
         ORDER BY
         #(orderByKey) #(orderByType)
         #if(field) #if(page&&limit) LIMIT #(page),#(limit) #end #end
@@ -91,8 +92,8 @@
       #(select) FROM (
         SELECT
           `a`.*,
-          `b`.`realname` AS `create_user_name`,
-          `c`.`realname` AS `owner_user_name`,
+          (SELECT realname FROM 72crm_admin_user WHERE user_id=`a`.`create_user_id`) AS `create_user_name`,
+          (SELECT realname FROM 72crm_admin_user WHERE user_id=`a`.`owner_user_id`) AS `owner_user_name`,
           #if(label==3)
           `d`.`customer_name` AS `customer_name`,
           #elseif(label==4)
@@ -110,13 +111,12 @@
           `d`.`customer_name` AS `customer_name`,
           `e`.`name` AS `contract_name`,
           `e`.`num` AS `contract_num`,
+          `e`.`money` AS `contract_money`,
           `f`.`num` AS `plan_num`,
           #end
           `z`.*
         FROM
         `72crm_crm_#(realm)` as `a`
-        LEFT JOIN `72crm_admin_user` `b` ON `a`.`create_user_id` = `b`.`user_id`
-        LEFT JOIN `72crm_admin_user` `c` ON `a`.`owner_user_id` = `c`.`user_id`
         #if(label==3)
           LEFT JOIN `72crm_crm_customer` `d` ON `a`.`customer_id` = `d`.`customer_id`
         #elseif(label==4)
@@ -171,87 +171,13 @@
         #end
     #end
     #sql ("queryCrmPageListCount")
-      SELECT COUNT(*) FROM (
-      SELECT
-          `a`.*,
-          #if(label==3)
-          `d`.`customer_name` AS `customer_name`,
-          #elseif(label==4)
-          `d`.`name` AS `category_name`,
-          #elseif(label==5)
-          `d`.`customer_name` AS `customer_name`,
-	        `e`.`name` AS `type_name`,
-	        `f`.`name` AS `status_name`,
-	        #elseif(label==6)
-          `d`.`customer_name` AS `customer_name`,
-          IFNULL(`e`.`business_name`,'') AS `business_name`,
-          `f`.`name` AS `contacts_name`,
-          `g`.`realname` AS `company_user_name`,
-          #elseif(label==7)
-          `d`.`customer_name` AS `customer_name`,
-          `e`.`name` AS `contract_name`,
-          `e`.`num` AS `contract_num`,
-          `f`.`num` AS `plan_num`,
-          #end
-          #if(field)
-          `z`.*,
-          #end
-          `b`.`realname` AS `create_user_name`,
-          `c`.`realname` AS `owner_user_name`
-      FROM
-        `72crm_crm_#(realm)` as `a`
-        LEFT JOIN `72crm_admin_user` `b` ON `a`.`create_user_id` = `b`.`user_id`
-        LEFT JOIN `72crm_admin_user` `c` ON `a`.`owner_user_id` = `c`.`user_id`
-        #if(label==3)
-          LEFT JOIN `72crm_crm_customer` `d` ON `a`.`customer_id` = `d`.`customer_id`
-        #elseif(label==4)
-          LEFT JOIN `72crm_crm_product_category` `d` ON `a`.`category_id` = `d`.`category_id`
-        #elseif(label==5)
-          LEFT JOIN `72crm_crm_customer` `d` ON `a`.`customer_id` = `d`.`customer_id`
-          LEFT JOIN `72crm_crm_business_type` `e` ON `a`.`type_id` = `e`.`type_id`
-          LEFT JOIN `72crm_crm_business_status` `f` ON `a`.`status_id` = `f`.`status_id`
-        #elseif(label==6)
-          LEFT JOIN `72crm_crm_customer` `d` ON `a`.`customer_id` = `d`.`customer_id`
-					LEFT JOIN `72crm_crm_business` `e` ON `a`.`business_id` = `e`.`business_id`
-					LEFT JOIN `72crm_crm_contacts` `f` ON `a`.`contacts_id` = `f`.`contacts_id`
-					LEFT JOIN `72crm_admin_user` `g` ON `a`.`company_user_id` = `g`.`user_id`
-		    #elseif(label==7)
-          LEFT JOIN `72crm_crm_customer` `d` ON `a`.`customer_id` = `d`.`customer_id`
-          LEFT JOIN `72crm_crm_contract` `e` ON `a`.`contract_id` = `e`.`contract_id`
-          LEFT JOIN `72crm_crm_receivables_plan` `f` ON `a`.`plan_id` = `f`.`plan_id`
-        #end
-      #if(field)
-        JOIN (
-          SELECT
-            a.batch_id as field_batch_id
-            #for(field : fieldMap)
-              #if(field.value&&field.value.get("field_type")==0)
-                #if(field.value.get("type")==12)
-                  ,GROUP_CONCAT(if(a.name = '#(field.key)',c.name,null)) AS `#(field.key)`
-                #elseif(field.value.get("type")==10)
-                  ,GROUP_CONCAT(if(a.name = '#(field.key)',d.realname,null)) AS `#(field.key)`
-                #else
-                  ,max(CASE WHEN `a`.`name` = '#(field.key)'  THEN `a`.`value` END) AS `#(field.key)`
-                #end
-              #end
-            #end
-          FROM 72crm_admin_fieldv AS a
-          LEFT JOIN 72crm_admin_field as b on a.field_id=b.field_id
-          #if(fieldMap.containsKey("user"))
-            left join 72crm_admin_user d on find_in_set(d.user_id,ifnull(a.value,0))
-          #end
-          #if(fieldMap.containsKey("dept"))
-            left join 72crm_admin_dept c on find_in_set(c.dept_id,ifnull(a.value,0))
-          #end
-          where  1=1
-          and  b.label=#para(label)
-          GROUP BY a.batch_id
-        ) `z` ON `a`.`batch_id` = `z`.`field_batch_id`
-      #end
-      ) as a
+      SELECT count(1) FROM 72crm_crm_#(realm) as a
       WHERE 1=1
+      #if(batchList&&batchList.size()>0)
+          and batch_id in ( #for(str:batchList) #(for.index == 0 ? "" : ",") #para(str) #end)
+      #end
       #for(query : queryList)
-          #(query.get("sql"))
+        #if(query.get("type")==1) #(query.get("sql")) #end
       #end
     #end
     #sql ("queryHideScene")
@@ -285,7 +211,7 @@
 
     #sql ("getCustomerPageList")
     select *,
-    IF(deal_status = '未成交',(TO_DAYS(
+    IF(deal_status = 0,(TO_DAYS(
       IFNULL((SELECT car.create_time FROM 72crm_admin_record as car where car.types = 'crm_customer' and car.types_id = views.customer_id ORDER BY car.create_time DESC LIMIT 1),create_time))
       + CAST((SELECT value FROM 72crm_admin_config WHERE name= 'customerPoolSettingFollowupDays') as SIGNED) - TO_DAYS(NOW())
     ),'') as pool_day,

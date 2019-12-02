@@ -1,76 +1,89 @@
 <template>
-  <el-popover ref="popover"
-              :placement="placement"
-              :width="popoverWidth"
-              v-model="popoverVisible"
-              popper-class="project-com-popover"
-              trigger="click">
+  <el-popover
+    ref="popover"
+    :placement="placement"
+    :width="popoverWidth"
+    v-model="popoverVisible"
+    popper-class="project-com-popover"
+    trigger="click">
     <div v-if="popoverContentShow">
       <div class="title-icon">
-        <span>{{title}}</span>
-        <span class="el-icon-close rt"
-              @click="popoverVisible = false"></span>
+        <span>{{ title }}</span>
+        <span
+          class="el-icon-close rt"
+          @click="popoverVisible = false"/>
       </div>
       <div class="popover-content-box">
         <div class="select-input">
           <!-- 搜索员工列表 -->
-          <el-tabs v-model="activeTabName"
-                   :stretch="true"
-                   @tab-click="tabClick">
-            <el-tab-pane label="员工"
-                         name="user"
-                         v-if="!closeUser"
-                         v-loading="userLoading">
-              <el-input placeholder="搜索员工"
-                        size="mini"
-                        prefix-icon="el-icon-search"
-                        v-model="searchUserInput"
-                        @input="userSearchChange">
-              </el-input>
+          <el-tabs
+            v-model="activeTabName"
+            :stretch="true"
+            @tab-click="tabClick">
+            <el-tab-pane
+              v-loading="userLoading"
+              v-if="!closeUser"
+              label="员工"
+              name="user">
+              <el-input
+                v-model="searchUserInput"
+                placeholder="搜索员工"
+                size="mini"
+                prefix-icon="el-icon-search"
+                @input="userSearchChange"/>
               <div class="search-list">
-                <div v-for="(user, index) in userList"
-                     :key="index"
-                     class="colleagues-list"
-                     v-if="!user.hidden">
-                  <el-checkbox v-model="user.isCheck"
-                               @change="userCheckboxChange(user, index)">
-                    <div v-photo="user"
-                         v-lazy:background-image="$options.filters.filterUserLazyImg(user.img)"
-                         class="div-photo search-img header-circle"></div>
-                    <span>{{user.realname}}</span>
+                <div
+                  v-for="(user, index) in userList"
+                  v-if="!user.hidden"
+                  :key="index"
+                  class="colleagues-list">
+                  <el-checkbox
+                    v-model="user.isCheck"
+                    @change="userCheckboxChange(user, index)">
+                    <div
+                      v-photo="user"
+                      v-lazy:background-image="$options.filters.filterUserLazyImg(user.img)"
+                      class="div-photo search-img header-circle"/>
+                    <span>{{ user.realname }}</span>
                   </el-checkbox>
                 </div>
               </div>
             </el-tab-pane>
-            <el-tab-pane label="部门"
-                         name="dep"
-                         v-if="!closeDep"
-                         v-loading="depLoading">
-              <el-input placeholder="搜索部门"
-                        size="mini"
-                        style="margin-bottom:10px;"
-                        prefix-icon="el-icon-search"
-                        v-model="searchDepInput"
-                        @input="depSearchChange">
-              </el-input>
+            <el-tab-pane
+              v-loading="depLoading"
+              v-if="!closeDep"
+              label="部门"
+              name="dep">
+              <el-input
+                v-model="searchDepInput"
+                placeholder="搜索部门"
+                size="mini"
+                style="margin-bottom:10px;"
+                prefix-icon="el-icon-search"
+                @input="depSearchChange"/>
               <div class="search-list">
                 <el-breadcrumb separator-class="el-icon-arrow-right">
-                  <el-breadcrumb-item v-for="(item, index) in breadcrumbList"
-                                      :key="index">
-                    <a href="javascript:;"
-                       @click="breadcrumbBtn(item, index)">{{item.label}}</a>
+                  <el-breadcrumb-item
+                    v-for="(item, index) in breadcrumbList"
+                    :key="index">
+                    <a
+                      href="javascript:;"
+                      @click="breadcrumbBtn(item, index)">{{ item.label }}</a>
                   </el-breadcrumb-item>
                 </el-breadcrumb>
-                <div v-for="(depItem, index) in depShowList"
-                     :key="index"
-                     v-if="!depItem.hidden"
-                     class="checkout-box">
-                  <el-checkbox v-model="depItem.isCheck"
-                               @change="depCheckboxChange(depItem, index)"></el-checkbox>
+                <div
+                  v-for="(depItem, index) in depShowList"
+                  v-if="!depItem.hidden"
+                  :key="index"
+                  class="checkout-box">
+                  <el-checkbox
+                    v-model="depItem.isCheck"
+                    @change="depCheckboxChange(depItem, index)"/>
                   <div @click="enterDepChildren(depItem)">
-                    <span>{{depItem.name}}</span>
-                    <span class="el-icon-arrow-right"
-                          v-if="depItem.children"></span>
+                    <span>{{ depItem.name }}</span>
+                    <span
+                      v-if="depItem.children"
+                      class="el-icon-arrow-right"/>
                   </div>
                 </div>
               </div>
@@ -80,40 +93,48 @@
         <div class="checked-content">
           <div class="checked-top">
             <span class="title">已选择</span>
-            <span v-if="!closeUser"
-                  class="title">员工 ({{userSelectCount}})</span>
-            <span v-if="!closeDep"
-                  class="title">部门 ({{depSelectCount}})</span>
-            <el-button type="text"
-                       class="rt"
-                       @click="emptyClick">清空</el-button>
+            <span
+              v-if="!closeUser"
+              class="title">员工 ({{ userSelectCount }})</span>
+            <span
+              v-if="!closeDep"
+              class="title">部门 ({{ depSelectCount }})</span>
+            <el-button
+              type="text"
+              class="rt"
+              @click="emptyClick">清空</el-button>
           </div>
           <div class="border-content">
-            <div v-for="(item, index) in checkedUserDepList"
-                 :key="index"
-                 class="checked-list">
-              <div v-if="item.type == 'user'"
-                   v-photo="item"
-                   v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
-                   class="div-photo"></div>
-              <span v-if="item.type == 'user'"> {{item.realname}} </span>
-              <span v-else> {{item.name}} </span>
-              <span class="rt el-icon-close"
-                    @click="selectDelect(item, index)"></span>
+            <div
+              v-for="(item, index) in checkedUserDepList"
+              :key="index"
+              class="checked-list">
+              <div
+                v-photo="item"
+                v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
+                v-if="item.type == 'user'"
+                class="div-photo"/>
+              <span v-if="item.type == 'user'"> {{ item.realname }} </span>
+              <span v-else> {{ item.name }} </span>
+              <span
+                class="rt el-icon-close"
+                @click="selectDelect(item, index)"/>
             </div>
           </div>
         </div>
       </div>
       <div class="popover-footer">
-        <el-button type="primary"
-                   @click="popoverSubmit">确 定</el-button>
+        <el-button
+          type="primary"
+          @click="popoverSubmit">确 定</el-button>
         <el-button @click="popoverVisible = false">取 消</el-button>
       </div>
     </div>
-    <div :style="{'display':contentBlock ? 'block' : 'inline-block'}"
-         slot="reference"
-         @click="showContentClick">
-      <slot name="membersDep"></slot>
+    <div
+      slot="reference"
+      :style="{'display':contentBlock ? 'block' : 'inline-block'}"
+      @click="showContentClick">
+      <slot name="membersDep"/>
     </div>
   </el-popover>
 
@@ -121,53 +142,6 @@
 <script>
 import { usersList, depList } from '@/api/common'
 export default {
-  data() {
-    return {
-      activeTabName: 'user',
-      // 筛选
-      searchUserInput: '',
-      searchDepInput: '',
-      popoverVisible: false,
-      // 内容展示
-      popoverContentShow: false,
-      // 加载动画
-      userLoading: false,
-      depLoading: false,
-      // 所有用户
-      userList: [],
-      // 展示客户
-      depShowList: [],
-      // 面包屑数据
-      breadcrumbList: [],
-      // 选中的数据 -- 员工和部门一个数组用于页面展示
-      checkedUserDepList: []
-    }
-  },
-  watch: {
-    userCheckedData: function() {
-      this.updateCheckInfoByWatch()
-    },
-    depCheckedData: function() {
-      this.updateCheckInfoByWatch()
-    },
-    popoverVisible: function(val) {
-      if (val) {
-        this.updateCheckInfoByWatch()
-      }
-    }
-  },
-  computed: {
-    userSelectCount() {
-      return this.checkedUserDepList.filter(item => {
-        return item.type == 'user'
-      }).length
-    },
-    depSelectCount() {
-      return this.checkedUserDepList.filter(item => {
-        return item.type == 'dep'
-      }).length
-    }
-  },
   props: {
     // 弹出框宽度
     popoverWidth: {
@@ -214,6 +188,53 @@ export default {
     },
     userRequest: Function,
     userParams: Object
+  },
+  data() {
+    return {
+      activeTabName: 'user',
+      // 筛选
+      searchUserInput: '',
+      searchDepInput: '',
+      popoverVisible: false,
+      // 内容展示
+      popoverContentShow: false,
+      // 加载动画
+      userLoading: false,
+      depLoading: false,
+      // 所有用户
+      userList: [],
+      // 展示客户
+      depShowList: [],
+      // 面包屑数据
+      breadcrumbList: [],
+      // 选中的数据 -- 员工和部门一个数组用于页面展示
+      checkedUserDepList: []
+    }
+  },
+  computed: {
+    userSelectCount() {
+      return this.checkedUserDepList.filter(item => {
+        return item.type == 'user'
+      }).length
+    },
+    depSelectCount() {
+      return this.checkedUserDepList.filter(item => {
+        return item.type == 'dep'
+      }).length
+    }
+  },
+  watch: {
+    userCheckedData: function() {
+      this.updateCheckInfoByWatch()
+    },
+    depCheckedData: function() {
+      this.updateCheckInfoByWatch()
+    },
+    popoverVisible: function(val) {
+      if (val) {
+        this.updateCheckInfoByWatch()
+      }
+    }
   },
   methods: {
     initInfo() {

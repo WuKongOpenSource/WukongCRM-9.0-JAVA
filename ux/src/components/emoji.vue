@@ -1,26 +1,30 @@
 <template>
   <div class="emoji">
     <ul class="emoji-controller">
-      <li v-for="(pannel,index) in pannels"
-          :key="index"
-          @click="changeActive(index)"
-          :class="{'active': index === activeIndex}">
+      <li
+        v-for="(pannel,index) in pannels"
+        :key="index"
+        :class="{'active': index === activeIndex}"
+        @click="changeActive(index)">
         {{ pannel }}
       </li>
     </ul>
     <ul class="emoji-container">
-      <li v-for="(emojiGroup, index) in emojis"
-          style="padding: 0"
+      <li
+        v-for="(emojiGroup, index) in emojis"
+        v-if="index === activeIndex"
+        :key="index"
+        style="padding: 0">
+        {{ emojiGroup }}--{{ index }}
+        <a
+          v-for="(emoji, index) in emojiGroup"
           :key="index"
-          v-if="index === activeIndex">
-        {{emojiGroup}}--{{index}}
-        <a href="javascript:;"
-           v-for="(emoji, index) in emojiGroup"
-           :key="index"
-           @click="selectItem(emoji)">
-          <span class="emoji-item"
-                :title="emoji"
-                :class="'sprite-' + getPureName(emoji)"></span>
+          href="javascript:;"
+          @click="selectItem(emoji)">
+          <span
+            :title="emoji"
+            :class="'sprite-' + getPureName(emoji)"
+            class="emoji-item"/>
         </a>
       </li>
     </ul>
@@ -29,12 +33,19 @@
 <script>
 import data from '@/utils/emoji-data.js'
 export default {
-  name: 'emoji',
+  name: 'Emoji',
   data() {
     return {
       emojiData: data,
       pannels: ['表情', '自然', '物品', '地点', '符号'],
       activeIndex: 0
+    }
+  },
+  computed: {
+    emojis() {
+      return this.pannels.map(item => {
+        return Object.keys(this.emojiData[item])
+      })
     }
   },
   created() {
@@ -48,13 +59,6 @@ export default {
     },
     selectItem(emoji) {
       this.$emit('select', emoji)
-    }
-  },
-  computed: {
-    emojis() {
-      return this.pannels.map(item => {
-        return Object.keys(this.emojiData[item])
-      })
     }
   }
 }

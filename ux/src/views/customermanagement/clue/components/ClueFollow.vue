@@ -1,58 +1,69 @@
 <template>
   <div class="f-container">
     <div v-loading="sendLoading">
-      <mix-add ref="mixadd"
-               :crmType="crmType"
-               :id="id"
-               @mixadd-info="submitInfo"></mix-add>
+      <mix-add
+        ref="mixadd"
+        :crm-type="crmType"
+        :id="id"
+        @mixadd-info="submitInfo"/>
       <flexbox class="se-section">
         <div class="se-name">记录类型</div>
-        <el-dropdown style="margin-right: 20px;"
-                     trigger="click"
-                     @command="handleTypeDrop">
+        <el-dropdown
+          style="margin-right: 20px;"
+          trigger="click"
+          @command="handleTypeDrop">
           <flexbox class="se-select">
-            <div class="se-select-name">{{followType ? followType : '请选择'}}</div>
-            <i class="el-icon-arrow-down el-icon--right"
-               style="color:#ccc;"></i>
+            <div class="se-select-name">{{ followType ? followType : '请选择' }}</div>
+            <i
+              class="el-icon-arrow-down el-icon--right"
+              style="color:#ccc;"/>
           </flexbox>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item v-for="(item, index) in followTypes"
-                              :key="index"
-                              :command="item.type">{{item.name}}</el-dropdown-item>
+            <el-dropdown-item
+              v-for="(item, index) in followTypes"
+              :key="index"
+              :command="item.type">{{ item.name }}</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
         <div class="se-name">下次联系时间</div>
-        <el-date-picker class="se-datepicker"
-                        v-model="nextTime"
-                        type="datetime"
-                        placeholder="选择日期"
-                        :default-value="new Date"
-                        value-format="yyyy-MM-dd HH:mm:ss"
-                        :editable="false">
-        </el-date-picker>
-        <el-checkbox v-if="showOAPermission"
-                     v-model="isEvent">添加到日程提醒</el-checkbox>
-        <el-button @click.native="sendInfo"
-                   class="se-send"
-                   type="primary">发布</el-button>
+        <el-date-picker
+          v-model="nextTime"
+          :default-value="new Date"
+          :editable="false"
+          class="se-datepicker"
+          type="datetime"
+          placeholder="选择日期"
+          value-format="yyyy-MM-dd HH:mm:ss"/>
+        <el-checkbox
+          v-if="showOAPermission"
+          v-model="isEvent">添加到日程提醒</el-checkbox>
+        <el-button
+          class="se-send"
+          type="primary"
+          @click.native="sendInfo">发布</el-button>
       </flexbox>
     </div>
     <div class="log-cont">
-      <flexbox v-if="logTypes.length > 0"
-               style="border-bottom: 1px solid #E6E6E6;">
-        <flexbox v-for="(item, index) in logTypes"
-                 :key="index"
-                 style="width: auto;"
-                 @click.native="logTabsClick(item,index)">
-          <div class="log-tabs-item"
-               :style="{ color: logType==item.type ? '#F18C70' : '#777'}">{{item.name}}</div>
-          <div class="log-tabs-line"
-               v-if="logTypes.length -1 != index"></div>
+      <flexbox
+        v-if="logTypes.length > 0"
+        style="border-bottom: 1px solid #E6E6E6;">
+        <flexbox
+          v-for="(item, index) in logTypes"
+          :key="index"
+          style="width: auto;"
+          @click.native="logTabsClick(item,index)">
+          <div
+            :style="{ color: logType==item.type ? '#F18C70' : '#777'}"
+            class="log-tabs-item">{{ item.name }}</div>
+          <div
+            v-if="logTypes.length -1 != index"
+            class="log-tabs-line"/>
         </flexbox>
       </flexbox>
-      <component :is="componentsName"
-                 :id="id"
-                 :crmType="crmType"></component>
+      <component
+        :is="componentsName"
+        :id="id"
+        :crm-type="crmType"/>
     </div>
   </div>
 </template>
@@ -61,12 +72,11 @@
 import MixAdd from '../../components/MixAdd'
 import RecordLog from '../../components/followLog/RecordLog' // 跟进记录
 import { crmLeadsRecordSave } from '@/api/customermanagement/clue'
-import { formatTimeToTimestamp } from '@/utils'
 import followLogType from '@/views/customermanagement/mixins/followLogType'
 
 export default {
   /** 线索管理 的 线索详情 的 跟进记录*/
-  name: 'clue-follow',
+  name: 'ClueFollow',
   components: {
     MixAdd,
     RecordLog
@@ -81,7 +91,6 @@ export default {
       default: ''
     }
   },
-  watch: {},
   data() {
     return {
       sendLoading: false,
@@ -101,6 +110,7 @@ export default {
       return ''
     }
   },
+  watch: {},
   mounted() {},
   activated: function() {},
   deactivated: function() {},

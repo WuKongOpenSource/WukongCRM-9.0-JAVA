@@ -5,11 +5,11 @@ import request from '@/utils/request'
  * @param {*} data
  */
 export function workTrashIndexAPI(data) {
-    return request({
-        url: 'workTrash/queryList',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'workTrash/queryList',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -17,11 +17,11 @@ export function workTrashIndexAPI(data) {
  * @param {*} data
  */
 export function workTrashDeleteAPI(data) {
-    return request({
-        url: 'workTrash/deleteTask',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'workTrash/deleteTask',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -29,11 +29,11 @@ export function workTrashDeleteAPI(data) {
  * @param {*} data
  */
 export function workTrashRecoverAPI(data) {
-    return request({
-        url: 'workTrash/restore',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'workTrash/restore',
+    method: 'post',
+    data: data
+  })
 }
 
 

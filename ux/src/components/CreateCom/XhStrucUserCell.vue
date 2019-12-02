@@ -1,18 +1,22 @@
 <template>
-  <members-dep :popoverDisplay="'block'"
-               :depCheckedData="dataStrucs"
-               :userCheckedData="dataUsers"
-               @popoverSubmit="popoverSubmit">
+  <members-dep
+    :popover-display="'block'"
+    :dep-checked-data="dataStrucs"
+    :user-checked-data="dataUsers"
+    @popoverSubmit="popoverSubmit">
     <div slot="membersDep">
-      <flexbox wrap="wrap"
-               class="structure-container">
-        <div v-for="(item, index) in dataUsers"
-             :key="'user'+index"
-             class="user-item">{{item.name ? item.name : item.realname}}
+      <flexbox
+        wrap="wrap"
+        class="structure-container">
+        <div
+          v-for="(item, index) in dataUsers"
+          :key="'user'+index"
+          class="user-item">{{ item.name ? item.name : item.realname }}
         </div>
-        <div v-for="(item, index) in dataStrucs"
-             :key="'struc'+index"
-             class="user-item">{{item.name}}
+        <div
+          v-for="(item, index) in dataStrucs"
+          :key="'struc'+index"
+          class="user-item">{{ item.name }}
         </div>
         <div class="add-item">+添加</div>
       </flexbox>
@@ -24,28 +28,9 @@
 import membersDep from '@/components/selectEmployee/membersDep'
 
 export default {
-  name: 'xh-struc-user-cell', // 新建 struc-user-cell
+  name: 'XhStrucUserCell', // 新建 struc-user-cell
   components: {
     membersDep
-  },
-  computed: {},
-  watch: {
-    value: function(val) {
-      this.dataUsers = val.users
-      this.dataStrucs = val.strucs
-    },
-    users: function(val) {
-      this.dataUsers = val
-    },
-    strucs: function(val) {
-      this.dataStrucs = val
-    }
-  },
-  data() {
-    return {
-      dataUsers: [], // 关联的时候展示name 编辑的时候展示realname
-      dataStrucs: []
-    }
   },
   props: {
     // 员工和 部门
@@ -74,6 +59,25 @@ export default {
     index: Number,
     /** 包含数据源 */
     item: Object
+  },
+  data() {
+    return {
+      dataUsers: [], // 关联的时候展示name 编辑的时候展示realname
+      dataStrucs: []
+    }
+  },
+  computed: {},
+  watch: {
+    value: function(val) {
+      this.dataUsers = val.users
+      this.dataStrucs = val.strucs
+    },
+    users: function(val) {
+      this.dataUsers = val
+    },
+    strucs: function(val) {
+      this.dataStrucs = val
+    }
   },
   created() {
     if (this.value) {

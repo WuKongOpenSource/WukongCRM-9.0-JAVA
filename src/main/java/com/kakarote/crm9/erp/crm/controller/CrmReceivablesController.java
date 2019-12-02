@@ -65,14 +65,6 @@ public class CrmReceivablesController extends Controller {
     public void  deleteByIds(@Para("receivablesIds") String receivablesIds){
         renderJson(crmReceivablesService.deleteByIds(receivablesIds));
     }
-
-    /**
-     * 根据条件查询回款
-     * @author zxy
-     */
-    public void queryListByType(@Para("type") String type,@Para("id")Integer id ){
-        renderJson(R.ok().put("data",crmReceivablesService.queryListByType(type,id)));
-    }
     /**
      * 根据条件查询回款
      * @author zxy

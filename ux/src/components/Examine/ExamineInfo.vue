@@ -1,103 +1,125 @@
 <template>
-  <div v-loading="loading"
-       class="contract-flow-box">
-    <flexbox direction="row-reverse"
-             style="position:relative;">
-      <el-popover v-model="showFlowPopover"
-                  placement="bottom"
-                  width="300"
-                  trigger="click">
-        <check-flow ref="checkFlow"
-                    :id="recordId"
-                    :examineType="examineType"
-                    @close="showFlowPopover=false"></check-flow>
-        <el-button slot="reference"
-                   class="check-flow-button"
-                   type="text">查看审批历史</el-button>
+  <div
+    v-loading="loading"
+    class="contract-flow-box">
+    <flexbox
+      direction="row-reverse"
+      style="position:relative;">
+      <el-popover
+        v-model="showFlowPopover"
+        placement="bottom"
+        width="300"
+        trigger="click">
+        <check-flow
+          ref="checkFlow"
+          :id="recordId"
+          :examine-type="examineType"
+          @close="showFlowPopover=false"/>
+        <el-button
+          slot="reference"
+          class="check-flow-button"
+          type="text">查看审批历史</el-button>
       </el-popover>
       <div style="min-height: 40px;">
-        <el-button v-if="examineInfo.isRecheck==1"
-                   @click="examineHandle(4)"
-                   class="flow-button white">撤回审核</el-button>
-        <el-button v-if="examineInfo.isCheck==1"
-                   @click="examineHandle(2)"
-                   class="flow-button red">拒绝</el-button>
-        <el-button v-if="examineInfo.isCheck==1"
-                   @click="examineHandle(1)"
-                   class="flow-button blue">通过</el-button>
+        <el-button
+          v-if="examineInfo.isRecheck==1"
+          class="flow-button white"
+          @click="examineHandle(4)">撤回审核</el-button>
+        <el-button
+          v-if="examineInfo.isCheck==1"
+          class="flow-button red"
+          @click="examineHandle(2)">拒绝</el-button>
+        <el-button
+          v-if="examineInfo.isCheck==1"
+          class="flow-button blue"
+          @click="examineHandle(1)">通过</el-button>
       </div>
     </flexbox>
-    <flexbox v-if="examineInfo.examineType == 2"
-             class="check-items">
-      <flexbox class="check-item"
-               v-for="(item, index) in examineInfo.steps"
-               :key="index">
+    <flexbox
+      v-if="examineInfo.examineType == 2"
+      class="check-items">
+      <flexbox
+        v-for="(item, index) in examineInfo.steps"
+        :key="index"
+        class="check-item">
         <div>
-          <flexbox class="check-item-user"
-                   style="width:auto;">
-            <div v-photo="item.examinUser"
-                 v-lazy:background-image="$options.filters.filterUserLazyImg(item.examinUser.img)"
-                 class="div-photo check-item-img"></div>
-            <div class="check-item-name">{{item.examinUser.realname}}</div>
+          <flexbox
+            class="check-item-user"
+            style="width:auto;">
+            <div
+              v-photo="item.examinUser"
+              v-lazy:background-image="$options.filters.filterUserLazyImg(item.examinUser.img)"
+              class="div-photo check-item-img"/>
+            <div class="check-item-name">{{ item.examinUser.realname }}</div>
           </flexbox>
           <flexbox class="check-item-info">
-            <img class="check-item-img"
-                 :src="item.examineStatus|statusIcon">
-            <div class="check-item-name">{{getStatusName(item.examineStatus)}}</div>
+            <img
+              :src="item.examineStatus|statusIcon"
+              class="check-item-img">
+            <div class="check-item-name">{{ getStatusName(item.examineStatus) }}</div>
           </flexbox>
         </div>
-        <i v-if="examineInfo.steps.length -1 != index"
-           class="el-icon-arrow-right check-item-arrow"></i>
+        <i
+          v-if="examineInfo.steps.length -1 != index"
+          class="el-icon-arrow-right check-item-arrow"/>
       </flexbox>
     </flexbox>
-    <flexbox v-else-if="examineInfo.examineType == 1"
-             class="check-items"
-             wrap="wrap">
-      <el-popover v-for="(item, index) in examineInfo.steps"
-                  :key="index"
-                  placement="bottom"
-                  :disabled="!item.userList || item.userList.length==0"
-                  trigger="hover">
+    <flexbox
+      v-else-if="examineInfo.examineType == 1"
+      class="check-items"
+      wrap="wrap">
+      <el-popover
+        v-for="(item, index) in examineInfo.steps"
+        :key="index"
+        :disabled="!item.userList || item.userList.length==0"
+        placement="bottom"
+        trigger="hover">
         <div class="popover-detail">
-          <flexbox v-for="(subItem, subIndex) in item.userList"
-                   :key="subIndex"
-                   align="stretch"
-                   class="popover-detail-item">
-            <img class="popover-detail-item-img"
-                 :src="subItem.examineStatus|statusIcon">
+          <flexbox
+            v-for="(subItem, subIndex) in item.userList"
+            :key="subIndex"
+            align="stretch"
+            class="popover-detail-item">
+            <img
+              :src="subItem.examineStatus|statusIcon"
+              class="popover-detail-item-img">
             <div>
-              <div class="popover-detail-item-time">{{subItem.examineTime}}</div>
+              <div class="popover-detail-item-time">{{ subItem.examineTime }}</div>
               <flexbox class="popover-detail-item-examine">
-                <div class="examine-name">{{subItem.realname}}</div>
-                <div class="examine-info">{{getStatusName(subItem.examineStatus)}}此申请</div>
+                <div class="examine-name">{{ subItem.realname }}</div>
+                <div class="examine-info">{{ getStatusName(subItem.examineStatus) }}此申请</div>
               </flexbox>
             </div>
           </flexbox>
         </div>
-        <flexbox slot="reference"
-                 class="fixed-examine-item">
+        <flexbox
+          slot="reference"
+          class="fixed-examine-item">
           <div class="fixed-examine-info">
-            <img src="@/assets/img/examine_head.png" />
-            <div class="detail">{{item|detailName}}</div>
+            <img src="@/assets/img/examine_head.png" >
+            <div class="detail">{{ item|detailName }}</div>
             <flexbox class="check-item-info">
-              <img class="check-item-img"
-                   :src="item.examineStatus|statusIcon">
-              <div class="check-item-name">{{getStatusName(item.examineStatus)}}</div>
+              <img
+                :src="item.examineStatus|statusIcon"
+                class="check-item-img">
+              <div class="check-item-name">{{ getStatusName(item.examineStatus) }}</div>
             </flexbox>
           </div>
-          <i v-if="examineInfo.steps.length -1 != index"
-             class="el-icon-arrow-right check-item-arrow"></i>
+          <i
+            v-if="examineInfo.steps.length -1 != index"
+            class="el-icon-arrow-right check-item-arrow"/>
         </flexbox>
       </el-popover>
     </flexbox>
-    <examine-handle :show="showExamineHandle"
-                    @close="showExamineHandle = false"
-                    @save="examineHandleClick"
-                    :id="id"
-                    :recordId="recordId"
-                    :examineType="examineType"
-                    :detail="examineInfo"
-                    :status="examineHandleInfo.status"></examine-handle>
+    <examine-handle
+      :show="showExamineHandle"
+      :id="id"
+      :record-id="recordId"
+      :examine-type="examineType"
+      :detail="examineInfo"
+      :status="examineHandleInfo.status"
+      @close="showExamineHandle = false"
+      @save="examineHandleClick"/>
   </div>
 </template>
 <script type="text/javascript">
@@ -110,12 +132,11 @@ import CheckFlow from './CheckFlow' // 审批流程
 
 // 审核信息 config 1 固定 0 自选
 export default {
-  name: 'examine-info', // 合同审核操作
+  name: 'ExamineInfo', // 合同审核操作
   components: {
     ExamineHandle,
     CheckFlow
   },
-  computed: {},
   filters: {
     statusIcon: function(status) {
       // 0失败，1通过，2撤回，3创建，4待审核
@@ -152,6 +173,27 @@ export default {
       return '第' + Nzhcn.encodeS(index) + '级'
     }
   },
+  props: {
+    examineType: {
+      type: String,
+      default: ''
+    },
+    // 详情信息id
+    id: [String, Number],
+    // 审批流id
+    recordId: [String, Number],
+    ownerUserId: [String, Number]
+  },
+  data() {
+    return {
+      loading: false,
+      examineInfo: {}, // 审核信息
+      showFlowPopover: false,
+      examineHandleInfo: { status: 1 }, // 1 审核通过 2 审核拒绝 4 已撤回
+      showExamineHandle: false // 审核操作
+    }
+  },
+  computed: {},
   watch: {
     recordId: {
       handler(val) {
@@ -167,26 +209,6 @@ export default {
       immediate: true
     }
   },
-  data() {
-    return {
-      loading: false,
-      examineInfo: {}, //审核信息
-      showFlowPopover: false,
-      examineHandleInfo: { status: 1 }, // 1 审核通过 2 审核拒绝 4 已撤回
-      showExamineHandle: false // 审核操作
-    }
-  },
-  props: {
-    examineType: {
-      type: String,
-      default: ''
-    },
-    // 详情信息id
-    id: [String, Number],
-    // 审批流id
-    recordId: [String, Number],
-    ownerUserId: [String, Number]
-  },
   mounted() {},
   methods: {
     getFlowStepList() {
@@ -194,7 +216,7 @@ export default {
         return
       }
       this.loading = true
-      let request = {
+      const request = {
         crm_contract: crmExamineFlowStepList,
         crm_receivables: crmExamineFlowStepList,
         oa_examine: oaExamineFlowStepList

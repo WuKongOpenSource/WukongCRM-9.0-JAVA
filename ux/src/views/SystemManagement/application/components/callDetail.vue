@@ -1,44 +1,54 @@
 <template>
-  <el-dialog :visible.sync="visible"
-             width="700px"
-             :append-to-body="true"
-             :before-close="handleClose">
+  <el-dialog
+    :visible.sync="visible"
+    :append-to-body="true"
+    :before-close="handleClose"
+    width="700px">
     <div class="position-relative">
       <div>您可以联系悟空官方开通悟空呼叫中心服务。开通后您可以获得以下服务：</div>
       <flexbox class="phone-info">
-        <img src="@/assets/img/system/app/phone.png" />
+        <img src="@/assets/img/system/app/phone.png" >
         官方服务热线：400-0812-558
       </flexbox>
-      <el-table :data="tableData"
-                border
-                style="width: 100%">
-        <el-table-column prop="name"
-                         label="功能"
-                         width="180">
-        </el-table-column>
-        <el-table-column prop="des"
-                         label="功能描述">
-        </el-table-column>
+      <el-table
+        :data="tableData"
+        border
+        style="width: 100%">
+        <el-table-column
+          prop="name"
+          label="功能"
+          width="180"/>
+        <el-table-column
+          prop="des"
+          label="功能描述"/>
       </el-table>
       <div class="switch">
-        <el-switch v-model="callSwitch"
-                   disabled>
-        </el-switch>
+        <el-switch
+          v-model="callSwitch"
+          disabled/>
         未启用
       </div>
     </div>
-    <span slot="footer"
-          class="dialog-footer">
-      <el-button type="primary"
-                 @click="handleClose">确 定</el-button>
+    <span
+      slot="footer"
+      class="dialog-footer">
+      <el-button
+        type="primary"
+        @click="handleClose">确 定</el-button>
     </span>
   </el-dialog>
 </template>
 
 <script>
 export default {
-  name: 'call-detail',
+  name: 'CallDetail',
   components: {},
+  props: {
+    visible: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       tableData: [
@@ -63,12 +73,6 @@ export default {
     }
   },
   computed: {},
-  props: {
-    visible: {
-      type: Boolean,
-      default: false
-    }
-  },
   mounted() {},
   methods: {
     handleClose() {

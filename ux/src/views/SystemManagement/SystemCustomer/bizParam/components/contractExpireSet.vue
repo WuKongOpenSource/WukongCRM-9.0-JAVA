@@ -2,21 +2,25 @@
   <div v-loading="loading">
     <div class="content-title">
       <span>合同到期提醒设置</span>
-      <el-button type="primary"
-                 class="rt"
-                 size="medium"
-                 @click="save">保存</el-button>
+      <el-button
+        type="primary"
+        class="rt"
+        size="medium"
+        @click="save">保存</el-button>
     </div>
     <div class="content-body">
       <div class="tips">设置提前提醒天数之后，根据合同的”合同到期时间”计算提醒时间</div>
       <div class="set-content">
-        <el-radio v-model="contractConfig"
-                  :label="0">不提醒</el-radio>
-        <el-radio v-model="contractConfig"
-                  :label="1">提前提醒天数</el-radio>
-        <div v-if="contractConfig == 1"
-             class="time-set">
-          <el-input v-model="contractDay"></el-input><span>天</span>
+        <el-radio
+          v-model="contractConfig"
+          :label="0">不提醒</el-radio>
+        <el-radio
+          v-model="contractConfig"
+          :label="1">提前提醒天数</el-radio>
+        <div
+          v-if="contractConfig == 1"
+          class="time-set">
+          <el-input v-model="contractDay"/><span>天</span>
         </div>
       </div>
     </div>
@@ -27,7 +31,7 @@
 import { crmSettingContractDayAPI } from '@/api/systemManagement/SystemCustomer'
 
 export default {
-  name: 'contract-expire-set',
+  name: 'ContractExpireSet',
 
   components: {},
 
@@ -67,7 +71,7 @@ export default {
      */
     save() {
       this.loading = true
-      let params = {}
+      const params = {}
       if (this.contractConfig == 1) {
         params.contractDay = this.contractDay
         params.status = 1

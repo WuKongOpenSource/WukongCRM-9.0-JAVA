@@ -5,9 +5,9 @@ import request from '@/utils/request'
  * @param {*} data
  */
 export function workWorkArchiveListAPI(data) {
-    return request({
-        url: 'work/queryArchiveWorkList',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/queryArchiveWorkList',
+    method: 'post',
+    data: data
+  })
 }

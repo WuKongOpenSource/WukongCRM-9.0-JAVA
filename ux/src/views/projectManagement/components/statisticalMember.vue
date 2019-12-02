@@ -1,19 +1,20 @@
 <template>
   <create-sections title="成员完成情况">
-    <el-table :data="list"
-              class="table"
-              height="500"
-              stripe
-              border
-              highlight-current-row
-              style="width: 100%"
-              :cell-style="cellStyle">
-      <el-table-column v-for="(item, index) in fieldList"
-                       :key="index"
-                       show-overflow-tooltip
-                       :prop="item.prop"
-                       :label="item.label">
-      </el-table-column>
+    <el-table
+      :data="list"
+      :cell-style="cellStyle"
+      class="table"
+      height="500"
+      stripe
+      border
+      highlight-current-row
+      style="width: 100%">
+      <el-table-column
+        v-for="(item, index) in fieldList"
+        :key="index"
+        :prop="item.prop"
+        :label="item.label"
+        show-overflow-tooltip/>
     </el-table>
   </create-sections>
 </template>
@@ -21,13 +22,15 @@
 import CreateSections from '@/components/CreateSections'
 
 export default {
-  name: 'statistical-member', // 成员完成情况
+  name: 'StatisticalMember', // 成员完成情况
 
   components: {
     CreateSections
   },
 
-  computed: {},
+  props: {
+    list: Array
+  },
 
   data() {
     return {
@@ -60,9 +63,7 @@ export default {
     }
   },
 
-  props: {
-    list: Array
-  },
+  computed: {},
 
   mounted() {},
 

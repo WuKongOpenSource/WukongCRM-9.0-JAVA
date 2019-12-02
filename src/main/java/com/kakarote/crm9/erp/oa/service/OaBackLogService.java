@@ -13,7 +13,7 @@ public class OaBackLogService {
      * oa代办事项提醒
      */
     public R backLogNum(){
-        Integer userId = BaseUtil.getUserId().intValue();
+        Long userId = BaseUtil.getUserId();
         Integer eventNum = Db.queryInt(Db.getSql("oa.backLog.queryEventNum"),userId,userId);
         Integer taskNum = Db.queryInt(Db.getSql("oa.backLog.queryTaskNum"),userId,userId);
         Integer announcementNum = Db.queryInt(Db.getSql("oa.backLog.queryAnnouncementNum"),userId);

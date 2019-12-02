@@ -1,10 +1,11 @@
 <template>
   <div id="app">
     <router-view class="router-view" />
-    <vue-picture-viewer :imgData="previewImgs"
-                        :select-index="previewIndex"
-                        v-if="showPreviewImg"
-                        @close-viewer="showPreviewImg=false"></vue-picture-viewer>
+    <vue-picture-viewer
+      v-if="showPreviewImg"
+      :img-data="previewImgs"
+      :select-index="previewIndex"
+      @close-viewer="showPreviewImg=false"/>
   </div>
 </template>
 
@@ -30,7 +31,7 @@ export default {
   },
   watch: {
     $route(to, from) {
-      this.showPreviewImg = false //切换页面隐藏图片预览
+      this.showPreviewImg = false // 切换页面隐藏图片预览
       if (to.meta.menuIndex) {
         this.$store.commit('SET_ACTIVEINDEX', to.meta.menuIndex)
       } else {

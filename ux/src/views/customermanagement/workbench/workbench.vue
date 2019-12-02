@@ -1,34 +1,38 @@
 <template>
   <div>
     <flexbox class="user-container">
-      <div v-photo="filtersInfo"
-           :key="filtersInfo.img"
-           v-lazy:background-image="$options.filters.filterUserLazyImg(filtersInfo.img)"
-           class="div-photo user-img">
-      </div>
+      <div
+        v-photo="filtersInfo"
+        v-lazy:background-image="$options.filters.filterUserLazyImg(filtersInfo.img)"
+        :key="filtersInfo.img"
+        class="div-photo user-img"/>
       <div>
         <flexbox class="user-info">
-          <div class="user-name">{{filtersInfo.realname}}</div>
-          <div class="user-line"></div>
-          <members-dep :popoverDisplay="'block'"
-                       :userCheckedData="users"
-                       :depCheckedData="strucs"
-                       @popoverSubmit="popoverSubmit">
-            <el-button slot="membersDep"
-                       type="text"
-                       class="user-switch">切换</el-button>
+          <div class="user-name">{{ filtersInfo.realname }}</div>
+          <div class="user-line"/>
+          <members-dep
+            :popover-display="'block'"
+            :user-checked-data="users"
+            :dep-checked-data="strucs"
+            @popoverSubmit="popoverSubmit">
+            <el-button
+              slot="membersDep"
+              type="text"
+              class="user-switch">切换</el-button>
           </members-dep>
-          <time-type-select @change="timeTypeChange"></time-type-select>
+          <time-type-select @change="timeTypeChange"/>
         </flexbox>
       </div>
-      <el-button class="check"
-                 type="primary"
-                 icon="wukong wukong-check"
-                 @click="showDuplicateCheck = true">数据查重</el-button>
+      <el-button
+        class="check"
+        type="primary"
+        icon="wukong wukong-check"
+        @click="showDuplicateCheck = true">数据查重</el-button>
     </flexbox>
-    <customer-dash :data="dashData"></customer-dash>
-    <duplicate-check v-if="showDuplicateCheck"
-                     @hiden-view="showDuplicateCheck=false"></duplicate-check>
+    <customer-dash :data="dashData"/>
+    <duplicate-check
+      v-if="showDuplicateCheck"
+      @hiden-view="showDuplicateCheck=false"/>
   </div>
 </template>
 
@@ -41,7 +45,7 @@ import { mapGetters } from 'vuex'
 
 export default {
   /** 客户管理下的工作台 */
-  name: 'customerWorkbench',
+  name: 'CustomerWorkbench',
   components: {
     CustomerDash,
     DuplicateCheck,
@@ -55,7 +59,7 @@ export default {
       users: [],
       strucs: [],
       // 条件
-      dashData: { users: [], strucs: [], timeTypeValue: {} },
+      dashData: { users: [], strucs: [], timeTypeValue: {}},
       filtersInfo: { realname: '', img: '' },
       // 时间值
       timeTypeValue: { label: '本季度', value: 'quarter' },

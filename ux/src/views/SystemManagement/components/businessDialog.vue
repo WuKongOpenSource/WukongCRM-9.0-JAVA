@@ -1,24 +1,27 @@
 <template>
-  <el-dialog :title="businessTitle"
-             :visible.sync="businessDialogVisible"
-             width="600px"
-             :before-close="businessClose">
+  <el-dialog
+    :title="businessTitle"
+    :visible.sync="businessDialogVisible"
+    :before-close="businessClose"
+    width="600px">
     <div class="business-list">
       <div class="business-label">商机组名称</div>
-      <el-input v-model="name"
-                style="width: 60%;"></el-input>
+      <el-input
+        v-model="name"
+        style="width: 60%;"/>
     </div>
     <div class="business-list">
       <div class="business-label">应用部门</div>
-      <el-select v-model="businessDep"
-                 placeholder="请选择"
-                 multiple
-                 style="width: 60%;">
-        <el-option v-for="item in optionsDep"
-                   :key="item.id"
-                   :label="item.label"
-                   :value="item.id">
-        </el-option>
+      <el-select
+        v-model="businessDep"
+        placeholder="请选择"
+        multiple
+        style="width: 60%;">
+        <el-option
+          v-for="item in optionsDep"
+          :key="item.id"
+          :label="item.label"
+          :value="item.id"/>
       </el-select>
       <div class="business-des">默认全公司</div>
     </div>
@@ -31,50 +34,57 @@
           <span>赢单率</span>
         </div>
         <div class="business-setting-table-body">
-          <div v-for="(item, index) in settingList"
-               :key="index"
-               class="business-setting-table">
-            <span>{{'阶段' + (index+1)}}</span>
+          <div
+            v-for="(item, index) in settingList"
+            :key="index"
+            class="business-setting-table">
+            <span>{{ '阶段' + (index+1) }}</span>
             <span>
-              <el-input v-model="item.name"
-                        size="mini"></el-input>
+              <el-input
+                v-model="item.name"
+                size="mini"/>
             </span>
             <span class="icon-span">
-              <el-input v-model="item.rate"
-                        @change="changeInput"
-                        size="mini"
-                        type="number"></el-input> %
+              <el-input
+                v-model="item.rate"
+                size="mini"
+                type="number"
+                @change="changeInput"/> %
               <span class="icon-box">
-                <span @click="addIcon"
-                      class="el-icon-circle-plus"></span>
-                <span v-if="index != 0"
-                      class="el-icon-remove"
-                      @click="removeIcon(index)"></span>
+                <span
+                  class="el-icon-circle-plus"
+                  @click="addIcon"/>
+                <span
+                  v-if="index != 0"
+                  class="el-icon-remove"
+                  @click="removeIcon(index)"/>
               </span>
             </span>
           </div>
           <div class="business-setting-table">
             <span>结束</span>
             <span>赢单</span>
-            <span>{{winSingle}} %</span>
+            <span>{{ winSingle }} %</span>
           </div>
           <div class="business-setting-table">
             <span>结束</span>
             <span>输单</span>
-            <span>{{loseSingle}} %</span>
+            <span>{{ loseSingle }} %</span>
           </div>
           <div class="business-setting-table">
             <span>结束</span>
             <span>无效</span>
-            <span>{{invalidSingle}} %</span>
+            <span>{{ invalidSingle }} %</span>
           </div>
         </div>
       </div>
     </div>
-    <span slot="footer"
-          class="dialog-footer">
-      <el-button type="primary"
-                 @click="businessSubmit">确 定</el-button>
+    <span
+      slot="footer"
+      class="dialog-footer">
+      <el-button
+        type="primary"
+        @click="businessSubmit">确 定</el-button>
       <el-button @click="businessClose">取 消</el-button>
     </span>
   </el-dialog>
@@ -84,6 +94,17 @@
 import { depList } from '@/api/common'
 
 export default {
+  props: {
+    businessDialogVisible: Boolean,
+    businessTitle: String,
+    /** 编辑时候传递进来的信息 */
+    infoData: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    }
+  },
   data() {
     return {
       optionsDep: [],
@@ -94,17 +115,6 @@ export default {
       winSingle: 100,
       loseSingle: 0,
       invalidSingle: 0
-    }
-  },
-  props: {
-    businessDialogVisible: Boolean,
-    businessTitle: String,
-    /** 编辑时候传递进来的信息 */
-    infoData: {
-      type: Object,
-      default: () => {
-        return {}
-      }
     }
   },
   watch: {

@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Aop;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
@@ -14,12 +15,15 @@ import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
+import com.kakarote.crm9.erp.admin.service.AdminRoleService;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
+import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author wyq
@@ -31,38 +35,49 @@ public class CrmBackLogService {
     /**
      * 待办事项数量统计
      */
-    public R num(){
-        Integer userId = BaseUtil.getUserId().intValue();
-        Integer todayCustomer = Db.queryInt(Db.getSql("crm.backLog.todayCustomerNum"),userId);
-        Integer followLeads = Db.queryInt(Db.getSql("crm.backLog.followLeadsNum"),userId);
-        Integer followCustomer = Db.queryInt(Db.getSql("crm.backLog.followCustomerNum"),userId);
-        Integer config = Db.queryInt("select status from 72crm_admin_config where name = 'expiringContractDays'");
-        Integer checkReceivables = Db.queryInt(Db.getSql("crm.backLog.checkReceivablesNum"),userId);
-        Integer remindReceivablesPlan = Db.queryInt(Db.getSql("crm.backLog.remindReceivablesPlanNum"),userId);
-        AdminConfig adminConfig = AdminConfig.dao.findFirst("select * from 72crm_admin_config where name = 'expiringContractDays'");
-        AdminConfig poolRemindConfig = AdminConfig.dao.findFirst("select * from 72crm_admin_config where name = 'putInPoolRemindDays'");
-        Integer endContract = 0;
-        if (1 == adminConfig.getStatus()){
-            endContract = Db.queryInt(Db.getSql("crm.backLog.endContractNum"),adminConfig.getValue(),userId);
+    public R num() {
+        Long userId = BaseUtil.getUserId();
+        JSONObject jsonObject= Aop.get(AdminRoleService.class).auth(userId);
+        List<String> authList= AuthUtil.queryAuth(jsonObject, "");
+        Kv kv = new Kv();
+        if (authList.contains("crm:customer:index")){
+            Integer todayCustomer = Db.queryInt(Db.getSql("crm.backLog.todayCustomerNum"), userId);
+            Integer followCustomer = Db.queryInt(Db.getSql("crm.backLog.followCustomerNum"), userId);
+            kv.set("todayCustomer", todayCustomer).set("followCustomer", followCustomer);
+            AdminConfig poolRemindConfig = AdminConfig.getConfig("putInPoolRemindDays");
+            Integer poolSetting = AdminConfig.getStatus("customerPoolSetting");
+            if (Objects.equals(1 ,poolRemindConfig.getStatus()) && Objects.equals(1,poolSetting)) {
+                String dealDays = AdminConfig.getValue("customerPoolSettingDealDays");
+                String followUpDays = AdminConfig.getValue("customerPoolSettingFollowupDays");
+                int remindDays = Integer.parseInt(poolRemindConfig.getValue());
+                Integer startDealDays = Integer.parseInt(dealDays) - remindDays;
+                Integer startFollowUpDays = Integer.parseInt(followUpDays) - remindDays;
+                Integer putInPoolRemind = Db.queryInt(Db.getSql("crm.backLog.putInPoolRemindNum"), userId, startFollowUpDays, followUpDays, startDealDays, dealDays);
+                kv.set("putInPoolRemind", putInPoolRemind);
+            }
         }
-        Kv kv = Kv.by("todayCustomer",todayCustomer).set("followLeads",followLeads).set("followCustomer",followCustomer)
-                .set("checkReceivables",checkReceivables).set("remindReceivablesPlan",remindReceivablesPlan).set("endContract",endContract);
-        if (config == 1){
-            Integer checkContract = Db.queryInt(Db.getSql("crm.backLog.checkContractNum"),userId);
-            kv.set("checkContract",checkContract);
+        if (authList.contains("crm:leads:index")){
+            Integer followLeads = Db.queryInt(Db.getSql("crm.backLog.followLeadsNum"), userId);
+            kv.set("followLeads", followLeads);
         }
-        Integer poolSetting = Db.queryInt("select status from 72crm_admin_config where name = 'customerPoolSetting' limit 1");
-        if (1 == poolRemindConfig.getStatus() && 1==poolSetting){
-            String dealDays = Db.queryStr("select value from 72crm_admin_config where name = 'customerPoolSettingDealDays' limit 1");
-            String followUpDays = Db.queryStr("select value from 72crm_admin_config where name = 'customerPoolSettingFollowupDays' limit 1");
-            int remindDays = Integer.parseInt(poolRemindConfig.getValue());
-            Integer startDealDays = Integer.parseInt(dealDays) - remindDays;
-            Integer startFollowUpDays = Integer.parseInt(followUpDays) - remindDays;
-            Integer putInPoolRemind = Db.queryInt(Db.getSql("crm.backLog.putInPoolRemindNum"),userId,startFollowUpDays,followUpDays,startDealDays,dealDays);
-            kv.set("putInPoolRemind",putInPoolRemind);
+        if (authList.contains("crm:contract:index")){
+            AdminConfig adminConfig = AdminConfig.getConfig("expiringContractDays");
+            if (1 == adminConfig.getStatus()) {
+                Integer endContract = Db.queryInt(Db.getSql("crm.backLog.endContractNum"), adminConfig.getValue(), userId);
+                kv.set("endContract", endContract);
+            }
+            Integer checkContract = Db.queryInt(Db.getSql("crm.backLog.checkContractNum"), userId);
+            kv.set("checkContract", checkContract);
         }
-        return R.ok().put("data",kv);
+        if (authList.contains("crm:receivables:index")){
+            Integer checkReceivables = Db.queryInt(Db.getSql("crm.backLog.checkReceivablesNum"), userId);
+            Integer remindReceivablesPlan = Db.queryInt(Db.getSql("crm.backLog.remindReceivablesPlanNum"), userId);
+            kv.set("checkReceivables", checkReceivables).set("remindReceivablesPlan", remindReceivablesPlan);
+        }
+        return R.ok().put("data", kv);
     }
+
+
 
     /**
      * 今日需联系客户
@@ -87,13 +102,13 @@ public class CrmBackLogService {
         if (isSub == 1){
             stringBuffer.append(" and a.owner_user_id = ").append(BaseUtil.getUserId());
         }else if (isSub == 2){
-            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId().intValue(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
+            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
             stringBuffer.append(" and a.owner_user_id in (").append(ids).append(")");
         }else {
             return R.error("isSub参数不正确");
         }
-        Integer page = basePageRequest.getPage();
-        Integer limit = basePageRequest.getLimit();
+        int page = basePageRequest.getPage();
+        int limit = basePageRequest.getLimit();
         stringBuffer.append(" limit ").append((page - 1) * limit).append(",").append(limit);
         List<Integer> customerIds = Db.query(stringBuffer.toString());
         if (customerIds.size() == 0){
@@ -132,7 +147,7 @@ public class CrmBackLogService {
         if (isSub == 1){
             stringBuffer.append(" and a.owner_user_id = ").append(BaseUtil.getUserId());
         }else if (isSub == 2){
-            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId().intValue(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
+            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
             stringBuffer.append(" and a.owner_user_id in (").append(ids).append(")");
         }else {
             return R.error("isSub参数不正确");
@@ -180,13 +195,13 @@ public class CrmBackLogService {
         if (isSub == 1){
             stringBuffer.append(" and a.owner_user_id = ").append(BaseUtil.getUserId());
         }else if (isSub == 2){
-            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId().intValue(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
+            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
             stringBuffer.append(" and a.owner_user_id in (").append(ids).append(")");
         }else {
             return R.error("isSub参数不正确");
         }
-        Integer page = basePageRequest.getPage();
-        Integer limit = basePageRequest.getLimit();
+        int page = basePageRequest.getPage();
+        int limit = basePageRequest.getLimit();
         stringBuffer.append(" limit ").append((page - 1) * limit).append(",").append(limit);
         List<Integer> customerIds = Db.query(stringBuffer.toString());
         if (customerIds.size() == 0){
@@ -208,16 +223,16 @@ public class CrmBackLogService {
         Integer isSub = jsonObject.getInteger("isSub");
         StringBuffer stringBuffer = new StringBuffer("select contract_id from 72crm_crm_contract as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id left join 72crm_admin_examine_log as c on b.record_id = c.record_id where c.is_recheck != 1 and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and");
         if (type == 1){
-            stringBuffer.append(" a.check_status in (0,1)");
+            stringBuffer.append(" a.check_status in (0,3) and c.examine_status in (0,3)");
         }else if (type == 2){
-            stringBuffer.append(" a.check_status in (2,3)");
+            stringBuffer.append(" a.check_status in (1,2)");
         }else {
             return R.error("type类型不正确");
         }
         if (isSub == 1){
             stringBuffer.append(" and c.examine_user = ").append(BaseUtil.getUserId());
         }else if (isSub == 2){
-            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId().intValue(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
+            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
             stringBuffer.append(" and c.examine_user in (").append(ids).append(")");
         }else {
             return R.error("isSub参数不正确");
@@ -244,17 +259,17 @@ public class CrmBackLogService {
         Integer type = jsonObject.getInteger("type");
         Integer isSub = jsonObject.getInteger("isSub");
         StringBuilder stringBuffer = new StringBuilder("select receivables_id from 72crm_crm_receivables as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id left join 72crm_admin_examine_log as c on b.record_id = c.record_id where ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and");
-        if (type == 1){
-            stringBuffer.append(" a.check_status in (0,1)");
-        }else if (type == 2){
-            stringBuffer.append(" a.check_status in (2,3)");
-        }else {
+        if (type == 1) {
+            stringBuffer.append(" a.check_status in (0,3) and c.examine_status in (0,3)");
+        } else if (type == 2) {
+            stringBuffer.append(" a.check_status in (1,2)");
+        } else {
             return R.error("type类型不正确");
         }
         if (isSub == 1){
             stringBuffer.append(" and c.examine_user = ").append(BaseUtil.getUserId());
         }else if (isSub == 2){
-            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId().intValue(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
+            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
             stringBuffer.append(" and c.examine_user in (").append(ids).append(")");
         }else {
             return R.error("isSub参数不正确");
@@ -293,7 +308,7 @@ public class CrmBackLogService {
         if (isSub == 1){
             stringBuffer.append(" and c.owner_user_id = ").append(BaseUtil.getUserId());
         }else if (isSub == 2){
-            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId().intValue(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
+            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
             stringBuffer.append(" and c.owner_user_id in (").append(ids).append(")");
         }else {
             return R.error("isSub参数不正确");
@@ -314,21 +329,21 @@ public class CrmBackLogService {
         Integer type = jsonObject.getInteger("type");
         Integer isSub = jsonObject.getInteger("isSub");
         AdminConfig adminConfig = AdminConfig.dao.findFirst("select * from 72crm_admin_config where name = 'expiringContractDays'");
-        StringBuffer stringBuffer = new StringBuffer("select contract_id from 72crm_crm_contract as a where");
+        StringBuffer stringBuffer = new StringBuffer("select contract_id from 72crm_crm_contract as a where a.check_status = 1 ");
         if (type == 1){
             if (adminConfig.getStatus() == 0 || ObjectUtil.isNull(adminConfig)){
                 return R.ok().put("data",new Page<>());
             }
-            stringBuffer.append(" to_days(end_time) >= to_days(now()) and to_days(end_time) <= to_days(now())+").append(adminConfig.getValue());
+            stringBuffer.append(" and to_days(end_time) >= to_days(now()) and to_days(end_time) <= to_days(now())+").append(adminConfig.getValue());
         }else if (type == 2){
-            stringBuffer.append(" to_days(end_time) < to_days(now())");
+            stringBuffer.append(" and to_days(end_time) < to_days(now())");
         }else {
             return R.error("type类型不正确");
         }
         if (isSub == 1){
             stringBuffer.append(" and owner_user_id = ").append(BaseUtil.getUserId());
         }else if (isSub == 2){
-            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId().intValue(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
+            String ids = adminSceneService.getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
             stringBuffer.append(" and owner_user_id in (").append(ids).append(")");
         }else {
             return R.error("isSub参数不正确");
@@ -353,45 +368,27 @@ public class CrmBackLogService {
      */
     public R putInPoolRemind(BasePageRequest basePageRequest){
         JSONObject jsonObject = basePageRequest.getJsonObject();
-//        Integer type = jsonObject.getInteger("type");
         Integer isSub = jsonObject.getInteger("isSub");
         Integer poolSetting = Db.queryInt("select status from 72crm_admin_config where name = 'customerPoolSetting' limit 1");
         String dealDays = Db.queryStr("select value from 72crm_admin_config where name = 'customerPoolSettingDealDays' limit 1");
         String followUpDays = Db.queryStr("select value from 72crm_admin_config where name = 'customerPoolSettingFollowupDays' limit 1");
         AdminConfig remindConfig = AdminConfig.dao.findFirst("select * from 72crm_admin_config where name = 'putInPoolRemindDays'");
         StringBuffer stringBuffer = new StringBuffer("select customer_id from 72crm_crm_customer as a");
-//        if (type == 1){
             if (poolSetting != 1 || remindConfig.getStatus() == 0 || ObjectUtil.isNull(remindConfig)){
                 return R.ok().put("data",new Page<>());
             }
             int remindDays = Integer.parseInt(remindConfig.getValue());
             Integer startDealDays = Integer.parseInt(dealDays) - remindDays;
             Integer startFollowUpDays = Integer.parseInt(followUpDays) - remindDays;
-            stringBuffer.append(" where owner_user_id is not null and deal_status ='未成交' and is_lock = 0 and ((to_days(now()) - to_days(IFNULL((SELECT car.create_time FROM 72crm_admin_record as car where car.types = 'crm_customer' and car.types_id = a.customer_id ORDER BY car.create_time DESC LIMIT 1),a.create_time))) between ").append(startFollowUpDays).append(" and ").append(followUpDays).append(" or (to_days(now()) - to_days(create_time)) between ").append(startDealDays).append(" and ").append(dealDays).append(")");
+            stringBuffer.append(" where owner_user_id is not null and deal_status = 0 and is_lock = 0 and ((to_days(now()) - to_days(IFNULL((SELECT car.create_time FROM 72crm_admin_record as car where car.types = 'crm_customer' and car.types_id = a.customer_id ORDER BY car.create_time DESC LIMIT 1),a.create_time))) between ").append(startFollowUpDays).append(" and ").append(followUpDays).append(" or (to_days(now()) - to_days(create_time)) between ").append(startDealDays).append(" and ").append(dealDays).append(")");
             if (isSub == 1){
                 stringBuffer.append(" and owner_user_id = ").append(BaseUtil.getUserId());
             }else if (isSub == 2){
-                String ids = adminSceneService.getSubUserId(BaseUtil.getUserId().intValue(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
+                String ids = adminSceneService.getSubUserId(BaseUtil.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1);
                 stringBuffer.append(" and owner_user_id in (").append(ids).append(")");
             }else {
                 return R.error("isSub参数不正确");
             }
-//        }else if (type == 2){
-//            stringBuffer.append(" left join 72crm_crm_owner_record as b on a.customer_id = b.type_id where b.type = 8 and post_owner_user_id is null");
-//            if (isSub == 1){
-//                stringBuffer.append(" and pre_owner_user_id = ").append(BaseUtil.getUserId());
-//            }else if (isSub == 2){
-//                String ids = adminSceneService.getSubUserId(BaseUtil.getUserId().intValue(), BaseConstant.AUTH_DATA_RECURSION_NUM);
-//                if (StrUtil.isEmpty(ids)){
-//                    ids = "0";
-//                }
-//                stringBuffer.append(" and pre_owner_user_id in (").append(ids).append(")");
-//            }else {
-//                return R.error("isSub参数不正确");
-//            }
-//        }else {
-//            return R.error("type类型不正确");
-//        }
         Integer page = basePageRequest.getPage();
         Integer limit = basePageRequest.getLimit();
         stringBuffer.append(" limit ").append((page - 1) * limit).append(",").append(limit);

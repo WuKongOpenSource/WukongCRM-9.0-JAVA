@@ -115,7 +115,7 @@ public class AdminRoleController extends Controller {
      * @param roleId 角色项目管理角色id
      * 删除
      */
-    @Permissions("manage:permission:update")
+    @Permissions("manage:work:update")
     public void deleteWorkRole(@Para("roleId")Integer roleId){
         renderJson(adminRoleService.deleteWorkRole(roleId) ? R.ok() : R.error());
     }

@@ -1,13 +1,15 @@
 <template>
   <div class="wrapper">
     <div class="http404-container">
-      <img class="pic"
-           src="@/assets/404_images/404.png"
-           alt="">
+      <img
+        class="pic"
+        src="@/assets/404_images/404.png"
+        alt="">
       <div class="title">抱歉，您要访问的页面丢失了</div>
       <div class="desc">请检查您输入的网址是否正确，请点击以下按钮返回首页</div>
-      <div class="btn"
-           @click="handleBack">
+      <div
+        class="btn"
+        @click="handleBack">
         返回首页
       </div>
     </div>

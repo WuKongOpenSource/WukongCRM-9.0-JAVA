@@ -4,9 +4,9 @@ import {
 import Vue from 'vue'
 
 /**
- * 
- * @param {*} router 
- * @param {*} authInfo 
+ *
+ * @param {*} router
+ * @param {*} authInfo
  */
 function checkAuth(router, authInfo) {
   // 判断当前路由在权限数组中是否存在
@@ -16,16 +16,16 @@ function checkAuth(router, authInfo) {
       return true
     } else {
       if (metaInfo.index == 0) {
-        return authInfo[metaInfo.type] ? true : false
+        return !!authInfo[metaInfo.type]
       } else if (metaInfo.index == 1) {
         if (authInfo[metaInfo.type]) {
-          return authInfo[metaInfo.type][metaInfo.subType] ? true : false
+          return !!authInfo[metaInfo.type][metaInfo.subType]
         }
         return false
       } else {
         var typeAuth = authInfo[metaInfo.type]
         for (let index = 0; index < metaInfo.subType.length; index++) {
-          const field = metaInfo.subType[index];
+          const field = metaInfo.subType[index]
           typeAuth = typeAuth[field]
           if (typeAuth && metaInfo.subType.length - 1 == index) {
             return true
@@ -40,11 +40,11 @@ function checkAuth(router, authInfo) {
 }
 
 /**
- * 
- * @param {*} routers 
- * @param {*} authInfo 
+ *
+ * @param {*} routers
+ * @param {*} authInfo
  */
-const filterAsyncRouter = function (routers, authInfo) {
+const filterAsyncRouter = function(routers, authInfo) {
   const res = []
   routers.forEach(router => {
     const tmp = {

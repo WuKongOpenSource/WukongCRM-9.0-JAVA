@@ -44,7 +44,7 @@ loadingDirective.install = Vue => {
   }
 
   Vue.directive('photo', {
-    bind: function (el, binding, vnode) {
+    bind: function(el, binding, vnode) {
       const vm = vnode.context
       let text = ''
       if (binding.value && !binding.value.img) {
@@ -62,7 +62,7 @@ loadingDirective.install = Vue => {
       text && togglePhoto(el, binding)
     },
 
-    update: function (el, binding) {
+    update: function(el, binding) {
       let text = ''
       if (binding.value && !binding.value.img) {
         text = binding.value.realname && binding.value.realname.length > 2 ? binding.value.realname.substring(binding.value.realname.length - 2, binding.value.realname.length) : binding.value.realname
@@ -73,7 +73,7 @@ loadingDirective.install = Vue => {
       }
     },
 
-    unbind: function (el, binding) {
+    unbind: function(el, binding) {
       if (el.domInserted) {
         el.mask &&
           el.mask.parentNode &&

@@ -1,5 +1,6 @@
 package com.kakarote.crm9.erp.admin.service;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -94,7 +95,12 @@ public class AdminUserService {
         }
         if (ids.size() > 0){
             HashSet<Long> idsSet = new HashSet<>();
-            ids.forEach(id -> idsSet.addAll(queryTopUserId(id,BaseConstant.AUTH_DATA_RECURSION_NUM)));
+            ids.forEach(id -> {
+                List<Long> longs = queryTopUserId(id, BaseConstant.AUTH_DATA_RECURSION_NUM);
+                if (CollUtil.isNotEmpty(longs)){
+                    idsSet.addAll(longs);
+                }
+            });
             SqlPara sqlPara=Db.getSqlPara("admin.user.updateScene",Kv.by("ids",idsSet));
             Db.delete(sqlPara.getSql(),sqlPara.getPara());
         }
@@ -218,12 +224,12 @@ public class AdminUserService {
      * @author zxy
      * 查询系统下属用户列表
      */
-    public List<Integer> queryUserIdsByParentId(Integer userId) {
+    public List<Long> queryUserIdsByParentId(Long userId) {
         String sql = "select user_id from 72crm_admin_user where parent_id = ? ";
         List<Record> records = Db.find(sql, userId);
-        List<Integer> userIds = new ArrayList<>();
+        List<Long> userIds = new ArrayList<>();
         for (Record record : records) {
-            userIds.add(record.getInt("user_id"));
+            userIds.add(record.getLong("user_id"));
         }
         return userIds;
     }
@@ -480,6 +486,7 @@ public class AdminUserService {
             return R.error("手机号重复！");
         }
         adminUser.setUsername(username);
+        adminUser.setMobile(username);
         adminUser.setPassword(BaseUtil.sign(username+password,adminUser.getSalt()));
         BaseUtil.userExit(adminUser.getUserId(),null);
         return R.isSuccess(adminUser.update());

@@ -33,7 +33,7 @@ export default {
         } else if (data.type == 'delete') {
           this.list.splice(data.index, 1)
         } else if (data.type == 'change-stop-time') {
-          let stopTime = new Date(data.value).getTime() / 1000 + 86399
+          const stopTime = new Date(data.value).getTime() / 1000 + 86399
           if (stopTime > new Date(new Date()).getTime() / 1000) {
             this.list[data.index].isEnd = false
           } else {
@@ -45,7 +45,7 @@ export default {
         } else if (data.type == 'change-name') {
           this.list[data.index].name = data.value
         } else if (data.type == 'change-comments') {
-          let commentCount = this.list[data.index].commentCount
+          const commentCount = this.list[data.index].commentCount
           if (data.value == 'add') {
             this.list[data.index].commentCount = commentCount + 1
           } else {
@@ -56,9 +56,9 @@ export default {
           this.list[data.index].childAllCount = data.value.allcount
         }
       }
-    },
+    }
   },
 
-  deactivated: function () {}
+  deactivated: function() {}
 
 }

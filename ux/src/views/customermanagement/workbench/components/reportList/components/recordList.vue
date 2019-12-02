@@ -1,44 +1,54 @@
 <template>
-  <slide-view class="d-view"
-              v-loading="loading"
-              :listenerIDs="listenerIDs"
-              :noListenerIDs="noListenerIDs"
-              :noListenerClass="noListenerClass"
-              @side-close="hideView"
-              :body-style="{padding: 0, height: '100%'}">
+  <slide-view
+    v-loading="loading"
+    :listener-ids="listenerIDs"
+    :no-listener-ids="noListenerIDs"
+    :no-listener-class="noListenerClass"
+    :body-style="{padding: 0, height: '100%'}"
+    class="d-view"
+    @side-close="hideView">
     <flexbox class="t-section">
-      <img class="t-img"
-           :src="crmIcon" />
+      <img
+        :src="crmIcon"
+        class="t-img" >
       <div class="t-name">跟进记录</div>
-      <img @click="hideView"
-           class="t-close"
-           src="@/assets/img/task_close.png" />
+      <img
+        class="t-close"
+        src="@/assets/img/task_close.png"
+        @click="hideView" >
     </flexbox>
-    <div id="follow-log-content"
-         class="t-content">
-      <follow-record-cell v-for="(item, index) in list"
-                          :item="item"
-                          :crmType="crmType"
-                          :index="index"
-                          :key="index"
-                          @on-handle="cellHandle">
-        <flexbox class="relate-cell"
-                 @click.native="checkRelationDetail(item.types, item.typesId)">
-          <i class="wukong relate-cell-head crm-type"
-             :class="item.types | crmIconClass"></i>
-          <div class="relate-cell-body"
-               style="color: #6394E5;cursor: pointer;">{{item.typesName}}</div>
+    <div
+      id="follow-log-content"
+      class="t-content">
+      <follow-record-cell
+        v-for="(item, index) in list"
+        :item="item"
+        :crm-type="crmType"
+        :index="index"
+        :key="index"
+        @on-handle="cellHandle">
+        <flexbox
+          class="relate-cell"
+          @click.native="checkRelationDetail(item.types, item.typesId)">
+          <i
+            :class="item.types | crmIconClass"
+            class="wukong relate-cell-head crm-type"/>
+          <div
+            class="relate-cell-body"
+            style="color: #6394E5;cursor: pointer;">{{ item.typesName }}</div>
         </flexbox>
       </follow-record-cell>
       <div class="load">
-        <el-button type="text"
-                   :loading="loadMoreLoading">{{loadMoreLoading ? '加载更多' : '没有更多了'}}</el-button>
+        <el-button
+          :loading="loadMoreLoading"
+          type="text">{{ loadMoreLoading ? '加载更多' : '没有更多了' }}</el-button>
       </div>
     </div>
 
-    <c-r-m-full-screen-detail :visible.sync="showFullDetail"
-                              :crmType="relationCrmType"
-                              :id="relationID"></c-r-m-full-screen-detail>
+    <c-r-m-full-screen-detail
+      :visible.sync="showFullDetail"
+      :crm-type="relationCrmType"
+      :id="relationID"/>
 
   </slide-view>
 </template>
@@ -50,13 +60,19 @@ import { crmIndexGetRecordListAPI } from '@/api/customermanagement/workbench'
 
 export default {
   /** 跟进记录列表 */
-  name: 'record-list',
+  name: 'RecordList',
 
   components: {
     FollowRecordCell,
     SlideView,
     CRMFullScreenDetail: () =>
       import('@/views/customermanagement/components/CRMFullScreenDetail.vue')
+  },
+
+  filters: {
+    crmIconClass(type) {
+      return type && type.replace('crm_', 'wukong-')
+    }
   },
 
   props: {
@@ -99,12 +115,6 @@ export default {
     }
   },
 
-  watch: {
-    params() {
-      this.refreshList()
-    }
-  },
-
   computed: {
     crmIcon() {
       if (this.crmType === 'crm_customer') {
@@ -126,18 +136,18 @@ export default {
     }
   },
 
-  filters: {
-    crmIconClass(type) {
-      return type && type.replace('crm_', 'wukong-')
+  watch: {
+    params() {
+      this.refreshList()
     }
   },
 
   mounted() {
     // 分批次加载
-    let dom = document.getElementById('follow-log-content')
+    const dom = document.getElementById('follow-log-content')
     dom.onscroll = () => {
-      let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
-      //滚动条到底部的条件
+      const scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+      // 滚动条到底部的条件
       if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
         if (!this.isPost) {
           this.isPost = true

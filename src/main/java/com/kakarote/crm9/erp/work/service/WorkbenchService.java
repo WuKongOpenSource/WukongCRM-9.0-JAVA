@@ -23,7 +23,7 @@ public class WorkbenchService{
     @Inject
     private TaskService taskService;
 
-    public R myTask(Integer userId){
+    public R myTask(Long userId){
         List<Record> result = new ArrayList<>();
         result.add(new Record().set("title", "收件箱").set("is_top", 0).set("count", 0).set("list", new ArrayList<>()));
         result.add(new Record().set("title", "今天要做").set("is_top", 1).set("count", 0).set("list", new ArrayList<>()));

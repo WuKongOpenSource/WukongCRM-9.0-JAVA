@@ -3,49 +3,55 @@
     <div class="se-header">自定义项目权限</div>
     <div class="se-body">
       <div class="se-table-header">
-        <reminder class="project-reminder"
-                  content="为不同场景下的项目成员所需的权限设置匹配的项目、任务列表、任务的操作权限">
-        </reminder>
-        <el-button class="se-table-header-button"
-                   @click="addJurisdiction"
-                   type="primary">新建权限</el-button>
+        <reminder
+          class="project-reminder"
+          content="为不同场景下的项目成员所需的权限设置匹配的项目、任务列表、任务的操作权限"/>
+        <el-button
+          class="se-table-header-button"
+          type="primary"
+          @click="addJurisdiction">新建权限</el-button>
       </div>
-      <el-table class="main-table"
-                id="examine-table"
-                v-loading="loading"
-                :data="list"
-                :height="tableHeight"
-                highlight-current-row
-                style="width: 100%"
-                @row-click="handleRowClick">
-        <el-table-column show-overflow-tooltip
-                         prop="roleName"
-                         width="150"
-                         label="项目权限">
-        </el-table-column>
-        <el-table-column show-overflow-tooltip
-                         prop="remark"
-                         label="项目描述">
-        </el-table-column>
-        <el-table-column fixed="right"
-                         label="操作"
-                         width="100">
+      <el-table
+        v-loading="loading"
+        id="examine-table"
+        :data="list"
+        :height="tableHeight"
+        class="main-table"
+        highlight-current-row
+        style="width: 100%"
+        @row-click="handleRowClick">
+        <el-table-column
+          show-overflow-tooltip
+          prop="roleName"
+          width="150"
+          label="项目权限"/>
+        <el-table-column
+          show-overflow-tooltip
+          prop="remark"
+          label="项目描述"/>
+        <el-table-column
+          fixed="right"
+          label="操作"
+          width="100">
           <template slot-scope="scope">
-            <el-button @click="handleClick('edit', scope)"
-                       type="text"
-                       :disabled="scope.row.roleType == 5"
-                       size="small">编辑</el-button>
-            <el-button @click="handleClick('delete', scope)"
-                       type="text"
-                       :disabled="scope.row.roleType == 5"
-                       size="small">删除</el-button>
+            <el-button
+              :disabled="scope.row.roleType == 5"
+              type="text"
+              size="small"
+              @click="handleClick('edit', scope)">编辑</el-button>
+            <el-button
+              :disabled="scope.row.roleType == 5"
+              type="text"
+              size="small"
+              @click="handleClick('delete', scope)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
-    <jurisdiction-create :show.sync="jurisdictionCreateShow"
-                         :action="createAction"
-                         @submite="getList"></jurisdiction-create>
+    <jurisdiction-create
+      :show.sync="jurisdictionCreateShow"
+      :action="createAction"
+      @submite="getList"/>
   </div>
 </template>
 
@@ -59,7 +65,7 @@ import {
 
 export default {
   /** 系统管理 的 项目管理 */
-  name: 'system-project',
+  name: 'SystemProject',
   components: {
     JurisdictionCreate,
     Reminder

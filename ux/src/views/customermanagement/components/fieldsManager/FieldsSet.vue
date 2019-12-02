@@ -1,43 +1,47 @@
 <template>
-  <el-dialog title="编辑列"
-             :visible.sync="visible"
-             @close="handleCancel"
-             :append-to-body="true"
-             width="600px">
+  <el-dialog
+    :visible.sync="visible"
+    :append-to-body="true"
+    title="编辑列"
+    width="600px"
+    @close="handleCancel">
     <div class="scene-name">您可通过拖拽管理列</div>
     <flexbox class="scene-list">
       <div class="scene-list-box">
         <flexbox class="scene-list-head">
-          <el-checkbox :indeterminate="isleftIndeterminate"
-                       v-model="checkleftAll"
-                       @change="handleleftCheckAllChange">
-          </el-checkbox>
+          <el-checkbox
+            :indeterminate="isleftIndeterminate"
+            v-model="checkleftAll"
+            @change="handleleftCheckAllChange"/>
           <div class="scene-list-head-name">显示的列</div>
-          <div class="scene-list-head-detail">{{leftCheckItems.length + '/' + checkedLeftData.length}}</div>
+          <div class="scene-list-head-detail">{{ leftCheckItems.length + '/' + checkedLeftData.length }}</div>
         </flexbox>
         <div style="position: relative;">
           <div class="scene-list-search">
-            <el-input placeholder="请输入"
-                      size="small"
-                      suffix-icon="el-icon-search"
-                      v-model="leftInput"
-                      @input="inputLeftChange">
-            </el-input>
+            <el-input
+              v-model="leftInput"
+              placeholder="请输入"
+              size="small"
+              suffix-icon="el-icon-search"
+              @input="inputLeftChange"/>
           </div>
           <div class="scene-list-body">
-            <draggable style="min-height: 100px;"
-                       v-model="checkedLeftData"
-                       @end="leftMoveEnd"
-                       :move="leftMove"
-                       :options="{group: 'list',forceFallback:true}">
-              <flexbox class="list-item"
-                       v-if="item.show"
-                       v-for="(item, index) in checkedLeftData"
-                       :key="index">
-                <el-checkbox class="list-item-check"
-                             v-model="item.check"
-                             @change="leftCheckItemChange"></el-checkbox>
-                <div class="list-item-name">{{item.name}}</div>
+            <draggable
+              v-model="checkedLeftData"
+              :move="leftMove"
+              :options="{group: 'list',forceFallback:true}"
+              style="min-height: 100px;"
+              @end="leftMoveEnd">
+              <flexbox
+                v-for="(item, index) in checkedLeftData"
+                v-if="item.show"
+                :key="index"
+                class="list-item">
+                <el-checkbox
+                  v-model="item.check"
+                  class="list-item-check"
+                  @change="leftCheckItemChange"/>
+                <div class="list-item-name">{{ item.name }}</div>
               </flexbox>
             </draggable>
 
@@ -45,51 +49,56 @@
         </div>
       </div>
       <div class="scene-middle-list">
-        <el-button class="scene-middle-left-button"
-                   :class="{'scene-middle-button-select':rightCheckItems.length > 0}"
-                   @click="changePositon('left')"
-                   :disabled="rightCheckItems.length == 0">
-          <i class="el-icon-arrow-left scene-middle-icon"></i>
+        <el-button
+          :class="{'scene-middle-button-select':rightCheckItems.length > 0}"
+          :disabled="rightCheckItems.length == 0"
+          class="scene-middle-left-button"
+          @click="changePositon('left')">
+          <i class="el-icon-arrow-left scene-middle-icon"/>
         </el-button>
-        <el-button class="scene-middle-right-button"
-                   :class="{'scene-middle-button-select':leftCheckItems.length > 0}"
-                   @click="changePositon('right')"
-                   :disabled="leftCheckItems.length == 0">
-          <i class="el-icon-arrow-right scene-middle-icon"></i>
+        <el-button
+          :class="{'scene-middle-button-select':leftCheckItems.length > 0}"
+          :disabled="leftCheckItems.length == 0"
+          class="scene-middle-right-button"
+          @click="changePositon('right')">
+          <i class="el-icon-arrow-right scene-middle-icon"/>
         </el-button>
       </div>
       <div class="scene-list-box">
         <flexbox class="scene-list-head">
-          <el-checkbox :indeterminate="isrightIndeterminate"
-                       v-model="checkrightAll"
-                       @change="handlerightCheckAllChange">
-          </el-checkbox>
+          <el-checkbox
+            :indeterminate="isrightIndeterminate"
+            v-model="checkrightAll"
+            @change="handlerightCheckAllChange"/>
           <div class="scene-list-head-name">隐藏的列</div>
-          <div class="scene-list-head-detail">{{rightCheckItems.length + '/' + checkedRightData.length}}</div>
+          <div class="scene-list-head-detail">{{ rightCheckItems.length + '/' + checkedRightData.length }}</div>
         </flexbox>
         <div style="position: relative;">
           <div class="scene-list-body">
             <div class="scene-list-search">
-              <el-input placeholder="请输入"
-                        size="small"
-                        suffix-icon="el-icon-search"
-                        v-model="rightInput"
-                        @input="inputRightChange">
-              </el-input>
+              <el-input
+                v-model="rightInput"
+                placeholder="请输入"
+                size="small"
+                suffix-icon="el-icon-search"
+                @input="inputRightChange"/>
             </div>
-            <draggable style="min-height: 100px;"
-                       v-model="checkedRightData"
-                       @end="rightMoveEnd"
-                       :move="rightMove"
-                       :options="{group: 'list',forceFallback:true}">
-              <flexbox class="list-item"
-                       v-if="item.show"
-                       v-for="(item, index) in checkedRightData"
-                       :key="index">
-                <el-checkbox v-model="item.check"
-                             class="list-item-check"
-                             @change="rightCheckItemChange"></el-checkbox>
-                <div class="list-item-name">{{item.name}}</div>
+            <draggable
+              v-model="checkedRightData"
+              :move="rightMove"
+              :options="{group: 'list',forceFallback:true}"
+              style="min-height: 100px;"
+              @end="rightMoveEnd">
+              <flexbox
+                v-for="(item, index) in checkedRightData"
+                v-if="item.show"
+                :key="index"
+                class="list-item">
+                <el-checkbox
+                  v-model="item.check"
+                  class="list-item-check"
+                  @change="rightCheckItemChange"/>
+                <div class="list-item-name">{{ item.name }}</div>
               </flexbox>
             </draggable>
           </div>
@@ -99,8 +108,9 @@
     <div class="handle-bar">
       <div class="handle-bar-save">
         <el-button @click.native="handleCancel">取消</el-button>
-        <el-button type="primary"
-                   @click.native="handleConfirm">保存</el-button>
+        <el-button
+          type="primary"
+          @click.native="handleConfirm">保存</el-button>
       </div>
     </div>
   </el-dialog>
@@ -115,48 +125,9 @@ import crmTypeModel from '@/views/customermanagement/model/crmTypeModel'
 import draggable from 'vuedraggable'
 
 export default {
-  name: 'fields-set', //场景 设置
+  name: 'FieldsSet', // 场景 设置
   components: {
     draggable
-  },
-  computed: {},
-  data() {
-    return {
-      visible: false, //控制展示
-      isleftIndeterminate: false, // 标注头部是多选框效果
-      checkleftAll: false, // 关联全选操作多选框
-
-      leftInput: '',
-      checkedLeftData: [], // 数据源
-      leftCheckItems: [], // 选择的数据源
-
-      isrightIndeterminate: false,
-      checkrightAll: false,
-
-      rightInput: '',
-      checkedRightData: [],
-      rightCheckItems: [],
-
-      moveItem: {}, //移动中的item
-      handlDefaultItem: {} //设置默认的中间item
-    }
-  },
-  watch: {
-    dialogVisible: {
-      handler(val) {
-        this.visible = val
-        if (val) {
-          if (
-            this.checkedLeftData.length == 0 &&
-            this.checkedRightData.length == 0
-          ) {
-            this.getFieldConfigIndex()
-          }
-        }
-      },
-      deep: true,
-      immediate: true
-    }
   },
   props: {
     dialogVisible: {
@@ -175,8 +146,47 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      visible: false, // 控制展示
+      isleftIndeterminate: false, // 标注头部是多选框效果
+      checkleftAll: false, // 关联全选操作多选框
+
+      leftInput: '',
+      checkedLeftData: [], // 数据源
+      leftCheckItems: [], // 选择的数据源
+
+      isrightIndeterminate: false,
+      checkrightAll: false,
+
+      rightInput: '',
+      checkedRightData: [],
+      rightCheckItems: [],
+
+      moveItem: {}, // 移动中的item
+      handlDefaultItem: {} // 设置默认的中间item
+    }
+  },
+  computed: {},
+  watch: {
+    dialogVisible: {
+      handler(val) {
+        this.visible = val
+        if (val) {
+          if (
+            this.checkedLeftData.length == 0 &&
+            this.checkedRightData.length == 0
+          ) {
+            this.getFieldConfigIndex()
+          }
+        }
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   mounted() {
-    //为了防止火狐浏览器拖拽的时候以新标签打开，此代码真实有效
+    // 为了防止火狐浏览器拖拽的时候以新标签打开，此代码真实有效
     document.body.ondrop = function(event) {
       event.preventDefault()
       event.stopPropagation()
@@ -185,7 +195,7 @@ export default {
   methods: {
     getFieldConfigIndex() {
       crmFieldConfigIndex({
-        label: this.isSeas ? 8 : crmTypeModel[this.crmType]
+        label: this.isSeas ? crmTypeModel.pool : crmTypeModel[this.crmType]
       })
         .then(res => {
           this.checkedLeftData = res.data.value.map(function(item, index) {
@@ -235,7 +245,7 @@ export default {
         this.$message.error('至少要显示两列')
       } else {
         crmFieldConfig({
-          label: this.isSeas ? 8 : crmTypeModel[this.crmType],
+          label: this.isSeas ? crmTypeModel.pool : crmTypeModel[this.crmType],
           noHideIds: this.checkedLeftData
             .map(item => {
               return item.id
@@ -351,7 +361,7 @@ export default {
         this.isrightIndeterminate = false
       }
     },
-    //按钮操作
+    // 按钮操作
     changePositon(type) {
       var self = this
       // 从右往左

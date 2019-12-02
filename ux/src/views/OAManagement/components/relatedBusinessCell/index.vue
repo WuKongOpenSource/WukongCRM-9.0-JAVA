@@ -1,41 +1,26 @@
 <template>
   <flexbox class="cell">
-    <i class="cell-head wukong"
-       :class="'wukong-' + type"></i>
-    <div class="cell-body"
-         :class="{'cursor-pointer' :cursorPointer}"
-         @click="bodyClick">
-      {{getShowName()}}
+    <i
+      :class="'wukong-' + type"
+      class="cell-head wukong"/>
+    <div
+      :class="{'cursor-pointer' :cursorPointer}"
+      class="cell-body"
+      @click="bodyClick">
+      {{ getShowName() }}
     </div>
-    <img v-if="showFoot"
-         class="cell-foot"
-         style="cursor: pointer;"
-         @click="footClick"
-         src="@/assets/img/cancel_associated.png" />
+    <img
+      v-if="showFoot"
+      class="cell-foot"
+      style="cursor: pointer;"
+      src="@/assets/img/cancel_associated.png"
+      @click="footClick" >
   </flexbox>
 </template>
 
 <script type="text/javascript">
 export default {
-  name: 'related-business-cell', // 相关CRM等类型展示布局
-  computed: {
-    typeName() {
-      if (this.type == 'customer') {
-        return '客户'
-      } else if (this.type == 'contacts') {
-        return '联系人'
-      } else if (this.type == 'business') {
-        return '商机'
-      } else if (this.type == 'contract') {
-        return '合同'
-      }
-      return ''
-    }
-  },
-  watch: {},
-  data() {
-    return {}
-  },
+  name: 'RelatedBusinessCell',
   props: {
     type: {
       type: String,
@@ -52,7 +37,27 @@ export default {
       default: true
     }
   },
+  data() {
+    return {}
+  }, // 相关CRM等类型展示布局
+  computed: {
+    typeName() {
+      if (this.type == 'customer') {
+        return '客户'
+      } else if (this.type == 'contacts') {
+        return '联系人'
+      } else if (this.type == 'business') {
+        return '商机'
+      } else if (this.type == 'contract') {
+        return '合同'
+      }
+      return ''
+    }
+  },
+  watch: {},
   mounted() {},
+
+  beforeDestroy() {},
   methods: {
     footClick() {
       this.$emit('unbind', this.type, this.cellIndex, this.data)
@@ -70,9 +75,7 @@ export default {
           this.data.number)
       )
     }
-  },
-
-  beforeDestroy() {}
+  }
 }
 </script>
 <style lang="scss" scoped>

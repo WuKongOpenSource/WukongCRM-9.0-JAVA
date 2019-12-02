@@ -45,9 +45,9 @@ export default {
         .catch(() => {
           this.loading = false
         })
-    },
+    }
   },
 
-  deactivated: function () { }
+  deactivated: function() { }
 
 }

@@ -1,12 +1,14 @@
 <template>
-  <transition name="slide-fade"
-              v-on:after-enter="afterEnter">
-    <el-card :style="{ 'z-index': zIndex }"
-             ref="slide"
-             id="slide"
-             class="slide-detail-card-container"
-             :body-style="bodyStyle">
-      <slot></slot>
+  <transition
+    name="slide-fade"
+    @after-enter="afterEnter">
+    <el-card
+      id="slide"
+      ref="slide"
+      :style="{ 'z-index': zIndex }"
+      :body-style="bodyStyle"
+      class="slide-detail-card-container">
+      <slot/>
     </el-card>
   </transition>
 </template>
@@ -14,19 +16,14 @@
 import { getMaxIndex } from '@/utils/index'
 
 export default {
-  name: 'slide-view', // 客户管理详情 滑动view
+  name: 'SlideView', // 客户管理详情 滑动view
   components: {},
-  computed: {},
-  watch: {},
-  data() {
-    return {
-      zIndex: getMaxIndex()
-    }
-  },
   props: {
     bodyStyle: {
       type: Object,
-      default: { padding: 0 }
+      default: () => {
+        return { padding: 0 }
+      }
     },
     /** 监听点击事件 隐藏视图 */
     listenerIDs: {
@@ -53,6 +50,13 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      zIndex: getMaxIndex()
+    }
+  },
+  computed: {},
+  watch: {},
   mounted() {
     if (this.appendToBody) {
       document.body.appendChild(this.$el)
@@ -64,6 +68,12 @@ export default {
           .addEventListener('click', this.handleDocumentClick, false)
       }
     })
+  },
+
+  beforeDestroy() {
+    if (this.appendToBody && this.$el && this.$el.parentNode) {
+      this.$el.parentNode.removeChild(this.$el)
+    }
   },
   methods: {
     handleDocumentClick(e) {
@@ -102,12 +112,6 @@ export default {
     },
     afterEnter() {
       this.$emit('afterEnter')
-    }
-  },
-
-  beforeDestroy() {
-    if (this.appendToBody && this.$el && this.$el.parentNode) {
-      this.$el.parentNode.removeChild(this.$el)
     }
   }
 }

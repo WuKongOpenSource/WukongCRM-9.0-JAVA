@@ -1,50 +1,57 @@
 <template>
   <div class="rc-cont">
-    <flexbox v-if="!isSeas"
-             class="rc-head"
-             direction="row-reverse">
-      <el-button class="rc-head-item"
-                 @click.native="handleClick('remove')"
-                 type="primary">移除</el-button>
-      <el-button class="rc-head-item"
-                 @click.native="handleClick('edit')"
-                 type="primary">编辑</el-button>
-      <el-button class="rc-head-item"
-                 @click.native="handleClick('add')"
-                 type="primary">添加团队成员</el-button>
+    <flexbox
+      v-if="!isSeas"
+      class="rc-head"
+      direction="row-reverse">
+      <el-button
+        class="rc-head-item"
+        type="primary"
+        @click.native="handleClick('remove')">移除</el-button>
+      <el-button
+        class="rc-head-item"
+        type="primary"
+        @click.native="handleClick('edit')">编辑</el-button>
+      <el-button
+        class="rc-head-item"
+        type="primary"
+        @click.native="handleClick('add')">添加团队成员</el-button>
     </flexbox>
-    <el-table :data="list"
-              :height="tableHeight"
-              stripe
-              style="width: 100%;border: 1px solid #E6E6E6;"
-              :header-cell-style="headerRowStyle"
-              :cell-style="cellStyle"
-              @row-click="handleRowClick"
-              @selection-change="handleSelectionChange">
-      <el-table-column show-overflow-tooltip
-                       type="selection"
-                       align="center"
-                       width="55"
-                       :selectable="handleSelectable">
-      </el-table-column>
-      <el-table-column v-for="(item, index) in fieldList"
-                       :key="index"
-                       show-overflow-tooltip
-                       :prop="item.prop"
-                       :label="item.label">
-      </el-table-column>
+    <el-table
+      :data="list"
+      :height="tableHeight"
+      :header-cell-style="headerRowStyle"
+      :cell-style="cellStyle"
+      stripe
+      style="width: 100%;border: 1px solid #E6E6E6;"
+      @row-click="handleRowClick"
+      @selection-change="handleSelectionChange">
+      <el-table-column
+        :selectable="handleSelectable"
+        show-overflow-tooltip
+        type="selection"
+        align="center"
+        width="55"/>
+      <el-table-column
+        v-for="(item, index) in fieldList"
+        :key="index"
+        :prop="item.prop"
+        :label="item.label"
+        show-overflow-tooltip/>
     </el-table>
-    <teams-handle :crmType="crmType"
-                  title="添加团队成员"
-                  :selectionList="[detail]"
-                  @handle="handleCallBack"
-                  :dialogVisible.sync="teamsDialogShow"></teams-handle>
+    <teams-handle
+      :crm-type="crmType"
+      :selection-list="[detail]"
+      :dialog-visible.sync="teamsDialogShow"
+      title="添加团队成员"
+      @handle="handleCallBack"/>
 
-    <el-dialog title="编辑权限"
-               v-loading="loading"
-               :visible.sync="editPermissionShow"
-               :append-to-body="true"
-               width="400px">
+    <el-dialog
+      v-loading="loading"
+      :visible.sync="editPermissionShow"
+      :append-to-body="true"
+      title="编辑权限"
+      width="400px">
       <div class="handle-box">
         <flexbox class="handle-item">
           <div class="handle-item-name">权限：</div>
@@ -54,11 +61,13 @@
           </el-radio-group>
         </flexbox>
       </div>
-      <span slot="footer"
-            class="dialog-footer">
+      <span
+        slot="footer"
+        class="dialog-footer">
         <el-button @click.native="editPermissionShow=false">取消</el-button>
-        <el-button type="primary"
-                   @click.native="handleEditConfirm">保存</el-button>
+        <el-button
+          type="primary"
+          @click.native="handleEditConfirm">保存</el-button>
       </span>
     </el-dialog>
   </div>
@@ -84,29 +93,11 @@ import {
 } from '@/api/customermanagement/contract'
 
 export default {
-  name: 'relative-team', //相关团队  可能再很多地方展示 放到客户管理目录下
+  name: 'RelativeTeam', // 相关团队  可能再很多地方展示 放到客户管理目录下
   components: {
     TeamsHandle
   },
-  computed: {},
   mixins: [loading],
-  data() {
-    return {
-      list: [],
-      fieldList: [],
-      tableHeight: '400px',
-      teamsDialogShow: false, //是否展示添加团队成员窗口
-      handleType: 1, // 权限类型
-      editPermissionShow: false, //编辑权限接口展示
-      selectionList: [] //勾选的数据
-    }
-  },
-  watch: {
-    id: function(val) {
-      this.list = []
-      this.getDetail()
-    }
-  },
   props: {
     /** 模块ID */
     id: [String, Number],
@@ -128,6 +119,24 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      list: [],
+      fieldList: [],
+      tableHeight: '400px',
+      teamsDialogShow: false, // 是否展示添加团队成员窗口
+      handleType: 1, // 权限类型
+      editPermissionShow: false, // 编辑权限接口展示
+      selectionList: [] // 勾选的数据
+    }
+  },
+  computed: {},
+  watch: {
+    id: function(val) {
+      this.list = []
+      this.getDetail()
+    }
+  },
   mounted() {
     this.fieldList.push({ prop: 'realname', width: '200', label: '姓名' })
     this.fieldList.push({ prop: 'name', width: '200', label: '职位' })
@@ -141,12 +150,12 @@ export default {
   methods: {
     getDetail() {
       this.loading = true
-      let request = {
+      const request = {
         customer: crmCustomerTeamMembers,
         business: crmBusinessTeamMembers,
         contract: crmContractTeamMembers
       }[this.crmType]
-      let params = {}
+      const params = {}
       params[this.crmType + 'Id'] = this.id
       request(params)
         .then(res => {
@@ -157,7 +166,7 @@ export default {
           this.loading = false
         })
     },
-    //当选择项发生变化时会触发该事件
+    // 当选择项发生变化时会触发该事件
     handleSelectionChange(val) {
       this.selectionList = val
     },
@@ -185,7 +194,7 @@ export default {
                   return item.id
                 })
 
-                let request = {
+                const request = {
                   customer: crmCustomerSettingTeamDelete,
                   contract: crmContractSettingTeamDelete,
                   business: crmBusinessSettingTeamDelete
@@ -230,7 +239,7 @@ export default {
         return item.id
       })
       this.loading = true
-      let request = {
+      const request = {
         customer: crmCustomerUpdateMembers,
         business: crmBusinessUpdateMembers,
         contract: crmContractUpdateMembers
@@ -253,14 +262,14 @@ export default {
           this.loading = false
         })
     },
-    //返回值用来决定这一行的 CheckBox 是否可以勾选
+    // 返回值用来决定这一行的 CheckBox 是否可以勾选
     handleSelectable(row, index) {
       if (row.power == '负责人权限') {
         return false
       }
       return true
     },
-    //当某一行被点击时会触发该事件
+    // 当某一行被点击时会触发该事件
     handleRowClick(row, column, event) {},
     /** 通过回调控制表头style */
     headerRowStyle({ row, column, rowIndex, columnIndex }) {

@@ -9,36 +9,35 @@ import com.jfinal.plugin.activerecord.IBean;
 @SuppressWarnings("serial")
 public abstract class BaseWorkUser<M extends BaseWorkUser<M>> extends Model<M> implements IBean {
 
-	public void setId(Integer id) {
+	public void setId(java.lang.Integer id) {
 		set("id", id);
 	}
-
-	public Integer getId() {
+	
+	public java.lang.Integer getId() {
 		return getInt("id");
 	}
 
-	public void setWorkId(Integer workId) {
+	public void setWorkId(java.lang.Integer workId) {
 		set("work_id", workId);
 	}
-
-	public Integer getWorkId() {
+	
+	public java.lang.Integer getWorkId() {
 		return getInt("work_id");
 	}
 
-	public void setUserId(Integer userId) {
+	public void setUserId(java.lang.Long userId) {
 		set("user_id", userId);
 	}
-
-	public Integer getUserId() {
-		return getInt("user_id");
+	
+	public java.lang.Long getUserId() {
+		return getLong("user_id");
 	}
 
-
-	public void setRoleId(Integer roleId) {
+	public void setRoleId(java.lang.Integer roleId) {
 		set("role_id", roleId);
 	}
-
-	public Integer getRoleId() {
+	
+	public java.lang.Integer getRoleId() {
 		return getInt("role_id");
 	}
 

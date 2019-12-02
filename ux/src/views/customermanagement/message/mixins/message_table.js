@@ -44,6 +44,10 @@ export default {
       this.tableHeight = tableHeight
     })
 
+    this.$bus.on('examine-handle-bus', () => {
+      this.getList()
+    })
+
     /** 控制table的高度 */
     window.onresize = () => {
       this.updateTableHeight()
@@ -52,14 +56,21 @@ export default {
 
   beforeDestroy() {
     this.$bus.off('message-scroll')
+    this.$bus.off('examine-handle-bus')
+
+    if (document.getElementById('crm-table')) {
+      document.getElementById('crm-table').removeEventListener('click', e => {
+        e.stopPropagation()
+      })
+    }
   },
 
   methods: {
     /**
      * 当某一行被点击时会触发该事件
-     * @param {*} row 
-     * @param {*} column 
-     * @param {*} event 
+     * @param {*} row
+     * @param {*} column
+     * @param {*} event
      */
     handleRowClick(row, column, event) {
       if (this.crmType === 'leads') {
@@ -279,7 +290,7 @@ export default {
       this.getList()
     },
 
-    // 0待审核、1审核中、2审核通过、3审核未通过
+    // 0待审核、1审核中、2审核通过、3已拒绝 4已撤回 5未提交 修正 以 getStatusName 为准
     getStatusStyle(status) {
       if (status == 0) {
         return {
@@ -287,19 +298,19 @@ export default {
           'background-color': '#FDF6EC',
           'color': '#E6A23C'
         }
-      } else if (status == 1) {
+      } else if (status == 3) {
         return {
           'border-color': '#409EFF',
           'background-color': '#ECF5FF',
           'color': '#409EFF'
         }
-      } else if (status == 2) {
+      } else if (status == 1) {
         return {
           'border-color': '#67C23A',
           'background-color': '#F0F9EB',
           'color': '#67C23A'
         }
-      } else if (status == 3) {
+      } else if (status == 2) {
         return {
           'border-color': '#F56C6B',
           'background-color': '#FEF0F0',
@@ -309,22 +320,29 @@ export default {
         return {
           'background-color': '#FFFFFF'
         }
+      } else if (status == 6) {
+        return {
+          'border-color': '#E9E9EB',
+          'background-color': '#F4F4F5',
+          'color': '#909399'
+        }
       }
     },
-
     getStatusName(status) {
       if (status == 0) {
         return '待审核'
       } else if (status == 1) {
-        return '审核中'
-      } else if (status == 2) {
         return '通过'
-      } else if (status == 3) {
+      } else if (status == 2) {
         return '拒绝'
+      } else if (status == 3) {
+        return '审核中'
       } else if (status == 4) {
         return '撤回'
       } else if (status == 5) {
         return '未提交'
+      } else if (status == 6) {
+        return '已作废'
       }
       return ''
     },
@@ -336,14 +354,6 @@ export default {
       var offsetHei = document.documentElement.clientHeight
       var removeHeight = Object.keys(this.filterObj).length > 0 ? 360 : 300
       this.tableHeight = offsetHei - removeHeight
-    }
-  },
-
-  beforeDestroy() {
-    if (document.getElementById('crm-table')) {
-      document.getElementById('crm-table').removeEventListener('click', e => {
-        e.stopPropagation()
-      })
     }
   }
 }

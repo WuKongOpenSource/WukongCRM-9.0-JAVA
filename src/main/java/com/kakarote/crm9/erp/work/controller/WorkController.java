@@ -111,7 +111,7 @@ public class WorkController extends Controller {
      */
     public void leave(){
         String workId = getPara("workId");
-        Integer userId = BaseUtil.getUserId().intValue();
+        Long userId = BaseUtil.getUserId();
         renderJson(workService.leave(workId,userId));
     }
 
@@ -121,7 +121,7 @@ public class WorkController extends Controller {
      */
     public void removeWorkOwnerUser(){
         String workId = getPara("workId");
-        Integer userId = getInt("ownerUserId");
+        Long userId = getLong("ownerUserId");
         renderJson(workService.leave(workId,userId));
     }
 

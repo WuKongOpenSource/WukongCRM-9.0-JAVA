@@ -4,7 +4,7 @@
     <div class="customer-content">
       <!-- 业绩目标设置 -->
       <div class="system-view-table">
-        <task-set-statistics></task-set-statistics>
+        <task-set-statistics/>
       </div>
     </div>
   </div>
@@ -14,7 +14,7 @@
 import TaskSetStatistics from './components/TaskSetStatistics' // 业绩目标设置
 
 export default {
-  name: 'biz-goals', // 业绩目标设置
+  name: 'BizGoals', // 业绩目标设置
 
   components: {
     TaskSetStatistics

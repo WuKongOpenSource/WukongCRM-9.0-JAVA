@@ -1,41 +1,46 @@
 <template>
-  <div class="content"
-       v-loading="loading">
+  <div
+    v-loading="loading"
+    class="content">
     <div class="select-box">
       <div class="select-group">
         <label>审核状态</label>
-        <el-select v-model="checkStatus"
-                   size="small"
-                   placeholder="请选择"
-                   @change="searchBtn">
-          <el-option v-for="item in statusOptions"
-                     :key="item.key"
-                     :label="item.label"
-                     :value="item.key">
-          </el-option>
+        <el-select
+          v-model="checkStatus"
+          size="small"
+          placeholder="请选择"
+          @change="searchBtn">
+          <el-option
+            v-for="item in statusOptions"
+            :key="item.key"
+            :label="item.label"
+            :value="item.key"/>
         </el-select>
       </div>
       <div class="select-group">
         <label>发起时间</label>
-        <el-date-picker v-model="betweenTime"
-                        type="daterange"
-                        style="padding: 0px 10px;width: 250px;"
-                        range-separator="-"
-                        value-format="yyyy-MM-dd"
-                        start-placeholder="开始日期"
-                        end-placeholder="结束日期"
-                        @change="searchBtn">
-        </el-date-picker>
+        <el-date-picker
+          v-model="betweenTime"
+          type="daterange"
+          style="padding: 0px 10px;width: 250px;"
+          range-separator="-"
+          value-format="yyyy-MM-dd"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          @change="searchBtn"/>
       </div>
     </div>
-    <examine-section class="list-box"
-                     :id="'examine-list-box' + this.by"
-                     :list="list"
-                     @handle="searchBtn">
-      <p slot="load"
-         class="load">
-        <el-button type="text"
-                   :loading="loadMoreLoading">{{loadMoreLoading ? '加载更多' : '没有更多了'}}</el-button>
+    <examine-section
+      :id="'examine-list-box' + by"
+      :list="list"
+      class="list-box"
+      @handle="searchBtn">
+      <p
+        slot="load"
+        class="load">
+        <el-button
+          :loading="loadMoreLoading"
+          type="text">{{ loadMoreLoading ? '加载更多' : '没有更多了' }}</el-button>
       </p>
     </examine-section>
   </div>
@@ -44,15 +49,19 @@
 <script>
 import {
   oaExamineMyCreateIndex,
-  oaExamineMyExamineIndex,
-  oaExamineDelete
+  oaExamineMyExamineIndex
 } from '@/api/oamanagement/examine'
-import { formatTimeToTimestamp } from '@/utils'
 import ExamineSection from './examineSection'
 
 export default {
   components: {
     ExamineSection
+  },
+  props: {
+    // 类型 my我发起的,examine我审批的
+    by: String,
+    // 审批类型ID
+    categoryId: [String, Number]
   },
   data() {
     return {
@@ -65,19 +74,6 @@ export default {
       isPost: false,
       page: 1
     }
-  },
-  watch: {
-    categoryId: function(params) {
-      this.page = 1
-      this.list = []
-      this.getList()
-    }
-  },
-  props: {
-    // 类型 my我发起的,examine我审批的
-    by: String,
-    // 审批类型ID
-    categoryId: [String, Number]
   },
   computed: {
     statusOptions() {
@@ -98,12 +94,19 @@ export default {
       }
     }
   },
+  watch: {
+    categoryId: function(params) {
+      this.page = 1
+      this.list = []
+      this.getList()
+    }
+  },
   mounted() {
     // 分批次加载
-    let dom = document.getElementById('examine-list-box' + this.by)
+    const dom = document.getElementById('examine-list-box' + this.by)
     dom.onscroll = () => {
-      let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
-      //滚动条到底部的条件
+      const scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+      // 滚动条到底部的条件
       if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
         if (!this.isPost) {
           this.isPost = true
@@ -121,7 +124,7 @@ export default {
     /** 获取列表数据 */
     getList() {
       this.loading = true
-      let params = {
+      const params = {
         page: this.page,
         limit: 15,
         categoryId: this.categoryId
@@ -137,7 +140,7 @@ export default {
         params.endTime = this.betweenTime[1]
       }
 
-      let request = {
+      const request = {
         my: oaExamineMyCreateIndex,
         examine: oaExamineMyExamineIndex
       }[this.by]

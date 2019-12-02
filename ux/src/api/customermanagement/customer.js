@@ -205,7 +205,7 @@ export function crmCustomerReceive(data) {
 
 /**
  * 客户下联系人
- * @param {*} data 
+ * @param {*} data
  */
 export function crmCustomerQueryContacts(data) {
   return request({
@@ -217,7 +217,7 @@ export function crmCustomerQueryContacts(data) {
 
 /**
  * 客户下商机
- * @param {*} data 
+ * @param {*} data
  */
 export function crmCustomerQueryBusiness(data) {
   return request({
@@ -229,7 +229,7 @@ export function crmCustomerQueryBusiness(data) {
 
 /**
  * 客户下合同
- * @param {*} data 
+ * @param {*} data
  */
 export function crmCustomerQueryContract(data) {
   return request({
@@ -241,7 +241,7 @@ export function crmCustomerQueryContract(data) {
 
 /**
  * 客户下回款计划
- * @param {*} data 
+ * @param {*} data
  */
 export function crmCustomerQueryReceivablesPlan(data) {
   return request({
@@ -253,7 +253,7 @@ export function crmCustomerQueryReceivablesPlan(data) {
 
 /**
  * 客户下回款
- * @param {*} data 
+ * @param {*} data
  */
 export function crmCustomerQueryReceivables(data) {
   return request({
@@ -266,7 +266,7 @@ export function crmCustomerQueryReceivables(data) {
 
 /**
  * 跟进记录
- * @param {*} data 
+ * @param {*} data
  */
 export function crmCustomerRecordSave(data) {
   return request({

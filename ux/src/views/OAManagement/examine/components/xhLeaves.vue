@@ -1,63 +1,71 @@
 <template>
   <div>
-    <div class="expense-item"
-         v-for="(item, index) in mainList"
-         :key="index">
+    <div
+      v-for="(item, index) in mainList"
+      :key="index"
+      class="expense-item">
       <flexbox class="expense-item-head">
-        <div class="expense-item-head-title">行程明细（{{index+1}}）</div>
-        <i @click="deleteItems(index)"
-           v-if="index != 0"
-           class="el-icon-delete expense-item-head-delete"></i>
+        <div class="expense-item-head-title">行程明细（{{ index+1 }}）</div>
+        <i
+          v-if="index != 0"
+          class="el-icon-delete expense-item-head-delete"
+          @click="deleteItems(index)"/>
       </flexbox>
-      <flexbox wrap="wrap"
-               align="stretch"
-               class="clauses">
-        <flexbox-item :span="1/2"
-                      v-for="(subItem, subIndex) in showItems"
-                      :key="subIndex"
-                      class="clauses-item">
+      <flexbox
+        wrap="wrap"
+        align="stretch"
+        class="clauses">
+        <flexbox-item
+          v-for="(subItem, subIndex) in showItems"
+          :span="1/2"
+          :key="subIndex"
+          class="clauses-item">
           <div class="clauses-item-title">
-            {{subItem.name}}
+            {{ subItem.name }}
           </div>
-          <el-date-picker v-if="subItem.formType == 'datetime'"
-                          v-model="item[subItem.field]"
-                          type="datetime"
-                          value-format="yyyy-MM-dd HH:mm:ss"
-                          placeholder="选择日期"
-                          @change="valueChange">
-          </el-date-picker>
-          <el-select v-else-if="subItem.formType == 'select'"
-                     v-model="item[subItem.field]"
-                     @change="valueChange"
-                     placeholder="请选择">
-            <el-option v-for="(item, index) in subItem.data"
-                       :key="index"
-                       :label="item"
-                       :value="item">
-            </el-option>
+          <el-date-picker
+            v-if="subItem.formType == 'datetime'"
+            v-model="item[subItem.field]"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="选择日期"
+            @change="valueChange"/>
+          <el-select
+            v-else-if="subItem.formType == 'select'"
+            v-model="item[subItem.field]"
+            placeholder="请选择"
+            @change="valueChange">
+            <el-option
+              v-for="(item, index) in subItem.data"
+              :key="index"
+              :label="item"
+              :value="item"/>
           </el-select>
-          <el-input v-else
-                    @input="calculateValueChange(index, subIndex)"
-                    v-model="item[subItem.field]"></el-input>
+          <el-input
+            v-else
+            v-model="item[subItem.field]"
+            @input="calculateValueChange(index, subIndex)"/>
         </flexbox-item>
       </flexbox>
       <div class="description">
         <div class="description-title">备注</div>
-        <el-input v-model="item['description']"
-                  type="textarea"
-                  resize="none"
-                  :rows="3"
-                  :maxlength="200"
-                  show-word-limit
-                  @input="valueChange"></el-input>
+        <el-input
+          v-model="item['description']"
+          :rows="3"
+          :maxlength="200"
+          type="textarea"
+          resize="none"
+          show-word-limit
+          @input="valueChange"/>
       </div>
     </div>
     <div class="handle-bar">
-      <el-button class="handle-bar-button"
-                 type="text"
-                 @click="addItems(index)"
-                 icon="el-icon-plus">添加事项</el-button>
-      <!-- <div class="handle-bar-total">
+      <el-button
+        class="handle-bar-button"
+        type="text"
+        icon="el-icon-plus"
+        @click="addItems(index)">添加事项</el-button>
+        <!-- <div class="handle-bar-total">
         总时长：<span>{{totalDuration}}</span>
       </div> -->
     </div>
@@ -67,25 +75,15 @@
 import objMixin from '@/components/CreateCom/objMixin'
 
 export default {
-  name: 'xh-leaves', // 请假事项
+  name: 'XhLeaves', // 请假事项
   components: {},
   mixins: [objMixin],
-  computed: {},
-  watch: {
-    value: function(val) {
-      this.dataValue = val
-      if (val.list && val.list.length > 0) {
-        this.mainList = val.list
-      } else {
-        this.mainList.push(this.getValueItem())
-      }
-    }
-  },
+  props: {},
   data() {
     return {
       mainList: [],
       imageIndex: -1,
-      totalDuration: '0', //合计
+      totalDuration: '0', // 合计
       showItems: [
         {
           field: 'vehicle',
@@ -127,7 +125,17 @@ export default {
       ]
     }
   },
-  props: {},
+  computed: {},
+  watch: {
+    value: function(val) {
+      this.dataValue = val
+      if (val.list && val.list.length > 0) {
+        this.mainList = val.list
+      } else {
+        this.mainList.push(this.getValueItem())
+      }
+    }
+  },
   mounted() {
     if (this.dataValue.list && this.dataValue.list.length > 0) {
       this.mainList = this.dataValue.list
@@ -165,7 +173,7 @@ export default {
         index: this.index,
         value: {
           list: this.mainList,
-          update: update, //是否更新总数
+          update: update, // 是否更新总数
           duration: this.totalDuration
         }
       })

@@ -25,6 +25,20 @@ public class TagUtil{
         return tag;
     }
 
+    public static Set<Long> toLongSet(String tagStr){
+        Set<Long> tag=new HashSet<>();
+        if(StrUtil.isEmpty(tagStr)){
+            return tag;
+        }
+        String[] split = tagStr.split(SEPARATOR);
+        for (String s : split) {
+            try {
+                tag.add(Long.valueOf(s));
+            }catch (NumberFormatException ignore){}
+        }
+        return tag;
+    }
+
 
 
     public static String fromSet(Collection<Integer> tag){
@@ -37,6 +51,20 @@ public class TagUtil{
                 continue;
             }
             sb.append(integer).append(SEPARATOR);
+        }
+        return sb.toString();
+    }
+
+    public static String fromLongSet(Collection<Long> tag){
+        if(CollectionUtil.isEmpty(tag)){
+            return "";
+        }
+        StringBuilder sb=new StringBuilder(SEPARATOR);
+        for (Long l : tag) {
+            if(l==null){
+                continue;
+            }
+            sb.append(l).append(SEPARATOR);
         }
         return sb.toString();
     }

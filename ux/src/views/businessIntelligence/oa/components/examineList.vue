@@ -1,30 +1,37 @@
 <template>
-  <slide-view class="d-view"
-              v-loading="loading"
-              :listenerIDs="listenerIDs"
-              :noListenerIDs="noListenerIDs"
-              :noListenerClass="noListenerClass"
-              @side-close="hideView"
-              :body-style="{padding: 0, height: '100%'}">
-    <div v-if="!loading"
-         class="t-section">
-      <span class="t-name">{{name}}</span>&nbsp;
-      <span class="t-des">({{name}}申请：<span class="t-value">{{totalCount}}次</span></span>
-      <span v-if="showDes"
-            class="t-des">&nbsp;&nbsp;&nbsp;&nbsp;{{desInfo}}：<span class="t-value">{{sumData + desUnit}}</span></span><span class="t-des">) </span>
-      <img @click="hideView"
-           class="t-close"
-           src="@/assets/img/task_close.png" />
+  <slide-view
+    v-loading="loading"
+    :listener-ids="listenerIDs"
+    :no-listener-ids="noListenerIDs"
+    :no-listener-class="noListenerClass"
+    :body-style="{padding: 0, height: '100%'}"
+    class="d-view"
+    @side-close="hideView">
+    <div
+      v-if="!loading"
+      class="t-section">
+      <span class="t-name">{{ name }}</span>&nbsp;
+      <span class="t-des">({{ name }}申请：<span class="t-value">{{ totalCount }}次</span></span>
+      <span
+        v-if="showDes"
+        class="t-des">&nbsp;&nbsp;&nbsp;&nbsp;{{ desInfo }}：<span class="t-value">{{ sumData + desUnit }}</span></span><span class="t-des">) </span>
+      <img
+        class="t-close"
+        src="@/assets/img/task_close.png"
+        @click="hideView" >
     </div>
 
-    <examine-section class="t-content"
-                     id="oa-log-statistics"
-                     :list="list"
-                     @handle="refreshList">
-      <p slot="load"
-         class="load">
-        <el-button type="text"
-                   :loading="loadMoreLoading">{{loadMoreLoading ? '加载更多' : '没有更多了'}}</el-button>
+    <examine-section
+      id="oa-log-statistics"
+      :list="list"
+      class="t-content"
+      @handle="refreshList">
+      <p
+        slot="load"
+        class="load">
+        <el-button
+          :loading="loadMoreLoading"
+          type="text">{{ loadMoreLoading ? '加载更多' : '没有更多了' }}</el-button>
       </p>
     </examine-section>
   </slide-view>
@@ -36,7 +43,7 @@ import ExamineSection from '@/views/OAManagement/examine/components/examineSecti
 
 export default {
   /** 审批统计 列表 */
-  name: 'examine-list',
+  name: 'ExamineList',
 
   components: {
     SlideView,
@@ -82,12 +89,6 @@ export default {
     }
   },
 
-  watch: {
-    params() {
-      this.refreshList()
-    }
-  },
-
   computed: {
     // 展示说明信息
     showDes() {
@@ -117,12 +118,18 @@ export default {
     }
   },
 
+  watch: {
+    params() {
+      this.refreshList()
+    }
+  },
+
   mounted() {
     // 分批次加载
-    let dom = document.getElementById('oa-log-statistics')
+    const dom = document.getElementById('oa-log-statistics')
     dom.onscroll = () => {
-      let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
-      //滚动条到底部的条件
+      const scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+      // 滚动条到底部的条件
       if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
         if (!this.isPost) {
           this.isPost = true

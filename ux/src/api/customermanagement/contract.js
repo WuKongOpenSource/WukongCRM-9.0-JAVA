@@ -78,7 +78,14 @@ export function crmContractTransfer(data) {
     data: data
   })
 }
-
+// 作废合同 CrmContract/contractDiscard
+export function CrmContractContractDiscard(data) {
+  return request({
+    url: 'CrmContract/contractDiscard',
+    method: 'post',
+    data: data
+  })
+}
 /**
  * 合同下回款
  * @param {*} data

@@ -1,61 +1,70 @@
 <template>
   <div class="details">
-    <el-dialog :title="listData.title"
-               :visible.sync="dialogVisible"
-               width="400px"
-               :modal="false"
-               top="30vh"
-               :before-close="handleClose">
+    <el-dialog
+      :title="listData.title"
+      :visible.sync="dialogVisible"
+      :modal="false"
+      :before-close="handleClose"
+      width="400px"
+      top="30vh">
       <div class="content">
-        <div v-for="(item, index) in list"
-             :key="index"
-             class="list-data">
-          <label>{{item.label}}：</label>
-          <span v-if="item.type=='time' && listData.time">{{listData[item.value]}}</span>
-          <span v-else-if="item.type=='createTime'">{{listData[item.value]}}</span>
-          <span v-else-if="item.type=='ownerList'"
-                class="owner-list">
-            <span v-for="(k, j) in listData[item.value]"
-                  :key="j">
-              <el-tooltip placement="bottom"
-                          effect="light"
-                          popper-class="tooltip-change-border">
+        <div
+          v-for="(item, index) in list"
+          :key="index"
+          class="list-data">
+          <label>{{ item.label }}：</label>
+          <span v-if="item.type=='time' && listData.time">{{ listData[item.value] }}</span>
+          <span v-else-if="item.type=='createTime'">{{ listData[item.value] }}</span>
+          <span
+            v-else-if="item.type=='ownerList'"
+            class="owner-list">
+            <span
+              v-for="(k, j) in listData[item.value]"
+              :key="j">
+              <el-tooltip
+                placement="bottom"
+                effect="light"
+                popper-class="tooltip-change-border">
                 <div slot="content">
-                  <span>{{k.realname}}</span>
+                  <span>{{ k.realname }}</span>
                 </div>
-                <div v-photo="k"
-                     v-lazy:background-image="$options.filters.filterUserLazyImg(k.img)"
-                     class="div-photo header-circle"></div>
+                <div
+                  v-photo="k"
+                  v-lazy:background-image="$options.filters.filterUserLazyImg(k.img)"
+                  class="div-photo header-circle"/>
               </el-tooltip>
             </span>
           </span>
-          <span v-else-if="item.type=='remindtype'">{{listData.remindtypeText}}</span>
-          <span v-else-if="item.type=='createUser'">{{listData.createUser.realname}}</span>
-          <span v-else-if="item.type=='bz'">{{listData[item.value]}}</span>
+          <span v-else-if="item.type=='remindtype'">{{ listData.remindtypeText }}</span>
+          <span v-else-if="item.type=='createUser'">{{ listData.createUser.realname }}</span>
+          <span v-else-if="item.type=='bz'">{{ listData[item.value] }}</span>
         </div>
         <!-- 关联业务 -->
-        <related-business :marginLeft="'0'"
-                          :alterable="false"
-                          :allData="allData"
-                          :alterableColor="'#666'"
-                          @checkRelatedDetail="checkRelatedDetail">
-        </related-business>
+        <related-business
+          :margin-left="'0'"
+          :alterable="false"
+          :all-data="allData"
+          :alterable-color="'#666'"
+          @checkRelatedDetail="checkRelatedDetail"/>
       </div>
-      <span slot="footer"
-            class="dialog-footer"
-            v-if="btnShow">
-        <el-button type="primary"
-                   v-if="listData.permission && listData.permission.isUpdate == 1"
-                   @click="editBtn">编辑</el-button>
-        <el-button type="danger"
-                   v-if="listData.permission && listData.permission.isDelete == 1"
-                   @click="deleteClose">删除</el-button>
+      <span
+        v-if="btnShow"
+        slot="footer"
+        class="dialog-footer">
+        <el-button
+          v-if="listData.permission && listData.permission.isUpdate == 1"
+          type="primary"
+          @click="editBtn">编辑</el-button>
+        <el-button
+          v-if="listData.permission && listData.permission.isDelete == 1"
+          type="danger"
+          @click="deleteClose">删除</el-button>
       </span>
     </el-dialog>
-    <c-r-m-full-screen-detail :visible.sync="showRelatedDetail"
-                              :crmType="relatedCRMType"
-                              :id="relatedID">
-    </c-r-m-full-screen-detail>
+    <c-r-m-full-screen-detail
+      :visible.sync="showRelatedDetail"
+      :crm-type="relatedCRMType"
+      :id="relatedID"/>
   </div>
 </template>
 
@@ -68,6 +77,15 @@ export default {
   components: {
     relatedBusiness,
     CRMFullScreenDetail
+  },
+  props: {
+    dialogVisible: Boolean,
+    listData: Object,
+    // 是否显示编辑删除按钮
+    btnShow: {
+      type: Boolean,
+      default: true
+    }
   },
   data() {
     return {
@@ -87,7 +105,7 @@ export default {
     }
   },
   created() {
-    let newVal = this.listData
+    const newVal = this.listData
     this.allData.business = newVal.businessList ? newVal.businessList : ''
     this.allData.contacts = newVal.contactsList ? newVal.contactsList : ''
     this.allData.contract = newVal.contractList ? newVal.contractList : ''
@@ -123,15 +141,6 @@ export default {
       case 9:
         newVal.remindtypeText = '一周前'
         break
-    }
-  },
-  props: {
-    dialogVisible: Boolean,
-    listData: Object,
-    // 是否显示编辑删除按钮
-    btnShow: {
-      type: Boolean,
-      default: true
     }
   },
   methods: {

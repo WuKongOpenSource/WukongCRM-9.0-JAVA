@@ -1,29 +1,36 @@
 <template>
-  <div class="xh-files-cont"
-       :class="[disabled ? 'is_disabled' : 'is_valid']">
-    <flexbox class="f-header"
-             :class="[disabled ? 'is_disabled' : 'is_valid']"
-             @click.native="selectImage">
-      <img class="f-logo"
-           v-if="!disabled"
-           src="@/assets/img/relevance_file.png" />
+  <div
+    :class="[disabled ? 'is_disabled' : 'is_valid']"
+    class="xh-files-cont">
+    <flexbox
+      :class="[disabled ? 'is_disabled' : 'is_valid']"
+      class="f-header"
+      @click.native="selectImage">
+      <img
+        v-if="!disabled"
+        class="f-logo"
+        src="@/assets/img/relevance_file.png" >
       <div class="f-name">附件</div>
-      <input :id="'xhImageInput' + index||'0'"
-             type="file"
-             class="bar-iput"
-             accept="*.*"
-             multiple
-             @change="xhUploadFile" />
+      <input
+        :id="'xhImageInput' + index||'0'"
+        type="file"
+        class="bar-iput"
+        accept="*.*"
+        multiple
+        @change="xhUploadFile" >
     </flexbox>
     <div class="f-body">
-      <flexbox class="f-item"
-               v-for="(item, index) in dataValue"
-               :key="index">
-        <img class="f-img"
-             src="@/assets/img/relevance_file.png" />
-        <div class="f-name">{{item.name.length > 25 ? (item.name.substring(0, 25) + '...'): item.name+'('+item.size+')'}}</div>
-        <div class="close-button"
-             @click="deleteFile(item, index)">×</div>
+      <flexbox
+        v-for="(item, index) in dataValue"
+        :key="index"
+        class="f-item">
+        <img
+          class="f-img"
+          src="@/assets/img/relevance_file.png" >
+        <div class="f-name">{{ item.name.length > 25 ? (item.name.substring(0, 25) + '...'): item.name+'('+item.size+')' }}</div>
+        <div
+          class="close-button"
+          @click="deleteFile(item, index)">×</div>
       </flexbox>
     </div>
   </div>
@@ -34,17 +41,17 @@ import { crmFileSave, crmFileDelete } from '@/api/common'
 import { fileSize } from '@/utils/index'
 
 export default {
-  name: 'xh-files', // 新建 file  以数组的形式上传
+  name: 'XhFiles', // 新建 file  以数组的形式上传
   components: {},
   mixins: [arrayMixin],
-  computed: {},
-  watch: {},
+  props: {},
   data() {
     return {
       batchId: '' // 批次ID
     }
   },
-  props: {},
+  computed: {},
+  watch: {},
   mounted() {},
   methods: {
     selectImage() {
@@ -55,7 +62,6 @@ export default {
     /** 图片选择出发 */
     xhUploadFile(event) {
       var files = event.target.files
-      var self = this
       var firstFile = files[0]
       this.sendFileRequest(firstFile, () => {
         for (let index = 1; index < files.length; index++) {

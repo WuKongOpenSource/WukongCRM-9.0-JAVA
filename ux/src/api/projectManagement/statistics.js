@@ -5,9 +5,9 @@ import request from '@/utils/request'
  * @param {*} data
  */
 export function workWorkStatisticAPI(data) {
-    return request({
-        url: 'work/workStatistics',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/workStatistics',
+    method: 'post',
+    data: data
+  })
 }

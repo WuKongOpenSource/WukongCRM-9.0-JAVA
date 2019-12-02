@@ -12,7 +12,7 @@ import {
 let loadAsyncRouter = false
 const whiteList = ['/login'] // 不重定向白名单
 router.beforeEach((to, from, next) => {
-  localStorage.setItem("routerBefore", from.path)
+  localStorage.setItem('routerBefore', from.path)
   NProgress.start()
   /** 请求头包含授权信息 并且 页面必须授权 直接进入 */
   if (getAuth()) {
@@ -65,7 +65,6 @@ router.beforeEach((to, from, next) => {
             })
           })
         }
-
       } else {
         next()
       }

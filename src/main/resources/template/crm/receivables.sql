@@ -34,18 +34,19 @@
        )
      #end
      #sql("queryReceivablesById")
-     select a.*,b.customer_name,c.num as contract_num,c.name as contract_name,c.money as contract_money,d.realname as owner_user_name from
+     select a.*,b.customer_name,c.num as contract_num,c.name as contract_name,c.money as contract_money,d.realname as owner_user_name,e.num as plan_num from
      (select * from 72crm_crm_receivables where receivables_id = ?)as a left join 72crm_crm_customer as b on a.customer_id = b.customer_id
      left join 72crm_crm_contract as c on a.contract_id = c.contract_id
      left join 72crm_admin_user as d on a.owner_user_id = d.user_id
-     #end
-     #sql("queryReceivablesByContractId")
-       select * from 72crm_crm_receivables where contract_id = ?
+     left join 72crm_crm_receivables_plan e on a.plan_id = e.plan_id
      #end
      #sql ("queryByNumber")
        select count(*) from 72crm_crm_receivables where number = ?
      #end
      #sql ("updateCheckStatusById")
       update 72crm_crm_receivables set check_status = ? where receivables_id = ?
+     #end
+     #sql("queryReceivablesByRecordId")
+      SELECT number,receivables_id,owner_user_id FROM 72crm_crm_receivables WHERE examine_record_id=? limit 0,1
      #end
 #end

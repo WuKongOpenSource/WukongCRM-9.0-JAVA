@@ -1,33 +1,41 @@
 <template>
   <div>
-    <el-input placeholder="搜索部门名称"
-              size="small"
-              v-model="searchInput"
-              suffix-icon="el-icon-search"
-              @input="inputchange">
-    </el-input>
-    <div v-loading="loading"
-         class="search-list">
-      <el-breadcrumb style="padding: 5px 0;"
-                     separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item v-for="(item, index) in breadcrumbList"
-                            :key="index">
-          <a href="javascript:;"
-             @click="breadcrumbBtn(item, index)">{{item.label}}</a>
+    <el-input
+      v-model="searchInput"
+      placeholder="搜索部门名称"
+      size="small"
+      suffix-icon="el-icon-search"
+      @input="inputchange"/>
+    <div
+      v-loading="loading"
+      class="search-list">
+      <el-breadcrumb
+        style="padding: 5px 0;"
+        separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item
+          v-for="(item, index) in breadcrumbList"
+          :key="index">
+          <a
+            href="javascript:;"
+            @click="breadcrumbBtn(item, index)">{{ item.label }}</a>
         </el-breadcrumb-item>
       </el-breadcrumb>
-      <flexbox v-for="(item, index) in showlist"
-               :key="index"
-               v-if="item.show"
-               class="stru-list">
-        <el-checkbox class="stru-check"
-                     v-model="item.isCheck"
-                     :disabled="item.disabled"
-                     @change="checkChange(item, index)"></el-checkbox>
-        <div @click="enterChildren(item)"
-             class="stru-name">{{item.name}}</div>
-        <div class="el-icon-arrow-right stru-enter"
-             v-if="item.children"></div>
+      <flexbox
+        v-for="(item, index) in showlist"
+        v-if="item.show"
+        :key="index"
+        class="stru-list">
+        <el-checkbox
+          v-model="item.isCheck"
+          :disabled="item.disabled"
+          class="stru-check"
+          @change="checkChange(item, index)"/>
+        <div
+          class="stru-name"
+          @click="enterChildren(item)">{{ item.name }}</div>
+        <div
+          v-if="item.children"
+          class="el-icon-arrow-right stru-enter"/>
       </flexbox>
     </div>
   </div>
@@ -36,19 +44,8 @@
 import { depList } from '@/api/common'
 
 export default {
-  name: 'xh-structure', // 新建 structure
+  name: 'XhStructure', // 新建 structure
   components: {},
-  computed: {},
-  watch: {},
-  data() {
-    return {
-      breadcrumbList: [], // 面包屑数据
-      selectItems: [], // 选择项
-      showlist: [], // 展示数据
-      loading: false, // 加载动画
-      searchInput: ''
-    }
-  },
   props: {
     value: {
       type: Array,
@@ -69,6 +66,17 @@ export default {
       }
     }
   },
+  data() {
+    return {
+      breadcrumbList: [], // 面包屑数据
+      selectItems: [], // 选择项
+      showlist: [], // 展示数据
+      loading: false, // 加载动画
+      searchInput: ''
+    }
+  },
+  computed: {},
+  watch: {},
   mounted() {
     this.selectItems = this.selectedData
     // 部门列表数据

@@ -1,105 +1,116 @@
 <template>
   <div class="my-task">
-    <slot name="searchInput"></slot>
+    <slot name="searchInput"/>
     <div class="select-box">
       <!-- 筛选 -->
-      <div class="select-group"
-           v-if="listType == 'subtask'">
+      <div
+        v-if="listType == 'subtask'"
+        class="select-group">
         <label>任务类型</label>
-        <el-select v-model="fromData.type"
-                   @change="selectChange"
-                   placeholder="请选择">
-          <el-option v-for="item in subordinateOption"
-                     :key="item.key"
-                     :label="item.label"
-                     :value="item.key">
-          </el-option>
+        <el-select
+          v-model="fromData.type"
+          placeholder="请选择"
+          @change="selectChange">
+          <el-option
+            v-for="item in subordinateOption"
+            :key="item.key"
+            :label="item.label"
+            :value="item.key"/>
         </el-select>
       </div>
-      <div class="select-group"
-           v-else>
+      <div
+        v-else
+        class="select-group">
         <label>任务类型</label>
-        <el-select v-model="fromData.type"
-                   @change="selectChange"
-                   placeholder="请选择">
-          <el-option v-for="item in typeOptions"
-                     :key="item.key"
-                     :label="item.label"
-                     :value="item.key">
-          </el-option>
+        <el-select
+          v-model="fromData.type"
+          placeholder="请选择"
+          @change="selectChange">
+          <el-option
+            v-for="item in typeOptions"
+            :key="item.key"
+            :label="item.label"
+            :value="item.key"/>
         </el-select>
       </div>
       <div class="select-group">
         <label>状态</label>
-        <el-select v-model="fromData.status"
-                   @change="selectChange"
-                   placeholder="请选择">
-          <el-option v-for="item in statusOptions"
-                     :key="item.key"
-                     :label="item.label"
-                     :value="item.key">
-          </el-option>
+        <el-select
+          v-model="fromData.status"
+          placeholder="请选择"
+          @change="selectChange">
+          <el-option
+            v-for="item in statusOptions"
+            :key="item.key"
+            :label="item.label"
+            :value="item.key"/>
         </el-select>
       </div>
       <div class="select-group">
         <label>优先级</label>
-        <el-select v-model="fromData.priority"
-                   @change="selectChange"
-                   placeholder="请选择">
-          <el-option v-for="item in priorityOptions"
-                     :key="item.key"
-                     :label="item.label"
-                     :value="item.key">
-          </el-option>
+        <el-select
+          v-model="fromData.priority"
+          placeholder="请选择"
+          @change="selectChange">
+          <el-option
+            v-for="item in priorityOptions"
+            :key="item.key"
+            :label="item.label"
+            :value="item.key"/>
         </el-select>
       </div>
       <div class="select-group">
         <label>截止时间</label>
-        <el-select v-model="fromData.date"
-                   @change="selectChange"
-                   placeholder="请选择">
-          <el-option v-for="item in timeOptions"
-                     :key="item.key"
-                     :label="item.label"
-                     :value="item.key">
-          </el-option>
+        <el-select
+          v-model="fromData.date"
+          placeholder="请选择"
+          @change="selectChange">
+          <el-option
+            v-for="item in timeOptions"
+            :key="item.key"
+            :label="item.label"
+            :value="item.key"/>
         </el-select>
       </div>
-      <div class="select-group"
-           v-if="listType == 'subtask'">
+      <div
+        v-if="listType == 'subtask'"
+        class="select-group">
         <label class="min-width">负责人</label>
-        <el-select v-model="fromData.subUser"
-                   @change="selectChange"
-                   placeholder="请选择">
-          <el-option v-for="item in subUserListData"
-                     :key="item.userId"
-                     :label="item.realname"
-                     :value="item.userId">
-          </el-option>
+        <el-select
+          v-model="fromData.subUser"
+          placeholder="请选择"
+          @change="selectChange">
+          <el-option
+            v-for="item in subUserListData"
+            :key="item.userId"
+            :label="item.realname"
+            :value="item.userId"/>
         </el-select>
       </div>
     </div>
     <div class="list-box-container">
       <div class="list-box">
-        <task-cell v-for="(item, index) in list"
-                   :key="index"
-                   :data="item"
-                   :dataIndex="index"
-                   @on-handle="taskCellHandle"></task-cell>
+        <task-cell
+          v-for="(item, index) in list"
+          :key="index"
+          :data="item"
+          :data-index="index"
+          @on-handle="taskCellHandle"/>
       </div>
       <p class="load">
-        <el-button type="text"
-                   :loading="loadMoreLoading">{{loadMoreLoading ? '加载更多' : '没有更多了'}}</el-button>
+        <el-button
+          :loading="loadMoreLoading"
+          type="text">{{ loadMoreLoading ? '加载更多' : '没有更多了' }}</el-button>
       </p>
     </div>
     <!-- 详情 -->
-    <particulars v-if="taskDetailShow"
-                 ref="particulars"
-                 :id="taskID"
-                 :detailIndex="detailIndex"
-                 @on-handle="detailHandle"
-                 @close="closeBtn">
-    </particulars>
+    <particulars
+      v-if="taskDetailShow"
+      ref="particulars"
+      :id="taskID"
+      :detail-index="detailIndex"
+      @on-handle="detailHandle"
+      @close="closeBtn"/>
   </div>
 </template>
 
@@ -112,6 +123,19 @@ export default {
   components: {
     TaskCell,
     particulars
+  },
+  mixins: [listTaskDetail],
+  props: {
+    listType: '',
+    list: Array,
+    // 负责人
+    subUserListData: {
+      type: Array,
+      default: () => {
+        return []
+      }
+    },
+    loadMoreLoading: false
   },
   data() {
     return {
@@ -160,19 +184,6 @@ export default {
       ]
     }
   },
-  mixins: [listTaskDetail],
-  props: {
-    listType: '',
-    list: Array,
-    // 负责人
-    subUserListData: {
-      type: Array,
-      default: () => {
-        return []
-      }
-    },
-    loadMoreLoading: false
-  },
   mounted() {
     document
       .getElementById('workbench-main-container')
@@ -189,7 +200,7 @@ export default {
         !this.$refs.particulars.$el.contains(e.target)
       ) {
         let hidden = true
-        let items = document.getElementsByClassName('list-box')
+        const items = document.getElementsByClassName('list-box')
         for (let index = 0; index < items.length; index++) {
           const element = items[index]
           if (element.contains(e.target)) {

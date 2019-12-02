@@ -52,30 +52,30 @@ export default {
         .then(res => {
           this.loading = false
 
-          let list = [{
-              name: '当月' + this.typeName + this.typeUnit
-            },
-            {
-              name: '上月' + this.typeName + this.typeUnit
-            },
-            {
-              name: '去年当月' + this.typeName + this.typeUnit
-            },
-            {
-              name: '环比增长（%）'
-            },
-            {
-              name: '同比增长（%）'
-            }
+          const list = [{
+            name: '当月' + this.typeName + this.typeUnit
+          },
+          {
+            name: '上月' + this.typeName + this.typeUnit
+          },
+          {
+            name: '去年当月' + this.typeName + this.typeUnit
+          },
+          {
+            name: '环比增长（%）'
+          },
+          {
+            name: '同比增长（%）'
+          }
           ]
-          let fieldList = [{
+          const fieldList = [{
             field: 'name',
             name: '日期'
           }]
 
           for (let eIndex = 0; eIndex < res.data.length; eIndex++) {
             const element = res.data[eIndex]
-            let fieldKey = 'value' + eIndex
+            const fieldKey = 'value' + eIndex
 
             // 处理表头逻辑
             if (fieldList.length <= res.data.length) {
@@ -85,7 +85,7 @@ export default {
               })
             }
 
-            let keys = [
+            const keys = [
               'thisMonth',
               'lastMonth',
               'lastYear',
@@ -101,13 +101,13 @@ export default {
           this.fieldList = fieldList
           this.list = list
 
-          let monthData = []
-          let lastMonthData = []
-          let lastYeatMonthData = []
-          let chainRatioData = []
-          let yearOnYearData = []
+          const monthData = []
+          const lastMonthData = []
+          const lastYeatMonthData = []
+          const chainRatioData = []
+          const yearOnYearData = []
 
-          let xAxis = []
+          const xAxis = []
           for (let index = 0; index < res.data.length; index++) {
             const element = res.data[index]
             monthData.push(element.thisMonth)
@@ -193,161 +193,161 @@ export default {
           }
         }],
         yAxis: [{
-            type: 'value',
-            name: this.typeUnit,
-            axisTick: {
-              show: false
-            },
-            axisLabel: {
-              color: '#BDBDBD',
-              formatter: '{value}'
-            },
-            /** 坐标轴轴线相关设置 */
-            axisLine: {
-              lineStyle: {
-                color: '#BDBDBD'
-              }
-            },
-            splitLine: {
-              show: true,
-              lineStyle: {
-                color: '#e6e6e6'
-              }
+          type: 'value',
+          name: this.typeUnit,
+          axisTick: {
+            show: false
+          },
+          axisLabel: {
+            color: '#BDBDBD',
+            formatter: '{value}'
+          },
+          /** 坐标轴轴线相关设置 */
+          axisLine: {
+            lineStyle: {
+              color: '#BDBDBD'
             }
           },
-          {
-            type: 'value',
-            name: '',
-            axisTick: {
-              alignWithLabel: true,
-              lineStyle: {
-                width: 0
-              }
-            },
-            axisLabel: {
-              color: '#BDBDBD',
-              formatter: '{value}%'
-            },
-            /** 坐标轴轴线相关设置 */
-            axisLine: {
-              lineStyle: {
-                color: '#BDBDBD'
-              }
-            },
-            splitLine: {
-              show: true,
-              lineStyle: {
-                color: '#e6e6e6'
-              }
+          splitLine: {
+            show: true,
+            lineStyle: {
+              color: '#e6e6e6'
             }
           }
+        },
+        {
+          type: 'value',
+          name: '',
+          axisTick: {
+            alignWithLabel: true,
+            lineStyle: {
+              width: 0
+            }
+          },
+          axisLabel: {
+            color: '#BDBDBD',
+            formatter: '{value}%'
+          },
+          /** 坐标轴轴线相关设置 */
+          axisLine: {
+            lineStyle: {
+              color: '#BDBDBD'
+            }
+          },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              color: '#e6e6e6'
+            }
+          }
+        }
         ],
         series: [{
-            name: '当月' + this.typeName,
-            type: 'bar',
-            yAxisIndex: 0,
-            barWidth: 10,
-            markPoint: {
-              data: [{
-                  type: 'max',
-                  name: '最大值'
-                },
-                {
-                  type: 'min',
-                  name: '最小值'
-                }
-              ]
+          name: '当月' + this.typeName,
+          type: 'bar',
+          yAxisIndex: 0,
+          barWidth: 10,
+          markPoint: {
+            data: [{
+              type: 'max',
+              name: '最大值'
             },
-            data: []
+            {
+              type: 'min',
+              name: '最小值'
+            }
+            ]
           },
-          {
-            name: '上月' + this.typeName,
-            type: 'bar',
-            yAxisIndex: 0,
-            barWidth: 10,
-            markPoint: {
-              data: [{
-                  type: 'max',
-                  name: '最大值'
-                },
-                {
-                  type: 'min',
-                  name: '最小值'
-                }
-              ]
+          data: []
+        },
+        {
+          name: '上月' + this.typeName,
+          type: 'bar',
+          yAxisIndex: 0,
+          barWidth: 10,
+          markPoint: {
+            data: [{
+              type: 'max',
+              name: '最大值'
             },
-            data: []
+            {
+              type: 'min',
+              name: '最小值'
+            }
+            ]
           },
-          {
-            name: '去年当月' + this.typeName,
-            type: 'bar',
-            yAxisIndex: 0,
-            barWidth: 10,
-            markPoint: {
-              data: [{
-                  type: 'max',
-                  name: '最大值'
-                },
-                {
-                  type: 'min',
-                  name: '最小值'
-                }
-              ]
+          data: []
+        },
+        {
+          name: '去年当月' + this.typeName,
+          type: 'bar',
+          yAxisIndex: 0,
+          barWidth: 10,
+          markPoint: {
+            data: [{
+              type: 'max',
+              name: '最大值'
             },
-            data: []
+            {
+              type: 'min',
+              name: '最小值'
+            }
+            ]
           },
-          {
-            name: '环比增长',
-            type: 'line',
-            yAxisIndex: 1,
-            markLine: {
-              data: [{
-                type: 'average',
-                name: '平均值'
-              }]
-            },
-            markPoint: {
-              data: [{
-                  type: 'max',
-                  name: '最大值'
-                },
-                {
-                  type: 'min',
-                  name: '最小值'
-                }
-              ]
-            },
-            data: []
+          data: []
+        },
+        {
+          name: '环比增长',
+          type: 'line',
+          yAxisIndex: 1,
+          markLine: {
+            data: [{
+              type: 'average',
+              name: '平均值'
+            }]
           },
-          {
-            name: '同比增长',
-            type: 'line',
-            yAxisIndex: 1,
-            markLine: {
-              data: [{
-                type: 'average',
-                name: '平均值'
-              }]
+          markPoint: {
+            data: [{
+              type: 'max',
+              name: '最大值'
             },
-            markPoint: {
-              data: [{
-                  type: 'max',
-                  name: '最大值'
-                },
-                {
-                  type: 'min',
-                  name: '最小值'
-                }
-              ]
+            {
+              type: 'min',
+              name: '最小值'
+            }
+            ]
+          },
+          data: []
+        },
+        {
+          name: '同比增长',
+          type: 'line',
+          yAxisIndex: 1,
+          markLine: {
+            data: [{
+              type: 'average',
+              name: '平均值'
+            }]
+          },
+          markPoint: {
+            data: [{
+              type: 'max',
+              name: '最大值'
             },
-            data: []
-          }
+            {
+              type: 'min',
+              name: '最小值'
+            }
+            ]
+          },
+          data: []
+        }
         ]
       }
       this.axisChart.setOption(this.axisOption, true)
     }
   },
 
-  deactivated: function () {}
+  deactivated: function() {}
 
 }

@@ -33,10 +33,6 @@
      where b.receivables_id is null and a.contract_id = ?
    #end
 
-   #sql("queryReceivablesPlanById")
-     select * from 72crm_crm_receivables_plan where contract_id = ?
-   #end
-
   #sql ("deleteByIds")
     delete from 72crm_crm_receivables_plan where receivables_id = ?
   #end

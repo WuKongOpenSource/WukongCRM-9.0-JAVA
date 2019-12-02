@@ -4,55 +4,59 @@
       <div class="left-pic" />
     </div>
     <div class="right">
-      <el-form ref="loginForm"
-               :model="loginForm"
-               :rules="loginRules"
-               class="login-form"
-               auto-complete="on"
-               label-position="left">
-        <div class="title">{{name}}</div>
+      <el-form
+        ref="loginForm"
+        :model="loginForm"
+        :rules="loginRules"
+        class="login-form"
+        auto-complete="on"
+        label-position="left">
+        <div class="title">{{ name }}</div>
         <el-form-item prop="username">
-          <el-input ref="name"
-                    v-model="loginForm.username"
-                    autofocus="autofocus"
-                    name="username"
-                    type="text"
-                    auto-complete="on"
-                    placeholder="请输入用户名"
-                    @keyup.enter.native="handleLogin" />
+          <el-input
+            ref="name"
+            v-model="loginForm.username"
+            autofocus="autofocus"
+            name="username"
+            type="text"
+            auto-complete="on"
+            placeholder="请输入用户名"
+            @keyup.enter.native="handleLogin" />
         </el-form-item>
         <el-form-item prop="password">
-          <el-input type="password"
-                    v-model="loginForm.password"
-                    name="password"
-                    auto-complete="on"
-                    placeholder="请输入密码"
-                    @keyup.enter.native="handleLogin" />
+          <el-input
+            v-model="loginForm.password"
+            type="password"
+            name="password"
+            auto-complete="on"
+            placeholder="请输入密码"
+            @keyup.enter.native="handleLogin" />
         </el-form-item>
         <el-form-item>
-          <el-button :loading="loading"
-                     @click.native.prevent="handleLogin"
-                     class="submit-btn">
+          <el-button
+            :loading="loading"
+            class="submit-btn"
+            @click.native.prevent="handleLogin">
             登录
           </el-button>
         </el-form-item>
       </el-form>
       <div class="copyright">
         悟空CRM受国家计算机软件著作权保护，未经授权不得进行商业行为，违者必究。<br>
-        <a target="_blank"
-           href="http://www.5kcrm.com">©2019 悟空CRM</a>
+        <a
+          target="_blank"
+          href="http://www.5kcrm.com">©2019 悟空CRM</a>
       </div>
     </div>
 
-    <img class="logo"
-         :src="logo" />
+    <img
+      :src="logo"
+      class="logo" >
   </div>
 </template>
 
 <script>
-import { isvalidUsername } from '@/utils/validate'
 import { mapGetters } from 'vuex'
-import Lockr from 'lockr'
 
 export default {
   name: 'Login',
@@ -87,6 +91,9 @@ export default {
       remember: false
     }
   },
+  computed: {
+    ...mapGetters(['logo', 'name'])
+  },
   watch: {
     $route: {
       handler: function(route) {
@@ -94,9 +101,6 @@ export default {
       },
       immediate: true
     }
-  },
-  computed: {
-    ...mapGetters(['logo', 'name'])
   },
   mounted() {},
   methods: {

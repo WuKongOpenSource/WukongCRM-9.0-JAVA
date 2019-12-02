@@ -60,7 +60,7 @@ export default {
       search: '', // 搜索内容
       /** 控制详情展示 */
       rowID: '', // 行信息
-      rowType: '', //详情类型
+      rowType: '', // 详情类型
       showDview: false,
       /** 高级筛选 */
       filterObj: {}, // 筛选确定数据
@@ -101,11 +101,11 @@ export default {
         page: this.currentPage,
         limit: this.pageSize,
         search: this.search,
-        type: this.isSeas ? 8 : crmTypeModel[this.crmType] // 8是公海
+        type: this.isSeas ? crmTypeModel.pool : crmTypeModel[this.crmType] // 8是公海
       }
       if (this.sortData.order) {
         params.sortField = this.sortData.prop
-        params.order = this.sortData.order == "ascending" ? 2 : 1
+        params.order = this.sortData.order == 'ascending' ? 2 : 1
       }
 
       if (this.sceneId) {
@@ -118,6 +118,11 @@ export default {
         .then(res => {
           if (this.crmType === 'customer') {
             this.list = res.data.list.map(element => {
+              if (element.dealStatus === 1) {
+                element.dealStatus = '已成交'
+              } else {
+                element.dealStatus = '未成交'
+              }
               element.show = false // 控制列表商机展示
               return element
             })
@@ -164,12 +169,11 @@ export default {
       if (this.fieldList.length == 0) {
         this.loading = true
         filedGetTableField({
-          label: this.isSeas ? 8 : crmTypeModel[this.crmType] // 8 是公海
+          label: this.isSeas ? crmTypeModel.pool : crmTypeModel[this.crmType] // 9 是公海
         })
           .then(res => {
             for (let index = 0; index < res.data.length; index++) {
               const element = res.data[index]
-
               var width = 0
               if (!element.width) {
                 if (element.name && element.name.length <= 6) {
@@ -208,6 +212,7 @@ export default {
     /** */
     /** 搜索操作 */
     crmSearch(value) {
+      this.currentPage = 1
       this.search = value
       if (this.fieldList.length) {
         this.getList()
@@ -308,7 +313,7 @@ export default {
     },
     /**
      * 导出 线索 客户 联系人 产品
-     * @param {*} data 
+     * @param {*} data
      */
     // 导出操作
     exportInfos() {
@@ -333,26 +338,26 @@ export default {
           product: crmProductExcelAllExport
         }[this.crmType]
       }
-      let loading = Loading.service({ fullscreen: true, text: '导出中...' })
+      const loading = Loading.service({ fullscreen: true, text: '导出中...' })
       request(params)
         .then(res => {
           var blob = new Blob([res.data], {
             type: 'application/vnd.ms-excel;charset=utf-8'
           })
           var downloadElement = document.createElement('a')
-          var href = window.URL.createObjectURL(blob) //创建下载的链接
+          var href = window.URL.createObjectURL(blob) // 创建下载的链接
           downloadElement.href = href
           downloadElement.download =
             decodeURI(
               res.headers['content-disposition'].split('filename=')[1]
-            ) || '' //下载后文件名
+            ) || '' // 下载后文件名
           document.body.appendChild(downloadElement)
-          downloadElement.click() //点击下载
-          document.body.removeChild(downloadElement) //下载完成移除元素
-          window.URL.revokeObjectURL(href) //释放掉blob对象
+          downloadElement.click() // 点击下载
+          document.body.removeChild(downloadElement) // 下载完成移除元素
+          window.URL.revokeObjectURL(href) // 释放掉blob对象
           loading.close()
         })
-        .catch(() => { 
+        .catch(() => {
           loading.close()
         })
     },
@@ -404,6 +409,7 @@ export default {
      * 字段排序
      */
     sortChange(column, prop, order) {
+      this.currentPage = 1
       this.sortData = column
       this.getList()
     },
@@ -438,7 +444,7 @@ export default {
       this.currentPage = val
       this.getList()
     },
-    // 0待审核、1审核中、2审核通过、3已拒绝 4已撤回 5未提交
+    // 0待审核、1审核中、2审核通过、3已拒绝 4已撤回 5未提交 修正 以 getStatusName 为准
     getStatusStyle(status) {
       if (status == 0) {
         return {
@@ -446,19 +452,19 @@ export default {
           'background-color': '#FDF6EC',
           'color': '#E6A23C'
         }
-      } else if (status == 1) {
+      } else if (status == 3) {
         return {
           'border-color': '#409EFF',
           'background-color': '#ECF5FF',
           'color': '#409EFF'
         }
-      } else if (status == 2) {
+      } else if (status == 1) {
         return {
           'border-color': '#67C23A',
           'background-color': '#F0F9EB',
           'color': '#67C23A'
         }
-      } else if (status == 3) {
+      } else if (status == 2) {
         return {
           'border-color': '#F56C6B',
           'background-color': '#FEF0F0',
@@ -468,21 +474,29 @@ export default {
         return {
           'background-color': '#FFFFFF'
         }
+      } else if (status == 6) {
+        return {
+          'border-color': '#E9E9EB',
+          'background-color': '#F4F4F5',
+          'color': '#909399'
+        }
       }
     },
     getStatusName(status) {
       if (status == 0) {
         return '待审核'
       } else if (status == 1) {
-        return '审核中'
-      } else if (status == 2) {
         return '通过'
-      } else if (status == 3) {
+      } else if (status == 2) {
         return '拒绝'
+      } else if (status == 3) {
+        return '审核中'
       } else if (status == 4) {
         return '撤回'
       } else if (status == 5) {
         return '未提交'
+      } else if (status == 6) {
+        return '已作废'
       }
       return ''
     },

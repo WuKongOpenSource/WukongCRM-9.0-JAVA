@@ -1,68 +1,78 @@
 <template>
   <div class="task-sub">
-    <div class="subtasks-content"
-         v-clickoutside="subtasksSubmit">
+    <div
+      v-clickoutside="subtasksSubmit"
+      class="subtasks-content">
       <div class="checkbox-box subtasks-box">
-        <el-checkbox disabled
-                     v-model="checkboxData"></el-checkbox>
+        <el-checkbox
+          v-model="checkboxData"
+          disabled/>
       </div>
       <div class="subtasks-content-box">
-        <el-input type="textarea"
-                  autosize
-                  :maxlength="50"
-                  placeholder="请输入内容"
-                  @keyup.enter.native="subtasksSubmit"
-                  v-model="subtasksTextarea">
-        </el-input>
+        <el-input
+          :maxlength="50"
+          v-model="subtasksTextarea"
+          type="textarea"
+          autosize
+          placeholder="请输入内容"
+          @keyup.enter.native="subtasksSubmit"/>
       </div>
       <flexbox class="subtasks-content-png">
         <div class="time">
-          <el-date-picker v-model="subtasksDate"
-                          type="date"
-                          ref="subtasksDate"
-                          format="yyyy 年 MM 月 dd 日"
-                          value-format="yyyy-MM-dd"
-                          :style="{'width': subtasksDate ? '54px': '28px'}"
-                          placeholder="选择日期">
-          </el-date-picker>
-          <span class="bg-color"
-                v-if="subtasksDate">{{subtasksDate | moment("MM-DD")}}</span>
-          <i v-else
-             class="wukong wukong-time-task"
-             @click="subtasksDateFun"></i>
+          <el-date-picker
+            ref="subtasksDate"
+            v-model="subtasksDate"
+            :style="{'width': subtasksDate ? '54px': '28px'}"
+            type="date"
+            format="yyyy 年 MM 月 dd 日"
+            value-format="yyyy-MM-dd"
+            placeholder="选择日期"/>
+          <span
+            v-if="subtasksDate"
+            class="bg-color">{{ subtasksDate | moment("MM-DD") }}</span>
+          <i
+            v-else
+            class="wukong wukong-time-task"
+            @click="subtasksDateFun"/>
         </div>
         <!-- 选择负责人 -->
-        <el-popover placement="bottom-end"
-                    width="280"
-                    trigger="click"
-                    v-model="showUserPopover">
-          <xh-user ref="xhuser"
-                   radio
-                   :infoRequest="ownerListRequest"
-                   :infoParams="{ workId: workId }"
-                   :selectedData="xhUserData"
-                   @changeCheckout="xhUserCheckout">
-          </xh-user>
-          <div class="select-box"
-               slot="reference">
+        <el-popover
+          v-model="showUserPopover"
+          placement="bottom-end"
+          width="280"
+          trigger="click">
+          <xh-user
+            ref="xhuser"
+            :info-request="ownerListRequest"
+            :info-params="{ workId: workId }"
+            :selected-data="xhUserData"
+            radio
+            @changeCheckout="xhUserCheckout"/>
+          <div
+            slot="reference"
+            class="select-box">
             <template v-if="subtaskChange">
-              <span v-for="(item, index) in xhUserData"
-                    :key="index">
-                <el-tooltip placement="bottom"
-                            effect="light"
-                            popper-class="tooltip-change-border">
+              <span
+                v-for="(item, index) in xhUserData"
+                :key="index">
+                <el-tooltip
+                  placement="bottom"
+                  effect="light"
+                  popper-class="tooltip-change-border">
                   <div slot="content">
-                    <span @click="showUserPopover = true">{{item.realname}}</span>
+                    <span @click="showUserPopover = true">{{ item.realname }}</span>
                   </div>
-                  <div v-photo="item"
-                       v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
-                       :key="item.img || item.userId"
-                       class="div-photo"></div>
+                  <div
+                    v-photo="item"
+                    v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
+                    :key="item.img || item.userId"
+                    class="div-photo"/>
                 </el-tooltip>
               </span>
             </template>
-            <i v-else
-               class="wukong wukong-user"></i>
+            <i
+              v-else
+              class="wukong wukong-user"/>
           </div>
         </el-popover>
       </flexbox>
@@ -78,35 +88,6 @@ import { workWorkOwnerListAPI } from '@/api/projectManagement/project'
 export default {
   components: {
     XhUser
-  },
-  data() {
-    return {
-      // 子任务选择时间
-      subtasksDate: '',
-      // 子任务数据
-      xhUserData: [],
-      // 子任务人员
-      subtaskChange: false,
-      num: 0,
-      subtasksTextarea: '',
-      isNum: 0,
-      showUserPopover: false
-    }
-  },
-  created() {
-    if (this.subTaskCom == 'edit') {
-      this.subtasksTextarea = this.text ? this.text : ''
-      this.subtasksDate = this.time
-      if (JSON.stringify(this.subData) !== '{}') {
-        if (this.subData.mainUser) {
-          this.subtaskChange = true
-          this.xhUserData = [this.subData.mainUser]
-        }
-      } else {
-        this.xhUserData = []
-        this.subtaskChange = false
-      }
-    }
   },
   props: {
     taskData: {
@@ -129,6 +110,20 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      // 子任务选择时间
+      subtasksDate: '',
+      // 子任务数据
+      xhUserData: [],
+      // 子任务人员
+      subtaskChange: false,
+      num: 0,
+      subtasksTextarea: '',
+      isNum: 0,
+      showUserPopover: false
+    }
+  },
   computed: {
     ownerListRequest() {
       return workWorkOwnerListAPI
@@ -138,6 +133,21 @@ export default {
     }
   },
   watch: {},
+  created() {
+    if (this.subTaskCom == 'edit') {
+      this.subtasksTextarea = this.text ? this.text : ''
+      this.subtasksDate = this.time
+      if (JSON.stringify(this.subData) !== '{}') {
+        if (this.subData.mainUser) {
+          this.subtaskChange = true
+          this.xhUserData = [this.subData.mainUser]
+        }
+      } else {
+        this.xhUserData = []
+        this.subtaskChange = false
+      }
+    }
+  },
   methods: {
     subtasksSubmit(event) {
       this.subtasksTextarea = this.subtasksTextarea.split(/[\n]/).join('')
@@ -166,7 +176,7 @@ export default {
               this.subtaskChange = false
               this.num = 0
             })
-            .catch(err => {
+            .catch(() => {
               this.$emit('on-handle', { type: 'add', result: 'error' })
               this.$message.error('子任务创建失败')
               this.num = 0
@@ -186,10 +196,10 @@ export default {
               name: this.subtasksTextarea
             })
               .then(res => {
-                let dataList = this.taskData.childTask
-                for (let i in dataList) {
+                const dataList = this.taskData.childTask
+                for (const i in dataList) {
                   if (dataList[i].taskId == this.taskId) {
-                    let list = dataList[i]
+                    const list = dataList[i]
                     list.name = this.subtasksTextarea
                     list.stopTime = this.subtasksDate
                     list.mainUser =
@@ -201,7 +211,7 @@ export default {
                 this.num = 0
                 this.$message.success('子任务编辑成功')
               })
-              .catch(err => {
+              .catch(() => {
                 this.$emit('on-handle', { type: 'edit', result: 'error' })
                 this.$message.error('子任务编辑失败')
                 this.num = 0

@@ -20,9 +20,9 @@ const service = axios.create({
 // request拦截器
 service.interceptors.request.use(
   config => {
-    let flag = config.headers['Content-Type'] && config.headers['Content-Type'].indexOf('application/json') !== -1
+    const flag = config.headers['Content-Type'] && config.headers['Content-Type'].indexOf('application/json') !== -1
     if (!flag) {
-      let mult = config.headers['Content-Type'] && config.headers['Content-Type'].indexOf('multipart/form-data') !== -1
+      const mult = config.headers['Content-Type'] && config.headers['Content-Type'].indexOf('multipart/form-data') !== -1
       if (mult) {
         config.data = config.data
       } else {

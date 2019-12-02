@@ -1,101 +1,119 @@
 <template>
-  <slide-view class="d-view"
-              :listenerIDs="['manager-main-container']"
-              :noListenerIDs="['examine-table']"
-              @side-close="hideView"
-              :appendToBody="true"
-              :body-style="{padding: '10px 30px', height: '100%'}">
-    <flexbox orient="vertical"
-             style="height: 100%;">
+  <slide-view
+    :listener-ids="['manager-main-container']"
+    :no-listener-ids="['examine-table']"
+    :append-to-body="true"
+    :body-style="{padding: '10px 30px', height: '100%'}"
+    class="d-view"
+    @side-close="hideView">
+    <flexbox
+      orient="vertical"
+      style="height: 100%;">
       <div class="header">
         <flexbox class="detail-header">
-          <div class="header-name">{{showData.title}}<i v-if="showData.isSys != 1"
-               @click="deleteClick"
-               class="el-icon-delete delete"></i></div>
-          <img @click="hideView"
-               class="header-close"
-               src="@/assets/img/task_close.png" />
+          <div class="header-name">{{ showData.title }}<i
+            v-if="showData.isSys != 1"
+            class="el-icon-delete delete"
+            @click="deleteClick"/></div>
+          <img
+            class="header-close"
+            src="@/assets/img/task_close.png"
+            @click="hideView" >
         </flexbox>
         <div class="detail-header-des">
-          <div class="status">状态：{{showData.status == 0 ? '停用' : '启用'}}</div>
+          <div class="status">状态：{{ showData.status == 0 ? '停用' : '启用' }}</div>
           <div class="status-handle">
             启用
-            <el-switch v-model="examineStatus"
-                       @change="examineStatusChange">
-            </el-switch>
+            <el-switch
+              v-model="examineStatus"
+              @change="examineStatusChange"/>
           </div>
         </div>
       </div>
       <div class="detail-body">
-        <create-sections title="基本信息"
-                         class="create-sections">
+        <create-sections
+          title="基本信息"
+          class="create-sections">
           <div class="create-sections-content">
             <div class="dialog-content">
               <flexbox class="content-items">
                 <div class="content-items-name">审批名称</div>
-                <div class="content-items-value">{{showData.title}}</div>
+                <div class="content-items-value">{{ showData.title }}</div>
               </flexbox>
               <flexbox class="content-items">
                 <div class="content-items-name">适用范围</div>
-                <div class="content-items-value">{{showData|formatedScopeInfo}}</div>
+                <div class="content-items-value">{{ showData|formatedScopeInfo }}</div>
               </flexbox>
               <flexbox class="content-items">
                 <div class="content-items-name">审批说明</div>
-                <div class="content-items-value">{{showData.remarks}}</div>
+                <div class="content-items-value">{{ showData.remarks }}</div>
               </flexbox>
             </div>
           </div>
         </create-sections>
-        <create-sections title="表单"
-                         class="create-sections">
-          <div slot="header"
-               class="preview-section">
-            <el-button type="text"
-                       @click="handlePreview">预览</el-button>
+        <create-sections
+          title="表单"
+          class="create-sections">
+          <div
+            slot="header"
+            class="preview-section">
+            <el-button
+              type="text"
+              @click="handlePreview">预览</el-button>
           </div>
         </create-sections>
-        <create-sections title="流程"
-                         class="create-sections">
-          <div v-if="showData.examineType == 1"
-               class="create-sections-content">
-            <flexbox v-for="(item, index) in showData.stepList"
-                     :key="index"
-                     align="stretch"
-                     class="examine-flow">
+        <create-sections
+          title="流程"
+          class="create-sections">
+          <div
+            v-if="showData.examineType == 1"
+            class="create-sections-content">
+            <flexbox
+              v-for="(item, index) in showData.stepList"
+              :key="index"
+              align="stretch"
+              class="examine-flow">
               <div class="examine-flow-header">
-                <div class="mark-circle"></div>
-                <div v-if="index != 0"
-                     class="mark-top-line"></div>
-                <div v-if="index < showData.stepList.length - 1"
-                     class="mark-bottom-line"></div>
+                <div class="mark-circle"/>
+                <div
+                  v-if="index != 0"
+                  class="mark-top-line"/>
+                <div
+                  v-if="index < showData.stepList.length - 1"
+                  class="mark-bottom-line"/>
               </div>
               <div class="examine-flow-body">
-                <div class="body-header"><span class="body-header-name">{{index + 1|toRowName}}</span><span class="body-header-des">（{{item|toRowNameDes}}）</span></div>
-                <flexbox class="examine-users"
-                         v-if="item.userList.length > 0">
-                  <div v-for="(userItem, userIndex) in item.userList"
-                       :key="userIndex"
-                       class="examine-users-item">
-                    <div v-photo="userItem"
-                         v-lazy:background-image="$options.filters.filterUserLazyImg(userItem.img)"
-                         class="div-photo"></div>
-                    <div class="name">{{userItem.realname}}</div>
+                <div class="body-header"><span class="body-header-name">{{ index + 1|toRowName }}</span><span class="body-header-des">（{{ item|toRowNameDes }}）</span></div>
+                <flexbox
+                  v-if="item.userList.length > 0"
+                  class="examine-users">
+                  <div
+                    v-for="(userItem, userIndex) in item.userList"
+                    :key="userIndex"
+                    class="examine-users-item">
+                    <div
+                      v-photo="userItem"
+                      v-lazy:background-image="$options.filters.filterUserLazyImg(userItem.img)"
+                      class="div-photo"/>
+                    <div class="name">{{ userItem.realname }}</div>
                   </div>
                 </flexbox>
               </div>
             </flexbox>
           </div>
-          <div v-else
-               class="create-sections-content">授权审批人</div>
+          <div
+            v-else
+            class="create-sections-content">授权审批人</div>
         </create-sections>
       </div>
     </flexbox>
     <!-- 表单预览 -->
-    <preview-field-view v-if="showTablePreview"
-                        :types="tablePreviewData.types"
-                        label="10"
-                        :typesId="tablePreviewData.typesId"
-                        @hiden-view="showTablePreview=false"></preview-field-view>
+    <preview-field-view
+      v-if="showTablePreview"
+      :types="tablePreviewData.types"
+      :types-id="tablePreviewData.typesId"
+      label="10"
+      @hiden-view="showTablePreview=false"/>
   </slide-view>
 </template>
 
@@ -111,15 +129,11 @@ import {
 
 export default {
   /** 办公审批类型详情 */
-  name: 'examine-category-detail',
+  name: 'ExamineCategoryDetail',
   components: {
     SlideView,
     CreateSections,
     PreviewFieldView
-  },
-  props: {
-    // 详情信息
-    data: Object
   },
   filters: {
     formatedScopeInfo(data) {
@@ -137,7 +151,7 @@ export default {
         name =
           name + element.realname + (index === users.length - 1 ? '' : '、')
       }
-      return name ? name : '全公司'
+      return name || '全公司'
     },
     // 标题
     toRowName: function(value) {
@@ -157,10 +171,9 @@ export default {
       return ''
     }
   },
-  watch: {
-    data: function(value) {
-      this.getShowData()
-    }
+  props: {
+    // 详情信息
+    data: Object
   },
   data() {
     return {
@@ -172,6 +185,11 @@ export default {
     }
   },
   computed: {},
+  watch: {
+    data: function(value) {
+      this.getShowData()
+    }
+  },
   mounted() {
     this.getShowData()
   },
@@ -212,7 +230,7 @@ export default {
     },
     getShowData() {
       this.showData = Object.assign({}, this.data)
-      this.examineStatus = this.showData.status == 0 ? false : true
+      this.examineStatus = this.showData.status != 0
     },
     // 切换审批状态
     examineStatusChange(status) {
@@ -255,7 +273,7 @@ export default {
       this.examineStatus = !this.examineStatus
       this.showData.status = this.examineStatus ? 1 : 0
     },
-    //** 点击关闭按钮隐藏视图 */
+    //* * 点击关闭按钮隐藏视图 */
     hideView() {
       this.$emit('hide-view')
     }

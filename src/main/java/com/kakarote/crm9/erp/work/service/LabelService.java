@@ -25,7 +25,7 @@ public class LabelService{
         boolean bol;
         if (taskLable.getLabelId() == null) {
             taskLable.setCreateTime(new Date());
-            taskLable.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            taskLable.setCreateUserId(BaseUtil.getUser().getUserId());
             bol = taskLable.save();
         } else {
 
@@ -56,10 +56,10 @@ public class LabelService{
      * 标签任务列表
      */
     public R getTaskList(Integer labelId){
-        List<Record> taskList = Db.find(Db.getSqlPara("work.label.queryTaskList", Kv.by("labelId",labelId).set("userId",BaseUtil.getUserId().intValue())));
+        List<Record> taskList = Db.find(Db.getSqlPara("work.label.queryTaskList", Kv.by("labelId",labelId).set("userId",BaseUtil.getUserId())));
         workbenchService.taskListTransfer(taskList);
         Map<Integer,List<Record>> map = taskList.stream().collect(Collectors.groupingBy(record -> record.getInt("work_id")));
-        List<Record> workList = Db.find(Db.getSqlPara("work.label.queryWorkList",Kv.by("labelId",labelId).set("userId",BaseUtil.getUserId().intValue())));
+        List<Record> workList = Db.find(Db.getSqlPara("work.label.queryWorkList",Kv.by("labelId",labelId).set("userId",BaseUtil.getUserId())));
         workList.forEach(work -> work.set("list",map.get(work.getInt("work_id"))));
         return R.ok().put("data",workList);
     }

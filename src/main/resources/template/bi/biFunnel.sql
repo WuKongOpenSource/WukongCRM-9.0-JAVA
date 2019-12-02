@@ -1,6 +1,6 @@
 #namespace("bi.funnel")
     #sql ("sellFunnel")
-      SELECT COUNT(1) as count,
+      SELECT COUNT(ccb.status_id) as count,
       ccbs.`name`,
       ccbs.order_num,IFNULL(SUM(ccb.money),0) as money,
       ccb.type_id
@@ -8,6 +8,7 @@
       LEFT JOIN 72crm_crm_business_status as ccbs ON ccbs.status_id = ccb.status_id
       where
         ccbs.type_id = #para(typeId)
+        and is_end = 0
         and  ccb.owner_user_id in (#for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
@@ -46,7 +47,7 @@
             and  TO_DAYS(ccb.create_time) >= TO_DAYS(#para(startTime))
             and  TO_DAYS(ccb.create_time) <= TO_DAYS(#para(endTime))
           #end
-          GROUP BY ccbs.`name`,ccbs.order_num,ccb.type_id
+          GROUP BY ccbs.status_id
     #end
     #sql ("sellFunnelSum")
       SELECT IFNULL(SUM(ccb.money),0) as money

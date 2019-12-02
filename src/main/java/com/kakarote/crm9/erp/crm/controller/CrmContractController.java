@@ -100,29 +100,6 @@ public class CrmContractController extends Controller {
     public void queryList(@Para("")CrmContract crmContract){
         renderJson(R.ok().put("data",crmContractService.queryList(crmContract)));
     }
-    /**
-     * 根据条件查询合同
-     * @author zxy
-     */
-    @NotNullValidate(value = "id",message = "id不能为空")
-    @NotNullValidate(value = "type",message = "类型不能为空")
-    public void queryListByType(@Para("type") String type,@Para("id")Integer id ){
-        renderJson(R.ok().put("data",crmContractService.queryListByType(type,id)));
-    }
-    /**
-     * 根据合同id查询回款
-     * @author zxy
-     */
-    public void queryReceivablesById(@Para("id") Integer id){
-        renderJson(R.ok().put("data",crmContractService.queryReceivablesById(id)));
-    }
-    /**
-     * 根据合同id查询回款计划
-     * @author zxy
-     */
-    public void queryReceivablesPlanById(@Para("id") Integer id){
-        renderJson(R.ok().put("data",crmContractService.queryReceivablesPlanById(id)));
-    }
 
     /**
      * @author wyq
@@ -138,6 +115,7 @@ public class CrmContractController extends Controller {
      * @author wyq
      * 编辑团队成员
      */
+    @Permissions("crm:contract:teamsave")
     public void updateMembers(@Para("")CrmContract crmContract){
         renderJson(crmContractService.addMember(crmContract));
     }
@@ -155,6 +133,7 @@ public class CrmContractController extends Controller {
      * @author wyq
      * 删除团队成员
      */
+    @Permissions("crm:contract:teamsave")
     public void deleteMembers(@Para("")CrmContract crmContract){
         renderJson(crmContractService.deleteMembers(crmContract));
     }
@@ -230,5 +209,13 @@ public class CrmContractController extends Controller {
     @NotNullValidate(value = "status",message = "status不能为空")
     public void setContractConfig(@Para("status") Integer status,@Para("contractDay") Integer contractDay){
         renderJson(crmContractService.setContractConfig(status,contractDay));
+    }
+
+    /**
+     * 合同作废
+     */
+    @Permissions("crm:contract:discard")
+    public void contractDiscard(@Para("contractId") Integer contractId){
+        renderJson(crmContractService.contractDiscard(contractId));
     }
 }

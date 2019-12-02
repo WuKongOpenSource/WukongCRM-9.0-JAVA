@@ -3,24 +3,26 @@
     <div class="recycle-header">
       回收站
     </div>
-    <div class="content"
-         v-loading="loading">
-      <task-cell v-for="(item, index) in list"
-                 :key="index"
-                 class="item-list"
-                 :data="item"
-                 :dataIndex="index"
-                 @on-handle="taskCellHandle"></task-cell>
+    <div
+      v-loading="loading"
+      class="content">
+      <task-cell
+        v-for="(item, index) in list"
+        :key="index"
+        :data="item"
+        :data-index="index"
+        class="item-list"
+        @on-handle="taskCellHandle"/>
     </div>
 
     <!-- 详情 -->
-    <particulars v-if="taskDetailShow"
-                 ref="particulars"
-                 :id="taskID"
-                 :detailIndex="detailIndex"
-                 @on-handle="detailHandle"
-                 @close="closeBtn">
-    </particulars>
+    <particulars
+      v-if="taskDetailShow"
+      ref="particulars"
+      :id="taskID"
+      :detail-index="detailIndex"
+      @on-handle="detailHandle"
+      @close="closeBtn"/>
   </div>
 </template>
 
@@ -64,7 +66,7 @@ export default {
       workTrashIndexAPI()
         .then(res => {
           this.list = res.data
-          for (let i of this.list) {
+          for (const i of this.list) {
             i.isDeleted = true
             if (i.status == 5) {
               i.checked = true
@@ -72,7 +74,7 @@ export default {
           }
           this.loading = false
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = true
         })
     },
@@ -82,7 +84,7 @@ export default {
      */
     taskCellHandle(data) {
       if (data.type == 'view') {
-        let dataCell = data.data
+        const dataCell = data.data
         this.taskID = dataCell.item.taskId
         this.detailIndex = dataCell.index
         this.taskDetailShow = true
@@ -105,7 +107,7 @@ export default {
         ) {
           this.list.splice(data.index, 1)
         } else if (data.type == 'change-stop-time') {
-          let stopTime = new Date(data.value).getTime() / 1000 + 86399
+          const stopTime = new Date(data.value).getTime() / 1000 + 86399
           if (stopTime > new Date(new Date()).getTime() / 1000) {
             this.list[data.index].isEnd = false
           } else {
@@ -117,7 +119,7 @@ export default {
         } else if (data.type == 'change-name') {
           this.list[data.index].name = data.value
         } else if (data.type == 'change-comments') {
-          let commentCount = this.list[data.index].commentCount
+          const commentCount = this.list[data.index].commentCount
           if (data.value == 'add') {
             this.list[data.index].commentCount = commentCount + 1
           } else {
@@ -151,7 +153,7 @@ export default {
         !this.$refs.particulars.$el.contains(e.target)
       ) {
         let hidden = true
-        let items = document.getElementsByClassName('item-list')
+        const items = document.getElementsByClassName('item-list')
         for (let index = 0; index < items.length; index++) {
           const element = items[index]
           if (element.contains(e.target)) {

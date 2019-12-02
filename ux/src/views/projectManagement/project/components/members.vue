@@ -1,38 +1,46 @@
 <template>
   <transition name="slide-fade">
-    <el-card class="add-members-project-screening"
-             :style="{ 'z-index': zIndex }"
-             v-show="visible"
-             v-loading="loading">
+    <el-card
+      v-loading="loading"
+      v-show="visible"
+      :style="{ 'z-index': zIndex }"
+      class="add-members-project-screening">
       <div class="header">
-        <span class="label">成员<span class="color-a">（{{userList.length}}）</span></span>
-        <i class="rt el-icon-close"
-           @click="close"></i>
+        <span class="label">成员<span class="color-a">（{{ userList.length }}）</span></span>
+        <i
+          class="rt el-icon-close"
+          @click="close"/>
       </div>
       <div class="content">
-        <members-dep v-if="canUpdateWork"
-                     :userCheckedData="userList"
-                     :closeDep="true"
-                     @popoverSubmit="userSelectChange">
-          <div slot="membersDep"
-               class="img-span">
-            <img src="@/assets/img/project/project_add.png"
-                 alt="">
+        <members-dep
+          v-if="canUpdateWork"
+          :user-checked-data="userList"
+          :close-dep="true"
+          @popoverSubmit="userSelectChange">
+          <div
+            slot="membersDep"
+            class="img-span">
+            <img
+              src="@/assets/img/project/project_add.png"
+              alt="">
             <span class="add-title">添加成员</span>
           </div>
         </members-dep>
-        <div v-for="(item, index) in userList"
-             :key="index"
-             class="item-list">
-          <div v-photo="item"
-               v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
-               :key="item.img"
-               class="div-photo"></div>
-          <span>{{item.realname}}
+        <div
+          v-for="(item, index) in userList"
+          :key="index"
+          class="item-list">
+          <div
+            v-photo="item"
+            v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
+            :key="item.img"
+            class="div-photo"/>
+          <span>{{ item.realname }}
           </span>
-          <i v-if="canUpdateWork"
-             class="el-icon-close"
-             @click="deleteUser(item, index)"></i>
+          <i
+            v-if="canUpdateWork"
+            class="el-icon-close"
+            @click="deleteUser(item, index)"/>
         </div>
       </div>
     </el-card>
@@ -49,40 +57,9 @@ import MembersDep from '@/components/selectEmployee/membersDep'
 import { getMaxIndex } from '@/utils/index'
 
 export default {
-  name: 'members', // 项目成员
+  name: 'Members', // 项目成员
   components: {
     MembersDep
-  },
-
-  computed: {
-    /**
-     * 可以编辑项目
-     */
-    canUpdateWork() {
-      return this.isOpen != 1 && this.permission.work && this.permission.work.update 
-    }
-  },
-
-  data() {
-    return {
-      zIndex: getMaxIndex(),
-      loading: false,
-      userList: []
-    }
-  },
-
-  watch: {
-    visible(val) {
-      if (val) {
-        this.userList = this.list || []
-      } else {
-        this.$emit('close')
-      }
-    },
-
-    userList() {
-      this.$bus.$emit('members-update', this.userList)
-    }
   },
 
   props: {
@@ -99,6 +76,37 @@ export default {
         return {
         }
       }
+    }
+  },
+
+  data() {
+    return {
+      zIndex: getMaxIndex(),
+      loading: false,
+      userList: []
+    }
+  },
+
+  computed: {
+    /**
+     * 可以编辑项目
+     */
+    canUpdateWork() {
+      return this.isOpen != 1 && this.permission.work && this.permission.work.update
+    }
+  },
+
+  watch: {
+    visible(val) {
+      if (val) {
+        this.userList = this.list || []
+      } else {
+        this.$emit('close')
+      }
+    },
+
+    userList() {
+      this.$bus.$emit('members-update', this.userList)
     }
   },
 
@@ -126,7 +134,7 @@ export default {
           this.$emit('handle', 'member', res.data)
           this.$message.success('添加成功')
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
         })
     },

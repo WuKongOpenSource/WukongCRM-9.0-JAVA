@@ -1,42 +1,53 @@
 <template>
-  <el-dialog v-loading="loading"
-             :title="title"
-             width="400px"
-             :append-to-body="true"
-             @close="hiddenView"
-             :visible.sync="showDialog">
-    <div v-if="status == 1 && detail.examineType == 2"
-         class="handle-type">
+  <el-dialog
+    v-loading="loading"
+    :title="title"
+    :append-to-body="true"
+    :visible.sync="showDialog"
+    width="400px"
+    @close="hiddenView">
+    <div
+      v-if="status == 1 && detail.examineType == 2"
+      class="handle-type">
       <flexbox class="handle-item">
-        <el-radio v-model="handleType"
-                  :label="1"><span></span></el-radio>
-        <div @click.native="handleType=1"
-             style="font-size: 12px;">审核结束</div>
+        <el-radio
+          v-model="handleType"
+          :label="1"><span/></el-radio>
+        <div
+          style="font-size: 12px;"
+          @click.native="handleType=1">审核结束</div>
       </flexbox>
-      <flexbox class="handle-item"
-               id="selectUser">
-        <el-radio v-model="handleType"
-                  :label="2"><span></span></el-radio>
-        <xh-user-cell class="select-user"
-                      placeholder="选择下一审批人"
-                      @focus="selectUserFocus"
-                      @value-change="selectExamineUser"></xh-user-cell>
+      <flexbox
+        id="selectUser"
+        class="handle-item">
+        <el-radio
+          v-model="handleType"
+          :label="2"><span/></el-radio>
+        <xh-user-cell
+          class="select-user"
+          placeholder="选择下一审批人"
+          @focus="selectUserFocus"
+          @value-change="selectExamineUser"/>
       </flexbox>
     </div>
-    <div v-if="status == 1 && detail.examineType == 2"
-         class="title">意见</div>
-    <el-input v-model="content"
-              type="textarea"
-              resize="none"
-              :rows="5"
-              :maxlength="200"
-              show-word-limit
-              :placeholder="placeholder"></el-input>
-    <div slot="footer"
-         class="dialog-footer">
+    <div
+      v-if="status == 1 && detail.examineType == 2"
+      class="title">意见</div>
+    <el-input
+      v-model="content"
+      :rows="5"
+      :maxlength="200"
+      :placeholder="placeholder"
+      type="textarea"
+      resize="none"
+      show-word-limit/>
+    <div
+      slot="footer"
+      class="dialog-footer">
       <el-button @click="handleClick('cancel')">取 消</el-button>
-      <el-button type="primary"
-                 @click="handleClick('confirm')">确 定</el-button>
+      <el-button
+        type="primary"
+        @click="handleClick('confirm')">确 定</el-button>
     </div>
   </el-dialog>
 </template>
@@ -47,9 +58,43 @@ import { oaExamineFlowAuditExamine } from '@/api/oamanagement/examine'
 import { XhUserCell } from '@/components/CreateCom'
 
 export default {
-  name: 'examine-handle', // 合同审核操作
+  name: 'ExamineHandle', // 合同审核操作
   components: {
     XhUserCell
+  },
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    }, // 审核状态 1 审核通过 2 审核拒绝 4 已撤回
+    /** 操作类型  1通过0拒绝2撤回*/ status: {
+      type: [String, Number],
+      default: 1
+    },
+    // 详情信息id
+    id: [String, Number],
+    recordId: [String, Number],
+    // 审核信息 config 1 固定 0 自选
+    detail: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    // crm_contract crm_receivables oa_examine
+    examineType: {
+      type: String,
+      default: ''
+    }
+  },
+  data() {
+    return {
+      loading: false,
+      showDialog: false,
+      handleType: 1,
+      selectUsers: [],
+      content: '' // 输入内容
+    }
   },
   computed: {
     title() {
@@ -83,40 +128,6 @@ export default {
       immediate: true
     }
   },
-  data() {
-    return {
-      loading: false,
-      showDialog: false,
-      handleType: 1,
-      selectUsers: [],
-      content: '' // 输入内容
-    }
-  },
-  props: {
-    show: {
-      type: Boolean,
-      default: false
-    }, // 审核状态 1 审核通过 2 审核拒绝 4 已撤回
-    /** 操作类型  1通过0拒绝2撤回*/ status: {
-      type: [String, Number],
-      default: 1
-    },
-    // 详情信息id
-    id: [String, Number],
-    recordId: [String, Number],
-    // 审核信息 config 1 固定 0 自选
-    detail: {
-      type: Object,
-      default: () => {
-        return {}
-      }
-    },
-    // crm_contract crm_receivables oa_examine
-    examineType: {
-      type: String,
-      default: ''
-    }
-  },
   mounted() {},
   methods: {
     submitInfo() {
@@ -144,6 +155,8 @@ export default {
           this.loading = false
           this.$message.success('操作成功')
           this.$emit('save')
+          this.$bus.emit('examine-handle-bus')
+          this.$store.dispatch('GetMessageNum')
           this.hiddenView()
         })
         .catch(() => {
@@ -167,8 +180,7 @@ export default {
         remarks: this.content
       }
       if (this.status == 1 && this.detail.examineType == 2) {
-        if (this.handleType == 1) {
-        } else {
+        if (this.handleType != 1) {
           params['nextUserId'] = this.selectUsers[0].userId
         }
       }
@@ -178,6 +190,8 @@ export default {
           this.$message.success('操作成功')
           this.$emit('save', { type: this.status })
           this.hiddenView()
+          this.$bus.emit('examine-handle-bus')
+          this.$store.dispatch('GetMessageNum')
         })
         .catch(() => {
           this.loading = false

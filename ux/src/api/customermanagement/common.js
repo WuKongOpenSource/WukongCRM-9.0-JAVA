@@ -14,7 +14,7 @@ export function filedGetField(data) {
 
 /**
  * 详情页基本信息
- * @param {*} data 
+ * @param {*} data
  */
 export function filedGetInformation(data) {
   return request({
@@ -27,7 +27,7 @@ export function filedGetInformation(data) {
 
 /**
  * 表头
- * @param {*} data 
+ * @param {*} data
  */
 export function filedGetTableField(data) {
   return request({
@@ -199,7 +199,7 @@ export function crmIndexFieldRecord(data) {
 
 /**
  * 记录类型 数据 与系统设置系统(repeat)
- * @param {*} data 
+ * @param {*} data
  */
 export function crmSettingRecordListAPI(data) {
   return request({

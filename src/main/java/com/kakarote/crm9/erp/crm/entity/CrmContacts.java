@@ -10,7 +10,7 @@ public class CrmContacts extends BaseCrmContacts<CrmContacts> {
 	public static final CrmContacts dao = new CrmContacts().dao();
 
 	private String contactsIds;
-	private Integer newOwnerUserId;
+	private Long newOwnerUserId;
 	private String customerName;
 
 	public String getContactsIds() {
@@ -21,11 +21,11 @@ public class CrmContacts extends BaseCrmContacts<CrmContacts> {
 		this.contactsIds = contactsIds;
 	}
 
-	public Integer getNewOwnerUserId() {
+	public Long getNewOwnerUserId() {
 		return newOwnerUserId;
 	}
 
-	public void setNewOwnerUserId(Integer newOwnerUserId) {
+	public void setNewOwnerUserId(Long newOwnerUserId) {
 		this.newOwnerUserId = newOwnerUserId;
 	}
 

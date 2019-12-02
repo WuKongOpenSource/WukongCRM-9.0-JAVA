@@ -1,30 +1,32 @@
 <template>
-  <div v-loading="loading"
-       class="main-container">
-    <filtrate-handle-view class="filtrate-bar"
-                          moduleType="business"
-                          :showBusinessSelect="true"
-                          @load="loading=true"
-                          @change="getDataList">
-    </filtrate-handle-view>
+  <div
+    v-loading="loading"
+    class="main-container">
+    <filtrate-handle-view
+      :show-business-select="true"
+      class="filtrate-bar"
+      module-type="business"
+      @load="loading=true"
+      @change="getDataList"/>
     <div class="content">
       <div class="axis-content">
-        <div id="axismain"></div>
+        <div id="axismain"/>
       </div>
       <div class="table-content">
-        <el-table :data="list"
-                  height="400"
-                  stripe
-                  border
-                  highlight-current-row>
-          <el-table-column v-for="(item, index) in fieldList"
-                           :key="index"
-                           align="center"
-                           header-align="center"
-                           show-overflow-tooltip
-                           :prop="item.field"
-                           :label="item.name">
-          </el-table-column>
+        <el-table
+          :data="list"
+          height="400"
+          stripe
+          border
+          highlight-current-row>
+          <el-table-column
+            v-for="(item, index) in fieldList"
+            :key="index"
+            :prop="item.field"
+            :label="item.name"
+            align="center"
+            header-align="center"
+            show-overflow-tooltip/>
         </el-table>
       </div>
     </div>
@@ -39,8 +41,9 @@ import { biBusinessFunnel } from '@/api/businessIntelligence/bi'
 
 export default {
   /** 销售漏斗 */
-  name: 'funnel-statistics',
+  name: 'FunnelStatistics',
   components: {},
+  mixins: [base],
   data() {
     return {
       loading: false,
@@ -56,7 +59,6 @@ export default {
       funnelOption: null
     }
   },
-  mixins: [base],
   computed: {},
   mounted() {
     this.initAxis()

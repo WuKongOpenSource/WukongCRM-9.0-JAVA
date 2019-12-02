@@ -3,6 +3,7 @@ package com.kakarote.crm9.erp.work.service;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
@@ -11,6 +12,7 @@ import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.erp.admin.common.AdminMessageEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.oa.common.OaEnum;
@@ -41,7 +43,7 @@ public class TaskService{
             }
             Integer orderNum = Db.queryInt("select max(order_num) from `72crm_work_task_class` where work_id = ?", taskClass.getWorkId());
             taskClass.setOrderNum(orderNum+1);
-            taskClass.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            taskClass.setCreateUserId(BaseUtil.getUser().getUserId());
             taskClass.setCreateTime(new Date());
             bol = taskClass.save();
         }else{
@@ -73,29 +75,28 @@ public class TaskService{
         }
         if(task.getTaskId() == null){
             if(task.getMainUserId() == null){
-                task.setMainUserId(user.getUserId().intValue());
+                task.setMainUserId(user.getUserId());
             }
             if(task.getOwnerUserId() != null){
-                Set<Integer> ownerUserId = TagUtil.toSet(task.getOwnerUserId());
-                ownerUserId.add(user.getUserId().intValue());
-                task.setOwnerUserId(TagUtil.fromSet(ownerUserId));
+                Set<Long> ownerUserId = TagUtil.toLongSet(task.getOwnerUserId());
+                ownerUserId.add(user.getUserId());
+                task.setOwnerUserId(TagUtil.fromLongSet(ownerUserId));
             }else{
                 task.setOwnerUserId("," + user.getUserId() + ",");
             }
             task.setCreateTime(new Date());
             task.setUpdateTime(new Date());
-            task.setCreateUserId(user.getUserId().intValue());
+            task.setCreateUserId(user.getUserId());
             task.setBatchId(IdUtil.simpleUUID());
             bol = task.save();
             WorkTaskLog workTaskLog = new WorkTaskLog();
-            workTaskLog.setUserId(user.getUserId().intValue());
+            workTaskLog.setUserId(user.getUserId());
             workTaskLog.setTaskId(task.getTaskId());
             workTaskLog.setContent("添加了新任务 " + task.getName());
             saveWorkTaskLog(workTaskLog);
-
         }else{
             task.setUpdateTime(new Date());
-            bol = getWorkTaskLog(task, user.getUserId().intValue());
+            bol = getWorkTaskLog(task, user.getUserId());
         }
         if(taskRelation.getBusinessIds() != null || taskRelation.getContactsIds() != null || taskRelation.getContractIds() != null || taskRelation.getCustomerIds() != null){
             Db.deleteById("72crm_task_relation", "task_id", task.getTaskId());
@@ -104,7 +105,7 @@ public class TaskService{
             taskRelation.save();
         }
         task.getMainUserId();
-        oaActionRecordService.addRecord(task.getTaskId(), OaEnum.TASK_TYPE_KEY.getTypes(), task.getUpdateTime() == null ? 1 : 2, oaActionRecordService.getJoinIds(user.getUserId().intValue(), getJoinUserIds(task)), oaActionRecordService.getJoinIds(user.getDeptId(), ""));
+        oaActionRecordService.addRecord(task.getTaskId(), OaEnum.TASK_TYPE_KEY.getTypes(), task.getUpdateTime() == null ? 1 : 2, oaActionRecordService.getJoinIds(user.getUserId(), getJoinUserIds(task)), oaActionRecordService.getJoinIds(Long.valueOf(user.getDeptId()), ""));
         return bol ? R.ok().put("data", Kv.by("task_id", task.getTaskId())) : R.error();
     }
 
@@ -229,7 +230,7 @@ public class TaskService{
     /**
      * 查询任务列表
      */
-    public R getTaskList(Integer type, Integer status, Integer priority, Integer date, List<Integer> userIds, BasePageRequest<Task> basePageRequest, String name){
+    public R getTaskList(Integer type, Integer status, Integer priority, Integer date, List<Long> userIds, BasePageRequest<Task> basePageRequest, String name){
         Page<Record> page = new Page<>();
         if(userIds.size() == 0){
             page.setList(new ArrayList<>());
@@ -255,6 +256,9 @@ public class TaskService{
         ArrayList<Record> labelList;
         ArrayList<Record> ownerUserList;
         for(Record task : tasks){
+            Integer mainUserId = task.getInt("main_user_id");
+            Record mainUser = Db.findFirst("select user_id,realname,img from 72crm_admin_user where user_id = ?", mainUserId);
+            task.set("mainUser",mainUser);
             labelList = new ArrayList<>();
             ownerUserList = new ArrayList<>();
             if(StrUtil.isNotBlank(task.getStr("label_id"))){
@@ -329,12 +333,13 @@ public class TaskService{
     }
 
     @Before(Tx.class)
-    private boolean getWorkTaskLog(Task task, Integer userId){
+    private boolean getWorkTaskLog(Task task, Long userId){
         WorkTaskLog workTaskLog = new WorkTaskLog();
         workTaskLog.setUserId(userId);
         workTaskLog.setTaskId(task.getTaskId());
 
         Task auldTask = Task.dao.findById(task.getTaskId());
+
         task.update();
         Set<Map.Entry<String,Object>> newEntries = task._getAttrsEntrySet();
         Set<Map.Entry<String,Object>> oldEntries = auldTask._getAttrsEntrySet();
@@ -478,7 +483,7 @@ public class TaskService{
      * @author zxy
      * 添加任务与业务关联
      */
-    public R svaeTaskRelation(TaskRelation taskRelation, Integer userId){
+    public R saveTaskRelation(TaskRelation taskRelation, Long userId){
         Db.delete("delete from `72crm_task_relation` where task_id = ?", taskRelation.getTaskId());
         taskRelation.setCreateTime(DateUtil.date());
         return taskRelation.save() ? R.ok() : R.error();
@@ -497,7 +502,6 @@ public class TaskService{
         }else {
             bol = Db.update("update 72crm_task set ishidden = 1,hidden_time = now() where task_id = ?", taskId) > 0;
         }
-        adminFileService.removeByBatchId(Db.queryStr("select batch_id from `72crm_task` where task_id = ?",taskId));
         return bol ? R.ok() : R.error();
     }
 

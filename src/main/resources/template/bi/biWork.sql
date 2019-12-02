@@ -1,6 +1,6 @@
 #namespace("bi.work")
   #sql ("queryLogByUser")
-    SELECT b.realname,b.username,b.img,b.user_id,(SELECT COUNT(1) FROM 72crm_task_comment WHERE type='1' and type_id=a.log_id) as sum,a.send_user_ids,a.read_user_ids
+    SELECT b.realname,b.username,b.img,b.user_id,(SELECT COUNT(1) FROM 72crm_task_comment WHERE type='2' and type_id=a.log_id) as sum,a.send_user_ids,a.read_user_ids
     FROM 72crm_oa_log as a LEFT JOIN 72crm_admin_user as b on a.create_user_id=b.user_id
     WHERE DATE_FORMAT(a.create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime) and a.create_user_id =#para(userId)
   #end

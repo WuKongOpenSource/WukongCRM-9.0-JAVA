@@ -2,12 +2,12 @@
   <div class="cell">
     <div class="div-flex">
       <div style="flex:1;">
-        <div class="cell-title">{{title}}</div>
-        <div class="cell-detail">{{detail}}</div>
+        <div class="cell-title">{{ title }}</div>
+        <div class="cell-detail">{{ detail }}</div>
       </div>
       <div style="flex-shrink:0;">
-        <slot name="value"></slot>
-        <div class="cell-time">{{time}}</div>
+        <slot name="value"/>
+        <div class="cell-time">{{ time }}</div>
       </div>
     </div>
   </div>
@@ -15,12 +15,8 @@
 
 <script type="text/javascript">
 export default {
-  name: 'details-cell', //标题  详情  时间 常用布局
+  name: 'DetailsCell', // 标题  详情  时间 常用布局
   components: {},
-  computed: {},
-  data() {
-    return {}
-  },
   props: {
     title: {
       type: String,
@@ -35,6 +31,10 @@ export default {
       default: ''
     }
   },
+  data() {
+    return {}
+  },
+  computed: {},
   mounted() {},
   methods: {}
 }

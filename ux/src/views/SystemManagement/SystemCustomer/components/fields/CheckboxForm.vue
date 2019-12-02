@@ -1,18 +1,21 @@
 <template>
   <div class="box-wrapper">
-    <div class="title"><span>{{attr.isNull ? '*' : ''}}</span>{{attr.name}}<span v-if="attr.inputTips">{{'（'+attr.inputTips+'）'}}</span></div>
+    <div class="title"><span>{{ attr.isNull ? '*' : '' }}</span>{{ attr.name }}<span v-if="attr.inputTips">{{ '（'+attr.inputTips+'）' }}</span></div>
     <div class="box">
-      <el-checkbox-group v-model="attr.defaultValue"
-                         :disabled="disabled">
-        <el-checkbox class="checkbox"
-                     v-for="(item, index) in attr.showSetting"
-                     :key="index"
-                     :label="item.value"></el-checkbox>
+      <el-checkbox-group
+        v-model="attr.defaultValue"
+        :disabled="disabled">
+        <el-checkbox
+          v-for="(item, index) in attr.showSetting"
+          :key="index"
+          :label="item.value"
+          class="checkbox"/>
       </el-checkbox-group>
     </div>
-    <span class="el-icon-delete control"
-          @click="handleDelete"
-          v-if="isShow"></span>
+    <span
+      v-if="isShow"
+      class="el-icon-delete control"
+      @click="handleDelete"/>
   </div>
 </template>
 
@@ -25,6 +28,9 @@ import mixins from './mixin'
 export default {
   name: 'CheckboxForm',
   mixins: [mixins],
+  data() {
+    return {}
+  },
   computed: {
     /** 只读 */
     disabled() {
@@ -36,9 +42,6 @@ export default {
     }
   },
   mounted() {
-  },
-  data() {
-    return {}
   }
 }
 </script>

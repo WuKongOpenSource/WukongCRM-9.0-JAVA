@@ -1,50 +1,57 @@
 <template>
-  <create-view :loading="loading"
-               :body-style="{ height: '100%'}">
-    <flexbox direction="column"
-             align="stretch"
-             class="crm-create-container">
+  <create-view
+    :loading="loading"
+    :body-style="{ height: '100%'}">
+    <flexbox
+      direction="column"
+      align="stretch"
+      class="crm-create-container">
       <flexbox class="crm-create-header">
-        <div style="flex:1;font-size:17px;color:#333;">{{title}}</div>
-        <img @click="hidenView"
-             class="close"
-             src="@/assets/img/task_close.png" />
+        <div style="flex:1;font-size:17px;color:#333;">{{ title }}</div>
+        <img
+          class="close"
+          src="@/assets/img/task_close.png"
+          @click="hidenView" >
       </flexbox>
       <div class="crm-create-flex">
         <!-- 基本信息 -->
         <create-sections title="基本信息">
-          <flexbox direction="column"
-                   align="stretch">
+          <flexbox
+            direction="column"
+            align="stretch">
             <div class="crm-create-body">
-              <el-form ref="crmForm"
-                       :model="crmForm"
-                       label-position="top"
-                       class="crm-create-box">
-                <el-form-item v-for="(item, index) in this.crmForm.crmFields"
-                              :key="item.key"
-                              :prop="'crmFields.' + index + '.value'"
-                              :class="{ 'crm-create-block-item': item.showblock, 'crm-create-item': !item.showblock }"
-                              :rules="crmRules[item.key]"
-                              :style="{'padding-left': getPaddingLeft(item, index), 'padding-right': getPaddingRight(item, index)}">
-                  <div slot="label"
-                       style="display: inline-block;">
+              <el-form
+                ref="crmForm"
+                :model="crmForm"
+                label-position="top"
+                class="crm-create-box">
+                <el-form-item
+                  v-for="(item, index) in crmForm.crmFields"
+                  :key="item.key"
+                  :prop="'crmFields.' + index + '.value'"
+                  :class="{ 'crm-create-block-item': item.showblock, 'crm-create-item': !item.showblock }"
+                  :rules="crmRules[item.key]"
+                  :style="{'padding-left': getPaddingLeft(item, index), 'padding-right': getPaddingRight(item, index)}">
+                  <div
+                    slot="label"
+                    style="display: inline-block;">
                     <div style="margin:5px 0;font-size:12px;word-wrap:break-word;word-break:break-all;">
-                      {{item.data.name}}
+                      {{ item.data.name }}
                       <span style="color:#999;">
-                        {{item.data.inputTips ? '（'+item.data.inputTips+'）':''}}
+                        {{ item.data.inputTips ? '（'+item.data.inputTips+'）':'' }}
                       </span>
                     </div>
                   </div>
                   <!-- 员工 和部门 为多选（radio=false）  relation 相关合同商机使用-->
-                  <component :is="item.data.formType | typeToComponentName"
-                             :value="item.value"
-                             :index="index"
-                             :item="item"
-                             :relation="item.relation"
-                             :radio="false"
-                             :disabled="item.disabled"
-                             @value-change="fieldValueChange">
-                  </component>
+                  <component
+                    :is="item.data.formType | typeToComponentName"
+                    :value="item.value"
+                    :index="index"
+                    :item="item"
+                    :relation="item.relation"
+                    :radio="false"
+                    :disabled="item.disabled"
+                    @value-change="fieldValueChange"/>
                 </el-form-item>
               </el-form>
             </div>
@@ -53,76 +60,85 @@
         <!-- 图片附件 -->
         <div class="img-accessory">
           <div class="img-box">
-            <el-upload ref="imageUpload"
-                       :action="crmFileSaveUrl"
-                       :headers="httpHeader"
-                       name="file"
-                       :data="{type: 'img', batchId: batchId}"
-                       multiple
-                       accept="image/*"
-                       list-type="picture-card"
-                       :on-preview="handleFilePreview"
-                       :before-remove="beforeRemove"
-                       :on-success="imgFileUploadSuccess"
-                       :file-list="imgFileList">
+            <el-upload
+              ref="imageUpload"
+              :action="crmFileSaveUrl"
+              :headers="httpHeader"
+              :data="{type: 'img', batchId: batchId}"
+              :on-preview="handleFilePreview"
+              :before-remove="beforeRemove"
+              :on-success="imgFileUploadSuccess"
+              :file-list="imgFileList"
+              name="file"
+              multiple
+              accept="image/*"
+              list-type="picture-card">
               <p class="add-img">
-                <span class="el-icon-picture"></span>
+                <span class="el-icon-picture"/>
                 <span>添加图片</span>
               </p>
-              <i class="el-icon-plus"></i>
+              <i class="el-icon-plus"/>
             </el-upload>
           </div>
           <p class="add-accessory">
-            <el-upload ref="fileUpload"
-                       :action="crmFileSaveUrl"
-                       :headers="httpHeader"
-                       name="file"
-                       :data="{type: 'file', batchId: batchId}"
-                       multiple
-                       accept="*.*"
-                       :on-preview="handleFilePreview"
-                       :before-remove="handleFileRemove"
-                       :on-success="fileUploadSuccess"
-                       :file-list="fileList">
+            <el-upload
+              ref="fileUpload"
+              :action="crmFileSaveUrl"
+              :headers="httpHeader"
+              :data="{type: 'file', batchId: batchId}"
+              :on-preview="handleFilePreview"
+              :before-remove="handleFileRemove"
+              :on-success="fileUploadSuccess"
+              :file-list="fileList"
+              name="file"
+              multiple
+              accept="*.*">
               <p>
-                <img src="@/assets/img/relevance_file.png"
-                     alt="">
+                <img
+                  src="@/assets/img/relevance_file.png"
+                  alt="">
                 添加附件
               </p>
             </el-upload>
           </p>
         </div>
         <!-- 关联业务 -->
-        <related-business class="related-business"
-                          :selectedInfos="relatedBusinessInfo"
-                          @value-change="relativeValueChange"></related-business>
+        <related-business
+          :selected-infos="relatedBusinessInfo"
+          class="related-business"
+          @value-change="relativeValueChange"/>
         <!-- 审核信息 -->
-        <create-sections v-if="showExamine"
-                         title="审核信息">
-          <div slot="header"
-               v-if="examineInfo.examineType===1 || examineInfo.examineType===2"
-               class="examine-type">{{examineInfo.examineType===1 ? '固定审批流' : '授权审批人'}}</div>
-          <create-examine-info ref="examineInfo"
-                               types="oa_examine"
-                               :typesId="categoryId"
-                               @value-change="examineValueChange"></create-examine-info>
+        <create-sections
+          v-if="showExamine"
+          title="审核信息">
+          <div
+            v-if="examineInfo.examineType===1 || examineInfo.examineType===2"
+            slot="header"
+            class="examine-type">{{ examineInfo.examineType===1 ? '固定审批流' : '授权审批人' }}</div>
+          <create-examine-info
+            ref="examineInfo"
+            :types-id="categoryId"
+            types="oa_examine"
+            @value-change="examineValueChange"/>
         </create-sections>
       </div>
 
       <div class="handle-bar">
-        <el-button class="handle-button"
-                   @click.native="hidenView">取消</el-button>
-        <el-button class="handle-button"
-                   type="primary"
-                   @click.native="saveField()">保存</el-button>
+        <el-button
+          class="handle-button"
+          @click.native="hidenView">取消</el-button>
+        <el-button
+          class="handle-button"
+          type="primary"
+          @click.native="saveField()">保存</el-button>
       </div>
     </flexbox>
   </create-view>
 </template>
 <script type="text/javascript">
-import { filedGetField, filedValidates } from '@/api/customermanagement/common'
+import { filedGetField } from '@/api/customermanagement/common'
 import { OaExamineGetField } from '@/api/oamanagement/examine'
-import { crmFileSave, crmFileDelete, crmFileSaveUrl } from '@/api/common'
+import { crmFileDelete, crmFileSaveUrl } from '@/api/common'
 import axios from 'axios'
 import { oaExamineSaveAndUpdate } from '@/api/oamanagement/examine'
 
@@ -133,10 +149,7 @@ import XhExpenses from './xhExpenses' // 报销事项
 import XhLeaves from './xhLeaves' // 出差事项
 import RelatedBusiness from './relatedBusiness'
 
-import { isArray } from '@/utils/types'
-
 import {
-  regexIsNumber,
   regexIsCRMNumber,
   regexIsCRMMoneyNumber,
   regexIsCRMMobile,
@@ -159,7 +172,7 @@ import {
 } from '@/components/CreateCom'
 
 export default {
-  name: 'examine-create-view', // 所有新建效果的view
+  name: 'ExamineCreateView', // 所有新建效果的view
   components: {
     CreateView,
     CreateSections,
@@ -177,41 +190,6 @@ export default {
     XhExpenses,
     XhLeaves,
     RelatedBusiness
-  },
-  computed: {
-    /** 审批 下展示审批人信息 */
-    showExamine() {
-      return true
-    },
-    crmFileSaveUrl() {
-      return crmFileSaveUrl
-    },
-    httpHeader() {
-      return {
-        'Admin-Token': axios.defaults.headers['Admin-Token']
-      }
-    }
-  },
-  watch: {},
-  data() {
-    return {
-      // 标题展示名称
-      title: '',
-      loading: false,
-      // 自定义字段验证规则
-      crmRules: {},
-      // 自定义字段信息表单
-      crmForm: {
-        crmFields: []
-      },
-      batchId: guid(),
-      // 图片附件
-      imgFileList: [],
-      fileList: [],
-      // 审批信息
-      examineInfo: {},
-      relatedBusinessInfo: {} // 关联业务信息
-    }
   },
   filters: {
     /** 根据type 找到组件 */
@@ -280,6 +258,41 @@ export default {
       }
     }
   },
+  data() {
+    return {
+      // 标题展示名称
+      title: '',
+      loading: false,
+      // 自定义字段验证规则
+      crmRules: {},
+      // 自定义字段信息表单
+      crmForm: {
+        crmFields: []
+      },
+      batchId: guid(),
+      // 图片附件
+      imgFileList: [],
+      fileList: [],
+      // 审批信息
+      examineInfo: {},
+      relatedBusinessInfo: {} // 关联业务信息
+    }
+  },
+  computed: {
+    /** 审批 下展示审批人信息 */
+    showExamine() {
+      return true
+    },
+    crmFileSaveUrl() {
+      return crmFileSaveUrl
+    },
+    httpHeader() {
+      return {
+        'Admin-Token': axios.defaults.headers['Admin-Token']
+      }
+    }
+  },
+  watch: {},
   mounted() {
     // 获取title展示名称
     document.body.appendChild(this.$el)
@@ -288,6 +301,12 @@ export default {
 
     if (this.action.type == 'update') {
       this.batchId = this.action.data.batchId
+    }
+  },
+  destroyed() {
+    // remove DOM node after destroy
+    if (this.$el && this.$el.parentNode) {
+      this.$el.parentNode.removeChild(this.$el)
     }
   },
   methods: {
@@ -324,7 +343,7 @@ export default {
         }
       }
 
-      //无事件的处理 后期可换成input实现
+      // 无事件的处理 后期可换成input实现
       if (
         item.data.formType == 'user' ||
         item.data.formType == 'structure' ||
@@ -347,7 +366,7 @@ export default {
         params.isDetail = 2 // 1详情 2 编辑
       }
 
-      let request = {
+      const request = {
         update: OaExamineGetField,
         save: filedGetField
       }[this.action.type]
@@ -391,7 +410,7 @@ export default {
          * 规则数据
          */
         var tempList = []
-        //验证必填
+        // 验证必填
         if (item.isNull == 1) {
           if (item.formType == 'business_cause') {
             var validateFunction = (rule, value, callback) => {
@@ -402,7 +421,7 @@ export default {
                 var hasError = false
                 for (let index = 0; index < value.list.length; index++) {
                   const item = value.list[index]
-                  let keys = [
+                  const keys = [
                     'startAddress',
                     'endAddress',
                     'startTime',
@@ -438,7 +457,7 @@ export default {
                 var hasError = false
                 for (let index = 0; index < value.list.length; index++) {
                   const item = value.list[index]
-                  let keys = [
+                  const keys = [
                     'startAddress',
                     'endAddress',
                     'startTime',
@@ -475,65 +494,6 @@ export default {
               trigger: ['blur', 'change']
             })
           }
-        }
-
-        //验证唯一
-        if (item.isUnique == 1) {
-          var validateUnique = (rule, value, callback) => {
-            if ((isArray(value) && value.length == 0) || !value) {
-              callback()
-            } else {
-              var validatesParams = {}
-              validatesParams.name = item.name
-              if (isArray(value)) {
-                let postValue = ''
-                if (value.length > 0) {
-                  if (
-                    rule.item.formType == 'user' ||
-                    rule.item.formType == 'structure'
-                  ) {
-                    postValue = value
-                      .map(valueItem => {
-                        return rule.item.formType == 'user'
-                          ? valueItem.userId
-                          : valueItem.id
-                      })
-                      .join(',')
-                  } else if (rule.item.fieldName == 'categoryId') {
-                    if (value && value.length) {
-                      postValue = value[value.length - 1]
-                    } else {
-                      postValue = ''
-                    }
-                  } else if (rule.item.formType == 'checkbox') {
-                    postValue = value.join(',')
-                  }
-                }
-                validatesParams.val = postValue
-              } else {
-                validatesParams.val = value
-              }
-              validatesParams.types = 10
-              if (this.action.type == 'update') {
-                validatesParams.id = this.action.id
-              }
-              filedValidates(validatesParams)
-                .then(res => {
-                  callback()
-                })
-                .catch(error => {
-                  callback(new Error(error.error ? error.error : '验证出错'))
-                })
-            }
-          }
-          tempList.push({
-            validator: validateUnique,
-            item: item,
-            trigger:
-              item.formType == 'checkbox' || item.formType == 'select'
-                ? ['change']
-                : ['blur']
-          })
         }
 
         // 特殊字符
@@ -628,7 +588,7 @@ export default {
           var params = {}
 
           if (this.action.type == 'update') {
-            let list = item.value.map(function(element, index, array) {
+            const list = item.value.map(function(element, index, array) {
               if (element.img) {
                 element.imgList = element.img.map(function(file, index, array) {
                   file.url = file.filePath
@@ -705,7 +665,7 @@ export default {
           if (this.showExamine) {
             /** 验证审批数据 */
             this.$refs.examineInfo.validateField(() => {
-              let params = {
+              const params = {
                 oaExamine: { categoryId: this.categoryId },
                 oaExamineRelation: {},
                 field: [],
@@ -718,7 +678,7 @@ export default {
               this.submiteParams(params)
             })
           } else {
-            let params = {
+            const params = {
               oaExamine: { categoryId: this.categoryId },
               oaExamineRelation: {},
               field: [],
@@ -735,7 +695,7 @@ export default {
     /** 上传 */
     submiteParams(params) {
       /** 注入关联参数 */
-      for (let key in this.relatedBusinessInfo) {
+      for (const key in this.relatedBusinessInfo) {
         const list = this.relatedBusinessInfo[key]
         params.oaExamineRelation[key + 'Ids'] = list
           .map(function(item, index, array) {
@@ -988,12 +948,6 @@ export default {
         return '0'
       }
       return item.styleIndex % 2 == 0 ? '25px' : '0'
-    }
-  },
-  destroyed() {
-    // remove DOM node after destroy
-    if (this.$el && this.$el.parentNode) {
-      this.$el.parentNode.removeChild(this.$el)
     }
   }
 }

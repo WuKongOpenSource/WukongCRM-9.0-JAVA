@@ -1,19 +1,22 @@
 <template>
-  <create-view :body-style="{ height: '100%'}" id="duplicate-check-container">
+  <create-view id="duplicate-check-container" :body-style="{ height: '100%'}">
     <div class="container">
       <div class="header">
         查重工具
-        <img @click="hidenView"
-             class="close"
-             src="@/assets/img/task_close.png" />
+        <img
+          class="close"
+          src="@/assets/img/task_close.png"
+          @click="hidenView" >
       </div>
-      <el-tabs v-model="tabActiveName"
-               class="content">
-        <el-tab-pane v-for="(item, index) in tabList"
-                     :key="index"
-                     :label="item.label"
-                     :name="item.name">
-          <check-content :type="item.name"></check-content>
+      <el-tabs
+        v-model="tabActiveName"
+        class="content">
+        <el-tab-pane
+          v-for="(item, index) in tabList"
+          :key="index"
+          :label="item.label"
+          :name="item.name">
+          <check-content :type="item.name"/>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -24,13 +27,12 @@ import CreateView from '@/components/CreateView'
 import CheckContent from './checkContent'
 
 export default {
-  name: 'duplicate-check', // 验重页面
+  name: 'DuplicateCheck', // 验重页面
   components: {
     CreateView,
     CheckContent
   },
-  computed: {},
-  watch: {},
+  props: {},
   data() {
     return {
       tabActiveName: 'customer',
@@ -41,10 +43,17 @@ export default {
       ]
     }
   },
-  props: {},
+  computed: {},
+  watch: {},
   mounted() {
     // 获取title展示名称
     document.body.appendChild(this.$el)
+  },
+  destroyed() {
+    // remove DOM node after destroy
+    if (this.$el && this.$el.parentNode) {
+      this.$el.parentNode.removeChild(this.$el)
+    }
   },
   methods: {
     /**
@@ -52,12 +61,6 @@ export default {
      */
     hidenView() {
       this.$emit('hiden-view')
-    }
-  },
-  destroyed() {
-    // remove DOM node after destroy
-    if (this.$el && this.$el.parentNode) {
-      this.$el.parentNode.removeChild(this.$el)
     }
   }
 }

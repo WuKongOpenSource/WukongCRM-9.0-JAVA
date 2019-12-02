@@ -54,7 +54,7 @@ loadingDirective.install = Vue => {
   }
 
   Vue.directive('empty', {
-    bind: function (el, binding, vnode) {
+    bind: function(el, binding, vnode) {
       const textExr = el.getAttribute('xs-empty-text')
       const iconExr = el.getAttribute('xs-empty-icon')
       const backgroundExr = el.getAttribute('xs-empty-background')
@@ -76,7 +76,7 @@ loadingDirective.install = Vue => {
       binding.value && toggleEmpty(el, binding)
     },
 
-    update: function (el, binding) {
+    update: function(el, binding) {
       el.instance.setText(el.getAttribute('xs-empty-text'))
       el.instance.setIcon(el.getAttribute('xs-empty-icon'))
       if (binding.oldValue !== binding.value) {
@@ -84,7 +84,7 @@ loadingDirective.install = Vue => {
       }
     },
 
-    unbind: function (el, binding) {
+    unbind: function(el, binding) {
       if (el.domInserted) {
         el.mask &&
           el.mask.parentNode &&

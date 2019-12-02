@@ -1,59 +1,66 @@
 <template>
   <div class="system-customer">
     <div class="title">客户管理</div>
-    <div class="customer-content"
-         v-loading="loading">
+    <div
+      v-loading="loading"
+      class="customer-content">
       <!-- 客户保护规则设置 -->
       <div class="system-view-table">
         <div class="content-title">
           <span>客户公海规则设置</span>
-          <el-button type="primary"
-                     class="rt"
-                     size="medium"
-                     @click="customerSettingSave">保存</el-button>
+          <el-button
+            type="primary"
+            class="rt"
+            size="medium"
+            @click="customerSettingSave">保存</el-button>
         </div>
         <div class="customer-setting">
-          <label class="label">客户公海规则设置<el-tooltip effect="dark"
-                        content="客户自动进入公海的天数设置"
-                        placement="top">
-              <i class="wukong wukong-help_tips"></i>>
-            </el-tooltip></label>
+          <label class="label">客户公海规则设置<el-tooltip
+            effect="dark"
+            content="客户自动进入公海的天数设置"
+            placement="top">
+            <i class="wukong wukong-help_tips"/>>
+          </el-tooltip></label>
           <div class="customer-radio">
             <el-radio-group v-model="customerData.type">
               <el-radio :label="0">不启用</el-radio>
               <el-radio :label="1">启用</el-radio>
             </el-radio-group>
-            <br />
-            <el-input-number v-model="customerData.followupDay"
-                             controls-position="right"
-                             :min="0"
-                             size="small"></el-input-number>
+            <br >
+            <el-input-number
+              v-model="customerData.followupDay"
+              :min="0"
+              controls-position="right"
+              size="small"/>
             <span>&nbsp;天不跟进或&nbsp;</span>
-            <el-input-number v-model="customerData.dealDay"
-                             controls-position="right"
-                             :min="0"
-                             size="small"></el-input-number>
+            <el-input-number
+              v-model="customerData.dealDay"
+              :min="0"
+              controls-position="right"
+              size="small"/>
             <span>&nbsp;天未成交</span>
           </div>
         </div>
 
         <div class="customer-setting">
-          <label class="label">提前提醒设置<el-tooltip effect="dark"
-                        content="提醒时间不能大于公海回收时间"
-                        placement="top">
-              <i class="wukong wukong-help_tips"></i>>
-            </el-tooltip></label>
+          <label class="label">提前提醒设置<el-tooltip
+            effect="dark"
+            content="提醒时间不能大于公海回收时间"
+            placement="top">
+            <i class="wukong wukong-help_tips"/>>
+          </el-tooltip></label>
           <div class="customer-radio">
             <el-radio-group v-model="customerData.putInPoolRemindConfig">
               <el-radio :label="0">不提醒</el-radio>
               <el-radio :label="1">提醒</el-radio>
             </el-radio-group>
-            <br />
+            <br >
             <span>提前</span>
-            <el-input-number v-model="customerData.putInPoolRemindDays"
-                             controls-position="right"
-                             :min="0"
-                             size="small"></el-input-number>
+            <el-input-number
+              v-model="customerData.putInPoolRemindDays"
+              :min="0"
+              controls-position="right"
+              size="small"/>
             <span>&nbsp;天提醒</span>
           </div>
         </div>
@@ -66,7 +73,7 @@
 import { crmSettingConfig } from '@/api/systemManagement/SystemCustomer'
 
 export default {
-  name: 'customer', // 客户设置
+  name: 'Customer', // 客户设置
 
   components: {},
 

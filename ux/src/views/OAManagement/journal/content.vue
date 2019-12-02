@@ -1,63 +1,68 @@
 <template>
   <div class="content">
     <div class="select-box">
-      <div class="select-group"
-           v-if="selectAuthority">
+      <div
+        v-if="selectAuthority"
+        class="select-group">
         <label>发起人</label>
-        <el-select v-model="fromData.createUserId"
-                   size="small"
-                   @change="selectChange"
-                   placeholder="请选择">
-          <el-option v-for="item in nameOptions"
-                     :key="item.userId"
-                     :label="item.realname"
-                     :value="item.userId">
-          </el-option>
+        <el-select
+          v-model="fromData.createUserId"
+          size="small"
+          placeholder="请选择"
+          @change="selectChange">
+          <el-option
+            v-for="item in nameOptions"
+            :key="item.userId"
+            :label="item.realname"
+            :value="item.userId"/>
         </el-select>
       </div>
       <div class="select-group">
         <label>提交时间</label>
-        <el-date-picker @change="selectChange"
-                        v-model="fromData.createTime"
-                        type="date"
-                        value-format="yyyy-MM-dd"
-                        placeholder="选择日期">
-        </el-date-picker>
+        <el-date-picker
+          v-model="fromData.createTime"
+          type="date"
+          value-format="yyyy-MM-dd"
+          placeholder="选择日期"
+          @change="selectChange"/>
       </div>
       <div class="select-group">
         <label>类型</label>
-        <el-select v-model="fromData.categoryId"
-                   @change="selectChange"
-                   size="small"
-                   placeholder="请选择">
-          <el-option v-for="item in modelOptions"
-                     :key="item.key"
-                     :label="item.label"
-                     :value="item.key">
-          </el-option>
+        <el-select
+          v-model="fromData.categoryId"
+          size="small"
+          placeholder="请选择"
+          @change="selectChange">
+          <el-option
+            v-for="item in modelOptions"
+            :key="item.key"
+            :label="item.label"
+            :value="item.key"/>
         </el-select>
       </div>
     </div>
-    <div class="list-box"
-         :id="'list-box' + activeName"
-         v-loading="journalLoading">
-      <journal-cell v-for="(item, index) in journalData"
-                    :key="index"
-                    :logIndex="index"
-                    :data="item"
-                    class="list-cell"
-                    @on-handle="jourecallCellHandle"></journal-cell>
-      <slot name="load"></slot>
-      <div ref="blankClick"></div>
+    <div
+      v-loading="journalLoading"
+      :id="'list-box' + activeName"
+      class="list-box">
+      <journal-cell
+        v-for="(item, index) in journalData"
+        :key="index"
+        :log-index="index"
+        :data="item"
+        class="list-cell"
+        @on-handle="jourecallCellHandle"/>
+      <slot name="load"/>
+      <div ref="blankClick"/>
     </div>
     <!-- 相关业务页面 -->
-    <c-r-m-all-detail :visible.sync="showRelatedDetail"
-                      :crmType="relatedCRMType"
-                      :listenerIDs="['workbench-main-container']"
-                      :noListenerIDs="['journal-list-box']"
-                      :id="relatedID"
-                      class="d-view">
-    </c-r-m-all-detail>
+    <c-r-m-all-detail
+      :visible.sync="showRelatedDetail"
+      :crm-type="relatedCRMType"
+      :listener-ids="['workbench-main-container']"
+      :no-listener-ids="['journal-list-box']"
+      :id="relatedID"
+      class="d-view"/>
   </div>
 </template>
 
@@ -71,6 +76,14 @@ export default {
   components: {
     CRMAllDetail,
     JournalCell
+  },
+  props: {
+    // 数据
+    journalData: Array,
+    depOptions: Array,
+    nameOptions: Array,
+    journalLoading: Boolean,
+    activeName: String
   },
   data() {
     return {
@@ -88,23 +101,15 @@ export default {
       showRelatedDetail: false
     }
   },
-  watch: {
-    activeName: function(val) {
-      this.fromData = {}
-    }
-  },
   computed: {
     selectAuthority() {
       return this.activeName != 2 // 我发出的日志 的不展示
     }
   },
-  props: {
-    // 数据
-    journalData: Array,
-    depOptions: Array,
-    nameOptions: Array,
-    journalLoading: Boolean,
-    activeName: String
+  watch: {
+    activeName: function(val) {
+      this.fromData = {}
+    }
   },
   methods: {
     selectChange(val, key) {
@@ -128,7 +133,7 @@ export default {
                 type: 'success',
                 message: '删除成功!'
               })
-              for (let i in this.journalData) {
+              for (const i in this.journalData) {
                 if (this.journalData[i].logId == data.data.item.logId) {
                   this.journalData.splice(i, 1)
                   break

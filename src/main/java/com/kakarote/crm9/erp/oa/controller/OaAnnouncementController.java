@@ -22,7 +22,7 @@ public class OaAnnouncementController extends Controller {
      */
     @Permissions({"oa:announcement:save","oa:announcement:update"})
     public void saveAndUpdate(@Para("") OaAnnouncement oaAnnouncement){
-        oaAnnouncement.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        oaAnnouncement.setCreateUserId(BaseUtil.getUser().getUserId());
         renderJson(announcementService.saveAndUpdate(oaAnnouncement));
     }
     /**

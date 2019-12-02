@@ -159,6 +159,7 @@ public class CrmBusinessController extends Controller {
      * @author wyq
      * 编辑团队成员
      */
+    @Permissions("crm:business:teamsave")
     @NotNullValidate(value = "ids",message = "商机id不能为空")
     @NotNullValidate(value = "memberIds",message = "成员id不能为空")
     @NotNullValidate(value = "power",message = "读写权限不能为空")
@@ -170,6 +171,7 @@ public class CrmBusinessController extends Controller {
      * @author wyq
      * 删除团队成员
      */
+    @Permissions("crm:business:teamsave")
     @NotNullValidate(value = "ids",message = "商机id不能为空")
     @NotNullValidate(value = "memberIds",message = "成员id不能为空")
     public void deleteMembers(@Para("")CrmBusiness crmBusiness){

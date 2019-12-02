@@ -1,14 +1,15 @@
 <template>
   <div class="box-wrapper">
     <div class="title">
-      <span>{{attr.isNull ? '*' : ''}}</span>{{attr.name}}<span v-if="attr.inputTips">{{'（'+attr.inputTips+'）'}}</span>
+      <span>{{ attr.isNull ? '*' : '' }}</span>{{ attr.name }}<span v-if="attr.inputTips">{{ '（'+attr.inputTips+'）' }}</span>
     </div>
     <div class="box">
       请选择文件
     </div>
-    <span class="el-icon-delete control"
-          @click="handleDelete"
-          v-if="isShow"></span>
+    <span
+      v-if="isShow"
+      class="el-icon-delete control"
+      @click="handleDelete"/>
   </div>
 </template>
 
@@ -20,10 +21,10 @@ import mixins from './mixin'
 
 export default {
   name: 'FileForm',
+  mixins: [mixins],
   data() {
     return {}
-  },
-  mixins: [mixins]
+  }
 }
 </script>
 

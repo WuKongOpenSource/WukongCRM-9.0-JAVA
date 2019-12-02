@@ -1,20 +1,24 @@
 <template>
   <flexbox class="cell">
-    <img class="cell-head"
-         src="@/assets/img/relevance_file.png"
-         alt>
-    <div class="cell-body"
-         :class="{'cursor-pointer' :cursorPointer}">
-      <span>{{data.name.length > 20 ? data.name.substring(0, 20) + '...' : data.name}}</span>
-      <span class="size">({{data.size}})</span>
+    <img
+      class="cell-head"
+      src="@/assets/img/relevance_file.png"
+      alt>
+    <div
+      :class="{'cursor-pointer' :cursorPointer}"
+      class="cell-body">
+      <span>{{ data.name.length > 20 ? data.name.substring(0, 20) + '...' : data.name }}</span>
+      <span class="size">({{ data.size }})</span>
     </div>
     <div class="cell-foot">
-      <el-button type="primary"
-                 icon="el-icon-download"
-                 @click="downloadClick">下载</el-button>
-      <i v-if="showDelete"
-         class="el-icon-delete"
-         @click="deleteClick"></i>
+      <el-button
+        type="primary"
+        icon="el-icon-download"
+        @click="downloadClick">下载</el-button>
+      <i
+        v-if="showDelete"
+        class="el-icon-delete"
+        @click="deleteClick"/>
     </div>
   </flexbox>
 </template>
@@ -24,12 +28,7 @@ import { downloadFile } from '@/utils'
 import { crmFileDelete } from '@/api/common'
 
 export default {
-  name: 'file-cell', // 附件展示效果
-  computed: {},
-  watch: {},
-  data() {
-    return {}
-  },
+  name: 'FileCell',
   props: {
     cellIndex: Number,
     data: Object,
@@ -47,7 +46,14 @@ export default {
     },
     module_id: [String, Number]
   },
+  data() {
+    return {}
+  }, // 附件展示效果
+  computed: {},
+  watch: {},
   mounted() {},
+
+  beforeDestroy() {},
   methods: {
     downloadClick() {
       downloadFile({ path: this.data.filePath, name: this.data.name })
@@ -75,9 +81,7 @@ export default {
           })
         })
     }
-  },
-
-  beforeDestroy() {}
+  }
 }
 </script>
 <style lang="scss" scoped>

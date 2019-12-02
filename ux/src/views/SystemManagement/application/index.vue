@@ -1,42 +1,50 @@
 <template>
-  <flexbox style="height:100%;"
-           direction="column"
-           align="stretch">
+  <flexbox
+    style="height:100%;"
+    direction="column"
+    align="stretch">
     <div class="header">
       <div>应用管理</div>
     </div>
-    <div class="body"
-         v-loading="loading">
-      <div class="section"
-           v-for="(bigItem, bigIndex) in allList"
-           :key="bigIndex">
+    <div
+      v-loading="loading"
+      class="body">
+      <div
+        v-for="(bigItem, bigIndex) in allList"
+        :key="bigIndex"
+        class="section">
         <flexbox class="section-header">
-          {{bigItem.name}}
+          {{ bigItem.name }}
         </flexbox>
-        <flexbox wrap="wrap"
-                 class="section-body">
-          <flexbox class="section-item"
-                   v-for="(item, index) in bigItem.sublist"
-                   :key="index">
-            <img class="item-icon"
-                 :src="getModuleIcon(item.status, item.module)" />
-            <span class="item-name">{{item.name}}</span>
-            <el-dropdown v-if="item.type == 1 && configSetAuth"
-                         class="more-menu"
-                         @command="handleMoreCommand($event, item)">
-              <i class="el-icon-more"></i>
+        <flexbox
+          wrap="wrap"
+          class="section-body">
+          <flexbox
+            v-for="(item, index) in bigItem.sublist"
+            :key="index"
+            class="section-item">
+            <img
+              :src="getModuleIcon(item.status, item.module)"
+              class="item-icon" >
+            <span class="item-name">{{ item.name }}</span>
+            <el-dropdown
+              v-if="item.type == 1 && configSetAuth"
+              class="more-menu"
+              @command="handleMoreCommand($event, item)">
+              <i class="el-icon-more"/>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item :command="item.status ? 'disable' : 'enable'">{{item.status ? '停用' : '启用'}}</el-dropdown-item>
+                <el-dropdown-item :command="item.status ? 'disable' : 'enable'">{{ item.status ? '停用' : '启用' }}</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
-            <span v-else-if="item.type == 2"
-                  class="more-mark">即将发布</span>
+            <span
+              v-else-if="item.type == 2"
+              class="more-mark">即将发布</span>
           </flexbox>
         </flexbox>
       </div>
     </div>
 
-    <call-detail :visible.sync="showCallDetail"></call-detail>
+    <call-detail :visible.sync="showCallDetail"/>
   </flexbox>
 </template>
 
@@ -50,7 +58,7 @@ import { mapGetters } from 'vuex'
 
 export default {
   /** 系统管理 的 应用管理 */
-  name: 'system-module',
+  name: 'SystemModule',
   components: {
     CallDetail
   },
@@ -143,7 +151,7 @@ export default {
       if (command == 'enable') {
         result()
       } else {
-        let message = {
+        const message = {
           oa:
             '停用办公后，与客户管理、项目管理中的关联项也将被停用。确定要停用吗？',
           crm:

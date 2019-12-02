@@ -26,22 +26,22 @@ import { biRouter } from './modules/business'
   }
 **/
 export const constantRouterMap = [{
-    path: '/login',
-    component: () => import('@/views/login/index'),
-    hidden: true
-  },
-  {
-    path: '/404',
-    component: () => import('@/views/404'),
-    hidden: true
-  },
-  projectRouter,
-  personRouter,
-  {
-    path: '*',
-    redirect: '/404',
-    hidden: true
-  }
+  path: '/login',
+  component: () => import('@/views/login/index'),
+  hidden: true
+},
+{
+  path: '/404',
+  component: () => import('@/views/404'),
+  hidden: true
+},
+projectRouter,
+personRouter,
+{
+  path: '*',
+  redirect: '/404',
+  hidden: true
+}
 ]
 
 export default new Router({

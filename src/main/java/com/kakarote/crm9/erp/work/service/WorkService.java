@@ -47,19 +47,19 @@ public class WorkService{
         if(Arrays.asList(work._getAttrNames()).contains("name")&&StrUtil.isEmpty(work.getName())){
             return R.error("项目名称不能为空！");
         }
-        Integer userId = BaseUtil.getUser().getUserId().intValue();
+        Long userId = BaseUtil.getUser().getUserId();
         boolean bol;
         if(work.getWorkId() == null){
-            Set<Integer> ownerUserIds = new HashSet<>();
+            Set<Long> ownerUserIds = new HashSet<>();
             ownerUserIds.add(userId);
             if(work.getOwnerUserId() != null){
-                ownerUserIds.addAll(TagUtil.toSet(work.getOwnerUserId()));
+                ownerUserIds.addAll(TagUtil.toLongSet(work.getOwnerUserId()));
             }
             if(work.getIsOpen() == 1){
                 //公开项目删除负责人
                 ownerUserIds.clear();
             }
-            work.setOwnerUserId(TagUtil.fromSet(ownerUserIds));
+            work.setOwnerUserId(TagUtil.fromLongSet(ownerUserIds));
             work.setCreateUserId(userId);
             work.setCreateTime(new Date());
             bol = work.save();
@@ -95,20 +95,20 @@ public class WorkService{
             }
             Integer workId = work.getWorkId();
             Map<String,Object> columns = work.toRecord().getColumns();
-            if(columns.keySet().contains("owner_user_id")){
+            if(columns.containsKey("owner_user_id")){
                 if(! ObjectUtil.isNull(columns.get("owner_user_id"))){
                     Work oldWork = new Work().findById(workId);
                     work.setOwnerUserId(TagUtil.fromString(work.getOwnerUserId()));
-                    Set<Integer> oldOwnerUserIds = TagUtil.toSet(oldWork.getOwnerUserId());
-                    Set<Integer> ownerUserIds = TagUtil.toSet(work.getOwnerUserId());
-                    Collection<Integer> intersection = CollectionUtil.intersection(oldOwnerUserIds, ownerUserIds);
+                    Set<Long> oldOwnerUserIds = TagUtil.toLongSet(oldWork.getOwnerUserId());
+                    Set<Long> ownerUserIds = TagUtil.toLongSet(work.getOwnerUserId());
+                    Collection<Long> intersection = CollectionUtil.intersection(oldOwnerUserIds, ownerUserIds);
                     oldOwnerUserIds.removeAll(intersection);
                     ownerUserIds.removeAll(intersection);
-                    for(Integer next : oldOwnerUserIds){
+                    for(Long next : oldOwnerUserIds){
                         leave(work.getWorkId().toString(), next);
                         Db.delete("delete from `72crm_work_user` where work_id = ? and user_id = ?", workId, next);
                     }
-                    for(Integer ownerUserId : ownerUserIds){
+                    for(Long ownerUserId : ownerUserIds){
                         WorkUser workUser = new WorkUser();
                         workUser.setWorkId(work.getWorkId());
                         workUser.setUserId(ownerUserId);
@@ -142,7 +142,7 @@ public class WorkService{
                     userList.forEach(id -> {
                         WorkUser workUser = new WorkUser();
                         workUser.setWorkId(work.getWorkId());
-                        workUser.setUserId(id.intValue());
+                        workUser.setUserId(id);
                         workUser.setRoleId(BaseConstant.SMALL_WORK_EDIT_ROLE_ID);
                         workUserList.add(workUser);
                     });
@@ -172,7 +172,7 @@ public class WorkService{
         if(AuthUtil.isWorkAdmin()){
             recordList = Db.find(Db.getSqlPara("work.queryWorkNameList"));
         }else{
-            recordList = Db.find(Db.getSqlPara("work.queryWorkNameList", Kv.by("userId", BaseUtil.getUser().getUserId().intValue())));
+            recordList = Db.find(Db.getSqlPara("work.queryWorkNameList", Kv.by("userId", BaseUtil.getUser().getUserId())));
         }
         return R.ok().put("data", recordList);
     }
@@ -373,16 +373,16 @@ public class WorkService{
 
     }
 
-    public R leave(String workId, Integer userId){
+    public R leave(String workId, Long userId){
         Work work = new Work().findById(workId);
         if(work.getCreateUserId().equals(userId)){
             return R.error("项目创建人不可以退出");
         }
         Db.update(Db.getSqlPara("work.leave", Kv.by("workId", workId).set("userId", userId)));
         Db.update(Db.getSqlPara("work.leave1", Kv.by("workId", workId).set("userId", userId)));
-        Set<Integer> ownerUserIds = TagUtil.toSet(work.getOwnerUserId());
+        Set<Long> ownerUserIds = TagUtil.toLongSet(work.getOwnerUserId());
         ownerUserIds.remove(userId);
-        work.setOwnerUserId(TagUtil.fromSet(ownerUserIds));
+        work.setOwnerUserId(TagUtil.fromLongSet(ownerUserIds));
         boolean update = work.update();
         Db.update("delete from `72crm_work_user` where work_id = ? and user_id = ?", workId, userId);
         return update ? R.ok() : R.error();
@@ -415,7 +415,7 @@ public class WorkService{
             }else{
                 if(work.getIsOpen() == 1){
                     chlidMenus.forEach(child -> {
-                        if("update".equals(child.getRealm()) && ! work.getCreateUserId().equals(userId.intValue())){
+                        if("update".equals(child.getRealm()) && ! work.getCreateUserId().equals(userId)){
                             return;
                         }
                         authObject.put(child.getRealm(), true);

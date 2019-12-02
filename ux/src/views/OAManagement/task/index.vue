@@ -1,41 +1,46 @@
 <template>
   <div class="task oa-bgcolor">
     <div class="header">
-      <el-button type="primary"
-                 class="new-btn"
-                 @click="newBtn">新建任务</el-button>
-      <el-tabs v-model="activeName"
-               @tab-click="handleClick">
-        <el-tab-pane :label="item.label"
-                     :name="item.key"
-                     v-for="(item, index) in tabData"
-                     :key="index">
-          <my-task v-loading="loading"
-                   :list="listData"
-                   :listType="item.key"
-                   :ref="item.key"
-                   :subUserListData="subUserListData"
-                   :loadMoreLoading="loadMoreLoading"
-                   @selectChange="selectChange">
-            <div class="search-input"
-                 slot="searchInput">
-              <el-input size="medium"
-                        placeholder="搜索任务名称"
-                        suffix-icon="el-icon-search"
-                        v-model="searchValue"
-                        @input="searchChange">
-              </el-input>
+      <el-button
+        type="primary"
+        class="new-btn"
+        @click="newBtn">新建任务</el-button>
+      <el-tabs
+        v-model="activeName"
+        @tab-click="handleClick">
+        <el-tab-pane
+          v-for="(item, index) in tabData"
+          :label="item.label"
+          :name="item.key"
+          :key="index">
+          <my-task
+            v-loading="loading"
+            :list="listData"
+            :list-type="item.key"
+            :ref="item.key"
+            :sub-user-list-data="subUserListData"
+            :load-more-loading="loadMoreLoading"
+            @selectChange="selectChange">
+            <div
+              slot="searchInput"
+              class="search-input">
+              <el-input
+                v-model="searchValue"
+                size="medium"
+                placeholder="搜索任务名称"
+                suffix-icon="el-icon-search"
+                @input="searchChange"/>
             </div>
           </my-task>
         </el-tab-pane>
       </el-tabs>
     </div>
     <!-- 新增任务弹出框 newDialog-->
-    <new-dialog :newDialogVisible="dialogVisible"
-                :newLoading="newLoading"
-                @handleClose="handleClose"
-                @dialogVisibleSubmit="dialogVisibleSubmit">
-    </new-dialog>
+    <new-dialog
+      :new-dialog-visible="dialogVisible"
+      :new-loading="newLoading"
+      @handleClose="handleClose"
+      @dialogVisibleSubmit="dialogVisibleSubmit"/>
   </div>
 </template>
 
@@ -95,10 +100,10 @@ export default {
   },
   mounted() {
     // 分批次加载
-    for (let dom of document.getElementsByClassName('list-box-container')) {
+    for (const dom of document.getElementsByClassName('list-box-container')) {
       dom.onscroll = () => {
-        let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
-        //滚动条到底部的条件
+        const scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+        // 滚动条到底部的条件
         if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
           if (!this.isPost) {
             this.isPost = true
@@ -155,13 +160,13 @@ export default {
           this.newLoading = false
           this.dialogVisible = false
         })
-        .catch(err => {
+        .catch(() => {
           this.newLoading = false
           this.dialogVisible = false
         })
     },
     selectChange(data) {
-      let params = {
+      const params = {
         status: data.data.status,
         type: data.data.type,
         priority: data.data.priority,
@@ -196,7 +201,7 @@ export default {
       }
       taskListAPI(params)
         .then(res => {
-          for (let item of res.data.list) {
+          for (const item of res.data.list) {
             if (item.status == 5) {
               item.checked = true
             }
@@ -213,7 +218,7 @@ export default {
           this.isPost = false
           this.loading = false
         })
-        .catch(err => {
+        .catch(() => {
           this.isPost = false
           this.loading = false
         })

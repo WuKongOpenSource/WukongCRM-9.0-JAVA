@@ -2,58 +2,67 @@
   <create-sections title="任务总览">
     <flexbox class="content">
       <div class="content-progress">
-        <radial-progress-bar :diameter="120"
-                             :completed-steps="parseFloat(data.completionRate) || 0"
-                             :total-steps="100"
-                             :strokeWidth="7"
-                             inner-stroke-color="#E7F2FA"
-                             start-color="#0067E5"
-                             stop-color="#0067E5"
-                             class="progress">
+        <radial-progress-bar
+          :diameter="120"
+          :completed-steps="parseFloat(data.completionRate) || 0"
+          :total-steps="100"
+          :stroke-width="7"
+          inner-stroke-color="#E7F2FA"
+          start-color="#0067E5"
+          stop-color="#0067E5"
+          class="progress">
           <p class="progress-title">完成率</p>
-          <p class="progress-value">{{data.completionRate || 0}}<span>%</span></p>
+          <p class="progress-value">{{ data.completionRate || 0 }}<span>%</span></p>
         </radial-progress-bar>
 
-        <radial-progress-bar :diameter="120"
-                             :completed-steps="parseFloat(data.overdueRate) || 0"
-                             :total-steps="100"
-                             :strokeWidth="7"
-                             inner-stroke-color="#E8F2FA"
-                             start-color="#FF5D60"
-                             stop-color="#FF5D60"
-                             class="progress">
+        <radial-progress-bar
+          :diameter="120"
+          :completed-steps="parseFloat(data.overdueRate) || 0"
+          :total-steps="100"
+          :stroke-width="7"
+          inner-stroke-color="#E8F2FA"
+          start-color="#FF5D60"
+          stop-color="#FF5D60"
+          class="progress">
           <p class="progress-title">逾期率</p>
-          <p class="progress-value">{{data.overdueRate || 0}}<span>%</span></p>
+          <p class="progress-value">{{ data.overdueRate || 0 }}<span>%</span></p>
         </radial-progress-bar>
       </div>
       <div class="content-bar">
-        <div id="barmain"></div>
+        <div id="barmain"/>
       </div>
-      <div class="content-user"
-           v-if="list && list.length > 0">
+      <div
+        v-if="list && list.length > 0"
+        class="content-user">
         <div class="content-user-items">
-          <div class="main-user"
-               v-for="(item, index) in showList"
-               :key="index">
-            <div v-photo="item"
-                 v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
-                 :key="item.img"
-                 class="div-photo main-user-head"></div>
-            <div class="main-user-name">{{item.realname}}</div>
+          <div
+            v-for="(item, index) in showList"
+            :key="index"
+            class="main-user">
+            <div
+              v-photo="item"
+              v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
+              :key="item.img"
+              class="div-photo main-user-head"/>
+            <div class="main-user-name">{{ item.realname }}</div>
           </div>
-          <el-tooltip v-if="list.length > 3"
-                      placement="top"
-                      effect="light"
-                      popper-class="tooltip-change-border task-tooltip">
-            <div slot="content"
-                 class="tooltip-content"
-                 style="margin: 10px 10px 10px 0;">
-              <div v-for="(user, userIndex) in list"
-                   :key="userIndex"
-                   class="item-label"
-                   style="display: inline-block; margin-right: 10px;">
-                <span v-if="userIndex > 2"
-                      class="k-name">{{user.realname}}</span>
+          <el-tooltip
+            v-if="list.length > 3"
+            placement="top"
+            effect="light"
+            popper-class="tooltip-change-border task-tooltip">
+            <div
+              slot="content"
+              class="tooltip-content"
+              style="margin: 10px 10px 10px 0;">
+              <div
+                v-for="(user, userIndex) in list"
+                :key="userIndex"
+                class="item-label"
+                style="display: inline-block; margin-right: 10px;">
+                <span
+                  v-if="userIndex > 2"
+                  class="k-name">{{ user.realname }}</span>
               </div>
             </div>
             <span class="main-user-more">
@@ -64,7 +73,7 @@
         <div class="content-user-title">项目负责人</div>
       </div>
     </flexbox>
-    <slot></slot>
+    <slot/>
   </create-sections>
 </template>
 <script type="text/javascript">
@@ -73,33 +82,11 @@ import echarts from 'echarts'
 import RadialProgressBar from 'vue-radial-progress'
 
 export default {
-  name: 'statistical-overview', // 任务总阅
+  name: 'StatisticalOverview', // 任务总阅
 
   components: {
     CreateSections,
     RadialProgressBar
-  },
-
-  computed: {
-    showList() {
-      if (this.list && this.list.length > 3) {
-        return this.list.slice(0, 3)
-      }
-      return this.list || []
-    }
-  },
-
-  data() {
-    return {
-      barOption: null,
-      barChart: null
-    }
-  },
-
-  watch: {
-    data() {
-      this.changeBarData()
-    }
   },
 
   props: {
@@ -118,6 +105,28 @@ export default {
       }
     },
     list: Array
+  },
+
+  data() {
+    return {
+      barOption: null,
+      barChart: null
+    }
+  },
+
+  computed: {
+    showList() {
+      if (this.list && this.list.length > 3) {
+        return this.list.slice(0, 3)
+      }
+      return this.list || []
+    }
+  },
+
+  watch: {
+    data() {
+      this.changeBarData()
+    }
   },
 
   mounted() {

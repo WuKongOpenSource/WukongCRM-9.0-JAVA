@@ -1,74 +1,84 @@
 <template>
   <div class="tabs-content">
-    <div class="list"
-         v-for="(item, index) in listData"
-         :key="index">
+    <div
+      v-for="(item, index) in listData"
+      :key="index"
+      class="list">
       <template v-if="item.type == 1">
-        <tab-journal :marginDefaults="true"
-                     :journalData="[item]">
-        </tab-journal>
+        <tab-journal
+          :margin-defaults="true"
+          :journal-data="[item]"/>
       </template>
       <template v-else>
-        <div v-photo="item.createUser"
-             v-lazy:background-image="$options.filters.filterUserLazyImg(item.createUser.img)"
-             class="div-photo"></div>
+        <div
+          v-photo="item.createUser"
+          v-lazy:background-image="$options.filters.filterUserLazyImg(item.createUser.img)"
+          class="div-photo"/>
         <div class="img-text">
           <div class="name-time">
             <p class="name-behavior">
-              <span class="name"
-                    v-if="item.createUser.realname">{{item.createUser.realname}}</span>
-              <span class="behavior">{{item.actionContent}}</span>
+              <span
+                v-if="item.createUser.realname"
+                class="name">{{ item.createUser.realname }}</span>
+              <span class="behavior">{{ item.actionContent }}</span>
             </p>
-            <p class="time">{{item.createTime}}</p>
+            <p class="time">{{ item.createTime }}</p>
           </div>
           <div class="log-title">
-            <img v-if="item.type == 1"
-                 src="@/assets/img/work_log.png">
-            <img v-else-if="item.type == 2"
-                 src="@/assets/img/work_schedule.png">
-            <img v-else-if="item.type == 3"
-                 src="@/assets/img/work_notice.png">
-            <img v-else-if="item.type == 4"
-                 src="@/assets/img/work_task.png">
-            <img v-else-if="item.type == 5"
-                 class="img-5"
-                 src="@/assets/img/work_examine.png">
-            <span class="type-name">{{item.typeName}}</span>
+            <img
+              v-if="item.type == 1"
+              src="@/assets/img/work_log.png">
+            <img
+              v-else-if="item.type == 2"
+              src="@/assets/img/work_schedule.png">
+            <img
+              v-else-if="item.type == 3"
+              src="@/assets/img/work_notice.png">
+            <img
+              v-else-if="item.type == 4"
+              src="@/assets/img/work_task.png">
+            <img
+              v-else-if="item.type == 5"
+              class="img-5"
+              src="@/assets/img/work_examine.png">
+            <span class="type-name">{{ item.typeName }}</span>
           </div>
-          <div class="title"
-               v-if="item.title">
-            <span @click="rowFun(item)"
-                  ref="taskRow">{{item.title}}</span>
+          <div
+            v-if="item.title"
+            class="title">
+            <span
+              ref="taskRow"
+              @click="rowFun(item)">{{ item.title }}</span>
           </div>
         </div>
       </template>
     </div>
-    <slot name="workbenchLoad"></slot>
+    <slot name="workbenchLoad"/>
     <!-- 公告详情 -->
-    <v-details v-if="dialog"
-               :btnShow="false"
-               :titleList="titleList"
-               @close="close">
-    </v-details>
+    <v-details
+      v-if="dialog"
+      :btn-show="false"
+      :title-list="titleList"
+      @close="close"/>
     <!-- 日程详情 -->
-    <schedule-details v-if="showScheduleDetails"
-                      :btnShow="false"
-                      :dialogVisible="dialogVisible"
-                      :listData="scheduleData"
-                      @handleClose="scheduleClose">
-    </schedule-details>
+    <schedule-details
+      v-if="showScheduleDetails"
+      :btn-show="false"
+      :dialog-visible="dialogVisible"
+      :list-data="scheduleData"
+      @handleClose="scheduleClose"/>
     <!-- 任务详情 -->
-    <particulars v-if="taskDetailShow"
-                 ref="particulars"
-                 :id="taskID"
-                 @close="taskDetailShow = false">
-    </particulars>
+    <particulars
+      v-if="taskDetailShow"
+      ref="particulars"
+      :id="taskID"
+      @close="taskDetailShow = false"/>
     <!-- 审批详情 -->
-    <examine-detail v-if="showExamine"
-                    :id="examineData.id"
-                    :noListenerClass="['tabs-content']"
-                    @hide-view="showExamine=false">
-    </examine-detail>
+    <examine-detail
+      v-if="showExamine"
+      :id="examineData.id"
+      :no-listener-class="['tabs-content']"
+      @hide-view="showExamine=false"/>
   </div>
 </template>
 
@@ -78,9 +88,6 @@ import ScheduleDetails from '../schedule/components/details'
 import ExamineDetail from '../examine/components/examineDetail'
 // 任务详情
 import particulars from '../task/components/particulars'
-import { detailsTask, readLoglist, deleteTask } from '@/api/oamanagement/task'
-import { crmFileIndex } from '@/api/common'
-import { timestampToFormatTime } from '@/utils'
 
 import tabJournal from './tabsJournal'
 export default {
@@ -90,6 +97,9 @@ export default {
     particulars,
     tabJournal,
     ExamineDetail
+  },
+  props: {
+    listData: Array
   },
   data() {
     return {
@@ -109,9 +119,6 @@ export default {
       showExamine: false
     }
   },
-  props: {
-    listData: Array
-  },
   mounted() {
     document
       .getElementById('workbench-main-container')
@@ -125,7 +132,7 @@ export default {
           {
             this.dialogVisible = true
             this.scheduleData = val
-            let list = []
+            const list = []
             list.push(val.startTime, val.endTime)
             this.scheduleData.time = list
             this.showScheduleDetails = true
@@ -133,28 +140,22 @@ export default {
           break
         // 公告
         case 3:
-          {
-            this.dialog = true
-            this.titleList = {
-              title: val.title,
-              createTime: val.createTime,
-              content: val.annContent
-            }
+          this.dialog = true
+          this.titleList = {
+            title: val.title,
+            createTime: val.createTime,
+            content: val.annContent
           }
           break
         // 任务
         case 4:
-          {
-            this.taskID = val.actionId
-            this.taskDetailShow = true
-          }
+          this.taskID = val.actionId
+          this.taskDetailShow = true
           break
         // 审批
         case 5:
-          {
-            this.examineData = { id: val.actionId }
-            this.showExamine = true
-          }
+          this.examineData = { id: val.actionId }
+          this.showExamine = true
           break
       }
     },
@@ -165,7 +166,7 @@ export default {
         !this.$refs.particulars.$el.contains(e.target)
       ) {
         let hidden = true
-        let items = document.getElementsByClassName('tabs-content')
+        const items = document.getElementsByClassName('tabs-content')
         for (let index = 0; index < items.length; index++) {
           const element = items[index]
           if (element.contains(e.target)) {

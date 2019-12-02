@@ -1,28 +1,32 @@
 <template>
-  <div v-loading="loading"
-       class="main-container">
-    <filtrate-handle-view class="filtrate-bar"
-                          moduleType="oa"
-                          @load="loading=true"
-                          @change="getDataList">
-      <el-button @click.native="exportExcel"
-                 class="export-button"
-                 type="primary">导出</el-button>
+  <div
+    v-loading="loading"
+    class="main-container">
+    <filtrate-handle-view
+      class="filtrate-bar"
+      module-type="oa"
+      @load="loading=true"
+      @change="getDataList">
+      <el-button
+        class="export-button"
+        type="primary"
+        @click.native="exportExcel">导出</el-button>
     </filtrate-handle-view>
     <div class="content">
       <div class="table-content">
-        <el-table :data="list"
-                  :height="tableHeight"
-                  stripe
-                  border
-                  highlight-current-row>
-          <el-table-column v-for="(item, index) in fieldList"
-                           :key="index"
-                           align="center"
-                           header-align="center"
-                           :prop="item.field"
-                           :label="item.name">
-          </el-table-column>
+        <el-table
+          :data="list"
+          :height="tableHeight"
+          stripe
+          border
+          highlight-current-row>
+          <el-table-column
+            v-for="(item, index) in fieldList"
+            :key="index"
+            :prop="item.field"
+            :label="item.name"
+            align="center"
+            header-align="center"/>
         </el-table>
       </div>
     </div>
@@ -38,7 +42,7 @@ import filtrateHandleView from '../components/filtrateHandleView'
 
 export default {
   /** 日志统计表 */
-  name: 'log-statistics',
+  name: 'LogStatistics',
 
   components: {
     filtrateHandleView
@@ -96,16 +100,16 @@ export default {
             type: 'application/vnd.ms-excel;charset=utf-8'
           })
           var downloadElement = document.createElement('a')
-          var href = window.URL.createObjectURL(blob) //创建下载的链接
+          var href = window.URL.createObjectURL(blob) // 创建下载的链接
           downloadElement.href = href
           downloadElement.download =
             decodeURI(
               res.headers['content-disposition'].split('filename=')[1]
-            ) || '' //下载后文件名
+            ) || '' // 下载后文件名
           document.body.appendChild(downloadElement)
-          downloadElement.click() //点击下载
-          document.body.removeChild(downloadElement) //下载完成移除元素
-          window.URL.revokeObjectURL(href) //释放掉blob对象
+          downloadElement.click() // 点击下载
+          document.body.removeChild(downloadElement) // 下载完成移除元素
+          window.URL.revokeObjectURL(href) // 释放掉blob对象
         })
         .catch(() => {
           this.loading = false

@@ -2,15 +2,17 @@
   <div v-loading="loading">
     <div v-empty="list.length === 0">
       <div class="log-items">
-        <follow-record-cell v-for="(item, index) in list"
-                            :item="item"
-                            :index="index"
-                            :crmType="crmType"
-                            :key="index"
-                            @on-handle="cellHandle"></follow-record-cell>
+        <follow-record-cell
+          v-for="(item, index) in list"
+          :item="item"
+          :index="index"
+          :crm-type="crmType"
+          :key="index"
+          @on-handle="cellHandle"/>
         <div class="load">
-          <el-button type="text"
-                     :loading="loadMoreLoading">{{loadMoreLoading ? '加载更多' : '没有更多了'}}</el-button>
+          <el-button
+            :loading="loadMoreLoading"
+            type="text">{{ loadMoreLoading ? '加载更多' : '没有更多了' }}</el-button>
         </div>
       </div>
     </div>
@@ -24,11 +26,10 @@ import { crmCustomerRecordIndex } from '@/api/customermanagement/customer'
 import { crmContactsRecordIndex } from '@/api/customermanagement/contacts'
 import { crmBusinessRecordIndex } from '@/api/customermanagement/business'
 import { crmContractRecordIndex } from '@/api/customermanagement/contract'
-import { formatTimeToTimestamp } from '@/utils'
 
 export default {
   /** 线索管理 的 线索详情 的 跟进记录*/
-  name: 'record-log',
+  name: 'RecordLog',
   components: {
     FollowRecordCell
   },
@@ -41,11 +42,6 @@ export default {
       default: ''
     }
   },
-  watch: {
-    id: function(val) {
-      this.refreshList()
-    }
-  },
   data() {
     return {
       loading: false,
@@ -56,6 +52,11 @@ export default {
     }
   },
   computed: {},
+  watch: {
+    id: function(val) {
+      this.refreshList()
+    }
+  },
   mounted() {
     this.$bus.on('follow-log-refresh', data => {
       if (data.type == 'record-log') {
@@ -64,10 +65,10 @@ export default {
     })
 
     // 分批次加载
-    let dom = document.getElementById('follow-log-content')
+    const dom = document.getElementById('follow-log-content')
     dom.onscroll = () => {
-      let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
-      //滚动条到底部的条件
+      const scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+      // 滚动条到底部的条件
       if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
         if (!this.isPost) {
           this.isPost = true
@@ -83,10 +84,14 @@ export default {
   },
   activated: function() {},
   deactivated: function() {},
+
+  beforeDestroy() {
+    this.$bus.off('follow-log-refresh')
+  },
   methods: {
     getList() {
       this.loading = true
-      let request = {
+      const request = {
         customer: crmCustomerRecordIndex,
         leads: crmLeadsRecordIndex,
         contacts: crmContactsRecordIndex,
@@ -94,7 +99,7 @@ export default {
         contract: crmContractRecordIndex
       }[this.crmType]
 
-      let params = {
+      const params = {
         page: this.page,
         limit: 10
       }
@@ -128,10 +133,6 @@ export default {
         this.list.splice(data.data.index, 1)
       }
     }
-  },
-
-  beforeDestroy() {
-    this.$bus.off('follow-log-refresh')
   }
 }
 </script>

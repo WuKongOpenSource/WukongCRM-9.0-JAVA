@@ -11,7 +11,8 @@ public enum CrmEnum {
     CRM_BUSINESS("crm_business",5,"商机"),
     CRM_CONTRACT("crm_contract",6,"合同"),
     CRM_RECEIVABLES("crm_receivables",7,"回款"),
-    CRM_CUSTOMER_POOL("crm_customer_pool",8,"客户公海"),
+    CRM_RECEIVABLES_PLAN("crm_receivables_plan",8,"回款计划"),
+    CRM_CUSTOMER_POOL("crm_customer_pool",9,"客户公海"),
     CRM_NULL("NULL",0,"NULL")
     ;
 

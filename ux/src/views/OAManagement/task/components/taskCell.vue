@@ -1,57 +1,72 @@
 <template>
-  <div class="list"
-       :style="{'border-left-color': data.priority == 1 ? '#8bb5f0' : data.priority == 2 ? '#FF9668' : data.priority == 3 ? '#ED6363': 'transparent'}"
-       ref="taskRow"
-       @click="rowFun(data)">
-    <div class="list-left"
-         ref="listLeft">
-      <div :class="data.checked ? 'title title-active' : 'title'"
-           @click.stop>
-        <el-checkbox v-model="data.checked"
-                     @change="taskOverClick(data)"></el-checkbox>
+  <div
+    ref="taskRow"
+    :style="{'border-left-color': data.priority == 1 ? '#8bb5f0' : data.priority == 2 ? '#FF9668' : data.priority == 3 ? '#ED6363': 'transparent'}"
+    class="list"
+    @click="rowFun(data)">
+    <div
+      ref="listLeft"
+      class="list-left">
+      <div
+        :class="data.checked ? 'title title-active' : 'title'"
+        @click.stop>
+        <el-checkbox
+          v-model="data.checked"
+          @change="taskOverClick(data)"/>
       </div>
-      <el-tooltip placement="bottom"
-                  effect="light"
-                  popper-class="task-tooltip tooltip-change-border">
+      <el-tooltip
+        placement="bottom"
+        effect="light"
+        popper-class="task-tooltip tooltip-change-border">
         <div slot="content">
-          <span>{{data.name}}</span>
+          <span>{{ data.name }}</span>
         </div>
-        <span ref="itemSpan"
-              :class="data.checked ? 'item-name-active' : 'item-name'">
-          {{data.name}}
+        <span
+          ref="itemSpan"
+          :class="data.checked ? 'item-name-active' : 'item-name'">
+          {{ data.name }}
         </span>
       </el-tooltip>
     </div>
     <div class="list-right">
-      <div class="tag-box"
-           v-if="data.labelList && data.labelList.length > 0">
+      <div
+        v-if="data.labelList && data.labelList.length > 0"
+        class="tag-box">
         <template v-if="data.labelList.length <= 2">
-          <div v-for="(k, j) in data.labelList"
-               :key="j"
-               class="item-label">
-            <span class="k-name"
-                  :style="{'background': k.color}">{{k.labelName}}</span>
+          <div
+            v-for="(k, j) in data.labelList"
+            :key="j"
+            class="item-label">
+            <span
+              :style="{'background': k.color}"
+              class="k-name">{{ k.labelName }}</span>
           </div>
         </template>
         <template v-else>
-          <span class="k-name"
-                :style="{'background': data.labelList[0].color}">{{data.labelList[0].labelName}}</span>
-          <span class="k-name"
-                :style="{'background': data.labelList[1].color}">{{data.labelList[1].labelName}}</span>
-          <el-tooltip placement="top"
-                      effect="light"
-                      popper-class="tooltip-change-border task-tooltip">
-            <div slot="content"
-                 class="tooltip-content"
-                 style="margin: 10px 10px 10px 0;">
-              <div v-for="(k, j) in data.labelList"
-                   :key="j"
-                   class="item-label"
-                   style="display: inline-block; margin-right: 10px;">
-                <span v-if="j >= 2"
-                      class="k-name"
-                      :style="{'background': k.color || '#ccc'}"
-                      style="border-radius: 3px; color: #FFF; padding: 3px 10px;">{{k.labelName}}</span>
+          <span
+            :style="{'background': data.labelList[0].color}"
+            class="k-name">{{ data.labelList[0].labelName }}</span>
+          <span
+            :style="{'background': data.labelList[1].color}"
+            class="k-name">{{ data.labelList[1].labelName }}</span>
+          <el-tooltip
+            placement="top"
+            effect="light"
+            popper-class="tooltip-change-border task-tooltip">
+            <div
+              slot="content"
+              class="tooltip-content"
+              style="margin: 10px 10px 10px 0;">
+              <div
+                v-for="(k, j) in data.labelList"
+                :key="j"
+                class="item-label"
+                style="display: inline-block; margin-right: 10px;">
+                <span
+                  v-if="j >= 2"
+                  :style="{'background': k.color || '#ccc'}"
+                  class="k-name"
+                  style="border-radius: 3px; color: #FFF; padding: 3px 10px;">{{ k.labelName }}</span>
               </div>
             </div>
             <span class="color-label-more">
@@ -61,44 +76,52 @@
         </template>
       </div>
       <div class="img-group">
-        <div class="img-box"
-             v-if="data.relationCount">
-          <i class="wukong wukong-relevance"></i>
-          <span>{{data.relationCount}}</span>
+        <div
+          v-if="data.relationCount"
+          class="img-box">
+          <i class="wukong wukong-relevance"/>
+          <span>{{ data.relationCount }}</span>
         </div>
-        <div class="img-box"
-             v-if="data.childAllCount > 0">
-          <i class="wukong wukong-sub-task"></i>
-          <span>{{data.childWCCount}}/{{data.childAllCount}}</span>
+        <div
+          v-if="data.childAllCount > 0"
+          class="img-box">
+          <i class="wukong wukong-sub-task"/>
+          <span>{{ data.childWCCount }}/{{ data.childAllCount }}</span>
         </div>
-        <div class="img-box"
-             v-if="data.fileCount">
-          <i class="wukong wukong-file"></i>
-          <span>{{data.fileCount}}</span>
+        <div
+          v-if="data.fileCount"
+          class="img-box">
+          <i class="wukong wukong-file"/>
+          <span>{{ data.fileCount }}</span>
         </div>
-        <div class="img-box"
-             v-if="data.commentCount">
-          <i class="wukong wukong-comment-task"></i>
-          <span>{{data.commentCount}}</span>
+        <div
+          v-if="data.commentCount"
+          class="img-box">
+          <i class="wukong wukong-comment-task"/>
+          <span>{{ data.commentCount }}</span>
         </div>
-        <div class="img-box"
-             v-if="data.stopTime">
-          <i class="wukong wukong-time-task"
-             :style="{'color': data.isEnd == 1 && !data.checked ? 'red': '#999'}"></i>
-          <span :style="{'color': data.isEnd == 1 && !data.checked ? 'red': '#999'}">{{data.stopTime | moment("MM-DD")}} 截止</span>
+        <div
+          v-if="data.stopTime"
+          class="img-box">
+          <i
+            :style="{'color': data.isEnd == 1 && !data.checked ? 'red': '#999'}"
+            class="wukong wukong-time-task"/>
+          <span :style="{'color': data.isEnd == 1 && !data.checked ? 'red': '#999'}">{{ data.stopTime | moment("MM-DD") }} 截止</span>
         </div>
       </div>
       <div class="item-own-box">
-        <el-tooltip placement="bottom"
-                    effect="light"
-                    popper-class="tooltip-change-border"
-                    v-if="data.mainUser && data.mainUser.id">
+        <el-tooltip
+          v-if="data.mainUser && data.mainUser.id"
+          placement="bottom"
+          effect="light"
+          popper-class="tooltip-change-border">
           <div slot="content">
-            <span>{{data.mainUser.realname}}</span>
+            <span>{{ data.mainUser.realname }}</span>
           </div>
-          <div v-photo="data.mainUser"
-               v-lazy:background-image="$options.filters.filterUserLazyImg(data.mainUser.img)"
-               class="div-photo"></div>
+          <div
+            v-photo="data.mainUser"
+            v-lazy:background-image="$options.filters.filterUserLazyImg(data.mainUser.img)"
+            class="div-photo"/>
         </el-tooltip>
       </div>
     </div>
@@ -109,18 +132,18 @@
 import { editTask } from '@/api/oamanagement/task'
 
 export default {
-  name: 'task-cell', // 任务cell
+  name: 'TaskCell', // 任务cell
   components: {},
   mixins: [],
-  computed: {},
-  watch: {},
-  data() {
-    return {}
-  },
   props: {
     data: Object,
     dataIndex: Number
   },
+  data() {
+    return {}
+  },
+  computed: {},
+  watch: {},
   mounted() {},
   methods: {
     // 列表标记任务
@@ -132,7 +155,7 @@ export default {
         .then(res => {
           this.$store.dispatch('GetOAMessageNum', 'task')
         })
-        .catch(err => {
+        .catch(() => {
           val.checked = false
         })
     },

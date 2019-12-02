@@ -1,93 +1,115 @@
 <template>
   <div class="fl-c">
     <flexbox class="fl-h">
-      <div v-photo="{img: item.userImg, realname: item.realname}"
-           v-lazy:background-image="$options.filters.filterUserLazyImg(item.userImg)"
-           class="div-photo fl-h-img"></div>
+      <div
+        v-photo="{img: item.userImg, realname: item.realname}"
+        v-lazy:background-image="$options.filters.filterUserLazyImg(item.userImg)"
+        class="div-photo fl-h-img"/>
       <div class="fl-h-b">
-        <div class="fl-h-name">{{item.realname}}</div>
-        <div class="fl-h-time">{{item.createTime}}</div>
+        <div class="fl-h-name">{{ item.realname }}</div>
+        <div class="fl-h-time">{{ item.createTime }}</div>
       </div>
       <flexbox class="fl-h-mark">
-        <img class="fl-h-mark-img"
-             src="@/assets/img/follow_record.png" />
+        <img
+          class="fl-h-mark-img"
+          src="@/assets/img/follow_record.png" >
         <div class="fl-h-mark-name">跟进记录</div>
       </flexbox>
-      <el-dropdown @command="handleCommand"
-                   trigger="click">
-        <i style="color:#CDCDCD;margin-left: 8px;"
-           class="el-icon-arrow-down el-icon-more"></i>
+      <el-dropdown
+        trigger="click"
+        @command="handleCommand">
+        <i
+          style="color:#CDCDCD;margin-left: 8px;"
+          class="el-icon-arrow-down el-icon-more"/>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="delete">删除</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </flexbox>
     <div class="fl-b">
-      <div class="fl-b-content">{{item.content}}</div>
-      <flexbox class="fl-b-images"
-               v-if="item.img && item.img.length > 0"
-               wrap="wrap">
-        <div class="fl-b-img-item"
-             v-for="(file, index) in item.img"
-             :key="file.filePath"
-             @click="previewImg(item.img, index)"
-             v-lazy:background-image="file.filePath"></div>
+      <div class="fl-b-content">{{ item.content }}</div>
+      <flexbox
+        v-if="item.img && item.img.length > 0"
+        class="fl-b-images"
+        wrap="wrap">
+        <div
+          v-lazy:background-image="file.filePath"
+          v-for="(file, index) in item.img"
+          :key="file.filePath"
+          class="fl-b-img-item"
+          @click="previewImg(item.img, index)"/>
       </flexbox>
-      <div v-if="item.file && item.file.length > 0"
-           class="fl-b-files">
-        <flexbox class="cell"
-                 v-for="(file, index) in item.file"
-                 :key="index">
-          <img class="cell-head"
-               src="@/assets/img/relevance_file.png" />
-          <div class="cell-body">{{file.name}}<span style="color: #ccc;">（{{file.size}}）</span></div>
-          <el-button type="primary"
-                     icon="el-icon-download"
-                     @click="downloadFile(file)">下载</el-button>
+      <div
+        v-if="item.file && item.file.length > 0"
+        class="fl-b-files">
+        <flexbox
+          v-for="(file, index) in item.file"
+          :key="index"
+          class="cell">
+          <img
+            class="cell-head"
+            src="@/assets/img/relevance_file.png" >
+          <div class="cell-body">{{ file.name }}<span style="color: #ccc;">（{{ file.size }}）</span></div>
+          <el-button
+            type="primary"
+            icon="el-icon-download"
+            @click="downloadFile(file)">下载</el-button>
         </flexbox>
       </div>
-      <div class="follow"
-           v-if="item.category || item.nextTime">
-        <span v-if="item.category"
-              class="follow-info">{{item.category}}</span>
-        <span v-if="item.nextTime"
-              class="follow-info">{{item.nextTime}}</span>
+      <div
+        v-if="item.category || item.nextTime"
+        class="follow">
+        <span
+          v-if="item.category"
+          class="follow-info">{{ item.category }}</span>
+        <span
+          v-if="item.nextTime"
+          class="follow-info">{{ item.nextTime }}</span>
       </div>
-      <div class="fl-b-other"
-           v-if="item.contactsList && item.contactsList.length > 0">
+      <div
+        v-if="item.contactsList && item.contactsList.length > 0"
+        class="fl-b-other">
         <div class="fl-b-other-name">关联联系人</div>
         <div>
-          <flexbox class="cell"
-                   v-for="(item, index) in item.contactsList"
-                   @click.native="checkRelationDetail('contacts', item.contactsId)"
-                   :key="index">
-            <i class="wukong wukong-contacts cell-head crm-type"
-               :style="{'opacity': index == 0 ? 1 : 0}"></i>
-            <div class="cell-body"
-                 style="color: #6394E5;cursor: pointer;">{{item.name}}</div>
+          <flexbox
+            v-for="(item, index) in item.contactsList"
+            :key="index"
+            class="cell"
+            @click.native="checkRelationDetail('contacts', item.contactsId)">
+            <i
+              :style="{'opacity': index == 0 ? 1 : 0}"
+              class="wukong wukong-contacts cell-head crm-type"/>
+            <div
+              class="cell-body"
+              style="color: #6394E5;cursor: pointer;">{{ item.name }}</div>
           </flexbox>
         </div>
       </div>
-      <div class="fl-b-other"
-           v-if="item.businessList && item.businessList.length > 0">
+      <div
+        v-if="item.businessList && item.businessList.length > 0"
+        class="fl-b-other">
         <div class="fl-b-other-name">关联商机</div>
         <div>
-          <flexbox class="cell"
-                   v-for="(item, index) in item.businessList"
-                   @click.native="checkRelationDetail('business', item.businessId)"
-                   :key="index">
-            <i class="wukong wukong-business cell-head crm-type"
-               :style="{'opacity': index == 0 ? 1 : 0}"></i>
-            <div class="cell-body"
-                 style="color: #6394E5;cursor: pointer;">{{item.businessName}}</div>
+          <flexbox
+            v-for="(item, index) in item.businessList"
+            :key="index"
+            class="cell"
+            @click.native="checkRelationDetail('business', item.businessId)">
+            <i
+              :style="{'opacity': index == 0 ? 1 : 0}"
+              class="wukong wukong-business cell-head crm-type"/>
+            <div
+              class="cell-body"
+              style="color: #6394E5;cursor: pointer;">{{ item.businessName }}</div>
           </flexbox>
         </div>
       </div>
-      <slot></slot>
+      <slot/>
     </div>
-    <c-r-m-full-screen-detail :visible.sync="showFullDetail"
-                              :crmType="relationCrmType"
-                              :id="relationID"></c-r-m-full-screen-detail>
+    <c-r-m-full-screen-detail
+      :visible.sync="showFullDetail"
+      :crm-type="relationCrmType"
+      :id="relationID"/>
   </div>
 </template>
 
@@ -97,7 +119,7 @@ import { crmRecordDelete } from '@/api/customermanagement/common'
 
 export default {
   /** 客户管理 的 客户详情 的 跟进记录cell*/
-  name: 'follow-record-cell',
+  name: 'FollowRecordCell',
   components: {
     CRMFullScreenDetail: () =>
       import('@/views/customermanagement/components/CRMFullScreenDetail.vue')

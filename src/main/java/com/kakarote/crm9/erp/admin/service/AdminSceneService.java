@@ -5,24 +5,25 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
+import com.jfinal.aop.Before;
+import com.jfinal.aop.Inject;
+import com.jfinal.kit.Kv;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.SqlPara;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminScene;
 import com.kakarote.crm9.erp.admin.entity.AdminSceneDefault;
+import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.service.CrmBusinessService;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.ParamsUtil;
 import com.kakarote.crm9.utils.R;
-import com.jfinal.aop.Before;
-import com.jfinal.aop.Inject;
-import com.jfinal.kit.Kv;
-import com.jfinal.plugin.activerecord.Db;
-import com.jfinal.plugin.activerecord.Record;
-import com.jfinal.plugin.activerecord.tx.Tx;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,7 +43,7 @@ public class AdminSceneService{
         List<Record> recordList = new LinkedList<>();
         FieldUtil fieldUtil = new FieldUtil(recordList);
         String[] settingArr = new String[]{};
-        if(1 == label){
+        if(CrmEnum.CRM_LEADS.getType() == label){
             fieldUtil.add("leads_name", "线索名称", "text", settingArr)
                     .add("telephone", "电话", "text", settingArr)
                     .add("mobile", "手机", "mobile", settingArr)
@@ -53,21 +54,23 @@ public class AdminSceneService{
                     .add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(2 == label){
-            String[] dealStatusArr = new String[]{"未成交", "已成交"};
+        }else if(CrmEnum.CRM_CUSTOMER.getType() == label){
+            List<Record> dealStatusList = new ArrayList<>();
+            dealStatusList.add(new Record().set("name","未成交").set("value",0));
+            dealStatusList.add(new Record().set("name","已成交").set("value",1));
             fieldUtil.add("customer_name", "客户名称", "text", settingArr)
                     .add("mobile", "手机", "text", settingArr)
                     .add("telephone", "电话", "text", settingArr)
                     .add("website", "网址", "text", settingArr)
                     .add("next_time", "下次联系时间", "datetime", settingArr)
                     .add("remark", "备注", "text", settingArr)
-                    .add("deal_status", "成交状态", "select", dealStatusArr)
+                    .add("deal_status", "成交状态", "dealStatus", dealStatusList)
                     .add("owner_user_id", "负责人", "user", settingArr)
                     .add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr)
                     .add("address", "地区定位", "map_address", settingArr);
-        }else if(3 == label){
+        }else if(CrmEnum.CRM_CONTACTS.getType() == label){
             fieldUtil.add("name", "姓名", "text", settingArr)
                     .add("customer_name", "客户名称", "customer", settingArr)
                     .add("mobile", "手机", "mobile", settingArr)
@@ -81,7 +84,7 @@ public class AdminSceneService{
                     .add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(4 == label){
+        }else if(CrmEnum.CRM_PRODUCT.getType() == label){
             fieldUtil.add("name", "产品名称", "text", settingArr)
                     .add("category_id", "产品类别", "category", settingArr)
                     .add("num", "产品编码", "number", settingArr)
@@ -91,7 +94,7 @@ public class AdminSceneService{
                     .add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(5 == label){
+        }else if(CrmEnum.CRM_BUSINESS.getType() == label){
             fieldUtil.add("business_name", "商机名称", "text", settingArr)
                     .add("customer_name", "客户名称", "customer", settingArr)
                     .add("type_id", "商机状态组", "business_type", crmBusinessService.queryBusinessStatusOptions("condition"))
@@ -102,13 +105,14 @@ public class AdminSceneService{
                     .add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(6 == label){
+        }else if(CrmEnum.CRM_CONTRACT.getType() == label){
             List<Map<String,Object>> checkList = new ArrayList<>();
-            checkList.add(new JSONObject().fluentPut("name", "待审核").fluentPut("value", 0));
-            checkList.add(new JSONObject().fluentPut("name", "审核中").fluentPut("value", 1));
-            checkList.add(new JSONObject().fluentPut("name", "审核通过").fluentPut("value", 2));
-            checkList.add(new JSONObject().fluentPut("name", "审核未通过").fluentPut("value", 3));
+            checkList.add(new JSONObject().fluentPut("name", "通过").fluentPut("value", 1));
+            checkList.add(new JSONObject().fluentPut("name", "拒绝").fluentPut("value", 2));
+            checkList.add(new JSONObject().fluentPut("name", "审核中").fluentPut("value", 3));
             checkList.add(new JSONObject().fluentPut("name", "已撤回").fluentPut("value", 4));
+            checkList.add(new JSONObject().fluentPut("name", "未提交").fluentPut("value", 5));
+            checkList.add(new JSONObject().fluentPut("name", "已作废").fluentPut("value", 6));
             fieldUtil.add("num", "合同编号", "number", settingArr)
                     .add("name", "合同名称", "text", settingArr)
                     .add("check_status", "审核状态", "checkStatus", checkList)
@@ -126,13 +130,13 @@ public class AdminSceneService{
                     .add("create_user_id", "创建人", "user", settingArr)
                     .add("update_time", "更新时间", "datetime", settingArr)
                     .add("create_time", "创建时间", "datetime", settingArr);
-        }else if(7 == label){
+        }else if(CrmEnum.CRM_RECEIVABLES.getType() == label){
             List<Map<String,Object>> checkList = new ArrayList<>();
-            checkList.add(new JSONObject().fluentPut("name", "待审核").fluentPut("value", 0));
-            checkList.add(new JSONObject().fluentPut("name", "审核中").fluentPut("value", 1));
-            checkList.add(new JSONObject().fluentPut("name", "审核通过").fluentPut("value", 2));
-            checkList.add(new JSONObject().fluentPut("name", "审核未通过").fluentPut("value", 3));
+            checkList.add(new JSONObject().fluentPut("name", "通过").fluentPut("value", 1));
+            checkList.add(new JSONObject().fluentPut("name", "拒绝").fluentPut("value", 2));
+            checkList.add(new JSONObject().fluentPut("name", "审核中").fluentPut("value", 3));
             checkList.add(new JSONObject().fluentPut("name", "已撤回").fluentPut("value", 4));
+            checkList.add(new JSONObject().fluentPut("name", "未提交").fluentPut("value", 5));
             fieldUtil.add("number", "回款编号", "number", settingArr)
                     .add("check_status", "审核状态", "checkStatus", checkList)
                     .add("customer_name", "客户名称", "customer", settingArr)
@@ -148,7 +152,7 @@ public class AdminSceneService{
             return R.error("场景label不符合要求！");
         }
         recordList = fieldUtil.getRecordList();
-        List<Record> records = adminFieldService.customFieldList(label.toString());
+        List<Record> records = adminFieldService.customFieldList(label);
         if(recordList != null && records != null){
             for(Record r : records){
                 r.set("field_name", r.getStr("name"));
@@ -229,48 +233,48 @@ public class AdminSceneService{
             JSONObject ownerObject = new JSONObject();
             ownerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "is").fluentPut("value", userId));
             JSONObject subOwnerObject = new JSONObject();
-            subOwnerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "in").fluentPut("value", getSubUserId(userId.intValue(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1)));
-            if(1 == type){
+            subOwnerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "in").fluentPut("value", getSubUserId(userId, BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1)));
+            if(CrmEnum.CRM_LEADS.getType() == type){
                 systemScene.setName("全部线索").setData(new JSONObject().fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", 0)).toString()).save();
                 ownerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "is").fluentPut("value", userId)).fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", 0));
                 systemScene.setSceneId(null).setName("我负责的线索").setData(ownerObject.toString()).save();
-                subOwnerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "in").fluentPut("value", getSubUserId(userId.intValue(), BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1))).fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", 0));
+                subOwnerObject.fluentPut("owner_user_id", new JSONObject().fluentPut("name", "owner_user_id").fluentPut("condition", "in").fluentPut("value", getSubUserId(userId, BaseConstant.AUTH_DATA_RECURSION_NUM).substring(1))).fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", 0));
                 systemScene.setSceneId(null).setName("下属负责的线索").setData(subOwnerObject.toString()).save();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.fluentPut("is_transform", new JSONObject().fluentPut("name", "is_transform").fluentPut("condition", "is").fluentPut("value", "1"));
                 systemScene.setSceneId(null).setName("已转化的线索").setData(jsonObject.toString()).setBydata("transform").save();
-            }else if(2 == type){
+            }else if(CrmEnum.CRM_CUSTOMER.getType() == type){
                 systemScene.setName("全部客户").save();
                 systemScene.setSceneId(null).setName("我负责的客户").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的客户").setData(subOwnerObject.toString()).save();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.fluentPut("ro_user_id", new JSONObject().fluentPut("name", "ro_user_id").fluentPut("condition", "takePart").fluentPut("value", userId));
                 systemScene.setSceneId(null).setName("我参与的客户").setData(jsonObject.toString()).save();
-            }else if(3 == type){
+            }else if(CrmEnum.CRM_CONTACTS.getType() == type){
                 systemScene.setName("全部联系人").save();
                 systemScene.setSceneId(null).setName("我负责的联系人").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的联系人").setData(subOwnerObject.toString()).save();
-            }else if(4 == type){
+            }else if(CrmEnum.CRM_PRODUCT.getType() == type){
                 systemScene.setName("全部产品").save();
                 systemScene.setSceneId(null).setName("上架的产品").setData(new JSONObject().fluentPut("是否上下架", new JSONObject().fluentPut("name", "是否上下架").fluentPut("condition", "is").fluentPut("value", "上架")).toString()).save();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.fluentPut("是否上下架", new JSONObject().fluentPut("name", "是否上下架").fluentPut("condition", "is").fluentPut("value", "下架"));
                 systemScene.setSceneId(null).setName("下架的产品").setData(jsonObject.toString()).save();
-            }else if(5 == type){
+            }else if(CrmEnum.CRM_BUSINESS.getType() == type){
                 systemScene.setName("全部商机").save();
                 systemScene.setSceneId(null).setName("我负责的商机").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的商机").setData(subOwnerObject.toString()).save();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.fluentPut("ro_user_id", new JSONObject().fluentPut("name", "ro_user_id").fluentPut("condition", "takePart").fluentPut("value", userId));
                 systemScene.setSceneId(null).setName("我参与的商机").setData(jsonObject.toString()).save();
-            }else if(6 == type){
+            }else if(CrmEnum.CRM_CONTRACT.getType() == type){
                 systemScene.setName("全部合同").save();
                 systemScene.setSceneId(null).setName("我负责的合同").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的合同").setData(subOwnerObject.toString()).save();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.fluentPut("ro_user_id", new JSONObject().fluentPut("name", "ro_user_id").fluentPut("condition", "takePart").fluentPut("value", userId));
                 systemScene.setSceneId(null).setName("我参与的合同").setData(jsonObject.toString()).save();
-            }else if(7 == type){
+            }else if(CrmEnum.CRM_RECEIVABLES.getType() == type){
                 systemScene.setName("全部回款").save();
                 systemScene.setSceneId(null).setName("我负责的回款").setData(ownerObject.toString()).save();
                 systemScene.setSceneId(null).setName("下属负责的回款").setData(subOwnerObject.toString()).save();
@@ -282,13 +286,13 @@ public class AdminSceneService{
     /**
      * 递归查询下属id
      */
-    public String getSubUserId(Integer userId, Integer deepness){
+    public String getSubUserId(Long userId, Integer deepness){
         StringBuilder ids = new StringBuilder();
         if(deepness > 0){
             List<Long> list = Db.query("select user_id from 72crm_admin_user where parent_id = ?", userId);
             if(list != null && list.size() > 0){
                 for(Long l : list){
-                    ids.append(",").append(l).append(getSubUserId(l.intValue(), deepness - 1));
+                    ids.append(",").append(l).append(getSubUserId(l, deepness - 1));
                 }
             }
         }
@@ -371,7 +375,7 @@ public class AdminSceneService{
         List<JSONObject> queryList = new ArrayList<>();
         Integer type = jsonObject.getInteger("type");
         //自定义字段列表
-        Map<String,AdminField> fieldMap = getAdminFieldMap(type == 8 ? 2 : type);
+        Map<String,AdminField> fieldMap = getAdminFieldMap(type == 9 ? 2 : type);
         //权限标识
         switch(type){
             case 1:
@@ -395,7 +399,7 @@ public class AdminSceneService{
             case 7:
                 realm = "receivables";
                 break;
-            case 8:
+            case 9:
                 realm = "customer";
                 break;
             case 0:
@@ -441,12 +445,12 @@ public class AdminSceneService{
         StringBuilder conditions = new StringBuilder();
         if(2 == type){
             conditions.append(" and owner_user_id is not null");
-        }else if(8 == type){
+        }else if(9 == type){
             conditions.append(" and owner_user_id is null");
         }
         Long userId = BaseUtil.getUserId();
         List<Integer> roles = BaseUtil.getUser().getRoles();
-        if((!type.equals(8) && ! type.equals(4)) && ! BaseConstant.SUPER_ADMIN_USER_ID.equals(userId) && !roles.contains(BaseConstant.SUPER_ADMIN_ROLE_ID)){
+        if((!type.equals(9) && ! type.equals(4)) && ! BaseConstant.SUPER_ADMIN_USER_ID.equals(userId) && !roles.contains(BaseConstant.SUPER_ADMIN_ROLE_ID)){
             List<Long> longs = Aop.get(AdminUserService.class).queryUserByAuth(userId, realm);
             if(longs != null && longs.size() > 0){
                 conditions.append(" and (owner_user_id in (").append(StrUtil.join(",", longs)).append(")");
@@ -472,16 +476,20 @@ public class AdminSceneService{
             Integer configType = Db.queryInt("select status from 72crm_admin_config where name = 'customerPoolSetting'");
             selectSql = 1 == configType ? Db.getSql("admin.scene.getCustomerPageList") : "select *,(select count(*) from 72crm_crm_business as a where a.customer_id = views.customer_id) as business_count";
         }else if(6 == type){
-            selectSql = "select *,IFNULL((select SUM(a.money) from 72crm_crm_receivables as a where a.contract_id = views.contract_id),0) as receivedMoney";
-        }else if(8 == type){
+            selectSql = "select *,IFNULL((select SUM(a.money) from 72crm_crm_receivables as a where a.check_status = '1' and a.contract_id = views.contract_id),0) as receivedMoney,(IFNUll(money,0) - IFNULL((select SUM(a.money) from 72crm_crm_receivables as a where a.check_status = '1' and a.contract_id = views.contract_id),0)) as unreceivedMoney";
+        }else if(9 == type){
             Integer putInPoolTodayNum = Db.queryInt(Db.getSql("admin.scene.queryPutInPoolTodayNum"));
             selectSql = "select *";
             resultJsonObject.put("putInPoolTodayNum", putInPoolTodayNum);
         }else{
             selectSql = "select * ";
         }
-        kv.set("select", selectSql).set("queryList", queryList).set("realm", realm).set("fieldMap", fieldMap).set("label", type == 8 ? 2 : type);
-
+        List<String> batchList = queryBatchId(queryList);
+        if(batchList.size()==0&&kv.containsKey("field")){
+            batchList.add("");
+        }
+        kv.set("select", selectSql).set("queryList", queryList).set("realm", realm).set("fieldMap", fieldMap).set("label", type == 9 ? 2 : type);
+        kv.set("batchList",batchList);
         SqlPara sqlPara;
         if(kv.getInt("fieldType") == 0){
             sqlPara = Db.getSqlPara("admin.scene.queryCrmPageListByFieldType2", kv);
@@ -489,7 +497,7 @@ public class AdminSceneService{
             sqlPara = Db.getSqlPara("admin.scene.queryCrmPageListByFieldType1", kv);
         }
         List<Record> recordPage = Db.find(sqlPara);
-        if(type == 5){
+        if(type == CrmEnum.CRM_BUSINESS.getType()){
             recordPage.forEach(record -> {
                 if(record.getInt("is_end") == 1){
                     record.set("status_name", "赢单");
@@ -500,10 +508,10 @@ public class AdminSceneService{
                 }
             });
             setBusinessStatus(recordPage);
-        }else if(type == 6){
+        }else if (type == CrmEnum.CRM_CONTRACT.getType()){
             if(recordPage.size() > 0){
-                List<Integer> contractids = recordPage.stream().map(record -> record.getInt("contract_id")).collect(Collectors.toList());
-                Record record = Db.findFirst("SELECT IFNULL(SUM(a.money), 0) AS contractMoney, IFNULL(SUM(b.money), 0) AS receivedMoney FROM 72crm_crm_contract AS a LEFT JOIN 72crm_crm_receivables AS b ON a.contract_id = b.contract_id AND b.check_status = '2' WHERE a.check_status = '2' and a.contract_id in (" + StrUtil.join(",", contractids) + ")");
+                List<Integer> contractIds = recordPage.stream().map(record -> record.getInt("contract_id")).collect(Collectors.toList());
+                Record record = Db.findFirst("SELECT IFNULL(SUM(money),0) AS contractMoney,IFNULL(SUM(receivedMoney),0) AS receivedMoney from (SELECT a.money,(SELECT SUM(money) FROM 72crm_crm_receivables AS b where b.contract_id=a.contract_id and b.check_status = 1) as receivedMoney FROM 72crm_crm_contract AS a WHERE a.check_status = '1' AND a.contract_id IN (" + StrUtil.join(",", contractIds) + ")) as x");
                 resultJsonObject.put("money", record);
             }
         }
@@ -522,9 +530,9 @@ public class AdminSceneService{
         if (type == 1) {
             conditions.append(" and (leads_name like '%").append(search).append("%' or telephone like '%")
                     .append(search).append("%' or mobile like '%").append(search).append("%')");
-        } else if (type == 2 || type == 8) {
+        } else if (type == 2 || type == 9) {
             conditions.append(" and (customer_name like '%").append(search).append("%' or telephone like '%")
-                    .append(search).append("%')");
+                    .append(search).append("%' or mobile like '%").append(search).append("%')");
         } else if (type == 3) {
             conditions.append(" and (name like '%").append(search).append("%' or telephone like '%")
                     .append(search).append("%' or mobile like '%").append(search).append("%')");
@@ -686,6 +694,9 @@ public class AdminSceneService{
             adminFieldMap.put("is_transform",adminField);
             adminFieldMap.put("deal_status",adminField);
             adminFieldMap.put("customer_id",adminField);
+            adminFieldMap.put("contract_id",adminField);
+            adminFieldMap.put("leads_id",adminField);
+            adminFieldMap.put("receivables_id",adminField);
         }
         return adminFieldMap;
     }
@@ -709,5 +720,28 @@ public class AdminSceneService{
                 record.set("progressBar", "0/0");
             }
         });
+    }
+
+    /**
+     * 自定义字段的查询
+     * @author zhangzhiwei
+     */
+    private List<String> queryBatchId(List<JSONObject> queryList){
+        List<String> arrayList=new ArrayList<>();
+        queryList.forEach(jsonObject -> {
+            if(jsonObject.containsKey("type")&&jsonObject.get("type").equals(0)){
+                JSONObject object= (JSONObject) jsonObject.clone();
+                object.put("batchList",arrayList);
+                SqlPara sqlPara=Db.getSqlPara("admin.scene.queryBatchId",object);
+                arrayList.clear();
+                List<String> batchIdList=Db.query(sqlPara.getSql(),sqlPara.getPara());
+                if(batchIdList.size()==0){
+                    arrayList.add("");
+                }else {
+                    arrayList.addAll(batchIdList);
+                }
+            }
+        });
+        return arrayList;
     }
 }

@@ -3,72 +3,81 @@
     <div class="se-header">审批流程管理</div>
     <div class="se-body">
       <div class="se-table-header">
-        <el-button class="se-table-header-button"
-                   @click="addExamine"
-                   type="primary">添加审批流程</el-button>
+        <el-button
+          class="se-table-header-button"
+          type="primary"
+          @click="addExamine">添加审批流程</el-button>
       </div>
-      <el-table class="main-table"
-                id="examine-table"
-                v-loading="loading"
-                :data="list"
-                :height="tableHeight"
-                highlight-current-row
-                style="width: 100%"
-                @row-click="handleRowClick">
-        <el-table-column v-for="(item, index) in fieldList"
-                         :key="index"
-                         show-overflow-tooltip
-                         :formatter="fieldFormatter"
-                         :prop="item.prop"
-                         :width="item.width"
-                         :label="item.label">
-          <template slot="header"
-                    slot-scope="scope">
-            <div class="table-head-name">{{scope.column.label}}</div>
+      <el-table
+        v-loading="loading"
+        id="examine-table"
+        :data="list"
+        :height="tableHeight"
+        class="main-table"
+        highlight-current-row
+        style="width: 100%"
+        @row-click="handleRowClick">
+        <el-table-column
+          v-for="(item, index) in fieldList"
+          :key="index"
+          :formatter="fieldFormatter"
+          :prop="item.prop"
+          :width="item.width"
+          :label="item.label"
+          show-overflow-tooltip>
+          <template
+            slot="header"
+            slot-scope="scope">
+            <div class="table-head-name">{{ scope.column.label }}</div>
           </template>
         </el-table-column>
-        <el-table-column>
-        </el-table-column>
-        <el-table-column fixed="right"
-                         label="操作"
-                         width="250">
+        <el-table-column/>
+        <el-table-column
+          fixed="right"
+          label="操作"
+          width="250">
           <template slot-scope="scope">
-            <el-button @click="handleClick('edit', scope)"
-                       type="text"
-                       size="small">编辑</el-button>
-            <el-button @click="handleClick('delete', scope)"
-                       type="text"
-                       size="small">删除</el-button>
-            <el-button @click="handleClick('change', scope)"
-                       type="text"
-                       size="small">{{scope.row['status'] === 0 ? '启用' : '停用'}}</el-button>
-            <el-button @click="handleClick('copy', scope)"
-                       type="text"
-                       size="small">复制并新建</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="handleClick('edit', scope)">编辑</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="handleClick('delete', scope)">删除</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="handleClick('change', scope)">{{ scope.row['status'] === 0 ? '启用' : '停用' }}</el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click="handleClick('copy', scope)">复制并新建</el-button>
           </template>
         </el-table-column>
       </el-table>
       <div class="p-contianer">
-        <el-pagination class="p-bar"
-                       @size-change="handleSizeChange"
-                       @current-change="handleCurrentChange"
-                       :current-page="currentPage"
-                       :page-sizes="pageSizes"
-                       :page-size.sync="pageSize"
-                       layout="total, sizes, prev, pager, next, jumper"
-                       :total="total">
-        </el-pagination>
+        <el-pagination
+          :current-page="currentPage"
+          :page-sizes="pageSizes"
+          :page-size.sync="pageSize"
+          :total="total"
+          class="p-bar"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"/>
       </div>
     </div>
-    <create-system-examine v-if="showHandleView"
-                           :handle="createHandleInfo"
-                           @save="getList"
-                           @hiden-view="showHandleView=false"></create-system-examine>
-    <system-examine-detail v-if="showDetail"
-                           :data="detailData"
-                           @refresh="getList"
-                           @hide-view="showDetail=false">
-    </system-examine-detail>
+    <create-system-examine
+      v-if="showHandleView"
+      :handle="createHandleInfo"
+      @save="getList"
+      @hiden-view="showHandleView=false"/>
+    <system-examine-detail
+      v-if="showDetail"
+      :data="detailData"
+      @refresh="getList"
+      @hide-view="showDetail=false"/>
   </div>
 </template>
 
@@ -79,11 +88,10 @@ import {
   examineFlowIndex,
   examineFlowUpdateStatus
 } from '@/api/systemManagement/examineflow'
-import { timestampToFormatTime } from '@/utils'
 
 export default {
   /** 系统管理 的 审核管理 */
-  name: 'system-examine',
+  name: 'SystemExamine',
   components: {
     CreateSystemExamine,
     SystemExamineDetail
@@ -188,7 +196,7 @@ export default {
       } else if (column.property === 'categoryType') {
         return { 1: '合同', 2: '回款' }[row[column.property]]
       } else if (column.property === 'userIds') {
-        let structures = row['deptIds'] || []
+        const structures = row['deptIds'] || []
         let strName = structures
           .map(item => {
             return item.name
@@ -199,15 +207,15 @@ export default {
           strName += '、'
         }
 
-        let users = row['userIds'] || []
-        let userName = users
+        const users = row['userIds'] || []
+        const userName = users
           .map(item => {
             return item.realname
           })
           .join('、')
 
-        let name = strName + userName
-        return name ? name : '全公司'
+        const name = strName + userName
+        return name || '全公司'
         // 1 启用 0 禁用 2 删除
       } else if (column.property === 'status') {
         if (row[column.property] === 0) {

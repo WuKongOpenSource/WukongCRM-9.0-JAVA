@@ -1,14 +1,15 @@
 <template>
-  <el-select style="width: 100%;"
-             v-model="dataValue"
-             @change="valueChange"
-             placeholder="请选择"
-             :disabled="disabled">
-    <el-option v-for="item in options"
-               :key="item.typeId"
-               :label="item.name"
-               :value="item.typeId">
-    </el-option>
+  <el-select
+    v-model="dataValue"
+    :disabled="disabled"
+    style="width: 100%;"
+    placeholder="请选择"
+    @change="valueChange">
+    <el-option
+      v-for="item in options"
+      :key="item.typeId"
+      :label="item.name"
+      :value="item.typeId"/>
   </el-select>
 </template>
 <script type="text/javascript">
@@ -16,16 +17,16 @@ import stringMixin from './stringMixin'
 import { crmBusinessStatusList } from '@/api/customermanagement/business'
 
 export default {
-  name: 'xh-business-status', // 商机状态
+  name: 'XhBusinessStatus', // 商机状态
   components: {},
   mixins: [stringMixin],
-  computed: {},
+  props: {},
   data() {
     return {
       options: []
     }
   },
-  props: {},
+  computed: {},
   mounted() {
     this.getBusinessStatusList()
   },
@@ -36,7 +37,7 @@ export default {
         .then(res => {
           this.options = res.data
           if (this.dataValue) {
-            for (let item of this.options) {
+            for (const item of this.options) {
               if (item.typeId == this.dataValue) {
                 this.$emit('value-change', {
                   index: this.index,

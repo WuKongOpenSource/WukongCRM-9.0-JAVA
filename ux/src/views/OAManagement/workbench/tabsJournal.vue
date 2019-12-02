@@ -1,24 +1,25 @@
 <template>
   <div class="content">
-    <div class="list-box" id="journal-list-box">
-      <journal-cell v-for="(item, index) in journalData"
-                    :key="index"
-                    class="list-cell"
-                    :logIndex="index"
-                    :data="item"
-                    :showWorkbench="true"
-                    :style="{margin: marginDefaults ? '0' : '0 20px 20px'}"
-                    @on-handle="jourecallCellHandle"></journal-cell>
-      <slot name="load"></slot>
+    <div id="journal-list-box" class="list-box">
+      <journal-cell
+        v-for="(item, index) in journalData"
+        :key="index"
+        :log-index="index"
+        :data="item"
+        :show-workbench="true"
+        :style="{margin: marginDefaults ? '0' : '0 20px 20px'}"
+        class="list-cell"
+        @on-handle="jourecallCellHandle"/>
+      <slot name="load"/>
     </div>
     <!-- 相关业务页面 -->
-    <c-r-m-all-detail :visible.sync="showRelatedDetail"
-                      :crmType="relatedCRMType"
-                      :listenerIDs="['workbench-main-container']"
-                      :noListenerIDs="['journal-list-box']"
-                      :id="relatedID"
-                      class="d-view">
-    </c-r-m-all-detail>
+    <c-r-m-all-detail
+      :visible.sync="showRelatedDetail"
+      :crm-type="relatedCRMType"
+      :listener-ids="['workbench-main-container']"
+      :no-listener-ids="['journal-list-box']"
+      :id="relatedID"
+      class="d-view"/>
   </div>
 </template>
 
@@ -31,15 +32,6 @@ export default {
     CRMAllDetail,
     JournalCell
   },
-  computed: {},
-  data() {
-    return {
-      // 相关详情的查看
-      relatedID: '',
-      relatedCRMType: '',
-      showRelatedDetail: false
-    }
-  },
   props: {
     // 数据
     journalData: Array,
@@ -48,6 +40,15 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      // 相关详情的查看
+      relatedID: '',
+      relatedCRMType: '',
+      showRelatedDetail: false
+    }
+  },
+  computed: {},
   methods: {
     jourecallCellHandle(data) {
       this.relatedID = data.data.item.key

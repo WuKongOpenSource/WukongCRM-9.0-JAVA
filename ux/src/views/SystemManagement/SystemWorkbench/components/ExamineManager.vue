@@ -1,74 +1,82 @@
 <template>
   <div>
     <div class="se-table-header">
-      <el-button class="se-table-header-button"
-                 @click="addExamine"
-                 type="primary">添加审批流程</el-button>
+      <el-button
+        class="se-table-header-button"
+        type="primary"
+        @click="addExamine">添加审批流程</el-button>
     </div>
-    <el-table class="main-table"
-              id="examine-table"
-              v-loading="loading"
-              :data="list"
-              :height="tableHeight"
-              stripe
-              highlight-current-row
-              style="width: 100%"
-              @row-click="handleRowClick">
-      <el-table-column v-for="(item, index) in fieldList"
-                       :key="index"
-                       show-overflow-tooltip
-                       :formatter="fieldFormatter"
-                       :prop="item.prop"
-                       :width="item.width"
-                       :label="item.label">
-        <template slot="header"
-                  slot-scope="scope">
-          <div class="table-head-name">{{scope.column.label}}</div>
+    <el-table
+      v-loading="loading"
+      id="examine-table"
+      :data="list"
+      :height="tableHeight"
+      class="main-table"
+      stripe
+      highlight-current-row
+      style="width: 100%"
+      @row-click="handleRowClick">
+      <el-table-column
+        v-for="(item, index) in fieldList"
+        :key="index"
+        :formatter="fieldFormatter"
+        :prop="item.prop"
+        :width="item.width"
+        :label="item.label"
+        show-overflow-tooltip>
+        <template
+          slot="header"
+          slot-scope="scope">
+          <div class="table-head-name">{{ scope.column.label }}</div>
         </template>
       </el-table-column>
-      <el-table-column>
-      </el-table-column>
-      <el-table-column fixed="right"
-                       label="操作"
-                       width="250">
+      <el-table-column/>
+      <el-table-column
+        fixed="right"
+        label="操作"
+        width="250">
         <template slot-scope="scope">
-          <el-button @click="handleClick('edit-table', scope)"
-                     type="text"
-                     size="small">编辑表单</el-button>
-          <el-button @click="handleClick('edit', scope)"
-                     type="text"
-                     size="small">编辑</el-button>
-          <el-button :disabled="scope.row.isSys === 1"
-                     @click="handleClick('delete', scope)"
-                     type="text"
-                     size="small">删除</el-button>
-          <el-button @click="handleClick('change', scope)"
-                     type="text"
-                     size="small">{{scope.row['status'] === 0 ? '启用' : '停用'}}</el-button>
+          <el-button
+            type="text"
+            size="small"
+            @click="handleClick('edit-table', scope)">编辑表单</el-button>
+          <el-button
+            type="text"
+            size="small"
+            @click="handleClick('edit', scope)">编辑</el-button>
+          <el-button
+            :disabled="scope.row.isSys === 1"
+            type="text"
+            size="small"
+            @click="handleClick('delete', scope)">删除</el-button>
+          <el-button
+            type="text"
+            size="small"
+            @click="handleClick('change', scope)">{{ scope.row['status'] === 0 ? '启用' : '停用' }}</el-button>
         </template>
       </el-table-column>
     </el-table>
     <div class="p-contianer">
-      <el-pagination class="p-bar"
-                     @size-change="handleSizeChange"
-                     @current-change="handleCurrentChange"
-                     :current-page="currentPage"
-                     :page-sizes="pageSizes"
-                     :page-size.sync="pageSize"
-                     layout="total, sizes, prev, pager, next, jumper"
-                     :total="total">
-      </el-pagination>
+      <el-pagination
+        :current-page="currentPage"
+        :page-sizes="pageSizes"
+        :page-size.sync="pageSize"
+        :total="total"
+        class="p-bar"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"/>
     </div>
-    <create-examine-category v-if="showHandleView"
-                             :handle="createHandleInfo"
-                             @save="saveSuccess"
-                             @hiden-view="showHandleView=false"></create-examine-category>
-    <examine-category-detail v-if="showDetail"
-                             :data="detailData"
-                             @refresh="getList"
-                             @hide-view="showDetail=false">
-
-    </examine-category-detail>
+    <create-examine-category
+      v-if="showHandleView"
+      :handle="createHandleInfo"
+      @save="saveSuccess"
+      @hiden-view="showHandleView=false"/>
+    <examine-category-detail
+      v-if="showDetail"
+      :data="detailData"
+      @refresh="getList"
+      @hide-view="showDetail=false"/>
   </div>
 </template>
 
@@ -80,10 +88,9 @@ import {
 } from '@/api/systemManagement/workbench'
 import CreateExamineCategory from './CreateExamineCategory'
 import ExamineCategoryDetail from './examineCategoryDetail'
-import { timestampToFormatTime } from '@/utils'
 
 export default {
-  name: 'examine-manager',
+  name: 'ExamineManager',
   components: {
     CreateExamineCategory,
     ExamineCategoryDetail
@@ -184,7 +191,7 @@ export default {
           return ''
         }
       } else if (column.property === 'userIds') {
-        let structures = row['deptIds'] || []
+        const structures = row['deptIds'] || []
         let strName = structures
           .map(item => {
             return item.name
@@ -195,16 +202,15 @@ export default {
           strName += '、'
         }
 
-        let users = row['userIds'] || []
-        let userName = users
+        const users = row['userIds'] || []
+        const userName = users
           .map(item => {
             return item.realname
           })
           .join('、')
 
-        let name = strName + userName
-        return name ? name : '全公司'
-        return name ? name : '全公司'
+        const name = strName + userName
+        return name || '全公司'
       } else if (column.property === 'status') {
         if (row[column.property] === 0) {
           return '停用'

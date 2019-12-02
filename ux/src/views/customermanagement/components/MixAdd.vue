@@ -1,135 +1,161 @@
 <template>
   <div class="mix-container">
     <div class="i-cont">
-      <el-input v-model="content"
-                type="textarea"
-                ref='textarea'
-                :autosize="inputAutosize"
-                @focus="inputFocus"
-                clearable
-                resize="none"
-                placeholder="请输入内容"></el-input>
+      <el-input
+        ref="textarea"
+        v-model="content"
+        :autosize="inputAutosize"
+        type="textarea"
+        clearable
+        resize="none"
+        placeholder="请输入内容"
+        @focus="inputFocus"/>
     </div>
-    <section v-if="imgFiles.length > 0"
-             class="img-cont">
+    <section
+      v-if="imgFiles.length > 0"
+      class="img-cont">
       <flexbox wrap="wrap">
-        <div class="img-item"
-             v-for="(item, index) in imgFiles"
-             :key="index"
-             :style="{ 'background-image': 'url('+item.url+')' }"
-             @mouseover="mouseImgOver(item, index)"
-             @mouseleave="mouseImgLeave(item, index)">
-          <div v-if="item.showDelete"
-               class="img-delete"
-               @click="deleteImgOrFile('image', item, index)">×</div>
+        <div
+          v-for="(item, index) in imgFiles"
+          :key="index"
+          :style="{ 'background-image': 'url('+item.url+')' }"
+          class="img-item"
+          @mouseover="mouseImgOver(item, index)"
+          @mouseleave="mouseImgLeave(item, index)">
+          <div
+            v-if="item.showDelete"
+            class="img-delete"
+            @click="deleteImgOrFile('image', item, index)">×</div>
         </div>
         <div class="img-item-add">
-          <input type="file"
-                 class="img-item-iput"
-                 accept="image/*"
-                 multiple
-                 @change="uploadFile">
+          <input
+            type="file"
+            class="img-item-iput"
+            accept="image/*"
+            multiple
+            @change="uploadFile">
         </div>
       </flexbox>
-      <div class="img-bar"
-           @click="deleteAllImg">全部删除</div>
+      <div
+        class="img-bar"
+        @click="deleteAllImg">全部删除</div>
     </section>
-    <section v-if="files.length > 0"
-             class="file-cont">
+    <section
+      v-if="files.length > 0"
+      class="file-cont">
       <flexbox class="f-header">
-        <img class="f-logo"
-             src="@/assets/img/send_file.png">
+        <img
+          class="f-logo"
+          src="@/assets/img/send_file.png">
         <div class="f-name">附件</div>
       </flexbox>
       <div class="f-body">
-        <flexbox class="f-item"
-                 v-for="(item, index) in files"
-                 :key="index">
-          <img class="f-img"
-               :src="item.icon">
-          <div class="f-name">{{item.name+'('+item.size+')'}}</div>
-          <div class="close-button"
-               @click="deleteImgOrFile('file', item, index)">×</div>
+        <flexbox
+          v-for="(item, index) in files"
+          :key="index"
+          class="f-item">
+          <img
+            :src="item.icon"
+            class="f-img">
+          <div class="f-name">{{ item.name+'('+item.size+')' }}</div>
+          <div
+            class="close-button"
+            @click="deleteImgOrFile('file', item, index)">×</div>
         </flexbox>
       </div>
-      <div class="img-bar"
-           @click="files=[]">全部删除</div>
+      <div
+        class="img-bar"
+        @click="files=[]">全部删除</div>
     </section>
-    <section v-if="business.length > 0"
-             class="c-cont">
+    <section
+      v-if="business.length > 0"
+      class="c-cont">
       <flexbox class="c-header">
-        <img class="c-logo"
-             src="@/assets/img/send_business.png">
+        <img
+          class="c-logo"
+          src="@/assets/img/send_business.png">
         <div class="c-name">商机</div>
       </flexbox>
       <div class="c-body">
         <flexbox wrap="wrap">
-          <flexbox class="c-item"
-                   v-for="(item, index) in business"
-                   :key="index">
-            <div class="c-item-name">{{item.businessName}}</div>
-            <div class="c-item-close"
-                 @click="business.splice(index, 1)">×</div>
+          <flexbox
+            v-for="(item, index) in business"
+            :key="index"
+            class="c-item">
+            <div class="c-item-name">{{ item.businessName }}</div>
+            <div
+              class="c-item-close"
+              @click="business.splice(index, 1)">×</div>
           </flexbox>
         </flexbox>
       </div>
     </section>
-    <section v-if="contacts.length > 0"
-             class="c-cont">
+    <section
+      v-if="contacts.length > 0"
+      class="c-cont">
       <flexbox class="c-header">
-        <img class="c-logo"
-             src="@/assets/img/send_contacts.png">
+        <img
+          class="c-logo"
+          src="@/assets/img/send_contacts.png">
         <div class="c-name">联系人</div>
       </flexbox>
       <div class="c-body">
         <flexbox wrap="wrap">
-          <flexbox class="c-item"
-                   v-for="(item, index) in contacts"
-                   :key="index">
-            <div class="c-item-name">{{item.name}}</div>
-            <div class="c-item-close"
-                 @click="contacts.splice(index, 1)">×</div>
+          <flexbox
+            v-for="(item, index) in contacts"
+            :key="index"
+            class="c-item">
+            <div class="c-item-name">{{ item.name }}</div>
+            <div
+              class="c-item-close"
+              @click="contacts.splice(index, 1)">×</div>
           </flexbox>
         </flexbox>
       </div>
     </section>
     <flexbox class="bar-cont">
       <template v-for="(item, index) in barItems">
-        <flexbox v-if="item.type=='img'||item.type=='file'"
-                 class="bar-item"
-                 :key="index"
-                 @click.native="barClick(item)">
-          <input type="file"
-                 class="bar-input"
-                 :accept="item.data"
-                 multiple
-                 @change="uploadFile">
-          <img class="bar-img"
-               :src="item.img">
-          <div class="bar-title">{{item.title}}</div>
+        <flexbox
+          v-if="item.type=='img'||item.type=='file'"
+          :key="index"
+          class="bar-item"
+          @click.native="barClick(item)">
+          <input
+            :accept="item.data"
+            type="file"
+            class="bar-input"
+            multiple
+            @change="uploadFile">
+          <img
+            :src="item.img"
+            class="bar-img">
+          <div class="bar-title">{{ item.title }}</div>
         </flexbox>
-        <el-popover v-else
-                    :key="index"
-                    v-model="item.show"
-                    placement="bottom"
-                    width="700"
-                    popper-class="no-padding-popover"
-                    trigger="click">
-          <crm-relative :show="item.show"
-                        :radio="false"
-                        ref="crmrelative"
-                        :action="{ type: 'condition', data: { moduleType: crmType, customerId: id } }"
-                        :selectedData="item.type == 'business' ? { 'business': business } : { 'contacts': contacts }"
-                        :crm-type="item.type"
-                        @close="item.show=false"
-                        @changeCheckout="checkRelativeInfos">
-          </crm-relative>
-          <flexbox slot="reference"
-                   class="bar-item"
-                   @click.native="barClick(item)">
-            <img class="bar-img"
-                 :src="item.img">
-            <div class="bar-title">{{item.title}}</div>
+        <el-popover
+          v-else
+          :key="index"
+          v-model="item.show"
+          placement="bottom"
+          width="700"
+          popper-class="no-padding-popover"
+          trigger="click">
+          <crm-relative
+            ref="crmrelative"
+            :show="item.show"
+            :radio="false"
+            :action="{ type: 'condition', data: { moduleType: crmType, customerId: id } }"
+            :selected-data="item.type == 'business' ? { 'business': business } : { 'contacts': contacts }"
+            :crm-type="item.type"
+            @close="item.show=false"
+            @changeCheckout="checkRelativeInfos"/>
+          <flexbox
+            slot="reference"
+            class="bar-item"
+            @click.native="barClick(item)">
+            <img
+              :src="item.img"
+              class="bar-img">
+            <div class="bar-title">{{ item.title }}</div>
           </flexbox>
         </el-popover>
       </template>
@@ -144,7 +170,7 @@ import CrmRelative from '@/components/CreateCom/CrmRelative'
 
 export default {
   /** 跟进记录 下的 添加 有添加框的都需要*/
-  name: 'mix-add',
+  name: 'MixAdd',
   components: {
     CrmRelative
   },
@@ -221,7 +247,7 @@ export default {
       })
     }
     /** 父组件通知子组件提交数据 */
-    /**将拼接好的数据回调父组件 this.$refs.child.$emit('submit-info');  调用*/
+    /** 将拼接好的数据回调父组件 this.$refs.child.$emit('submit-info');  调用*/
     this.$on('submit-info', function() {
       this.$emit('mixadd-info', {
         content: this.content,
@@ -232,6 +258,10 @@ export default {
         batchId: this.batchId
       })
     })
+  },
+
+  beforeDestroy() {
+    this.$off('submit-info')
   },
   methods: {
     resetInfo() {
@@ -348,10 +378,6 @@ export default {
         this.$refs.textarea.resizeTextarea()
       })
     }
-  },
-
-  beforeDestroy() {
-    this.$off('submit-info')
   }
 }
 </script>

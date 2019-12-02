@@ -1,18 +1,21 @@
 <template>
   <el-container>
     <el-header class="nav-container">
-      <navbar :navIndex="5"
-              @nav-items-click="navClick"></navbar>
+      <navbar
+        :nav-index="5"
+        @nav-items-click="navClick"/>
     </el-header>
     <el-container>
-      <el-aside width="auto"
-                class="aside-container">
-        <sidebar :items="biRouterItems"
-                 createButtonTitle=""
-                 mainRouter="bi"></sidebar>
+      <el-aside
+        width="auto"
+        class="aside-container">
+        <sidebar
+          :items="biRouterItems"
+          create-button-title=""
+          main-router="bi"/>
       </el-aside>
       <el-main id="crm-main-container">
-        <app-main></app-main>
+        <app-main/>
       </el-main>
     </el-container>
   </el-container>
@@ -24,26 +27,24 @@ import { Navbar, Sidebar, AppMain } from './components'
 import { biRouterMenu } from '@/router/modules/business'
 
 export default {
-  name: 'business-layout',
+  name: 'BusinessLayout',
   components: {
     Navbar,
     Sidebar,
     AppMain
+  },
+  data() {
+    return {}
   },
   computed: {
     ...mapGetters(['bi']),
     biRouterItems() {
       for (let index = 0; index < biRouterMenu.length; index++) {
         const routerMenuItem = biRouterMenu[index]
-        routerMenuItem.hidden = this.bi[routerMenuItem.meta.subType]
-          ? false
-          : true
+        routerMenuItem.hidden = !this.bi[routerMenuItem.meta.subType]
       }
       return biRouterMenu
     }
-  },
-  data() {
-    return {}
   },
   methods: {
     navClick(index) {}

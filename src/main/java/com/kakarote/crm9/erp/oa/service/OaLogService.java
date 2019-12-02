@@ -55,7 +55,7 @@ public class OaLogService {
         }else {
             userIds = new AdminUserService().queryUserByParentUser(user.getUserId(), BaseConstant.AUTH_DATA_RECURSION_NUM);
             if (object.containsKey("createUserId")) {
-                if(!userIds.contains(Long.valueOf(object.getInteger("createUserId")))){
+                if(!userIds.contains(object.getLong("createUserId"))){
                     return new Page<>();
                 }
             }
@@ -96,7 +96,7 @@ public class OaLogService {
         record.set("contractList", (StrUtil.isNotEmpty(record.getStr("contract_ids")) && record.getStr("contract_ids").split(",").length > 0) ? Db.find(Db.getSqlPara("crm.contract.queryByIds", Kv.by("ids", record.getStr("contract_ids").split(",")))) : new ArrayList<>());
         record.set("createUser", Db.findFirst(Db.getSql("admin.user.queryUserByUserId"), record.getStr("create_user_id")));
         Integer isRead = record.getStr("read_user_ids").contains("," + userId + ",") ? 1 : 0;
-        int isEdit = userId.intValue() == record.getInt("create_user_id") ? 1 : 0;
+        int isEdit = userId == record.getLong("create_user_id") ? 1 : 0;
         int isDel = 0;
         if((System.currentTimeMillis()-1000*3600*72)>record.getDate("create_time").getTime()){
             if(BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID)){
@@ -123,7 +123,7 @@ public class OaLogService {
         AdminUser user = BaseUtil.getUser();
         OaLog oaLog = object.toJavaObject(OaLog.class);
         OaLogRelation oaLogRelation = object.toJavaObject(OaLogRelation.class);
-        oaLog.setCreateUserId(user.getUserId().intValue());
+        oaLog.setCreateUserId(user.getUserId());
         oaLog.setCreateTime(new Date());
         oaLog.setReadUserIds(",,");
         oaLog.setSendUserIds(TagUtil.fromString(oaLog.getSendUserIds()));
@@ -132,10 +132,10 @@ public class OaLogService {
             boolean oaAuth = AuthUtil.isOaAuth(OaEnum.LOG_TYPE_KEY.getTypes(), oaLog.getLogId());
             if(oaAuth){return R.noAuth();}
             oaLog.update();
-            oaActionRecordService.addRecord(oaLog.getLogId(), OaEnum.LOG_TYPE_KEY.getTypes(), 2, oaActionRecordService.getJoinIds(user.getUserId().intValue(), oaLog.getSendUserIds()),  oaLog.getSendDeptIds());
+            oaActionRecordService.addRecord(oaLog.getLogId(), OaEnum.LOG_TYPE_KEY.getTypes(), 2, oaActionRecordService.getJoinIds(user.getUserId(), oaLog.getSendUserIds()),  oaLog.getSendDeptIds());
         } else {
             oaLog.save();
-            oaActionRecordService.addRecord(oaLog.getLogId(), OaEnum.LOG_TYPE_KEY.getTypes(), 1, oaActionRecordService.getJoinIds(user.getUserId().intValue(), oaLog.getSendUserIds()),  oaLog.getSendDeptIds());
+            oaActionRecordService.addRecord(oaLog.getLogId(), OaEnum.LOG_TYPE_KEY.getTypes(), 1, oaActionRecordService.getJoinIds(user.getUserId(), oaLog.getSendUserIds()),  oaLog.getSendDeptIds());
         }
         if (oaLogRelation != null) {
             Db.deleteById("72crm_oa_log_relation", "log_id", oaLog.getLogId());

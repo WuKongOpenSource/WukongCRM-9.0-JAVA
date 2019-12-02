@@ -1,95 +1,113 @@
 <template>
   <div class="fl-c">
     <flexbox class="fl-h">
-      <div v-photo="data.createUser"
-           v-lazy:background-image="$options.filters.filterUserLazyImg(data.createUser.img)"
-           class="div-photo fl-h-img"></div>
+      <div
+        v-photo="data.createUser"
+        v-lazy:background-image="$options.filters.filterUserLazyImg(data.createUser.img)"
+        class="div-photo fl-h-img"/>
       <div class="fl-h-b">
-        <div class="fl-h-name">{{data.createUser.realname}}</div>
-        <div class="fl-h-time">{{data.createTime}}</div>
+        <div class="fl-h-name">{{ data.createUser.realname }}</div>
+        <div class="fl-h-time">{{ data.createTime }}</div>
       </div>
-      <el-dropdown @command="handleCommand"
-                   v-if="data.permission && (data.permission.isUpdate == 1 || data.permission.isDelete == 1)"
-                   trigger="click">
-        <i style="color:#CDCDCD;"
-           class="el-icon-arrow-down el-icon-more"></i>
+      <el-dropdown
+        v-if="data.permission && (data.permission.isUpdate == 1 || data.permission.isDelete == 1)"
+        trigger="click"
+        @command="handleCommand">
+        <i
+          style="color:#CDCDCD;"
+          class="el-icon-arrow-down el-icon-more"/>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="edit"
-                            v-if="data.permission && data.permission.isUpdate == 1">编辑</el-dropdown-item>
-          <el-dropdown-item command="delete"
-                            v-if="data.permission && data.permission.isDelete == 1">删除</el-dropdown-item>
+          <el-dropdown-item
+            v-if="data.permission && data.permission.isUpdate == 1"
+            command="edit">编辑</el-dropdown-item>
+          <el-dropdown-item
+            v-if="data.permission && data.permission.isDelete == 1"
+            command="delete">删除</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </flexbox>
     <div class="fl-b">
       <div>
-        <div class="state-color"
-             :style="{'background-color': data.color ? data.color : '#fff'}"></div>{{data.title}}
+        <div
+          :style="{'background-color': data.color ? data.color : '#fff'}"
+          class="state-color"/>{{ data.title }}
       </div>
       <div class="fl-b-des">
         <flexbox class="fl-b-des-item">
           <div class="fl-b-des-item-name">参与人：</div>
           <div class="owner-list">
-            <span v-for="(k, j) in data.ownerList"
-                  :key="j">
-              <el-tooltip placement="bottom"
-                          effect="light"
-                          popper-class="tooltip-change-border">
+            <span
+              v-for="(k, j) in data.ownerList"
+              :key="j">
+              <el-tooltip
+                placement="bottom"
+                effect="light"
+                popper-class="tooltip-change-border">
                 <div slot="content">
-                  <span>{{k.realname}}</span>
+                  <span>{{ k.realname }}</span>
                 </div>
-                <div v-photo="k"
-                     :key="k.img"
-                     v-lazy:background-image="$options.filters.filterUserLazyImg(k.img)"
-                     class="div-photo header-circle"></div>
+                <div
+                  v-photo="k"
+                  v-lazy:background-image="$options.filters.filterUserLazyImg(k.img)"
+                  :key="k.img"
+                  class="div-photo header-circle"/>
               </el-tooltip>
             </span>
           </div>
         </flexbox>
         <flexbox class="fl-b-des-item">
           <div class="fl-b-des-item-name">开始时间：</div>
-          <div>{{data.startTime}}</div>
+          <div>{{ data.startTime }}</div>
         </flexbox>
         <flexbox class="fl-b-des-item">
           <div class="fl-b-des-item-name">结束时间：</div>
-          <div>{{data.endTime}}</div>
+          <div>{{ data.endTime }}</div>
         </flexbox>
         <flexbox class="fl-b-des-item">
           <div class="fl-b-des-item-name">备注：</div>
-          <div>{{data.remark}}</div>
+          <div>{{ data.remark }}</div>
         </flexbox>
       </div>
       <!-- 关联业务 -->
-      <div class="related-business"
-           v-if="data.contactsList.length > 0 || data.customerList.length > 0 || data.businessList.length > 0 || data.contractList.length > 0">
+      <div
+        v-if="data.contactsList.length > 0 || data.customerList.length > 0 || data.businessList.length > 0 || data.contractList.length > 0"
+        class="related-business">
         <div class="label">关联业务</div>
-        <p v-for="(contacts, i) in data.contactsList"
-           :key="'contacts' + i"
-           @click="checkRelatedDetail('contacts',contacts)">
-          <img src="@/assets/img/relevance_business.png"
-               alt="">
-          联系人-{{contacts.name}}
+        <p
+          v-for="(contacts, i) in data.contactsList"
+          :key="'contacts' + i"
+          @click="checkRelatedDetail('contacts',contacts)">
+          <img
+            src="@/assets/img/relevance_business.png"
+            alt="">
+          联系人-{{ contacts.name }}
         </p>
-        <p v-for="(customer, i) in data.customerList"
-           :key="'customer' + i"
-           @click="checkRelatedDetail('customer',customer)">
-          <img src="@/assets/img/relevance_business.png"
-               alt="">
-          客户-{{customer.customerName}}
+        <p
+          v-for="(customer, i) in data.customerList"
+          :key="'customer' + i"
+          @click="checkRelatedDetail('customer',customer)">
+          <img
+            src="@/assets/img/relevance_business.png"
+            alt="">
+          客户-{{ customer.customerName }}
         </p>
-        <p v-for="(business, i) in data.businessList"
-           :key="'business' + i"
-           @click="checkRelatedDetail('business',business)">
-          <img src="@/assets/img/relevance_business.png"
-               alt="">
-          商机-{{business.businessName}}
+        <p
+          v-for="(business, i) in data.businessList"
+          :key="'business' + i"
+          @click="checkRelatedDetail('business',business)">
+          <img
+            src="@/assets/img/relevance_business.png"
+            alt="">
+          商机-{{ business.businessName }}
         </p>
-        <p v-for="(contract, i) in data.contractList"
-           :key="'contract' + i"
-           @click="checkRelatedDetail('contract',contract)">
-          <img src="@/assets/img/relevance_business.png"
-               alt="">
-          合同-{{contract.name}}
+        <p
+          v-for="(contract, i) in data.contractList"
+          :key="'contract' + i"
+          @click="checkRelatedDetail('contract',contract)">
+          <img
+            src="@/assets/img/relevance_business.png"
+            alt="">
+          合同-{{ contract.name }}
         </p>
       </div>
     </div>
@@ -99,50 +117,40 @@
 <script>
 export default {
   /** 客户管理 的 客户详情 的 任务cell */
-  name: 'follow-schedule-cell',
+  name: 'FollowScheduleCell',
   components: {},
-  props: {
-    data: Object
-  },
-  data() {
-    return {}
-  },
   filters: {
     getRemindtypeText: function(remindtype) {
       switch (remindtype) {
         case 0:
           return '无'
-          break
         case 1:
           return '准时提醒'
-          break
         case 2:
           return '5分钟前'
-          break
         case 3:
           return '15分钟前'
-          break
         case 4:
           return '30分钟前'
-          break
         case 5:
           return '一个小时前'
-          break
         case 6:
           return '二个小时前'
-          break
         case 7:
           return '一天前'
-          break
         case 8:
           return '二天前'
-          break
         case 9:
           return '一周前'
-          break
       }
       return ''
     }
+  },
+  props: {
+    data: Object
+  },
+  data() {
+    return {}
   },
   computed: {},
   mounted() {},

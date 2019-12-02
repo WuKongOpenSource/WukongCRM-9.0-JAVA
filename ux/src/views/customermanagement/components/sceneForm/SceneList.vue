@@ -1,25 +1,30 @@
 <template>
   <div class="scene-container">
     <div class="scene-list">
-      <div v-for="(item, index) in sceneList"
-           :key="index"
-           @click="selectScene(item, index)"
-           :class="{'scene-list-item-select':item.sceneId == sceneSelectId}"
-           class="scene-list-item">
-        {{item.name}}
+      <div
+        v-for="(item, index) in sceneList"
+        :key="index"
+        :class="{'scene-list-item-select':item.sceneId == sceneSelectId}"
+        class="scene-list-item"
+        @click="selectScene(item, index)">
+        {{ item.name }}
       </div>
     </div>
     <div>
-      <flexbox class="handle-button"
-               @click.native="addScene">
-        <img class="handle-button-icon"
-             src="@/assets/img/scene_add.png" />
+      <flexbox
+        class="handle-button"
+        @click.native="addScene">
+        <img
+          class="handle-button-icon"
+          src="@/assets/img/scene_add.png" >
         <div class="handle-button-name">新建场景</div>
       </flexbox>
-      <flexbox class="handle-button"
-               @click.native="setScene">
-        <img class="handle-button-icon"
-             src="@/assets/img/scene_set.png" />
+      <flexbox
+        class="handle-button"
+        @click.native="setScene">
+        <img
+          class="handle-button-icon"
+          src="@/assets/img/scene_set.png" >
         <div class="handle-button-name">管理</div>
       </flexbox>
     </div>
@@ -33,10 +38,14 @@ import { mapGetters } from 'vuex'
 import { crmSceneIndex } from '@/api/customermanagement/common'
 
 export default {
-  name: 'scene-list', //客户管理下 重要提醒 回款计划提醒
+  name: 'SceneList', // 客户管理下 重要提醒 回款计划提醒
   components: {},
-  computed: {
-    ...mapGetters(['crm'])
+  props: {
+    /** 没有值就是全部类型 有值就是当个类型 */
+    crmType: {
+      type: String,
+      default: ''
+    }
   },
   data() {
     return {
@@ -45,14 +54,10 @@ export default {
       sceneList: []
     }
   },
-  watch: {},
-  props: {
-    /** 没有值就是全部类型 有值就是当个类型 */
-    crmType: {
-      type: String,
-      default: ''
-    }
+  computed: {
+    ...mapGetters(['crm'])
   },
+  watch: {},
   mounted() {
     if (this.crm[this.crmType].index) {
       this.getSceneList()
@@ -64,12 +69,12 @@ export default {
         type: crmTypeModel[this.crmType]
       })
         .then(res => {
-          let defaultScenes = res.data.filter(function(item, index) {
+          const defaultScenes = res.data.filter(function(item, index) {
             return item.isDefault === 1
           })
 
           if (defaultScenes && defaultScenes.length > 0) {
-            let defaultScene = defaultScenes[0]
+            const defaultScene = defaultScenes[0]
             this.sceneSelectId = defaultScene.sceneId
             this.$emit('scene', {
               id: defaultScene.sceneId,

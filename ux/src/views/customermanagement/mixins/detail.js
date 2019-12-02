@@ -25,7 +25,7 @@ export default {
   },
 
   watch: {
-    id: function () {
+    id: function() {
       if (this.canShowDetail) {
         this.getDetial()
       }
@@ -45,11 +45,13 @@ export default {
         this.isCreate = true
       } else if (data.type === 'delete') {
         this.hideView()
+      } else if (data.type === 'discard') {
+        this.getDetial()
       }
       this.$emit('handle', data)
     }
   },
 
-  deactivated: function () { }
+  deactivated: function() { }
 
 }

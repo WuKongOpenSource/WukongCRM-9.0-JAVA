@@ -82,14 +82,13 @@ export function compressImage(file, quality, callback) {
   // quality 设置为0.3
   quality = quality || 0.3
   const reader = new FileReader()
-  reader.onload = function (event) {
+  reader.onload = function(event) {
     var result = event.target.result
     if (file.size > 204800 && file.type !== 'image/gif' && quality < 1) { // 大于200Kb
       const img = new Image()
       img.src = result
-      img.onload = function () {
+      img.onload = function() {
         // 如果图片大于四百万像素，计算压缩比并将大小压至400万以下
-        var initSize = img.src.length
         var width = img.width
         var height = img.height
 
@@ -299,7 +298,7 @@ export function regexIsCRMEmail(email) {
 
 /**
  * 时间操作
- * @param 
+ * @param
  */
 /** 时间戳转date*/
 import moment from 'moment'
@@ -315,8 +314,8 @@ export function getDateFromTimestamp(time) {
 }
 
 /**
- * 
- * @param {*} timestamp 时间戳 
+ *
+ * @param {*} timestamp 时间戳
  * @param {*} format 格式化
  */
 export function timestampToFormatTime(timestamp, format) {
@@ -326,7 +325,7 @@ export function timestampToFormatTime(timestamp, format) {
   return ''
 }
 /**
- * 
+ *
  * @param {*} format 格式化字符串
  */
 export function formatTimeToTimestamp(format) {
@@ -351,7 +350,7 @@ export function downloadImage(data, filename) {
     const image = new Image()
     // 解决跨域 canvas 污染问题
     image.setAttribute('crossOrigin', 'anonymous')
-    image.onload = function () {
+    image.onload = function() {
       const canvas = document.createElement('canvas')
       canvas.width = image.width
       canvas.height = image.height
@@ -384,7 +383,7 @@ export function downloadImage(data, filename) {
     a.dispatchEvent(event)
   }
 }
-/** 
+/**
  * path  和 name
  */
 export function downloadFile(data) {
@@ -413,20 +412,20 @@ export function dataURLtoBlob(dataurl) {
 }
 
 export function getBase64Image(img) {
-  var canvas = document.createElement("canvas")
+  var canvas = document.createElement('canvas')
   canvas.width = img.width
   canvas.height = img.height
-  var ctx = canvas.getContext("2d")
+  var ctx = canvas.getContext('2d')
   ctx.drawImage(img, 0, 0, img.width, img.height)
-  var ext = img.src.substring(img.src.lastIndexOf(".") + 1).toLowerCase()
-  var dataURL = canvas.toDataURL("image/" + ext)
+  var ext = img.src.substring(img.src.lastIndexOf('.') + 1).toLowerCase()
+  var dataURL = canvas.toDataURL('image/' + ext)
   return dataURL
 }
 
 // 获取绑定参数
 export function guid() {
   function S4() {
-    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
   }
-  return (S4() + S4() + S4() + S4() + S4() + S4() + S4() + S4());
+  return (S4() + S4() + S4() + S4() + S4() + S4() + S4() + S4())
 }

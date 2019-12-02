@@ -1,8 +1,9 @@
 <template>
   <div class="map-view">
-    <div id="choicemap"></div>
-    <i class="el-icon-close map-close"
-       @click="hiddenView"></i>
+    <div id="choicemap"/>
+    <i
+      class="el-icon-close map-close"
+      @click="hiddenView"/>
   </div>
 </template>
 
@@ -10,12 +11,8 @@
 import { getMaxIndex } from '@/utils/index'
 
 export default {
-  name: 'map-view', // 地图详情
+  name: 'MapView', // 地图详情
   components: {},
-  computed: {},
-  data() {
-    return {}
-  },
   props: {
     /**
      * title 内容
@@ -34,6 +31,10 @@ export default {
       default: 0
     }
   },
+  data() {
+    return {}
+  },
+  computed: {},
   mounted() {
     this.$el.style.zIndex = getMaxIndex()
     document.body.appendChild(this.$el)
@@ -47,18 +48,18 @@ export default {
     map.addOverlay(marker) // 将标注添加到地图中
     var infoWindow = new BMap.InfoWindow(this.title) // 创建信息窗口对象
     marker.addEventListener('click', function() {
-      map.openInfoWindow(infoWindow, point) //开启信息窗口
+      map.openInfoWindow(infoWindow, point) // 开启信息窗口
     })
-  },
-  methods: {
-    hiddenView() {
-      this.$emit('hidden')
-    }
   },
   destroyed() {
     // remove DOM node after destroy
     if (this.$el && this.$el.parentNode) {
       this.$el.parentNode.removeChild(this.$el)
+    }
+  },
+  methods: {
+    hiddenView() {
+      this.$emit('hidden')
     }
   }
 }

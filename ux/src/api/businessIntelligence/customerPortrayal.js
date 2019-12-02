@@ -12,21 +12,20 @@ export function biAchievementAnalysisAPI(data) {
 }
 
 export function biAchievementPortraitAPI(data) {
-  let  type=data.type_analyse;
-  if(type==='industry'){
+  const type = data.type_analyse
+  if (type === 'industry') {
     return request({
       url: 'biRanking/portrait',
       method: 'post',
       data: data
     })
-  }else if(type==='level'){
+  } else if (type === 'level') {
     return request({
       url: 'biRanking/portraitLevel',
       method: 'post',
       data: data
     })
-  }
-  else if(type==='source'){
+  } else if (type === 'source') {
     return request({
       url: 'biRanking/portraitSource',
       method: 'post',

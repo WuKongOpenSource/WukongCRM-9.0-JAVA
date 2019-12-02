@@ -35,7 +35,7 @@ public class OaExamineCategoryService{
         boolean bol;
         Integer categoryId;
         if(oaExamineCategory.getCategoryId() == null){
-            oaExamineCategory.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            oaExamineCategory.setCreateUserId(BaseUtil.getUser().getUserId());
             oaExamineCategory.setCreateTime(new Date());
             oaExamineCategory.setUpdateTime(new Date());
             bol = oaExamineCategory.save();
@@ -143,7 +143,7 @@ public class OaExamineCategoryService{
     public List<Record> queryField(){
         List<Record> fieldList = new LinkedList<>();
         String[] settingArr = new String[]{};
-        List<Record> fixedFieldList = adminFieldService.list("10");
+        List<Record> fixedFieldList = adminFieldService.list(10);
         fieldUtil.getFixedField(fieldList, "title", "审批内容","", "text", settingArr, 1);
         fieldUtil.getFixedField(fieldList, "remark", "备注", "","text", settingArr, 1);
         fieldList.addAll(fixedFieldList);
@@ -154,7 +154,7 @@ public class OaExamineCategoryService{
         List<Record> fieldList = new ArrayList<>();
         fieldUtil.addListHead(fieldList, "title", "审批内容");
         fieldUtil.addListHead(fieldList, "remark", "备注");
-        fieldList.addAll(adminFieldService.list("10"));
+        fieldList.addAll(adminFieldService.list(10));
         return fieldList;
     }
 

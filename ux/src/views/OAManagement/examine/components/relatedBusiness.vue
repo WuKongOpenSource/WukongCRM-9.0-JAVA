@@ -1,37 +1,41 @@
 <template>
   <div>
-    <el-popover v-model="showPopover"
-                placement="bottom"
-                width="800"
-                popper-class="no-padding-popover"
-                trigger="click">
-      <crm-relative ref="crmrelative"
-                    v-if="showRelative"
-                    :radio="false"
-                    :selectedData="selectedData"
-                    :showTypes='showTypes'
-                    @close="crmrelativeClose"
-                    @changeCheckout="checkInfos">
-      </crm-relative>
-      <p class="add-file"
-         slot="reference"
-         @click="showRelative = true">
-        <img src="@/assets/img/relevance_business.png"
-             alt="">
+    <el-popover
+      v-model="showPopover"
+      placement="bottom"
+      width="800"
+      popper-class="no-padding-popover"
+      trigger="click">
+      <crm-relative
+        v-if="showRelative"
+        ref="crmrelative"
+        :radio="false"
+        :selected-data="selectedData"
+        :show-types="showTypes"
+        @close="crmrelativeClose"
+        @changeCheckout="checkInfos"/>
+      <p
+        slot="reference"
+        class="add-file"
+        @click="showRelative = true">
+        <img
+          src="@/assets/img/relevance_business.png"
+          alt="">
         关联业务
       </p>
     </el-popover>
     <div class="related-business">
-      <div v-for="(items, key) in selectedData"
-           :key="key">
-        <related-business-cell v-for="(item, itemIndex) in items"
-                               :data="item"
-                               :cellIndex="itemIndex"
-                               :type="key"
-                               :key="itemIndex"
-                               :cursorPointer="false"
-                               @unbind="delRelevance">
-        </related-business-cell>
+      <div
+        v-for="(items, key) in selectedData"
+        :key="key">
+        <related-business-cell
+          v-for="(item, itemIndex) in items"
+          :data="item"
+          :cell-index="itemIndex"
+          :type="key"
+          :key="itemIndex"
+          :cursor-pointer="false"
+          @unbind="delRelevance"/>
       </div>
     </div>
   </div>
@@ -42,15 +46,18 @@ import RelatedBusinessCell from '@/views/OAManagement/components/relatedBusiness
 import { objDeepCopy } from '@/utils'
 
 export default {
-  name: 'related-business', // 关联业务
+  name: 'RelatedBusiness', // 关联业务
   components: {
     CrmRelative,
     RelatedBusinessCell
   },
-  computed: {},
-  watch: {
-    selectedInfos: function(data) {
-      this.selectedData = data
+  props: {
+    /** 已选信息 */
+    selectedInfos: {
+      type: Object,
+      default: () => {
+        return {}
+      }
     }
   },
   data() {
@@ -63,13 +70,10 @@ export default {
       selectedData: {}
     }
   },
-  props: {
-    /** 已选信息 */
-    selectedInfos: {
-      type: Object,
-      default: () => {
-        return {}
-      }
+  computed: {},
+  watch: {
+    selectedInfos: function(data) {
+      this.selectedData = data
     }
   },
   mounted() {},

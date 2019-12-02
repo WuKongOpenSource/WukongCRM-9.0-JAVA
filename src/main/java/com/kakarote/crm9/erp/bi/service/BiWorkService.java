@@ -1,5 +1,6 @@
 package com.kakarote.crm9.erp.bi.service;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
@@ -12,6 +13,8 @@ import com.jfinal.plugin.activerecord.SqlPara;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.bi.common.BiTimeUtil;
 import com.kakarote.crm9.erp.oa.service.OaExamineService;
+import com.kakarote.crm9.utils.TagUtil;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.util.*;
 
@@ -40,7 +43,7 @@ public class BiWorkService {
                     }
                     String sendUser = task.getStr("send_user_ids");
                     if (StrUtil.isNotEmpty(sendUser) && sendUser.split(",").length > 0) {
-                        if(!isIntersection(StrUtil.splitTrim(sendUser,","),StrUtil.splitTrim(record.getStr("read_user_ids"),","))){
+                        if(!isIntersection(StrUtil.splitTrim(sendUser,","),StrUtil.splitTrim(task.getStr("read_user_ids"),","))){
                             unReadCont++;
                         }
                     }

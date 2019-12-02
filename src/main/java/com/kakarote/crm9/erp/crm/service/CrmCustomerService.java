@@ -1,5 +1,6 @@
 package com.kakarote.crm9.erp.crm.service;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
@@ -8,12 +9,14 @@ import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Aop;
 import com.jfinal.log.Log;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
+import com.kakarote.crm9.erp.admin.service.AdminUserService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
@@ -88,7 +91,9 @@ public class CrmCustomerService{
     public R addOrUpdate(JSONObject jsonObject, String type){
         CrmCustomer crmCustomer = jsonObject.getObject("entity", CrmCustomer.class);
         String batchId = StrUtil.isNotEmpty(crmCustomer.getBatchId()) ? crmCustomer.getBatchId() : IdUtil.simpleUUID();
-        crmRecordService.updateRecord(jsonObject.getJSONArray("field"), batchId);
+        if(crmCustomer.getCustomerId() != null){
+            crmRecordService.updateRecord(jsonObject.getJSONArray("field"), batchId);
+        }
         adminFieldService.save(jsonObject.getJSONArray("field"), batchId);
         if(crmCustomer.getCustomerId() != null){
             if(!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID) && Db.queryInt(Db.getSql("crm.customer.queryIsRoUser"), BaseUtil.getUserId(), crmCustomer.getCustomerId()) > 0){
@@ -101,9 +106,9 @@ public class CrmCustomerService{
         }else{
             crmCustomer.setCreateTime(DateUtil.date());
             crmCustomer.setUpdateTime(DateUtil.date());
-            crmCustomer.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            crmCustomer.setCreateUserId(BaseUtil.getUser().getUserId());
             if("noImport".equals(type)){
-                crmCustomer.setOwnerUserId(BaseUtil.getUser().getUserId().intValue());
+                crmCustomer.setOwnerUserId(BaseUtil.getUser().getUserId());
             }
             crmCustomer.setBatchId(batchId);
             crmCustomer.setRwUserId(",");
@@ -137,7 +142,7 @@ public class CrmCustomerService{
         List<Record> fieldList = new ArrayList<>();
         FieldUtil field = new FieldUtil(fieldList);
         field.set("客户名称", crmCustomer.getCustomerName())
-                .set("成交状态", crmCustomer.getDealStatus())
+                .set("成交状态", crmCustomer.getDealStatus() == 0 ? "未成交" : "已成交")
                 .set("下次联系时间", DateUtil.formatDateTime(crmCustomer.getNextTime()))
                 .set("网址", crmCustomer.getWebsite())
                 .set("备注", crmCustomer.getRemark())
@@ -204,17 +209,18 @@ public class CrmCustomerService{
         Integer customerId = basePageRequest.getData().getCustomerId();
         Integer pageType = basePageRequest.getPageType();
         String search = basePageRequest.getJsonObject().getString("search");
+        String condition = AuthUtil.getCrmAuthSql(CrmEnum.CRM_CONTRACT, "a");
         if(basePageRequest.getData().getCheckstatus() != null){
             if(0 == pageType){
-                return R.ok().put("data", Db.find(Db.getSqlPara("crm.customer.queryPassContract", Kv.by("customerId", customerId).set("checkStatus", basePageRequest.getData().getCheckstatus()).set("contractName", search))));
+                return R.ok().put("data", Db.find(Db.getSqlPara("crm.customer.queryPassContract", Kv.by("customerId", customerId).set("checkStatus", basePageRequest.getData().getCheckstatus()).set("contractName", search).set("condition",condition))));
             }else{
-                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("crm.customer.queryPassContract", Kv.by("customerId", customerId).set("checkStatus", basePageRequest.getData().getCheckstatus()).set("contractName", search))));
+                return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("crm.customer.queryPassContract", Kv.by("customerId", customerId).set("checkStatus", basePageRequest.getData().getCheckstatus()).set("contractName", search).set("condition",condition))));
             }
         }
         if(0 == pageType){
-            return R.ok().put("data", Db.find(Db.getSqlPara("crm.customer.queryContract", Kv.by("customerId", customerId).set("contractName", search))));
+            return R.ok().put("data", Db.find(Db.getSqlPara("crm.customer.queryContract", Kv.by("customerId", customerId).set("contractName", search).set("condition",condition))));
         }else{
-            return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("crm.customer.queryContract", Kv.by("customerId", customerId).set("contractName", search))));
+            return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), Db.getSqlPara("crm.customer.queryContract", Kv.by("customerId", customerId).set("contractName", search).set("condition",condition))));
         }
     }
 
@@ -310,14 +316,14 @@ public class CrmCustomerService{
      * @author wyq
      * 设置成交状态
      */
-    public R setDealStatus(String ids, String dealStatus){
+    public R setDealStatus(String ids, Integer dealStatus){
         String[] idsArr = ids.split(",");
         for(String id : idsArr){
             if(!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID) && Db.queryInt(Db.getSql("crm.customer.queryIsRoUser"), BaseUtil.getUserId(), id) > 0){
                 return R.error("没有权限");
             }
             CrmCustomer customer = CrmCustomer.dao.findById(id);
-            if ("未成交".equals(dealStatus) && "已成交".equals(customer.getDealStatus())){
+            if (0 == dealStatus && 1 == customer.getDealStatus()){
                 if(!queryCustomerSettingNum(1,Long.valueOf(customer.getOwnerUserId()))){
                     return R.error("所选客户中有负责人拥有客户数已达上限");
                 }
@@ -402,14 +408,15 @@ public class CrmCustomerService{
     public R addMember(CrmCustomer crmCustomer){
         String[] customerIdsArr = crmCustomer.getIds().split(",");
         String[] memberArr = crmCustomer.getMemberIds().split(",");
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuffer = new StringBuilder();
+        Long userId = BaseUtil.getUserId();
         for(String id : customerIdsArr){
-            if(!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID) && Db.queryInt(Db.getSql("crm.customer.queryIsRoUser"), BaseUtil.getUserId(), id) > 0){
+            if(!userId.equals(BaseConstant.SUPER_ADMIN_USER_ID) && !BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID) && Db.template("crm.customer.queryIsAuth",Kv.by("userIds",Aop.get(AdminUserService.class).queryUserByAuth(userId,"customer")).set("customerId",id)).queryInt() == 0){
                 return R.error("没有权限");
             }
-            Integer ownerUserId = CrmCustomer.dao.findById(Integer.valueOf(id)).getOwnerUserId();
+            Long ownerUserId = CrmCustomer.dao.findById(Integer.valueOf(id)).getOwnerUserId();
             for(String memberId : memberArr){
-                if(ownerUserId.equals(Integer.valueOf(memberId))){
+                if(ownerUserId.equals(Long.valueOf(memberId))){
                     return R.error("负责人不能重复选为团队成员!");
                 }
                 Db.update(Db.getSql("crm.customer.deleteMember"), "," + memberId + ",", "," + memberId + ",", Integer.valueOf(id));
@@ -436,8 +443,9 @@ public class CrmCustomerService{
     public R deleteMembers(CrmCustomer crmCustomer){
         String[] customerIdsArr = crmCustomer.getIds().split(",");
         String[] memberArr = crmCustomer.getMemberIds().split(",");
+        Long userId = BaseUtil.getUserId();
         for(String id : customerIdsArr){
-            if( !BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID) && Db.queryInt(Db.getSql("crm.customer.queryIsRoUser"), BaseUtil.getUserId(), id) > 0){
+            if(!userId.equals(BaseConstant.SUPER_ADMIN_USER_ID) && !BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID) && Db.template("crm.customer.queryIsAuth",Kv.by("userIds",Aop.get(AdminUserService.class).queryUserByAuth(userId,"customer")).set("customerId",id)).queryInt() == 0){
                 return R.error("没有权限");
             }
             for(String memberId : memberArr){
@@ -514,7 +522,7 @@ public class CrmCustomerService{
      */
     public List<Record> queryField(Integer customerId){
         Record customer = queryById(customerId);
-        List<Record> fieldList = adminFieldService.queryUpdateField(2, customer);
+        List<Record> fieldList = adminFieldService.queryUpdateField(CrmEnum.CRM_CUSTOMER.getType(), customer);
         fieldList.add(new Record().set("fieldName", "map_address")
                 .set("name", "地区定位")
                 .set("value", Kv.by("location", customer.getStr("location"))
@@ -536,17 +544,20 @@ public class CrmCustomerService{
     public R addRecord(AdminRecord adminRecord){
         adminRecord.setTypes("crm_customer");
         adminRecord.setCreateTime(DateUtil.date());
-        adminRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        adminRecord.setCreateUserId(BaseUtil.getUser().getUserId());
+        if (StrUtil.isEmpty(adminRecord.getCategory())){
+            return R.error("跟进类型不能为空");
+        }
         if(1 == adminRecord.getIsEvent()){
             OaEvent oaEvent = new OaEvent();
             oaEvent.setTitle(adminRecord.getContent());
             oaEvent.setStartTime(adminRecord.getNextTime());
             oaEvent.setEndTime(DateUtil.offsetDay(adminRecord.getNextTime(), 1));
             oaEvent.setCreateTime(DateUtil.date());
-            oaEvent.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            oaEvent.setCreateUserId(BaseUtil.getUser().getUserId());
             oaEvent.save();
             AdminUser user = BaseUtil.getUser();
-            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(), 1, oaActionRecordService.getJoinIds(user.getUserId().intValue(), oaEvent.getOwnerUserIds()), oaActionRecordService.getJoinIds(user.getDeptId(), ""));
+            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(), 1, oaActionRecordService.getJoinIds(user.getUserId(), oaEvent.getOwnerUserIds()), oaActionRecordService.getJoinIds(Long.valueOf(user.getDeptId()), ""));
             OaEventRelation oaEventRelation = new OaEventRelation();
             oaEventRelation.setEventId(oaEvent.getEventId());
             oaEventRelation.setCustomerIds("," + adminRecord.getTypesId().toString() + ",");
@@ -716,9 +727,6 @@ public class CrmCustomerService{
             if(!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID) && Db.queryInt(Db.getSql("crm.customer.queryIsRoUser"), BaseUtil.getUserId(), id) > 0){
                 return R.error("无权限放入");
             }
-//            if (!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !AuthUtil.isRwAuth(Integer.valueOf(id),"customer")){
-//                return R.error("无权限放入");
-//            }
             CrmCustomer crmCustomer = CrmCustomer.dao.findById(Integer.valueOf(id));
             CrmOwnerRecord crmOwnerRecord = new CrmOwnerRecord();
             crmOwnerRecord.setTypeId(Integer.valueOf(id));
@@ -744,26 +752,26 @@ public class CrmCustomerService{
             userId = BaseUtil.getUser().getUserId();
         }
         String[] idsArr = ids.split(",");
-        if(! isMaxOwner(userId.intValue(), idsArr)){
+        if(! isMaxOwner(userId, idsArr)){
             return R.error("该员工拥有客户数已达上限");
         }
         for(String id : idsArr){
             CrmOwnerRecord crmOwnerRecord = new CrmOwnerRecord();
             crmOwnerRecord.setTypeId(Integer.valueOf(id));
             crmOwnerRecord.setType(8);
-            crmOwnerRecord.setPostOwnerUserId(userId.intValue());
+            crmOwnerRecord.setPostOwnerUserId(userId);
             crmOwnerRecord.setCreateTime(DateUtil.date());
             crmOwnerRecord.save();
-            Db.update("update 72crm_crm_contacts set owner_user_id = ? where customer_id = ?", userId.intValue(), id);
+            Db.update("update 72crm_crm_contacts set owner_user_id = ? where customer_id = ?", userId, id);
         }
         SqlPara sqlPara = Db.getSqlPara("crm.customer.getCustomersByIds", Kv.by("userId", userId).set("createTime", DateUtil.date()).set("ids", idsArr));
         return Db.update(sqlPara) > 0 ? R.ok() : R.error();
     }
 
-    public boolean isMaxOwner(Integer ownerUserId, String[] ids){
+    public boolean isMaxOwner(Long ownerUserId, String[] ids){
         SqlPara sqlPara = Db.getSqlPara("crm.customer.ownerNum", Kv.by("ids", ids).set("ownerUserId", ownerUserId));
         Integer number = Db.queryInt(sqlPara.getSql(), sqlPara.getPara());
-        return queryCustomerSettingNum(1, ownerUserId.longValue(), number);
+        return queryCustomerSettingNum(1, ownerUserId, number);
     }
 
     /**
@@ -787,9 +795,9 @@ public class CrmCustomerService{
         try{
             List<List<Object>> read = reader.read();
             List<Object> list = read.get(1);
-            List<Record> recordList = adminFieldService.customFieldList("2");
+            List<Record> recordList = adminFieldService.customFieldList(2);
             recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType")) || "user".equals(record.getStr("formType")) || "structure".equals(record.getStr("formType")));
-            List<Record> fieldList = adminFieldService.queryAddField(2);
+            List<Record> fieldList = adminFieldService.queryAddField(CrmEnum.CRM_CUSTOMER);
             fieldList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType")) || "user".equals(record.getStr("formType")) || "structure".equals(record.getStr("formType")));
             fieldList.forEach(record -> {
                 if(record.getInt("is_null") == 1){
@@ -870,37 +878,48 @@ public class CrmCustomerService{
         return R.ok();
     }
 
-    @Before(Tx.class)
+
     public R customerSetting(CrmCustomerSetting customerSetting){
-        customerSetting.setCreateTime(DateUtil.date());
-        if(customerSetting.getSettingId() != null){
-            customerSetting.update();
-        }else{
-            customerSetting.save();
-        }
-        Integer type = customerSetting.getType();
-        Db.delete("delete from `72crm_crm_customer_settinguser` where setting_id = ?", customerSetting.getSettingId());
-        for(Integer deptId : customerSetting.getDeptList()){
-            Integer count = Db.findFirst(Db.getSqlPara("crm.customer.getCustomerSettingCount", Kv.by("type", type).set("deptId", deptId))).getInt("count(*)");
-            if(count > 0){
-                return R.error("已经有员工或部门信息包含在别的规则里面");
+        List<String> errorList = new ArrayList<>();
+        Db.tx(() -> {
+            Db.delete("delete from `72crm_crm_customer_settinguser` where setting_id = ?", customerSetting.getSettingId());
+            customerSetting.setCreateTime(DateUtil.date());
+            if (customerSetting.getSettingId() != null) {
+                customerSetting.update();
+            } else {
+                customerSetting.save();
             }
-            CrmCustomerSettingUser crmCustomerSettingUser = new CrmCustomerSettingUser();
-            crmCustomerSettingUser.setDeptId(deptId);
-            crmCustomerSettingUser.setSettingId(customerSetting.getSettingId());
-            crmCustomerSettingUser.setType(2);
-            crmCustomerSettingUser.save();
-        }
-        for(Long userId : customerSetting.getUserList()){
-            Integer count = Db.findFirst(Db.getSqlPara("crm.customer.getCustomerSettingCount", Kv.by("type", type).set("userId", userId))).getInt("count(*)");
-            if(count > 0){
-                return R.error("已经有员工或部门信息包含在别的规则里面");
+            Integer type = customerSetting.getType();
+            for (Integer deptId : customerSetting.getDeptList()) {
+                SqlPara sqlPara = Db.getSqlPara("crm.customer.getCustomerSettingCount", Kv.by("type", type).set("deptId", deptId));
+                Integer count = Db.queryInt(sqlPara.getSql(), sqlPara.getPara());
+                if (count > 0) {
+                    errorList.add("已经有员工或部门信息包含在别的规则里面");
+                    return false;
+                }
+                CrmCustomerSettingUser crmCustomerSettingUser = new CrmCustomerSettingUser();
+                crmCustomerSettingUser.setDeptId(deptId);
+                crmCustomerSettingUser.setSettingId(customerSetting.getSettingId());
+                crmCustomerSettingUser.setType(2);
+                crmCustomerSettingUser.save();
             }
-            CrmCustomerSettingUser crmCustomerSettingUser = new CrmCustomerSettingUser();
-            crmCustomerSettingUser.setUserId(userId);
-            crmCustomerSettingUser.setSettingId(customerSetting.getSettingId());
-            crmCustomerSettingUser.setType(1);
-            crmCustomerSettingUser.save();
+            for (Long userId : customerSetting.getUserList()) {
+                SqlPara sqlPara = Db.getSqlPara("crm.customer.getCustomerSettingCount", Kv.by("type", type).set("userId", userId));
+                Integer count = Db.queryInt(sqlPara.getSql(), sqlPara.getPara());
+                if (count > 0) {
+                    errorList.add("已经有员工或部门信息包含在别的规则里面");
+                    return false;
+                }
+                CrmCustomerSettingUser crmCustomerSettingUser = new CrmCustomerSettingUser();
+                crmCustomerSettingUser.setUserId(userId);
+                crmCustomerSettingUser.setSettingId(customerSetting.getSettingId());
+                crmCustomerSettingUser.setType(1);
+                crmCustomerSettingUser.save();
+            }
+            return true;
+        });
+        if (CollectionUtil.isNotEmpty(errorList)) {
+            return R.error(errorList.get(0));
         }
         return R.ok();
     }

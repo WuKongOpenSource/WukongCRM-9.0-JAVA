@@ -1,14 +1,15 @@
 <template>
   <div class="box-wrapper">
     <div class="title">
-      <span>{{attr.isNull ? '*' : ''}}</span>{{attr.name}}<span v-if="attr.inputTips">{{'（'+attr.inputTips+'）'}}</span>
+      <span>{{ attr.isNull ? '*' : '' }}</span>{{ attr.name }}<span v-if="attr.inputTips">{{ '（'+attr.inputTips+'）' }}</span>
     </div>
     <div class="box">
-      <span class="default-val">{{typeof attr.defaultValue == 'string' ? attr.defaultValue : ''}}</span>
+      <span class="default-val">{{ typeof attr.defaultValue == 'string' ? attr.defaultValue : '' }}</span>
     </div>
-    <span class="el-icon-delete control"
-          @click="handleDelete"
-          v-if="isShow"></span>
+    <span
+      v-if="isShow"
+      class="el-icon-delete control"
+      @click="handleDelete"/>
   </div>
 </template>
 

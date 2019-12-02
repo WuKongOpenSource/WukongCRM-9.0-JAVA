@@ -94,6 +94,14 @@ li {
   box-sizing: border-box;
 }
 
+// 文本
+.text-one-line {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
 /* 右浮动 */
 .rt {
   float: right;

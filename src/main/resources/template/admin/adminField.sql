@@ -150,11 +150,25 @@
       SELECT * FROM 72crm_admin_field_style WHERE type=? and field_name =? and user_id=? limit 1
     #end
     #sql("queryFieldIsExist")
-      SELECT COUNT(*)
-      FROM 72crm_admin_field as a inner join 72crm_admin_fieldv as b on a.field_id = b.field_id
-      WHERE a.label=#para(types) and a.name=#para(fieldName) and b.value=#para(val)
+      SELECT COUNT(*) FROM 72crm_admin_fieldv WHERE field_id=#para(field_id)  and value=#para(value)
+      #if(batchId)
+        and batch_id!=#para(batchId)
+      #end
     #end
-
+    #sql("queryFixedIsExist")
+      SELECT COUNT(*) FROM 72crm_#(tableName) WHERE #(field_name)=#para(value)
+      #if(batchId)
+        and batch_id!=#para(batchId)
+      #end
+    #end
+    #sql("queryFieidValue")
+      SELECT #(primaryKey),batch_id FROM 72crm_#(tableName) where 1=1
+      #if(field_type==1)
+        and #(field_name) = #para(value)
+      #elseif(field_type==0)
+        SELECT customer_id,batch_id FROM 72crm_crm_customer WHERE batch_id=(SELECT batch_id FROM 72crm_admin_fieldv WHERE field_id=#para(field_id) and value=#para(value) LIMIT 0,1)
+      #end
+    #end
     #sql ("queryListHead")
     select field_name as fieldName,name from 72crm_admin_field_sort where is_hide = 0 and label = ? and user_id = ? order by sort asc
     #end

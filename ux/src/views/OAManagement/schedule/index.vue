@@ -1,39 +1,42 @@
 <template>
   <div class="task-calendars">
     <div class="add-btn">
-      <el-button type="primary"
-                 @click="newTask">
+      <el-button
+        type="primary"
+        @click="newTask">
         创建日程
       </el-button>
     </div>
-    <div ref="hoverDialog"
-         class="hover-dialog">
+    <div
+      ref="hoverDialog"
+      class="hover-dialog">
       <div class="img-content">
-        <span>{{hoverDialogList.startTime | moment("YYYY-MM-DD")}}</span>
-        <span v-if="hoverDialogList.endTime"> - {{hoverDialogList.endTime | moment("YYYY-MM-DD")}}</span>
+        <span>{{ hoverDialogList.startTime | moment("YYYY-MM-DD") }}</span>
+        <span v-if="hoverDialogList.endTime"> - {{ hoverDialogList.endTime | moment("YYYY-MM-DD") }}</span>
       </div>
       <div>
-        {{hoverDialogList.text}}
+        {{ hoverDialogList.text }}
       </div>
     </div>
     <!-- 日历 -->
-    <div id='calendar'
-         v-loading="loading"></div>
+    <div
+      v-loading="loading"
+      id="calendar"/>
     <!-- 新建日程 -->
-    <create-schedule v-if="showDialog"
-                     :text="newText"
-                     :formData="formData"
-                     @onSubmit="onSubmit"
-                     @closeDialog="closeDialog">
-    </create-schedule>
+    <create-schedule
+      v-if="showDialog"
+      :text="newText"
+      :form-data="formData"
+      @onSubmit="onSubmit"
+      @closeDialog="closeDialog"/>
     <!-- 详情 -->
-    <v-details v-if="dialogVisible"
-               :dialogVisible="dialogVisible"
-               :listData="listData"
-               @editBtn="editBtn"
-               @deleteClose="deleteClose"
-               @handleClose="handleClose">
-    </v-details>
+    <v-details
+      v-if="dialogVisible"
+      :dialog-visible="dialogVisible"
+      :list-data="listData"
+      @editBtn="editBtn"
+      @deleteClose="deleteClose"
+      @handleClose="handleClose"/>
   </div>
 </template>
 
@@ -45,13 +48,10 @@ import createSchedule from './components/createSchedule'
 import VDetails from './components/details'
 // API
 import {
-  scheduleList,
-  scheduleAdd,
-  scheduleEdit
+  scheduleList
 } from '@/api/oamanagement/schedule'
 
-import { getDateFromTimestamp, timestampToFormatTime } from '@/utils'
-import moment from 'moment'
+import { timestampToFormatTime } from '@/utils'
 
 export default {
   components: {
@@ -78,7 +78,7 @@ export default {
     }
   },
   created() {
-    let _this = this
+    const _this = this
     $(function() {
       _this.listFun()
     })
@@ -86,7 +86,7 @@ export default {
   methods: {
     // 初始化日历任务
     listFun() {
-      let _this = this
+      const _this = this
       $('#calendar').fullCalendar({
         height: document.documentElement.clientHeight - 101,
         nextDayThreshold: '00:00:00',
@@ -107,7 +107,7 @@ export default {
         },
         // 点击显示详情
         eventClick: function(val, key) {
-          let list = []
+          const list = []
           list.push(val.startTime, val.endTime)
           val.time = list
           _this.listData = val
@@ -140,11 +140,11 @@ export default {
         },
         events: function(start, end, timezone, callback) {
           _this.loading = true
-          let startTime = timestampToFormatTime(
+          const startTime = timestampToFormatTime(
             parseInt(start._i / 1000),
             'YYYY-MM-DD'
           )
-          let endTime = timestampToFormatTime(
+          const endTime = timestampToFormatTime(
             parseInt(end._i / 1000),
             'YYYY-MM-DD'
           )
@@ -153,7 +153,7 @@ export default {
             endTime: endTime
           })
             .then(res => {
-              let list = res.data.map(item => {
+              const list = res.data.map(item => {
                 item.start = item.startTime
                 item.end = item.endTime
                 item.color = item.color
@@ -163,7 +163,7 @@ export default {
               callback(list)
               _this.loading = false
             })
-            .catch(err => {
+            .catch(() => {
               _this.loading = false
             })
         }

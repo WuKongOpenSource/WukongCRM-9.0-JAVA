@@ -173,32 +173,11 @@ public class AdminRoleService {
                     object.put("crm",new JSONObject().fluentPut("field",true).fluentPut("pool",true).fluentPut("setting",true).fluentPut("achievement",true));
                     object.put("work",new JSONObject().fluentPut("update",true));
                 }
-//                if (roleIds.contains(2) || roleIds.contains(BaseConstant.SUPER_ADMIN_ROLE_ID)) {
-//                    object.put("system", true);
-//                    object.put("users", true);
-//                    object.put("examineFlow", true);
-//                    object.put("oa", true);
-//                    object.put("crm", true);
-//                    object.put("permission", true);
-//                }
-//                if (roleIds.contains(3) || roleIds.contains(BaseConstant.SUPER_ADMIN_ROLE_ID)) {
-//                    object.put("users", true);
-//                }
-//                if (roleIds.contains(4) || roleIds.contains(BaseConstant.SUPER_ADMIN_ROLE_ID)) {
-//                    object.put("examineFlow", true);
-//                }
-//                if (roleIds.contains(5) || roleIds.contains(BaseConstant.SUPER_ADMIN_ROLE_ID)) {
-//                    object.put("oa", true);
-//                }
-//                if (roleIds.contains(6) || roleIds.contains(BaseConstant.SUPER_ADMIN_ROLE_ID)) {
-//                    object.put("crm", true);
-//                }
             }
             if (!object.isEmpty()) {
                 jsonObject.put(adminMenu.getRealm(), object);
             }
         }
-        CaffeineCache.ME.put("role:permissions:"+userId.toString(),jsonObject);
         List<String> moduleName = Db.query("select name from 72crm_admin_config where name in ('oa','crm','project') and status = 0");
         if(!jsonObject.containsKey("project")){
             jsonObject.put("project",new Object());
@@ -219,6 +198,7 @@ public class AdminRoleService {
                 }
             }
         }
+        CaffeineCache.ME.put("role:permissions:",userId.toString(),jsonObject);
         return jsonObject;
     }
 

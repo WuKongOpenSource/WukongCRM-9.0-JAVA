@@ -1,13 +1,15 @@
 <template>
   <el-container>
     <el-header class="nav-container">
-      <navbar :navIndex="navActiveIndex"
-              @nav-items-click="navClick"></navbar>
+      <navbar
+        :nav-index="navActiveIndex"
+        @nav-items-click="navClick"/>
     </el-header>
     <el-container>
-      <el-main id="crm-main-container"
-               style="padding:15px;">
-        <app-main></app-main>
+      <el-main
+        id="crm-main-container"
+        style="padding:15px;">
+        <app-main/>
       </el-main>
     </el-container>
   </el-container>
@@ -24,11 +26,11 @@ export default {
     Sidebar,
     AppMain
   },
-  computed: {
-    ...mapGetters(['navActiveIndex'])
-  },
   data() {
     return {}
+  },
+  computed: {
+    ...mapGetters(['navActiveIndex'])
   },
   methods: {
     navClick(index) {}

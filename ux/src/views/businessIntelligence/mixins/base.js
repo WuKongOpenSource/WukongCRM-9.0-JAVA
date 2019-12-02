@@ -39,6 +39,6 @@ export default {
 
   methods: {},
 
-  deactivated: function () {}
+  deactivated: function() {}
 
 }

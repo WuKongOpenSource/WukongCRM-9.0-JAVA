@@ -1,25 +1,31 @@
 <template>
-  <el-dialog title="批量分配"
-             v-loading="loading"
-             :visible.sync="visible"
-             @close="handleCancel"
-             :append-to-body="true"
-             width="400px">
+  <el-dialog
+    v-loading="loading"
+    :visible.sync="visible"
+    :append-to-body="true"
+    title="批量分配"
+    width="400px"
+    @close="handleCancel">
     <div class="handle-box">
-      <flexbox class="handle-item"
-               align="stretch">
-        <div class="handle-item-name"
-             style="margin-top: 8px;">请选择：</div>
-        <xh-user-cell class="handle-item-content"
-                      placeholder="点击选择"
-                      @value-change="userChage"></xh-user-cell>
+      <flexbox
+        class="handle-item"
+        align="stretch">
+        <div
+          class="handle-item-name"
+          style="margin-top: 8px;">请选择：</div>
+        <xh-user-cell
+          class="handle-item-content"
+          placeholder="点击选择"
+          @value-change="userChage"/>
       </flexbox>
     </div>
-    <span slot="footer"
-          class="dialog-footer">
+    <span
+      slot="footer"
+      class="dialog-footer">
       <el-button @click.native="handleCancel">取消</el-button>
-      <el-button type="primary"
-                 @click.native="handleConfirm">保存</el-button>
+      <el-button
+        type="primary"
+        @click.native="handleConfirm">保存</el-button>
     </span>
   </el-dialog>
 </template>
@@ -30,22 +36,11 @@ import { crmCustomerDistribute } from '@/api/customermanagement/customer'
 
 export default {
   /** 客户管理 的 勾选后的 公海分配 操作*/
-  name: 'alloc-handle',
+  name: 'AllocHandle',
   components: {
     XhUserCell
   },
   mixins: [],
-  watch: {
-    dialogVisible: {
-      handler(val) {
-        this.visible = val
-        if (val) {
-        }
-      },
-      deep: true,
-      immediate: true
-    }
-  },
   props: {
     dialogVisible: {
       type: Boolean,
@@ -73,6 +68,15 @@ export default {
     }
   },
   computed: {},
+  watch: {
+    dialogVisible: {
+      handler(val) {
+        this.visible = val
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   mounted() {
     this.visible = this.dialogVisible
   },

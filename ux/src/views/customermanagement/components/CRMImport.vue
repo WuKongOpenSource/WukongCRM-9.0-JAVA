@@ -1,13 +1,15 @@
 <template>
-  <el-dialog :visible.sync="showDialog"
-             :title="'导入'+crmTypeName"
-             width="550px"
-             :append-to-body="true"
-             @close="closeView">
+  <el-dialog
+    :visible.sync="showDialog"
+    :title="'导入'+crmTypeName"
+    :append-to-body="true"
+    width="550px"
+    @close="closeView">
     <div class="dialog-body">
       <div class="sections">
-        <div>一、请按照数据模板的格式准备要导入的数据。<span class="download"
-                @click="download">点击下载</span>《{{crmTypeName}}导入模板》</div>
+        <div>一、请按照数据模板的格式准备要导入的数据。<span
+          class="download"
+          @click="download">点击下载</span>《{{ crmTypeName }}导入模板》</div>
         <div class="content content-tips">
           <div>注意事项：</div>
           <div>1、模板中的表头名称不能更改，表头行不能删除</div>
@@ -16,15 +18,16 @@
         </div>
       </div>
       <div class="sections">
-        <div>二、请选择数据重复时的处理方式（查重规则：【{{fieldUniqueInfo}}】）</div>
+        <div>二、请选择数据重复时的处理方式（查重规则：【{{ fieldUniqueInfo }}】）</div>
         <div class="content">
-          <el-select v-model="config"
-                     placeholder="请选择">
-            <el-option v-for="(item, index) in [{name: '覆盖系统原有数据',value: 1},{name: '跳过',value: 2}]"
-                       :key="index"
-                       :label="item.name"
-                       :value="item.value">
-            </el-option>
+          <el-select
+            v-model="config"
+            placeholder="请选择">
+            <el-option
+              v-for="(item, index) in [{name: '覆盖系统原有数据',value: 1},{name: '跳过',value: 2}]"
+              :key="index"
+              :label="item.name"
+              :value="item.value"/>
           </el-select>
         </div>
       </div>
@@ -32,32 +35,38 @@
         <div>三、请选择需要导入的文件</div>
         <div class="content">
           <flexbox class="file-select">
-            <el-input v-model="file.name"
-                      :disabled="true"></el-input>
-            <el-button type="primary"
-                       @click="selectFile">选择文件</el-button>
+            <el-input
+              v-model="file.name"
+              :disabled="true"/>
+            <el-button
+              type="primary"
+              @click="selectFile">选择文件</el-button>
           </flexbox>
         </div>
       </div>
       <div class="sections">
-        <div>四、请选择负责人（{{crmType == 'customer' ? '如不选择，导入的客户将进入公海' : '必选'}}）</div>
+        <div>四、请选择负责人（{{ crmType == 'customer' ? '如不选择，导入的客户将进入公海' : '必选' }}）</div>
         <div class="content">
           <div class="user-cell">
-            <xh-user-cell :value="user"
-                          @value-change="userSelect"></xh-user-cell>
+            <xh-user-cell
+              :value="user"
+              @value-change="userSelect"/>
           </div>
         </div>
       </div>
-      <input type="file"
-             id="importInputFile"
-             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-             @change="uploadFile">
+      <input
+        id="importInputFile"
+        type="file"
+        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+        @change="uploadFile">
     </div>
-    <span slot="footer"
-          class="dialog-footer">
+    <span
+      slot="footer"
+      class="dialog-footer">
       <el-button @click="closeView">取 消</el-button>
-      <el-button type="primary"
-                 @click="sure">确 定</el-button>
+      <el-button
+        type="primary"
+        @click="sure">确 定</el-button>
     </span>
   </el-dialog>
 </template>
@@ -66,31 +75,38 @@
 import { mapGetters } from 'vuex'
 import {
   crmCustomerExcelImport,
-  crmCustomerExcelDownloadURL,
   crmCustomerDownloadExcelAPI
 } from '@/api/customermanagement/customer'
 import {
   crmLeadsExcelImport,
-  crmLeadsExcelDownloadURL,
   crmLeadsDownloadExcelAPI
 } from '@/api/customermanagement/clue'
 import {
   crmContactsExcelImport,
-  crmContactsExcelDownloadURL,
   crmContactsDownloadExcelAPI
 } from '@/api/customermanagement/contacts'
 import {
   crmProductExcelImport,
-  crmProductExcelDownloadURL,
   crmProductDownloadExcelAPI
 } from '@/api/customermanagement/product'
 import { XhUserCell } from '@/components/CreateCom'
 import { Loading } from 'element-ui'
 
 export default {
-  name: 'c-r-m-import', // 文件导入
+  name: 'CRMImport', // 文件导入
   components: {
     XhUserCell
+  },
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    },
+    // CRM类型
+    crmType: {
+      type: String,
+      default: ''
+    }
   },
   data() {
     return {
@@ -122,17 +138,6 @@ export default {
       return this.crmTypeName + '名称'
     }
   },
-  props: {
-    show: {
-      type: Boolean,
-      default: false
-    },
-    // CRM类型
-    crmType: {
-      type: String,
-      default: ''
-    }
-  },
   watch: {
     show: function(val) {
       this.showDialog = val
@@ -161,7 +166,7 @@ export default {
           contacts: crmContactsExcelImport,
           product: crmProductExcelImport
         }[this.crmType]
-        let loading = Loading.service({ fullscreen: true })
+        const loading = Loading.service({ fullscreen: true })
         request(params)
           .then(res => {
             loading.close()
@@ -187,16 +192,16 @@ export default {
             type: 'application/vnd.ms-excel;charset=utf-8'
           })
           var downloadElement = document.createElement('a')
-          var href = window.URL.createObjectURL(blob) //创建下载的链接
+          var href = window.URL.createObjectURL(blob) // 创建下载的链接
           downloadElement.href = href
           downloadElement.download =
             decodeURI(
               res.headers['content-disposition'].split('filename=')[1]
-            ) || '' //下载后文件名
+            ) || '' // 下载后文件名
           document.body.appendChild(downloadElement)
-          downloadElement.click() //点击下载
-          document.body.removeChild(downloadElement) //下载完成移除元素
-          window.URL.revokeObjectURL(href) //释放掉blob对象
+          downloadElement.click() // 点击下载
+          document.body.removeChild(downloadElement) // 下载完成移除元素
+          window.URL.revokeObjectURL(href) // 释放掉blob对象
         })
         .catch(() => {})
     },

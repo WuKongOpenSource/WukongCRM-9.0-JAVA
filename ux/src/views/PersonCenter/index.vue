@@ -1,65 +1,78 @@
 <template>
-  <div v-loading="loading"
-       class="person-container">
+  <div
+    v-loading="loading"
+    class="person-container">
     <div class="header-handle">
-      <el-button type="primary"
-                 @click="editClick('password')">修改密码</el-button>
-      <el-button type="primary"
-                 @click="editClick('info')">编辑</el-button>
-      <el-button plain
-                 @click="editClick('back')">返回</el-button>
+      <el-button
+        type="primary"
+        @click="editClick('password')">修改密码</el-button>
+      <el-button
+        type="primary"
+        @click="editClick('info')">编辑</el-button>
+      <el-button
+        plain
+        @click="editClick('back')">返回</el-button>
     </div>
     <flexbox class="person-info">
       <div class="person-head">
-        <div v-photo="userInfo"
-             v-lazy:background-image="$options.filters.filterUserLazyImg(userInfo.img)"
-             class="div-photo person-head-img"></div>
-        <div class="select-picture"
-             @click="changePersonImage">
+        <div
+          v-photo="userInfo"
+          v-lazy:background-image="$options.filters.filterUserLazyImg(userInfo.img)"
+          class="div-photo person-head-img"/>
+        <div
+          class="select-picture"
+          @click="changePersonImage">
           <div>点击更换头像</div>
         </div>
       </div>
       <div class="person-body">
-        <div class="person-name">{{userInfo.realname}}</div>
-        <div class="person-detail">部门：{{userInfo.deptName}}&nbsp;&nbsp;&nbsp;&nbsp;职位：{{userInfo.post}}</div>
+        <div class="person-name">{{ userInfo.realname }}</div>
+        <div class="person-detail">部门：{{ userInfo.deptName }}&nbsp;&nbsp;&nbsp;&nbsp;职位：{{ userInfo.post }}</div>
       </div>
     </flexbox>
-    <div class="segmentation"></div>
+    <div class="segmentation"/>
     <div class="section">
       <div class="section-header">
-        <div class="section-mark"></div>
+        <div class="section-mark"/>
         <div class="section-title">基本信息</div>
       </div>
-      <flexbox :gutter="0"
-               wrap="wrap"
-               class="content">
-        <flexbox-item v-for="(item, index) in list"
-                      :key="index"
-                      :span="0.5"
-                      class="info-cell">
-          <flexbox align="stretch"
-                   class="info-cell-box">
-            <div class="info-cell-box-name">{{item.name}}</div>
-            <div class="info-cell-box-value">{{item.props!=='sex'?userInfo[item.props]:userInfo[item.props]===1?'男':userInfo[item.props]===2?'女':""}}</div>
+      <flexbox
+        :gutter="0"
+        wrap="wrap"
+        class="content">
+        <flexbox-item
+          v-for="(item, index) in list"
+          :key="index"
+          :span="0.5"
+          class="info-cell">
+          <flexbox
+            align="stretch"
+            class="info-cell-box">
+            <div class="info-cell-box-name">{{ item.name }}</div>
+            <div class="info-cell-box-value">{{ item.props!=='sex'?userInfo[item.props]:userInfo[item.props]===1?'男':userInfo[item.props]===2?'女':"" }}</div>
           </flexbox>
         </flexbox-item>
       </flexbox>
     </div>
-    <input type="file"
-           id="inputFile"
-           accept="image/png, image/jpeg, image/gif, image/jpg"
-           @change="uploadFile">
-    <edit-image :show="showEditImage"
-                :file="editFile"
-                :image="editImage"
-                @save="submiteImage"
-                @close="showEditImage=false"></edit-image>
-    <edit-info :show="showEditInfo"
-               @save="getDetail"
-               @close="showEditInfo=false"></edit-info>
-    <edit-password :show="showEditPassword"
-                   @save="getDetail"
-                   @close="showEditPassword=false"></edit-password>
+    <input
+      id="inputFile"
+      type="file"
+      accept="image/png, image/jpeg, image/gif, image/jpg"
+      @change="uploadFile">
+    <edit-image
+      :show="showEditImage"
+      :file="editFile"
+      :image="editImage"
+      @save="submiteImage"
+      @close="showEditImage=false"/>
+    <edit-info
+      :show="showEditInfo"
+      @save="getDetail"
+      @close="showEditInfo=false"/>
+    <edit-password
+      :show="showEditPassword"
+      @save="getDetail"
+      @close="showEditPassword=false"/>
   </div>
 </template>
 
@@ -72,14 +85,11 @@ import EditInfo from './components/EditInfo'
 import EditPassword from './components/EditPassword'
 
 export default {
-  name: 'person',
+  name: 'Person',
   components: {
     EditImage,
     EditInfo,
     EditPassword
-  },
-  computed: {
-    ...mapGetters(['userInfo'])
   },
   data() {
     return {
@@ -99,6 +109,9 @@ export default {
         { name: '直属上级', props: 'parentName' }
       ]
     }
+  },
+  computed: {
+    ...mapGetters(['userInfo'])
   },
   mounted() {
     this.getDetail()

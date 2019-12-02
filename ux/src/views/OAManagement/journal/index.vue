@@ -1,45 +1,52 @@
 <template>
   <div class="journal oa-bgcolor">
-    <el-button type="primary"
-               class="new-btn"
-               @click="newBtn">写日志</el-button>
-    <el-tabs v-model="activeName"
-             @tab-click="tabClick">
-      <el-tab-pane :name="item.key"
-                   v-for="(item, index) in tabsData"
-                   :key="index">
-        <el-badge slot="label"
-                  :hidden="item.key != '3' || messageOANum.logNum == 0"
-                  :max="99"
-                  :value="messageOANum.logNum">
-          <span>{{item.label}}</span>
+    <el-button
+      type="primary"
+      class="new-btn"
+      @click="newBtn">写日志</el-button>
+    <el-tabs
+      v-model="activeName"
+      @tab-click="tabClick">
+      <el-tab-pane
+        v-for="(item, index) in tabsData"
+        :name="item.key"
+        :key="index">
+        <el-badge
+          slot="label"
+          :hidden="item.key != '3' || messageOANum.logNum == 0"
+          :max="99"
+          :value="messageOANum.logNum">
+          <span>{{ item.label }}</span>
         </el-badge>
-        <v-content id="journal-list-box"
-                   :ref="'log-list' + item.key"
-                   :activeName="activeName"
-                   :journalData="journalData"
-                   :depOptions="depOptions"
-                   :nameOptions="nameOptions"
-                   :journalLoading="journalLoading"
-                   @selectChange="refreshLogList"
-                   @editBtn="editBtn">
-          <p class="load"
-             slot="load">
-            <el-button type="text"
-                       :loading="loadMoreLoading">{{loadText}}</el-button>
+        <v-content
+          id="journal-list-box"
+          :ref="'log-list' + item.key"
+          :active-name="activeName"
+          :journal-data="journalData"
+          :dep-options="depOptions"
+          :name-options="nameOptions"
+          :journal-loading="journalLoading"
+          @selectChange="refreshLogList"
+          @editBtn="editBtn">
+          <p
+            slot="load"
+            class="load">
+            <el-button
+              :loading="loadMoreLoading"
+              type="text">{{ loadText }}</el-button>
           </p>
         </v-content>
       </el-tab-pane>
     </el-tabs>
-    <new-dialog v-if="showNewDialog"
-                :formData="formData"
-                :dialogTitle="dialogTitle"
-                :imgFileList="imgFileList"
-                :accessoryFileList="accessoryFileList"
-                :newLoading="newLoading"
-                @close="newClose"
-                @submitBtn="submitBtn">
-    </new-dialog>
+    <new-dialog
+      v-if="showNewDialog"
+      :form-data="formData"
+      :dialog-title="dialogTitle"
+      :img-file-list="imgFileList"
+      :accessory-file-list="accessoryFileList"
+      :new-loading="newLoading"
+      @close="newClose"
+      @submitBtn="submitBtn"/>
   </div>
 </template>
 
@@ -133,12 +140,12 @@ export default {
   methods: {
     initControlPage() {
       // 分批次加载
-      for (let dom of document.getElementsByClassName('list-box')) {
+      for (const dom of document.getElementsByClassName('list-box')) {
         dom.onscroll = e => {
-          if (e && e.target.id == 'list-box' + this.activeName) {
+          if (e && e.target.id === ('list-box' + this.activeName)) {
             this.$bus.emit('journal-list-box-scroll', e.target)
-            let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
-            //滚动条到底部的条件
+            const scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+            // 滚动条到底部的条件
             if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
               if (!this.isPost) {
                 this.isPost = true
@@ -154,14 +161,14 @@ export default {
     },
     // 数据
     getLogList() {
-      let params = objDeepCopy(
+      const params = objDeepCopy(
         this.$refs['log-list' + this.activeName][0].fromData
       )
       if (!params.createTime) {
         delete params['createTime']
       }
       params.page = this.pageNum
-      params.limit = 15
+      params.limit = 5
       if (this.byData) {
         params.by = this.byData
       }
@@ -176,16 +183,15 @@ export default {
             this.loadText = '加载更多'
             this.loadMoreLoading = true
           }
-          for (let item of res.data.list) {
+          for (const item of res.data.list) {
             item.showComment = false
           }
 
           this.journalData = this.journalData.concat(res.data.list)
           this.createInitAwaitMessage()
-          this.loadMoreLoading = false
           this.isPost = false
         })
-        .catch(err => {
+        .catch(() => {
           this.journalLoading = false
           this.isPost = false
         })
@@ -232,28 +238,32 @@ export default {
       }
     },
     // 新建提交
-    submitBtn(key, batchId, relevanceAll) {
+    submitBtn(key, batchId, img, relevanceAll) {
       this.newLoading = true
-      let imgList = []
-      let fileList = []
+      let obj = {}
+      if (!relevanceAll) {
+        obj = {}
+      } else {
+        obj = relevanceAll
+      }
       // 获取部门
-      let dep = []
+      const dep = []
       if (this.formData.depData) {
-        for (let j of this.formData.depData) {
+        for (const j of this.formData.depData) {
           dep.push(j.id)
         }
       }
       // 获取员工
-      let staff = []
+      const staff = []
       if (this.formData.sentWhoList) {
-        for (let h of this.formData.sentWhoList) {
+        for (const h of this.formData.sentWhoList) {
           staff.push(h.userId)
         }
       }
 
       if (this.dialogTitle == '写日志') {
         // 图片
-        let pramas = {
+        const pramas = {
           categoryId: key || '',
           content: this.formData.content,
           tomorrow: this.formData.tomorrow,
@@ -262,10 +272,10 @@ export default {
           // img: imgList,
           sendUserIds: staff.join(','),
           sendDeptIds: dep.join(','),
-          customerIds: relevanceAll.customerIds.join(','),
-          contactsIds: relevanceAll.contactsIds.join(','),
-          businessIds: relevanceAll.businessIds.join(','),
-          contractIds: relevanceAll.contractIds.join(',')
+          customerIds: obj.customerIds.join(','),
+          contactsIds: obj.contactsIds.join(','),
+          businessIds: obj.businessIds.join(','),
+          contractIds: obj.contractIds.join(',')
         }
         if (key) {
           this.formData.categoryId = key
@@ -277,13 +287,13 @@ export default {
             this.$message.success('新建成功')
             this.newClose()
           })
-          .catch(err => {
+          .catch(() => {
             this.newLoading = false
             this.$message.error('新建失败')
           })
         // 编辑页面
       } else {
-        let pramas = {
+        const pramas = {
           logId: this.formData.logId,
           categoryId: key,
           content: this.formData.content,
@@ -292,10 +302,10 @@ export default {
           batchId: batchId,
           sendUserIds: staff.join(','),
           sendDeptIds: dep.join(','),
-          customerIds: relevanceAll.customerIds.join(','),
-          contactsIds: relevanceAll.contactsIds.join(','),
-          businessIds: relevanceAll.businessIds.join(','),
-          contractIds: relevanceAll.contractIds.join(',')
+          customerIds: obj.customerIds.join(','),
+          contactsIds: obj.contactsIds.join(','),
+          businessIds: obj.businessIds.join(','),
+          contractIds: obj.contractIds.join(',')
         }
         journalEdit(pramas)
           .then(res => {
@@ -304,7 +314,7 @@ export default {
             this.$message.success('编辑成功')
             this.newLoading = false
           })
-          .catch(err => {
+          .catch(() => {
             this.newLoading = false
             this.$message.error('编辑失败')
           })

@@ -1,26 +1,32 @@
 <template>
-  <el-dialog title="关联员工"
-             v-loading="loading"
-             :visible="visible"
-             @close="handleCancel"
-             :append-to-body="true"
-             width="600px">
+  <el-dialog
+    v-loading="loading"
+    :visible="visible"
+    :append-to-body="true"
+    title="关联员工"
+    width="600px"
+    @close="handleCancel">
     <div class="handle-box">
-      <flexbox class="handle-item"
-               align="stretch">
-        <div class="handle-item-name"
-             style="margin-top: 8px;">选择员工：</div>
-        <xh-user-cell :radio="false"
-                      :value="selectUsers"
-                      class="handle-item-content"
-                      @value-change="changeCheckout"></xh-user-cell>
+      <flexbox
+        class="handle-item"
+        align="stretch">
+        <div
+          class="handle-item-name"
+          style="margin-top: 8px;">选择员工：</div>
+        <xh-user-cell
+          :radio="false"
+          :value="selectUsers"
+          class="handle-item-content"
+          @value-change="changeCheckout"/>
       </flexbox>
     </div>
-    <span slot="footer"
-          class="dialog-footer">
+    <span
+      slot="footer"
+      class="dialog-footer">
       <el-button @click.native="handleCancel">取消</el-button>
-      <el-button type="primary"
-                 @click.native="handleConfirm">保存</el-button>
+      <el-button
+        type="primary"
+        @click.native="handleConfirm">保存</el-button>
     </span>
   </el-dialog>
 </template>
@@ -31,18 +37,11 @@ import { XhUserCell } from '@/components/CreateCom'
 
 export default {
   /** 关联员工*/
-  name: 'relate-empoyee',
+  name: 'RelateEmpoyee',
   components: {
     XhUserCell
   },
   mixins: [],
-  watch: {
-    visible(val) {
-      if (val) {
-        this.selectUsers = []
-      }
-    }
-  },
   props: {
     visible: {
       type: Boolean,
@@ -58,6 +57,13 @@ export default {
     }
   },
   computed: {},
+  watch: {
+    visible(val) {
+      if (val) {
+        this.selectUsers = []
+      }
+    }
+  },
   mounted() {},
   methods: {
     /**
@@ -91,7 +97,7 @@ export default {
             this.$message.success('操作成功')
             this.$emit('save')
           })
-          .catch(err => {})
+          .catch(() => {})
       }
     }
   }

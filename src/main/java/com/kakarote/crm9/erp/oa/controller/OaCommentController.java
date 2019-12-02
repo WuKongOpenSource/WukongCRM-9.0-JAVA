@@ -27,19 +27,12 @@ public class OaCommentController extends Controller{
     }
 
     /**
-     * @author hmb
-     * 添加项目任务评论或者修改
-     * @param comment 评论对象
-     */
-    public void setWorkTaskComment(@Para("") TaskComment comment){
-        renderJson(commentService.setComment(comment));
-    }
-
-    /**
      * 删除评论
      */
     public void deleteComment(){
         Integer commentId = getParaToInt ( "commentId" );
+        boolean oaAuth = AuthUtil.isOaAuth(OaEnum.COMMENT_TYPE_KEY.getTypes(), commentId);
+        if(oaAuth){renderJson(R.noAuth());return;}
         renderJson(commentService.deleteComment (commentId));
     }
 
@@ -54,16 +47,6 @@ public class OaCommentController extends Controller{
             boolean oaAuth = AuthUtil.isOaAuth(OaEnum.TASK_TYPE_KEY.getTypes(), Integer.valueOf(typeId));
             if(oaAuth){renderJson(R.noAuth());return;}
         }
-        renderJson(R.ok().put("data",commentService.queryCommentList(typeId,type)));
-    }
-
-    /**
-     * @author hmb
-     * 查询评论列表
-     */
-    public void queryWorkCommentList(){
-        String typeId = getPara("typeId");
-        String type = getPara("type");
         renderJson(R.ok().put("data",commentService.queryCommentList(typeId,type)));
     }
 }

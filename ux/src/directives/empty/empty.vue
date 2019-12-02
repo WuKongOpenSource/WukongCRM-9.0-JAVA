@@ -1,14 +1,17 @@
 <template>
-  <div v-show="visible"
-       class="empty-mask"
-       :style="{ backgroundColor: background || '' }"
-       :class="[customClass]">
+  <div
+    v-show="visible"
+    :style="{ backgroundColor: background || '' }"
+    :class="[customClass]"
+    class="empty-mask">
     <div class="empty-content">
-      <img class="empty-icon"
-           v-if="iconUrl"
-           :src="iconUrl" />
-      <p v-if="showText"
-         class="empty-text">{{ showText }}</p>
+      <img
+        v-if="iconUrl"
+        :src="iconUrl"
+        class="empty-icon" >
+      <p
+        v-if="showText"
+        class="empty-text">{{ showText }}</p>
     </div>
   </div>
 </template>

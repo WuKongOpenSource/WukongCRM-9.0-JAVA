@@ -9,51 +9,51 @@ import com.jfinal.plugin.activerecord.IBean;
 @SuppressWarnings("serial")
 public abstract class BaseAdminFieldv<M extends BaseAdminFieldv<M>> extends Model<M> implements IBean {
 
-	public void setId(Integer id) {
+	public void setId(java.lang.Integer id) {
 		set("id", id);
 	}
-
-	public Integer getId() {
+	
+	public java.lang.Integer getId() {
 		return getInt("id");
 	}
 
-	public void setFieldId(Integer fieldId) {
+	public void setFieldId(java.lang.Integer fieldId) {
 		set("field_id", fieldId);
 	}
-
-	public Integer getFieldId() {
+	
+	public java.lang.Integer getFieldId() {
 		return getInt("field_id");
 	}
 
-	public void setName(String name) {
+	public void setName(java.lang.String name) {
 		set("name", name);
 	}
-
-	public String getName() {
+	
+	public java.lang.String getName() {
 		return getStr("name");
 	}
 
-	public void setValue(String value) {
+	public void setValue(java.lang.String value) {
 		set("value", value);
 	}
-
-	public String getValue() {
+	
+	public java.lang.String getValue() {
 		return getStr("value");
 	}
 
 	public void setCreateTime(java.util.Date createTime) {
 		set("create_time", createTime);
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
 	}
 
-	public void setBatchId(String batchId) {
+	public void setBatchId(java.lang.String batchId) {
 		set("batch_id", batchId);
 	}
-
-	public String getBatchId() {
+	
+	public java.lang.String getBatchId() {
 		return getStr("batch_id");
 	}
 

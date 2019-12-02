@@ -26,7 +26,7 @@ const app = {
      */
     SET_MESSAGENUM: (state, messageNum) => {
       let totalNum = 0
-      for (let key in messageNum) {
+      for (const key in messageNum) {
         if (key != 'totalNum') {
           totalNum += (messageNum[key] || 0)
         }

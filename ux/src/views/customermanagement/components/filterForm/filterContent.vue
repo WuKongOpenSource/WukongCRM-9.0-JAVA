@@ -1,19 +1,21 @@
 <template>
   <div class="wrapper">
     <ul class="list">
-      <li class="list-item"
-          v-for="(item, index) in showObj.form"
-          :key="index">
-        <span v-if="item.formType == 'date'">{{item.name +'&nbsp;“' + item.value[0] + '-' + item.value[1] + '”'}}</span>
-        <span v-else-if="item.formType === 'datetime'">{{item.name +'&nbsp;“' + item.value[0] + '-' + item.value[1] + '”'}}</span>
-        <span v-else-if="item.formType === 'business_type'">{{item.name +'&nbsp;“' + getTypesName(item) + getStatusName(item) + '”'}}</span>
-        <span v-else-if="item.formType === 'map_address'">{{`${item.name} ${item.address.state} ${item.address.city} ${item.address.area}`}}</span>
-        <span v-else-if="item.formType === 'checkStatus'">{{item.name +'&nbsp;“' + optionsNames[item.condition]+ '”'+'&nbsp;'+ getCheckName(item)}}</span>
-        <span v-else-if="item.formType === 'user'">{{item.name +'&nbsp;' + optionsNames[item.condition] + '“' + item.value[0].realname + '”'}}</span>
-        <span v-else-if="item.formType === 'category' && item.value.length > 0">{{item.name +'&nbsp;“' + item.valueContent + '”'}}</span>
-        <span v-else>{{item.name + '&nbsp;' + optionsNames[item.condition] + '“' + item.value + '”' }}</span>
-        <i class="el-icon-close icon"
-           @click="handleDelete(item, index)"></i>
+      <li
+        v-for="(item, index) in showObj.form"
+        :key="index"
+        class="list-item">
+        <span v-if="item.formType == 'date'">{{ item.name +'&nbsp;“' + item.value[0] + '-' + item.value[1] + '”' }}</span>
+        <span v-else-if="item.formType === 'datetime'">{{ item.name +'&nbsp;“' + item.value[0] + '-' + item.value[1] + '”' }}</span>
+        <span v-else-if="item.formType === 'business_type'">{{ item.name +'&nbsp;“' + getTypesName(item) + getStatusName(item) + '”' }}</span>
+        <span v-else-if="item.formType === 'map_address'">{{ `${item.name} ${item.address.state} ${item.address.city} ${item.address.area}` }}</span>
+        <span v-else-if="item.formType === 'checkStatus'">{{ item.name +'&nbsp;“' + optionsNames[item.condition]+ '”'+'&nbsp;'+ getCheckName(item) }}</span>
+        <span v-else-if="item.formType === 'user'">{{ item.name +'&nbsp;' + optionsNames[item.condition] + '“' + item.value[0].realname + '”' }}</span>
+        <span v-else-if="item.formType === 'category' && item.value.length > 0">{{ item.name +'&nbsp;“' + item.valueContent + '”' }}</span>
+        <span v-else>{{ item.name + '&nbsp;' + optionsNames[item.condition] + '“' + item.value + '”' }}</span>
+        <i
+          class="el-icon-close icon"
+          @click="handleDelete(item, index)"/>
       </li>
     </ul>
   </div>
@@ -21,19 +23,16 @@
 
 <script>
 export default {
-  name: 'filterContent',
+  name: 'FilterContent',
   props: {
     obj: {
-      default: {},
-      required: true
+      type: Object,
+      required: true,
+      default: () => {
+        return {}
+      }
     }
   },
-  watch: {
-    obj: function(val) {
-      this.showObj = val
-    }
-  },
-  computed: {},
   data() {
     return {
       // 获取条件名称
@@ -53,8 +52,14 @@ export default {
         lt: '小于',
         elt: '小于等于'
       },
-      //展示信息
+      // 展示信息
       showObj: {}
+    }
+  },
+  computed: {},
+  watch: {
+    obj: function(val) {
+      this.showObj = val
     }
   },
   mounted() {
@@ -73,7 +78,7 @@ export default {
     // 商机组展示名称
     getTypesName(data) {
       if (data.typeId) {
-        let obj = data.typeOption.find(item => {
+        const obj = data.typeOption.find(item => {
           return item.typeId === data.typeId
         })
         return obj.name || ''
@@ -81,19 +86,19 @@ export default {
       return ''
     },
     getCheckName(data) {
-      let value=''
-      data.setting.forEach(item=>{
-        if(item.value===data.value){
-          value=item.name;
-          return;
+      let value = ''
+      data.setting.forEach(item => {
+        if (item.value === data.value) {
+          value = item.name
+          return
         }
       })
-      return value;
+      return value
     },
     // 商机阶段展示名称
     getStatusName(data) {
       if (data.statusId) {
-        let obj = data.statusOption.find(item => {
+        const obj = data.statusOption.find(item => {
           return item.statusId === data.statusId
         })
         if (obj.name) {

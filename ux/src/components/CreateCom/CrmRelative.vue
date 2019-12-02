@@ -1,32 +1,36 @@
 <template>
   <div class="cr-contianer">
-    <div class="title">{{getTitle()}}</div>
+    <div class="title">{{ getTitle() }}</div>
     <div style="height: 100%;position: relative;">
-      <div v-if="crmType == ''"
-           class="cr-body-side">
-        <div v-for="(item, index) in leftSides"
-             :key="index"
-             :class="leftType===item.type? 'side-item-select' : 'side-item-default'"
-             @click="sideClick(item)"
-             class="side-item">{{item.name}}</div>
+      <div
+        v-if="crmType == ''"
+        class="cr-body-side">
+        <div
+          v-for="(item, index) in leftSides"
+          :key="index"
+          :class="leftType===item.type? 'side-item-select' : 'side-item-default'"
+          class="side-item"
+          @click="sideClick(item)">{{ item.name }}</div>
       </div>
       <div :style="{ 'padding-left': crmType == '' ? '150px' : '0'}">
-        <crm-relative-table v-for="(item, index) in leftSides"
-                            :key="index"
-                            :ref="'crm'+item.type"
-                            :show="show && item.type == leftType"
-                            v-show="item.type == leftType"
-                            :radio="radio"
-                            :crmType="item.type"
-                            :selectedData="currentSelectedData"
-                            :action="action"
-                            @changeCheckout="checkCrmTypeInfos"></crm-relative-table>
+        <crm-relative-table
+          v-for="(item, index) in leftSides"
+          v-show="item.type == leftType"
+          :key="index"
+          :ref="'crm'+item.type"
+          :show="show && item.type == leftType"
+          :radio="radio"
+          :crm-type="item.type"
+          :selected-data="currentSelectedData"
+          :action="action"
+          @changeCheckout="checkCrmTypeInfos"/>
       </div>
     </div>
     <div class="handle-bar">
       <el-button @click.native="closeView">取消</el-button>
-      <el-button @click.native="confirmClick"
-                 type="primary">确定</el-button>
+      <el-button
+        type="primary"
+        @click.native="confirmClick">确定</el-button>
     </div>
   </div>
 </template>
@@ -36,18 +40,9 @@ import CrmRelativeTable from './CrmRelativeTable'
 import { objDeepCopy } from '@/utils'
 
 export default {
-  name: 'crm-relatieve', // 相关
+  name: 'CrmRelatieve', // 相关
   components: {
     CrmRelativeTable
-  },
-  computed: {},
-  data() {
-    return {
-      leftType: 'customer',
-      leftSides: [],
-      /** 各类型选择的值 */
-      currentSelectedData: {}
-    }
   },
   props: {
     /** 多选框 只能选一个 */
@@ -100,6 +95,15 @@ export default {
       }
     }
   },
+  data() {
+    return {
+      leftType: 'customer',
+      leftSides: [],
+      /** 各类型选择的值 */
+      currentSelectedData: {}
+    }
+  },
+  computed: {},
   watch: {
     selectedData: function(data) {
       this.currentSelectedData = objDeepCopy(data)

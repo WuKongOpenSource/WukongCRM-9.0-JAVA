@@ -1,56 +1,61 @@
 <template>
-  <slide-view v-empty="!canShowDetail"
-              xs-empty-icon="nopermission"
-              xs-empty-text="暂无权限"
-              :listenerIDs="listenerIDs"
-              :noListenerIDs="noListenerIDs"
-              :noListenerClass="noListenerClass"
-              @side-close="hideView"
-              :body-style="{padding: 0, height: '100%'}">
-    <flexbox v-if="canShowDetail"
-             v-loading="loading"
-             direction="column"
-             align="stretch"
-             class="d-container">
-      <c-r-m-detail-head crmType="receivables"
-                         @handle="detailHeadHandle"
-                         @close="hideView"
-                         :detail="detailData"
-                         :headDetails="headDetails"
-                         :id="id">
-      </c-r-m-detail-head>
+  <slide-view
+    v-empty="!canShowDetail"
+    :listener-ids="listenerIDs"
+    :no-listener-ids="noListenerIDs"
+    :no-listener-class="noListenerClass"
+    :body-style="{padding: 0, height: '100%'}"
+    xs-empty-icon="nopermission"
+    xs-empty-text="暂无权限"
+    @side-close="hideView">
+    <flexbox
+      v-loading="loading"
+      v-if="canShowDetail"
+      direction="column"
+      align="stretch"
+      class="d-container">
+      <c-r-m-detail-head
+        :detail="detailData"
+        :head-details="headDetails"
+        :id="id"
+        crm-type="receivables"
+        @handle="detailHeadHandle"
+        @close="hideView"/>
       <div class="examine-info">
-        <examine-info :id="id"
-                      class="examine-info-border"
-                      examineType="crm_receivables"
-                      :recordId="detailData.examineRecordId"
-                      :ownerUserId="detailData.ownerUserId">
-        </examine-info>
+        <examine-info
+          :id="id"
+          :record-id="detailData.examineRecordId"
+          :owner-user-id="detailData.ownerUserId"
+          class="examine-info-border"
+          examine-type="crm_receivables"/>
       </div>
       <div class="tabs">
-        <el-tabs v-model="tabCurrentName"
-                 @tab-click="handleClick">
-          <el-tab-pane v-for="(item, index) in tabnames"
-                       :key="index"
-                       :label="item.label"
-                       :name="item.name">
-          </el-tab-pane>
+        <el-tabs
+          v-model="tabCurrentName"
+          @tab-click="handleClick">
+          <el-tab-pane
+            v-for="(item, index) in tabnames"
+            :key="index"
+            :label="item.label"
+            :name="item.name"/>
         </el-tabs>
       </div>
       <div class="t-loading-content">
         <keep-alive>
-          <component v-bind:is="tabName"
-                     crmType="receivables"
-                     :detail="detailData"
-                     :id="id"></component>
+          <component
+            :is="tabName"
+            :detail="detailData"
+            :id="id"
+            crm-type="receivables"/>
         </keep-alive>
       </div>
     </flexbox>
-    <c-r-m-create-view v-if="isCreate"
-                       crm-type="receivables"
-                       :action="{type: 'update', id: this.id, batchId: detailData.batchId}"
-                       @save-success="editSaveSuccess"
-                       @hiden-view="isCreate=false"></c-r-m-create-view>
+    <c-r-m-create-view
+      v-if="isCreate"
+      :action="{type: 'update', id: id, batchId: detailData.batchId}"
+      crm-type="receivables"
+      @save-success="editSaveSuccess"
+      @hiden-view="isCreate=false"/>
   </slide-view>
 </template>
 
@@ -60,15 +65,14 @@ import { crmReceivablesRead } from '@/api/customermanagement/money'
 import SlideView from '@/components/SlideView'
 import CRMDetailHead from '../components/CRMDetailHead'
 import CRMBaseInfo from '../components/CRMBaseInfo' // 基本信息
-import RelativeHandle from '../components/RelativeHandle' //相关操作
+import RelativeHandle from '../components/RelativeHandle' // 相关操作
 import CRMCreateView from '../components/CRMCreateView' // 新建页面
 import ExamineInfo from '@/components/Examine/ExamineInfo'
-import { timestampToFormatTime } from '@/utils'
 import detail from '../mixins/detail'
 
 export default {
   /** 客户管理 的 回款详情 */
-  name: 'money-detail',
+  name: 'MoneyDetail',
   components: {
     SlideView,
     CRMDetailHead,
@@ -158,11 +162,11 @@ export default {
           this.loading = false
         })
     },
-    //** 点击关闭按钮隐藏视图 */
+    //* * 点击关闭按钮隐藏视图 */
     hideView() {
       this.$emit('hide-view')
     },
-    //** tab标签点击 */
+    //* * tab标签点击 */
     handleClick(tab, event) {},
     editSaveSuccess() {
       this.$emit('handle', { type: 'save-success' })

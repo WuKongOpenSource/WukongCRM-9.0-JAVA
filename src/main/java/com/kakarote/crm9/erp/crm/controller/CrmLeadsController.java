@@ -4,9 +4,14 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Inject;
+import com.jfinal.core.Controller;
+import com.jfinal.core.paragetter.Para;
 import com.jfinal.kit.Kv;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.upload.UploadFile;
 import com.kakarote.crm9.common.annotation.LoginFormCookie;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
@@ -20,13 +25,6 @@ import com.kakarote.crm9.erp.crm.entity.CrmLeads;
 import com.kakarote.crm9.erp.crm.service.CrmLeadsService;
 import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.R;
-import com.jfinal.aop.Before;
-import com.jfinal.aop.Inject;
-import com.jfinal.core.Controller;
-import com.jfinal.core.paragetter.Para;
-import com.jfinal.plugin.activerecord.Record;
-import com.jfinal.plugin.activerecord.tx.Tx;
-import com.jfinal.upload.UploadFile;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -113,7 +111,7 @@ public class CrmLeadsController extends Controller {
     @Permissions("crm:leads:transfer")
     @NotNullValidate(value = "leadsIds",message = "线索id不能为空")
     @NotNullValidate(value = "newOwnerUserId",message = "新负责人id不能为空")
-    public void changeOwnerUser(@Para("leadsIds")String leadsIds,@Para("newOwnerUserId")Integer newOwnerUserId){
+    public void changeOwnerUser(@Para("leadsIds")String leadsIds,@Para("newOwnerUserId")Long newOwnerUserId){
         renderJson(crmLeadsService.updateOwnerUserId(leadsIds,newOwnerUserId));
     }
 
@@ -187,7 +185,7 @@ public class CrmLeadsController extends Controller {
         try {
             writer = ExcelUtil.getWriter();
             AdminFieldService adminFieldService = new AdminFieldService();
-            List<Record> fieldList = adminFieldService.customFieldList("1");
+            List<Record> fieldList = adminFieldService.customFieldList(CrmEnum.CRM_LEADS.getType());
             writer.addHeaderAlias("leads_name", "线索名称");
             writer.addHeaderAlias("next_time", "下次联系时间");
             writer.addHeaderAlias("telephone", "电话");
@@ -251,14 +249,20 @@ public class CrmLeadsController extends Controller {
      */
     @LoginFormCookie
     public void downloadExcel(){
-        List<Record> recordList = adminFieldService.queryAddField(1);
+        List<Record> recordList = adminFieldService.queryAddField(CrmEnum.CRM_LEADS);
         recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("线索导入表");
-        sheet.setDefaultColumnWidth(12);
         sheet.setDefaultRowHeight((short)400);
-        HSSFRow titleRow = sheet.createRow(0);
+        CellStyle textStyle = wb.createCellStyle();
+        DataFormat format = wb.createDataFormat();
+        textStyle.setDataFormat(format.getFormat("@"));
+        for (int i=0;i < recordList.size();i++){
+            sheet.setDefaultColumnStyle(i,textStyle);
+            sheet.setColumnWidth(i,20*256);
+        }
         CellStyle cellStyle = wb.createCellStyle();
+        HSSFRow titleRow = sheet.createRow(0);
         cellStyle.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
         cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         Font font = wb.createFont();
@@ -320,12 +324,14 @@ public class CrmLeadsController extends Controller {
      */
     @Permissions("crm:leads:excelimport")
     @NotNullValidate(value = "ownerUserId",message = "请选择负责人")
-    @Before(Tx.class)
-    public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling,@Para("ownerUserId") Integer ownerUserId){
-        Db.tx(() ->{
-            R result = crmLeadsService.uploadExcel(file,repeatHandling,ownerUserId);
+    public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling,@Para("ownerUserId") Long ownerUserId){
+        Db.tx(() -> {
+            R result = crmLeadsService.uploadExcel(file, repeatHandling, ownerUserId);
             renderJson(result);
-            return !result.get("code").equals(500);
+            if (result.get("code").equals(500)) {
+                return false;
+            }
+            return true;
         });
     }
 }

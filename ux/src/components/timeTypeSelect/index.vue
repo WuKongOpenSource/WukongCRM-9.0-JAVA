@@ -1,67 +1,61 @@
 <template>
-  <el-popover placement="bottom"
-              width="200"
-              popper-class="no-padding-popover"
-              v-model="showTypePopover"
-              trigger="click">
+  <el-popover
+    v-model="showTypePopover"
+    placement="bottom"
+    width="200"
+    popper-class="no-padding-popover"
+    trigger="click">
     <div class="type-popper">
       <div class="type-content">
-        <div v-for="(item, index) in typeOptions"
-             :key="index"
-             class="type-content-item"
-             :class="{ 'selected' : selectType.value == item.value && !showCustomContent}"
-             @click="typeSelectClick(item)">
-          <div class="mark"></div>{{item.label}}
+        <div
+          v-for="(item, index) in typeOptions"
+          :key="index"
+          :class="{ 'selected' : selectType.value == item.value && !showCustomContent}"
+          class="type-content-item"
+          @click="typeSelectClick(item)">
+          <div class="mark"/>{{ item.label }}
         </div>
-        <div class="type-content-item"
-             :class="{ 'selected' : showCustomContent}"
-             @click="showCustomContent = true">
-          <div class="mark"></div>自定义
+        <div
+          :class="{ 'selected' : showCustomContent}"
+          class="type-content-item"
+          @click="showCustomContent = true">
+          <div class="mark"/>自定义
         </div>
       </div>
-      <div class="type-content-custom"
-           v-if="showCustomContent">
-        <el-date-picker v-model="startTime"
-                        type="date"
-                        value-format="yyyy-MM-dd"
-                        placeholder="选择日期">
-        </el-date-picker>
-        <el-date-picker v-model="endTime"
-                        type="date"
-                        value-format="yyyy-MM-dd"
-                        placeholder="选择日期">
-        </el-date-picker>
+      <div
+        v-if="showCustomContent"
+        class="type-content-custom">
+        <el-date-picker
+          v-model="startTime"
+          type="date"
+          value-format="yyyy-MM-dd"
+          placeholder="选择日期"/>
+        <el-date-picker
+          v-model="endTime"
+          type="date"
+          value-format="yyyy-MM-dd"
+          placeholder="选择日期"/>
         <el-button @click="customSureClick">确定</el-button>
       </div>
     </div>
-    <el-input slot="reference"
-              placeholder="请选择选择"
-              v-model="typeShowValue"
-              :readonly="true"
-              class="type-select">
-      <i slot="suffix"
-         :class="['el-input__icon', 'el-icon-' + iconClass]"></i>
+    <el-input
+      slot="reference"
+      v-model="typeShowValue"
+      :readonly="true"
+      placeholder="请选择选择"
+      class="type-select">
+      <i
+        slot="suffix"
+        :class="['el-input__icon', 'el-icon-' + iconClass]"/>
     </el-input>
   </el-popover>
 </template>
 
 <script type="text/javascript">
 export default {
-  name: 'time-type-select', //时间类型选择
-  computed: {
-    iconClass() {
-      return this.showTypePopover ? 'arrow-up' : 'arrow-down'
-    },
-    typeShowValue() {
-      if (this.sureCustomContent) {
-        if (this.startTime || this.endTime) {
-          return (this.startTime || '') + '-' + (this.endTime || '')
-        }
-        return ''
-      } else {
-        return this.selectType.label
-      }
-    }
+  name: 'TimeTypeSelect',
+  props: {
+    defaultType: Object
   },
   data() {
     return {
@@ -85,9 +79,21 @@ export default {
         { label: '去年', value: 'lastYear' }
       ]
     }
-  },
-  props: {
-    defaultType: Object
+  }, // 时间类型选择
+  computed: {
+    iconClass() {
+      return this.showTypePopover ? 'arrow-up' : 'arrow-down'
+    },
+    typeShowValue() {
+      if (this.sureCustomContent) {
+        if (this.startTime || this.endTime) {
+          return (this.startTime || '') + '-' + (this.endTime || '')
+        }
+        return ''
+      } else {
+        return this.selectType.label
+      }
+    }
   },
   mounted() {
     if (this.defaultType) {

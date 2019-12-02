@@ -103,7 +103,7 @@
   #sql("queryTaskFileByWorkId")
     SELECT a.file_id,a.name, CONCAT(FLOOR(a.size/1000),'KB') as size,a.create_user_id,b.realname as create_user_name,a.create_time,a.file_path,a.file_type,a.batch_id
     FROM `72crm_admin_file` as a inner join `72crm_admin_user` as b on a.create_user_id = b.user_id
-    where a.batch_id in (select batch_id from `72crm_task` where work_id = #para(workId))
+    where a.batch_id in (select batch_id from `72crm_task` where work_id = #para(workId) and ishidden = 0)
   #end
   #sql("leave")
     update `72crm_task` set main_user_id = null where work_id =  #para(workId) and main_user_id = #para(userId);

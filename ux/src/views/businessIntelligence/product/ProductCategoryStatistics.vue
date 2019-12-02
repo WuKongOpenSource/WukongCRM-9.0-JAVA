@@ -1,15 +1,16 @@
 <template>
-  <div v-loading="loading"
-       class="main-container">
-    <filtrate-handle-view class="filtrate-bar"
-                          moduleType="product"
-                          :showProductSelct="true"
-                          @load="loading=true"
-                          @change="getDataList">
-    </filtrate-handle-view>
+  <div
+    v-loading="loading"
+    class="main-container">
+    <filtrate-handle-view
+      :show-product-selct="true"
+      class="filtrate-bar"
+      module-type="product"
+      @load="loading=true"
+      @change="getDataList"/>
     <div class="content">
       <div class="axis-content">
-        <div id="axismain"></div>
+        <div id="axismain"/>
       </div>
     </div>
   </div>
@@ -22,7 +23,8 @@ import { biProductCategoryAPI } from '@/api/businessIntelligence/product'
 
 export default {
   /** 产品分类销量分析 */
-  name: 'product-category-statistics',
+  name: 'ProductCategoryStatistics',
+  mixins: [base],
   data() {
     return {
       loading: false,
@@ -30,7 +32,6 @@ export default {
       axisChart: null
     }
   },
-  mixins: [base],
   computed: {},
   mounted() {
     this.initAxis()
@@ -42,8 +43,8 @@ export default {
         .then(res => {
           this.loading = false
 
-          let numCounts = []
-          let legendData = []
+          const numCounts = []
+          const legendData = []
           for (let index = 0; index < res.data.length; index++) {
             const element = res.data[index]
             numCounts.push({ name: element.productName, value: element.num })

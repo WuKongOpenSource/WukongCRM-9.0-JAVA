@@ -5,9 +5,9 @@ import request from '@/utils/request'
  * @param {*} data
  */
 export function workTaskDateListAPI(data) {
-    return request({
-        url: 'workbench/dateList',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'workbench/dateList',
+    method: 'post',
+    data: data
+  })
 }

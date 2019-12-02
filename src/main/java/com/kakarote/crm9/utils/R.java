@@ -59,7 +59,7 @@ public class R extends LinkedHashMap<String, Object> implements Serializable {
 	}
 
 	public static R isSuccess(boolean b,String msg){
-		return b?R.ok(msg):R.error(msg);
+		return b?R.ok():R.error(msg);
 	}
 	public static R isSuccess(boolean b){
 		return isSuccess(b,null);

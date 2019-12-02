@@ -60,8 +60,8 @@
     #sql("queryUserCustomer")
          SELECT sau.realname,
     (select COUNT(customer_id) FROM 72crm_crm_customer where owner_user_id = sau.user_id) as khs,
-    (select COUNT(customer_id) FROM 72crm_crm_customer where owner_user_id = sau.user_id AND deal_status = '成交') as  cjkhs,
-    (IFNULL((select COUNT(customer_id) FROM 72crm_crm_customer where owner_user_id = sau.user_id AND deal_status = '成交') /
+    (select COUNT(customer_id) FROM 72crm_crm_customer where owner_user_id = sau.user_id AND deal_status = 1) as  cjkhs,
+    (IFNULL((select COUNT(customer_id) FROM 72crm_crm_customer where owner_user_id = sau.user_id AND deal_status = 1) /
      (select COUNT(customer_id) FROM 72crm_crm_customer where owner_user_id = sau.user_id) * 100,0)) as khcjl,
     IFNULL((SELECT SUM(money) FROM 72crm_crm_contract where owner_user_id = sau.user_id),0) as htje,
     IFNULL((SELECT SUM(money) FROM 72crm_crm_receivables where owner_user_id = sau.user_id),0) as hkje,
@@ -95,10 +95,7 @@
 
     #sql ("updateScene")
     delete from 72crm_admin_scene where user_id in (
-        #for(i:ids)
-          #(for.index == 0 ? "" : ",")
-              #para(i)
-        #end
+        #fori(ids)
     )
     #end
 #end

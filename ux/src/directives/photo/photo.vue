@@ -1,11 +1,13 @@
 <template>
-  <div v-show="visible"
-       class="photo-wrap">
-    <flexbox class="photo-content"
-             justify="center"
-             align="center"
-             :style="{'font-size' : fontSize+'px'}">
-      <div v-if="text">{{text}}</div>
+  <div
+    v-show="visible"
+    class="photo-wrap">
+    <flexbox
+      :style="{'font-size' : fontSize+'px'}"
+      class="photo-content"
+      justify="center"
+      align="center">
+      <div v-if="text">{{ text }}</div>
     </flexbox>
   </div>
 </template>
@@ -19,6 +21,7 @@ export default {
       fontSize: 12
     }
   },
+  computed: {},
   watch: {
     visible: function(params) {
       this.$nextTick(() => {
@@ -34,7 +37,6 @@ export default {
       })
     }
   },
-  computed: {},
   mounted() {},
   methods: {
     setText(text) {

@@ -1,43 +1,48 @@
 <template>
-  <el-dialog :title="diaTitle"
-             :visible="show"
-             v-loading="loading"
-             @close="closeView"
-             :modal-append-to-body="true"
-             :append-to-body="true"
-             :close-on-click-modal="false"
-             class="create-dialog"
-             width="700px">
+  <el-dialog
+    v-loading="loading"
+    :title="diaTitle"
+    :visible="show"
+    :modal-append-to-body="true"
+    :append-to-body="true"
+    :close-on-click-modal="false"
+    class="create-dialog"
+    width="700px"
+    @close="closeView">
     <div class="label-input">
       <label class="label-title">权限名称</label>
-      <el-input v-model="roleName"
-                placeholder="请输入权限名称"></el-input>
+      <el-input
+        v-model="roleName"
+        placeholder="请输入权限名称"/>
     </div>
     <div class="label-input">
       <label class="label-title">权限描述</label>
-      <el-input v-model="remark"
-                type="textarea"
-                :rows="2"
-                placeholder="请输入权限描述"></el-input>
+      <el-input
+        v-model="remark"
+        :rows="2"
+        type="textarea"
+        placeholder="请输入权限描述"/>
     </div>
     <label class="label-title">权限配置</label>
     <div class="jurisdiction-content-checkbox">
-      <el-tree :data="showTreeData"
-               show-checkbox
-               node-key="menuId"
-               style="height: 0;"
-               ref="tree"
-               :indent="0"
-               empty-text=""
-               default-expand-all
-               :expand-on-click-node="false"
-               :props="defaultProps">
-      </el-tree>
+      <el-tree
+        ref="tree"
+        :data="showTreeData"
+        :indent="0"
+        :expand-on-click-node="false"
+        :props="defaultProps"
+        show-checkbox
+        node-key="menuId"
+        style="height: 0;"
+        empty-text=""
+        default-expand-all/>
     </div>
-    <span slot="footer"
-          class="dialog-footer">
-      <el-button type="primary"
-                 @click="sureClick">确 定</el-button>
+    <span
+      slot="footer"
+      class="dialog-footer">
+      <el-button
+        type="primary"
+        @click="sureClick">确 定</el-button>
       <el-button @click="closeView">取 消</el-button>
     </span>
   </el-dialog>
@@ -47,8 +52,24 @@
 import { systemMenuGetWorkMenuListAPI, systemRoleSetWorkRoleAPI } from '@/api/systemManagement/project'
 
 export default {
-  name: 'jurisdiction-create', // 文件导入
+  name: 'JurisdictionCreate', // 文件导入
   components: {},
+
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    },
+
+    action: {
+      type: Object,
+      default: () => {
+        return {
+          type: 'save'
+        }
+      }
+    }
+  },
   data() {
     return {
       loading: false,
@@ -69,22 +90,6 @@ export default {
       }
 
       return '编辑'
-    }
-  },
-
-  props: {
-    show: {
-      type: Boolean,
-      default: false
-    },
-
-    action: {
-      type: Object,
-      default: () => {
-        return {
-          type: 'save'
-        }
-      }
     }
   },
 
@@ -160,8 +165,8 @@ export default {
         this.$message.error('请填写权限名称')
       } else {
         this.loading = true
-        let rules = this.$refs.tree.getCheckedKeys()
-        let params = {
+        const rules = this.$refs.tree.getCheckedKeys()
+        const params = {
           roleName: this.roleName,
           remark: this.remark,
           rules: rules
@@ -262,7 +267,6 @@ export default {
       for (let index = 0; index < array.length; index++) {
         if (item == array[index]) {
           return true
-          break
         }
       }
       return false

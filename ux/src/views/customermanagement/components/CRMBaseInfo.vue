@@ -1,31 +1,61 @@
 <template>
   <div class="b-cont">
     <div>
-      <sections class="b-cells"
-                title="基本信息"
-                m-color="#46CDCF"
-                content-height="auto">
-        <flexbox :gutter="0"
-                 wrap="wrap"
-                 style="padding: 10px 8px 0;">
-          <flexbox-item :span="0.5"
-                        v-for="(item, index) in list"
-                        :key="index"
-                        class="b-cell">
-            <flexbox align="stretch"
-                     class="b-cell-b">
-              <div class="b-cell-name">{{item.name}}</div>
-              <div class="b-cell-value">{{item.value}}</div>
+      <sections
+        class="b-cells"
+        title="基本信息"
+        m-color="#46CDCF"
+        content-height="auto">
+        <flexbox
+          :gutter="0"
+          wrap="wrap"
+          style="padding: 10px 8px 0;">
+          <flexbox-item
+            v-for="(item, index) in list"
+            :span="0.5"
+            :key="index"
+            class="b-cell">
+            <flexbox
+              v-if="item.type === 8"
+              align="stretch"
+              class="b-cell-b">
+              <div class="b-cell-name">{{ item.name }}</div>
+              <div class="b-cell-value">
+                <flexbox
+                  v-for="(file, index) in item.value"
+                  :key="index"
+                  class="f-item">
+                  <img
+                    class="f-img"
+                    src="@/assets/img/relevance_file.png" >
+                  <div class="f-name">{{ file | fileName }}</div>
+                  <el-button
+                    type="text"
+                    @click.native="handleFile('preview', item, index)">预览</el-button>
+                  <el-button
+                    type="text"
+                    @click.native="handleFile('download', file, index)">下载</el-button>
+                </flexbox>
+              </div>
+            </flexbox>
+
+            <flexbox
+              v-else
+              align="stretch"
+              class="b-cell-b">
+              <div class="b-cell-name">{{ item.name }}</div>
+              <div class="b-cell-value">{{ item.value }}</div>
             </flexbox>
           </flexbox-item>
         </flexbox>
       </sections>
     </div>
-    <map-view v-if="showMapView"
-              :title="mapViewInfo.title"
-              :lat="mapViewInfo.lat"
-              :lng="mapViewInfo.lng"
-              @hidden="showMapView=false"></map-view>
+    <map-view
+      v-if="showMapView"
+      :title="mapViewInfo.title"
+      :lat="mapViewInfo.lat"
+      :lng="mapViewInfo.lng"
+      @hidden="showMapView=false"/>
   </div>
 </template>
 
@@ -34,24 +64,26 @@ import loading from '../mixins/loading'
 import crmTypeModel from '@/views/customermanagement/model/crmTypeModel'
 import Sections from '../components/Sections'
 import { filedGetInformation } from '@/api/customermanagement/common'
-import { getDateFromTimestamp } from '@/utils'
-import moment from 'moment'
+import { fileSize, downloadFile } from '@/utils'
 import MapView from '@/components/MapView' // 地图详情
-import { downloadFile } from '@/utils'
 
 export default {
   /** 客户管理 的 基本信息*/
-  name: 'c-r-m-base-info',
+  name: 'CRMBaseInfo',
   components: {
     Sections,
     MapView
   },
-  mixins: [loading],
   filters: {
     addressShow: function(list) {
       return list ? list.join(' ') : ''
+    },
+    fileName(file) {
+      const name = file.name && file.name.length > 10 ? (file.name.substring(0, 10) + '...') : file.name
+      return name + '(' + fileSize(file.size) + ')'
     }
   },
+  mixins: [loading],
   props: {
     /** 模块ID */
     id: [String, Number],
@@ -67,11 +99,6 @@ export default {
       default: ''
     }
   },
-  watch: {
-    id: function(val) {
-      this.getBaseInfo()
-    }
-  },
   data() {
     return {
       list: [],
@@ -80,6 +107,11 @@ export default {
     }
   },
   computed: {},
+  watch: {
+    id: function(val) {
+      this.getBaseInfo()
+    }
+  },
   mounted() {
     this.getBaseInfo()
   },
@@ -94,13 +126,29 @@ export default {
         id: this.id
       })
         .then(res => {
-          var self = this
           this.list = res.data
           this.loading = false
         })
         .catch(() => {
           this.loading = false
         })
+    },
+    /**
+     * 附件查看
+     */
+    handleFile(type, item, index) {
+      if (type === 'preview') {
+        var previewList = item.value.map(element => {
+          element.url = element.filePath
+          return element
+        })
+        this.$bus.emit('preview-image-bus', {
+          index: index,
+          data: previewList
+        })
+      } else if (type === 'download') {
+        downloadFile({ path: item.filePath, name: item.name })
+      }
     }
   }
 }

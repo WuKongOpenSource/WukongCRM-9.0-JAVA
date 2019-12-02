@@ -126,4 +126,10 @@
         #end
     )
     #end
+    #sql ("queryIsAuth")
+    select count(*) from 72crm_crm_business where owner_user_id in ( #fori(userIds) ) and business_id = #para(businessId)
+    #end
+    #sql ("queryIsRoUser")
+    select count(*) from 72crm_crm_business where find_in_set(?,ro_user_id) and business_id = ?
+    #end
 #end

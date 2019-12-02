@@ -11,7 +11,7 @@ export default {
   },
 
   watch: {
-    loading: function (val) {
+    loading: function(val) {
       if (val) {
         this.tab_loading = Loading.service({
           target: document.querySelector('.t-loading-content')
@@ -24,6 +24,6 @@ export default {
 
   mounted() {},
 
-  deactivated: function () {}
+  deactivated: function() {}
 
 }

@@ -1,43 +1,50 @@
 <template>
-  <create-view :loading="loading"
-               :body-style="{ height: '100%'}">
-    <flexbox direction="column"
-             align="stretch"
-             class="crm-create-container">
+  <create-view
+    :loading="loading"
+    :body-style="{ height: '100%'}">
+    <flexbox
+      direction="column"
+      align="stretch"
+      class="crm-create-container">
       <flexbox class="crm-create-header">
-        <div style="flex:1;font-size:17px;color:#333;">{{title}}</div>
-        <img @click="hidenView"
-             class="close"
-             src="@/assets/img/task_close.png" />
+        <div style="flex:1;font-size:17px;color:#333;">{{ title }}</div>
+        <img
+          class="close"
+          src="@/assets/img/task_close.png"
+          @click="hidenView" >
       </flexbox>
       <div class="crm-create-flex">
         <create-sections title="基本信息">
-          <flexbox direction="column"
-                   align="stretch">
+          <flexbox
+            direction="column"
+            align="stretch">
             <div class="crm-create-body">
-              <el-form ref="crmForm"
-                       :model="crmForm"
-                       label-position="top"
-                       class="crm-create-box">
-                <el-form-item v-for="(item, index) in this.crmForm.crmFields"
-                              :key="item.key"
-                              :prop="'crmFields.' + index + '.value'"
-                              :class="{ 'crm-create-block-item': item.showblock, 'crm-create-item': !item.showblock }"
-                              :style="{'padding-left': getPaddingLeft(item, index), 'padding-right': getPaddingRight(item, index)}">
-                  <div slot="label"
-                       style="display: inline-block;">
+              <el-form
+                ref="crmForm"
+                :model="crmForm"
+                label-position="top"
+                class="crm-create-box">
+                <el-form-item
+                  v-for="(item, index) in crmForm.crmFields"
+                  :key="item.key"
+                  :prop="'crmFields.' + index + '.value'"
+                  :class="{ 'crm-create-block-item': item.showblock, 'crm-create-item': !item.showblock }"
+                  :style="{'padding-left': getPaddingLeft(item, index), 'padding-right': getPaddingRight(item, index)}">
+                  <div
+                    slot="label"
+                    style="display: inline-block;">
                     <div style="margin:5px 0;font-size:12px;word-wrap:break-word;word-break:break-all;">
-                      {{item.data.name}}
+                      {{ item.data.name }}
                       <span style="color:#999;">
-                        {{item.data.inputTips ? '（'+item.data.inputTips+'）':''}}
+                        {{ item.data.inputTips ? '（'+item.data.inputTips+'）':'' }}
                       </span>
                     </div>
                   </div>
                   <!-- -->
-                  <component :is="item.data.formType | typeToComponentName"
-                             :radio="false"
-                             :disabled="item.disabled">
-                  </component>
+                  <component
+                    :is="item.data.formType | typeToComponentName"
+                    :radio="false"
+                    :disabled="item.disabled"/>
                 </el-form-item>
               </el-form>
             </div>
@@ -71,7 +78,7 @@ import {
 } from '@/components/CreateCom'
 
 export default {
-  name: 'preview-field-view', // 所有新建效果的view
+  name: 'PreviewFieldView', // 所有新建效果的view
   components: {
     CreateView,
     CreateSections,
@@ -90,26 +97,6 @@ export default {
     XhBusinessStatus,
     XhCustomerAddress,
     XhReceivablesPlan
-  },
-  computed: {},
-  watch: {
-    types: function(value) {
-      this.crmForm = {
-        crmFields: []
-      }
-      this.getField()
-    }
-  },
-  data() {
-    return {
-      // 标题展示名称
-      title: '预览',
-      loading: false,
-      // 自定义字段信息表单
-      crmForm: {
-        crmFields: []
-      }
-    }
   },
   filters: {
     /** 根据type 找到组件 */
@@ -175,10 +162,36 @@ export default {
       default: ''
     }
   },
+  data() {
+    return {
+      // 标题展示名称
+      title: '预览',
+      loading: false,
+      // 自定义字段信息表单
+      crmForm: {
+        crmFields: []
+      }
+    }
+  },
+  computed: {},
+  watch: {
+    types: function(value) {
+      this.crmForm = {
+        crmFields: []
+      }
+      this.getField()
+    }
+  },
   mounted() {
     // 获取title展示名称
     document.body.appendChild(this.$el)
     this.getField()
+  },
+  destroyed() {
+    // remove DOM node after destroy
+    if (this.$el && this.$el.parentNode) {
+      this.$el.parentNode.removeChild(this.$el)
+    }
   },
   methods: {
     // 获取自定义字段
@@ -229,12 +242,6 @@ export default {
       }
 
       return index % 2 == 0 ? '25px' : '0'
-    }
-  },
-  destroyed() {
-    // remove DOM node after destroy
-    if (this.$el && this.$el.parentNode) {
-      this.$el.parentNode.removeChild(this.$el)
     }
   }
 }

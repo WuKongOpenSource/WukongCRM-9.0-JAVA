@@ -6,12 +6,21 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Aop;
+import com.jfinal.aop.Before;
+import com.jfinal.aop.Inject;
+import com.jfinal.kit.Kv;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.SqlPara;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
+import com.kakarote.crm9.erp.admin.service.AdminUserService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.entity.*;
 import com.kakarote.crm9.erp.oa.common.OaEnum;
@@ -22,14 +31,6 @@ import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.R;
-import com.jfinal.aop.Before;
-import com.jfinal.aop.Inject;
-import com.jfinal.kit.Kv;
-import com.jfinal.plugin.activerecord.Db;
-import com.jfinal.plugin.activerecord.Page;
-import com.jfinal.plugin.activerecord.Record;
-import com.jfinal.plugin.activerecord.SqlPara;
-import com.jfinal.plugin.activerecord.tx.Tx;
 
 import java.util.*;
 
@@ -49,9 +50,6 @@ public class CrmBusinessService {
     @Inject
     private OaActionRecordService oaActionRecordService;
 
-    @Inject
-    private AuthUtil authUtil;
-
     /**
      * @author wyq
      * 新增或更新商机
@@ -67,6 +65,9 @@ public class CrmBusinessService {
         adminFieldService.save(jsonObject.getJSONArray("field"), batchId);
         boolean saveOrUpdate;
         if (crmBusiness.getBusinessId() != null) {
+            if(!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) && !BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID) && Db.queryInt(Db.getSql("crm.business.queryIsRoUser"), BaseUtil.getUserId(), crmBusiness.getBusinessId()) > 0){
+                return R.error("没有权限");
+            }
             crmBusiness.setUpdateTime(DateUtil.date());
             crmRecordService.updateRecord(new CrmBusiness().dao().findById(crmBusiness.getBusinessId()), crmBusiness, CrmEnum.CRM_BUSINESS);
             CrmBusiness oldBusiness = CrmBusiness.dao.findById(crmBusiness.getBusinessId());
@@ -75,15 +76,15 @@ public class CrmBusinessService {
                 change.setBusinessId(crmBusiness.getBusinessId());
                 change.setStatusId(crmBusiness.getStatusId());
                 change.setCreateTime(DateUtil.date());
-                change.setCreateUserId(BaseUtil.getUserId().intValue());
+                change.setCreateUserId(BaseUtil.getUserId());
                 change.save();
             }
             saveOrUpdate = crmBusiness.update();
         } else {
             crmBusiness.setCreateTime(DateUtil.date());
             crmBusiness.setUpdateTime(DateUtil.date());
-            crmBusiness.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
-            crmBusiness.setOwnerUserId(BaseUtil.getUser().getUserId().intValue());
+            crmBusiness.setCreateUserId(BaseUtil.getUser().getUserId());
+            crmBusiness.setOwnerUserId(BaseUtil.getUser().getUserId());
             crmBusiness.setBatchId(batchId);
             crmBusiness.setRwUserId(",");
             crmBusiness.setRoUserId(",");
@@ -333,9 +334,13 @@ public class CrmBusinessService {
         StringBuffer stringBuffer = new StringBuffer();
         for (String id : businessIdsArr) {
             if (StrUtil.isNotEmpty(id)) {
-                Integer ownerUserId = CrmBusiness.dao.findById(Integer.valueOf(id)).getOwnerUserId();
+                Long userId = BaseUtil.getUserId();
+                if(!userId.equals(BaseConstant.SUPER_ADMIN_USER_ID) && !BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID) && Db.template("crm.business.queryIsAuth",Kv.by("userIds", Aop.get(AdminUserService.class).queryUserByAuth(userId,"business")).set("businessId",id)).queryInt() == 0){
+                    return R.error("没有权限");
+                }
+                Long ownerUserId = CrmBusiness.dao.findById(Integer.valueOf(id)).getOwnerUserId();
                 for (String memberId : memberArr) {
-                    if (ownerUserId.equals(Integer.valueOf(memberId))) {
+                    if (ownerUserId.equals(Long.valueOf(memberId))) {
                         return R.error("负责人不能重复选为团队成员");
                     }
                     Db.update(Db.getSql("crm.business.deleteMember"), "," + memberId + ",", "," + memberId + ",", Integer.valueOf(id));
@@ -363,6 +368,12 @@ public class CrmBusinessService {
     public R deleteMembers(CrmBusiness crmBusiness) {
         String[] businessIdsArr = crmBusiness.getIds().split(",");
         String[] memberArr = crmBusiness.getMemberIds().split(",");
+        for (String id : businessIdsArr) {
+            Long userId = BaseUtil.getUserId();
+            if(!userId.equals(BaseConstant.SUPER_ADMIN_USER_ID) && !BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID) && Db.template("crm.business.queryIsAuth",Kv.by("userIds", Aop.get(AdminUserService.class).queryUserByAuth(userId,"business")).set("businessId",id)).queryInt() == 0){
+                return R.error("没有权限");
+            }
+        }
         return Db.tx(() -> {
             for (String id : businessIdsArr) {
                 for (String memberId : memberArr) {
@@ -394,7 +405,7 @@ public class CrmBusinessService {
             change.setBusinessId(crmBusiness.getBusinessId());
             change.setStatusId(crmBusiness.getStatusId());
             change.setCreateTime(DateUtil.date());
-            change.setCreateUserId(BaseUtil.getUserId().intValue());
+            change.setCreateUserId(BaseUtil.getUserId());
             change.save();
         }
         return crmBusiness.update() ? R.ok() : R.error();
@@ -410,7 +421,7 @@ public class CrmBusinessService {
         Record customer = new Record();
         customerList.add(customer.set("customer_id",business.getInt("customer_id")).set("customer_name",business.getStr("customer_name")));
         business.set("customer_id",customerList);
-        List<Record> fieldList = adminFieldService.queryUpdateField(5,business);
+        List<Record> fieldList = adminFieldService.queryUpdateField(CrmEnum.CRM_BUSINESS.getType(),business);
         fieldList.add(new Record().set("field_name","type_id").set("name","商机状态组").set("value",business.getInt("type_id")).set("form_type","business_type").set("setting",new String[0]).set("is_null",1).set("field_type",1));
         fieldList.add(new Record().set("field_name","status_id").set("name","商机阶段").set("value",business.getInt("status_id")).set("form_type","business_status").set("setting",new String[0]).set("is_null",1).set("field_type",1));
         List<Record> productList = Db.find(Db.getSql("crm.business.queryBusinessProduct"), businessId);
@@ -452,17 +463,20 @@ public class CrmBusinessService {
     public R addRecord(AdminRecord adminRecord) {
         adminRecord.setTypes("crm_business");
         adminRecord.setCreateTime(DateUtil.date());
-        adminRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        adminRecord.setCreateUserId(BaseUtil.getUser().getUserId());
+        if (StrUtil.isEmpty(adminRecord.getCategory())){
+            return R.error("跟进类型不能为空");
+        }
         if (1 == adminRecord.getIsEvent()) {
             OaEvent oaEvent = new OaEvent();
             oaEvent.setTitle(adminRecord.getContent());
             oaEvent.setStartTime(adminRecord.getNextTime());
             oaEvent.setEndTime(DateUtil.offsetDay(adminRecord.getNextTime(), 1));
             oaEvent.setCreateTime(DateUtil.date());
-            oaEvent.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            oaEvent.setCreateUserId(BaseUtil.getUser().getUserId());
             oaEvent.save();
             AdminUser user = BaseUtil.getUser();
-            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId().intValue(),oaEvent.getOwnerUserIds()),oaActionRecordService.getJoinIds(user.getDeptId(),""));
+            oaActionRecordService.addRecord(oaEvent.getEventId(), OaEnum.EVENT_TYPE_KEY.getTypes(),1,oaActionRecordService.getJoinIds(user.getUserId(),oaEvent.getOwnerUserIds()),oaActionRecordService.getJoinIds(Long.valueOf(user.getDeptId()),""));
             OaEventRelation oaEventRelation = new OaEventRelation();
             oaEventRelation.setEventId(oaEvent.getEventId());
             oaEventRelation.setBusinessIds(","+adminRecord.getTypesId().toString()+",");

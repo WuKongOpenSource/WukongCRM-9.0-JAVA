@@ -8,6 +8,7 @@ import com.jfinal.core.paragetter.Para;
 import com.jfinal.plugin.activerecord.Record;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
+import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldStyle;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
@@ -58,10 +59,21 @@ public class AdminFieldController extends Controller {
 
     /**
      * @author zhangzhiwei
-     * 保存自定义字段E
+     * 保存自定义字段
      */
     @Permissions("manage:crm:field")
     public void save() {
+        String str=getRawData();
+        JSONObject jsonObject= JSON.parseObject(str);
+        renderJson(adminFieldService.save(jsonObject));
+    }
+
+    /**
+     * @author zhangzhiwei
+     * 保存自定义字段(工作台)
+     */
+    @Permissions("manage:oa:examine")
+    public void examineFieldSave() {
         String str=getRawData();
         JSONObject jsonObject= JSON.parseObject(str);
         renderJson(adminFieldService.save(jsonObject));
@@ -80,48 +92,49 @@ public class AdminFieldController extends Controller {
      */
     public void list(){
         JSONObject object=JSONObject.parseObject(getRawData());
-        renderJson(R.ok().put("data",adminFieldService.list(object.getString("label"),object.getString("categoryId"))));
+        renderJson(R.ok().put("data",adminFieldService.list(object.getInteger("label"),object.getString("categoryId"))));
     }
 
     /**
      * @author wyq
      * 查询新增或编辑字段
      */
-    public void queryField(@Para("label")String label,@Para("id")Integer id){
+    public void queryField(@Para("label")Integer label,@Para("id")Integer id){
         List<Record> recordList = new LinkedList<>();
+        CrmEnum crmEnum = CrmEnum.parse(label);
         if (id != null){
-            if ("1".equals(label)){
+            if (CrmEnum.CRM_LEADS.equals(crmEnum)){
                 recordList = crmLeadsService.queryField(id);
             }
-            if ("2".equals(label)){
+            if (CrmEnum.CRM_CUSTOMER.equals(crmEnum)){
                 recordList = crmCustomerService.queryField(id);
             }
-            if ("3".equals(label)){
+            if (CrmEnum.CRM_CONTACTS.equals(crmEnum)){
                 recordList = crmContactsService.queryField(id);
             }
-            if ("4".equals(label)){
+            if (CrmEnum.CRM_PRODUCT.equals(crmEnum)){
                 recordList = crmProductService.queryField(id);
             }
-            if ("5".equals(label)){
+            if (CrmEnum.CRM_BUSINESS.equals(crmEnum)){
                 recordList = crmBusinessService.queryField(id);
             }
-            if ("6".equals(label)){
+            if (CrmEnum.CRM_CONTRACT.equals(crmEnum)){
                 recordList = crmContractService.queryField(id);
             }
-            if ("7".equals(label)){
+            if (CrmEnum.CRM_RECEIVABLES.equals(crmEnum)){
                 recordList = crmReceivablesService.queryField(id);
             }
-            if ("8".equals(label)){
+            if (CrmEnum.CRM_RECEIVABLES_PLAN.equals(crmEnum)){
                 recordList = crmReceivablesPlanService.queryField(id);
             }
-            if("10".equals(label)){
+            if(10 == label){
                 recordList = oaExamineCategoryService.queryField(id);
             }
         }else {
-            if ("8".equals(label)){
+            if (CrmEnum.CRM_RECEIVABLES_PLAN.equals(crmEnum)){
                 recordList = crmReceivablesPlanService.queryField();
             }else {
-                recordList = adminFieldService.queryAddField(Integer.valueOf(label));
+                recordList = adminFieldService.queryAddField(crmEnum);
             }
         }
         renderJson(R.ok().put("data",recordList));
@@ -172,12 +185,13 @@ public class AdminFieldController extends Controller {
      * @author zhangzhiwei
      * 验证字段数据
      */
-    @NotNullValidate(value = "val",message = "字段校验参数错误")
-    @NotNullValidate(value = "types",message = "字段校验参数错误")
-    @NotNullValidate(value = "fieldName",message = "字段校验参数错误")
-    @NotNullValidate(value = "fieldType",message = "字段校验参数错误")
-    public void verify(){
-        renderJson(adminFieldService.verify(getKv()));
+    @NotNullValidate(value = "value",message = "字段校验参数错误")
+    @NotNullValidate(value = "fieldId",message = "字段校验参数错误")
+    public void verify(@Para("fieldId") Integer fieldId,@Para("value") String value,@Para("batchId") String batchId){
+        AdminField adminField = AdminField.dao.findByIdLoadColumns(fieldId,"field_name,field_id,name,label,field_type");
+        adminField.put("value",value).put("batchId",batchId);
+        int num=adminFieldService.verify(CrmEnum.parse(adminField.getLabel()),adminField.toRecord());
+        renderJson(R.isSuccess(num==0,adminField.getName()+"已存在"));
     }
 
     /**

@@ -1,25 +1,29 @@
 <template>
   <div>
-    <el-input placeholder="搜索成员"
-              size="small"
-              v-model="searchInput"
-              suffix-icon="el-icon-search"
-              @input="inputchange">
-    </el-input>
-    <div v-loading="loading"
-         class="search-list">
-      <el-checkbox-group v-model="selectItems"
-                         @change="changeCheckout">
-        <el-checkbox v-if="item.show"
-                     v-for="(item, i) in list"
-                     :key="i"
-                     :label="item"
-                     :disabled="item.disabled"
-                     class="colleagues-list">
-          <div v-photo="item"
-               v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
-               class="div-photo search-img"></div>
-          <span>{{item.realname}}</span>
+    <el-input
+      v-model="searchInput"
+      placeholder="搜索成员"
+      size="small"
+      suffix-icon="el-icon-search"
+      @input="inputchange"/>
+    <div
+      v-loading="loading"
+      class="search-list">
+      <el-checkbox-group
+        v-model="selectItems"
+        @change="changeCheckout">
+        <el-checkbox
+          v-for="(item, i) in list"
+          v-if="item.show"
+          :key="i"
+          :label="item"
+          :disabled="item.disabled"
+          class="colleagues-list">
+          <div
+            v-photo="item"
+            v-lazy:background-image="$options.filters.filterUserLazyImg(item.img)"
+            class="div-photo search-img"/>
+          <span>{{ item.realname }}</span>
         </el-checkbox>
       </el-checkbox-group>
     </div>
@@ -29,22 +33,8 @@
 import { usersList } from '@/api/common'
 
 export default {
-  name: 'xh-user', // 新建 user
+  name: 'XhUser', // 新建 user
   components: {},
-  computed: {},
-  watch: {
-    selectedData: function(value) {
-      this.checkItems(value)
-    }
-  },
-  data() {
-    return {
-      list: [],
-      selectItems: [], // 选择项
-      loading: false, // 加载动画
-      searchInput: ''
-    }
-  },
   props: {
     value: {
       type: String,
@@ -65,7 +55,7 @@ export default {
     /** 获取不同的员工展示列表 */
     infoType: {
       type: String,
-      default: 'default' //返回全部  crm_contract crm_receivables oa_examine 合同审核人自选列表
+      default: 'default' // 返回全部  crm_contract crm_receivables oa_examine 合同审核人自选列表
     },
     infoRequest: Function,
     /** 请求辅助参数 */
@@ -74,6 +64,20 @@ export default {
       default: () => {
         return {}
       }
+    }
+  },
+  data() {
+    return {
+      list: [],
+      selectItems: [], // 选择项
+      loading: false, // 加载动画
+      searchInput: ''
+    }
+  },
+  computed: {},
+  watch: {
+    selectedData: function(value) {
+      this.checkItems(value)
     }
   },
   mounted() {
@@ -124,7 +128,7 @@ export default {
       }
     },
     getParams() {
-      let params =
+      const params =
         this.infoParams && Object.keys(this.infoParams.length !== 0)
           ? this.infoParams
           : {}

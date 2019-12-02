@@ -90,7 +90,8 @@ public class AdminLoginController extends Controller{
             user.update();
             user.setRoles(adminRoleService.queryRoleIdsByUserId(user.getUserId()));
             redis.setex(token, 3600, user);
-            BaseUtil.setToken(user.getUserId(),token,1);
+            Integer type=getParaToInt("type",1);
+            BaseUtil.setToken(user.getUserId(),token,type);
             user.remove("password", "salt");
             renderJson(R.ok().put("Admin-Token", token).put("user", user).put("auth", adminRoleService.auth(user.getUserId())));
         }else{
@@ -99,7 +100,6 @@ public class AdminLoginController extends Controller{
         }
 
     }
-
     /**
      * @author zhangzhiwei
      * 退出登录
@@ -149,35 +149,5 @@ public class AdminLoginController extends Controller{
             arrays.add("Redis配置失败");
         }
         renderJson(R.ok().put("data", arrays));
-    }
-
-    /**
-     * @author wyq
-     * 接入钉钉
-     */
-    public void dingLogin(String code){
-        String appkey = prop.get("appkey");
-        String appSecert = prop.get("appSecret");
-        String tokenJson = HttpUtil.get("https://oapi.dingtalk.com/gettoken?appkey=" + appkey + "&appsecret=" + appSecert);
-        String accessToken = JSONObject.parseObject(tokenJson).getString("access_token");
-        String userJson = HttpUtil.get("https://oapi.dingtalk.com/user/getuserinfo?access_token=" + accessToken + "&code=" + code);
-        String userId = JSONObject.parseObject(userJson).getString("userid");
-        String userInfo = HttpUtil.get("https://oapi.dingtalk.com/user/get?access_token=" + accessToken + "&userid=" + userId);
-        String mobile = JSONObject.parseObject(userInfo).getString("mobile");
-        Integer isUser = Db.queryInt("select count(*) from 72crm_admin_user where mobile = ?", mobile);
-        if(isUser > 0){
-            AdminUser user = AdminUser.dao.findFirst(Db.getSql("admin.user.queryByUserName"), mobile.trim());
-            String token = IdUtil.simpleUUID();
-            user.setLastLoginIp(BaseUtil.getLoginAddress(getRequest()));
-            user.setLastLoginTime(new Date());
-            user.update();
-            user.setRoles(adminRoleService.queryRoleIdsByUserId(user.getUserId()));
-            RedisManager.getRedis().setex(token, 360000, user);
-            user.remove("password", "salt");
-            //setCookie("Admin-Token", token, 360000);
-            renderJson(R.ok().put("Admin-Token", token).put("user", user).put("auth", adminRoleService.auth(user.getUserId())));
-        }else{
-            renderJson(R.error("账户不存在"));
-        }
     }
 }

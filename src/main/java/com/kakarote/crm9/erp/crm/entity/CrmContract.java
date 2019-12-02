@@ -14,7 +14,7 @@ public class CrmContract extends BaseCrmContract<CrmContract> {
 	private Integer power;
 	//变更模块（1.联系人2.商机3.合同）
 	private String ids;
-	private Integer newOwnerUserId;
+	private Long newOwnerUserId;
 	private String memberIds;
 	private String contractIds;
 
@@ -50,11 +50,11 @@ public class CrmContract extends BaseCrmContract<CrmContract> {
 		this.memberIds = memberIds;
 	}
 
-	public Integer getNewOwnerUserId() {
+	public Long getNewOwnerUserId() {
 		return newOwnerUserId;
 	}
 
-	public void setNewOwnerUserId(Integer newOwnerUserId) {
+	public void setNewOwnerUserId(Long newOwnerUserId) {
 		this.newOwnerUserId = newOwnerUserId;
 	}
 

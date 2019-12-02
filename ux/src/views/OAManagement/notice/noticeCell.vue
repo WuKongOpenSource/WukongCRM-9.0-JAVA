@@ -1,27 +1,35 @@
 <template>
-  <div class="list"
-       :id="'notice-cell' + cellIndex">
+  <div
+    :id="'notice-cell' + cellIndex"
+    class="list">
     <div class="header">
-      <div v-photo="data"
-           v-lazy:background-image="$options.filters.filterUserLazyImg(data.img)"
-           class="div-photo"></div>
+      <div
+        v-photo="data"
+        v-lazy:background-image="$options.filters.filterUserLazyImg(data.img)"
+        class="div-photo"/>
       <div class="name-time">
-        <p class="name">{{data.realname}}</p>
-        <p class="time">{{data.createTime | moment("YYYY-MM-DD HH:mm")}}</p>
+        <p class="name">{{ data.realname }}</p>
+        <p class="time">{{ data.createTime | moment("YYYY-MM-DD HH:mm") }}</p>
       </div>
     </div>
-    <div class="title"
-         @click="rowFun(data)">{{data.title}}</div>
-    <div class="data-content"
-         v-if="data.preShow">{{data.content}}</div>
-    <div class="data-content"
-         v-else>{{data.contentSub}}</div>
-    <div v-if="data.contentSub.length < data.content.length"
-         class="load-more">
-      <span v-if="!data.loadMore"
-            @click="loadMoreBtn(data)">展开全文</span>
-      <span v-else
-            @click="data.loadMore = false, data.preShow = false">收起全文</span>
+    <div
+      class="title"
+      @click="rowFun(data)">{{ data.title }}</div>
+    <div
+      v-if="data.preShow"
+      class="data-content">{{ data.content }}</div>
+    <div
+      v-else
+      class="data-content">{{ data.contentSub }}</div>
+    <div
+      v-if="data.contentSub.length < data.content.length"
+      class="load-more">
+      <span
+        v-if="!data.loadMore"
+        @click="loadMoreBtn(data)">展开全文</span>
+      <span
+        v-else
+        @click="data.loadMore = false, data.preShow = false">收起全文</span>
     </div>
   </div>
 </template>
@@ -32,17 +40,17 @@ import { noticeIsReadAPI } from '@/api/oamanagement/notice'
 export default {
   components: {},
 
+  props: {
+    data: Object,
+    cellIndex: Number
+  },
+
   data() {
     return {
       // 父元素
       parentTarget: null,
       awaitMoment: false // 等客户浏览
     }
-  },
-
-  props: {
-    data: Object,
-    cellIndex: Number
   },
 
   mounted() {
@@ -56,6 +64,10 @@ export default {
     }
   },
 
+  beforeDestroy() {
+    this.$bus.off('notice-list-box-scroll')
+  },
+
   methods: {
     /**
      * 观察预览
@@ -65,12 +77,12 @@ export default {
         if (target) {
           this.parentTarget = target
         }
-        let ispreview = this.whetherPreview()
+        const ispreview = this.whetherPreview()
         if (!this.awaitMoment && ispreview) {
           this.awaitMoment = true
           setTimeout(() => {
             this.awaitMoment = false
-            let ispreview = this.whetherPreview()
+            const ispreview = this.whetherPreview()
             if (ispreview) {
               this.submiteIsRead()
             }
@@ -78,14 +90,14 @@ export default {
         }
       }
     },
-    
+
     /**
      * 是否预览
      */
     whetherPreview() {
-      let dom = this.parentTarget.children[this.cellIndex]
+      const dom = this.parentTarget.children[this.cellIndex]
       if (this.parentTarget.getBoundingClientRect()) {
-        let offsetTop =
+        const offsetTop =
           this.parentTarget.getBoundingClientRect().top -
           dom.getBoundingClientRect().top
         let ispreview = false
@@ -114,7 +126,7 @@ export default {
           this.$store.dispatch('GetOAMessageNum', 'announcement')
           this.data.isRead = 1
         })
-        .catch(err => {})
+        .catch(() => {})
     },
 
     /**
@@ -131,10 +143,6 @@ export default {
       this.$set(val, 'preShow', true)
       this.$set(val, 'loadMore', true)
     }
-  },
-
-  beforeDestroy() {
-    this.$bus.off('notice-list-box-scroll')
   }
 }
 </script>

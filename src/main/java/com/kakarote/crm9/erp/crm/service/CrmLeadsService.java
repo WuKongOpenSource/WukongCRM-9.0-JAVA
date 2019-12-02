@@ -9,7 +9,15 @@ import cn.hutool.poi.excel.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
+import com.jfinal.aop.Before;
+import com.jfinal.aop.Inject;
+import com.jfinal.kit.Kv;
 import com.jfinal.log.Log;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Page;
+import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
+import com.jfinal.upload.UploadFile;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldv;
@@ -17,7 +25,6 @@ import com.kakarote.crm9.erp.admin.entity.AdminFile;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
-import com.kakarote.crm9.erp.admin.service.AdminSceneService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.common.CrmParamValid;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
@@ -27,17 +34,10 @@ import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.R;
-import com.jfinal.aop.Before;
-import com.jfinal.aop.Inject;
-import com.jfinal.kit.Kv;
-import com.jfinal.plugin.activerecord.Db;
-import com.jfinal.plugin.activerecord.Page;
-import com.jfinal.plugin.activerecord.Record;
-import com.jfinal.plugin.activerecord.tx.Tx;
-import com.jfinal.upload.UploadFile;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CrmLeadsService {
@@ -55,9 +55,6 @@ public class CrmLeadsService {
 
     @Inject
     private CrmParamValid crmParamValid;
-
-    @Inject
-    private AuthUtil authUtil;
 
     /**
      * @author wyq
@@ -94,9 +91,9 @@ public class CrmLeadsService {
         } else {
             crmLeads.setCreateTime(DateUtil.date());
             crmLeads.setUpdateTime(DateUtil.date());
-            crmLeads.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            crmLeads.setCreateUserId(BaseUtil.getUser().getUserId());
             if (crmLeads.getOwnerUserId() == null) {
-                crmLeads.setOwnerUserId(BaseUtil.getUser().getUserId().intValue());
+                crmLeads.setOwnerUserId(BaseUtil.getUser().getUserId());
             }
             crmLeads.setBatchId(batchId);
             boolean save = crmLeads.save();
@@ -164,7 +161,7 @@ public class CrmLeadsService {
      * @author wyq
      * 变更负责人
      */
-    public R updateOwnerUserId(String leadsIds, Integer ownerUserId) {
+    public R updateOwnerUserId(String leadsIds, Long ownerUserId) {
         String[] ids = leadsIds.split(",");
         int update = Db.update(Db.getSqlPara("crm.leads.updateOwnerUserId", Kv.by("ownerUserId", ownerUserId).set("ids", ids)));
         for (String id : ids) {
@@ -185,16 +182,16 @@ public class CrmLeadsService {
             if (1 == crmLeads.getInt("is_transform")) {
                 return R.error("已转化线索不能再次转化");
             }
-            List<Record> leadsFields = adminFieldService.list("1");
+            List<Record> leadsFields = adminFieldService.list(CrmEnum.CRM_LEADS.getType());
             CrmCustomer crmCustomer = new CrmCustomer();
             crmCustomer.setCustomerName(crmLeads.getStr("leads_name"));
             crmCustomer.setIsLock(0);
             crmCustomer.setNextTime(crmLeads.getDate("next_time"));
             crmCustomer.setMobile(crmLeads.getStr("mobile"));
             crmCustomer.setTelephone(crmLeads.getStr("telephone"));
-            crmCustomer.setDealStatus("未成交");
-            crmCustomer.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
-            crmCustomer.setOwnerUserId(crmLeads.getInt("owner_user_id"));
+            crmCustomer.setDealStatus(0);
+            crmCustomer.setCreateUserId(BaseUtil.getUser().getUserId());
+            crmCustomer.setOwnerUserId(crmLeads.getLong("owner_user_id"));
             crmCustomer.setCreateTime(DateUtil.date());
             crmCustomer.setUpdateTime(DateUtil.date());
             crmCustomer.setRoUserId(",");
@@ -207,16 +204,18 @@ public class CrmLeadsService {
             crmCustomer.setRemark("");
             String customerBatchId = IdUtil.simpleUUID();
             crmCustomer.setBatchId(customerBatchId);
-            List<AdminField> customerFields = AdminField.dao.find("select field_id,name,field_name,field_type from 72crm_admin_field where label = '2'");
+            List<AdminField> customerFields = AdminField.dao.find("select field_id,name,field_name,field_type,is_null,is_unique from 72crm_admin_field where label = '2'");
             List<AdminFieldv> adminFieldvList = new ArrayList<>();
-            for (Record leadsFIeld : leadsFields) {
+            for (Record leadsField : leadsFields) {
                 for (AdminField customerField : customerFields) {
-                    if(leadsFIeld.get("relevant")!=null&&customerField.getFieldId().equals(leadsFIeld.get("relevant"))){
-                        if(customerField.getFieldType().equals(1)){
-                            crmCustomer.set(customerField.getFieldName(),crmLeads.get(leadsFIeld.get("field_name")));
-                        }else {
+                    Integer isNull = customerField.getIsNull();
+                    Integer isUnique = customerField.getIsUnique();
+                    if (leadsField.get("relevant") != null && customerField.getFieldId().equals(leadsField.get("relevant"))) {
+                        if (customerField.getFieldType().equals(1)) {
+                            crmCustomer.set(customerField.getFieldName(), crmLeads.get(leadsField.get("field_name")));
+                        } else {
                             AdminFieldv adminFieldv = new AdminFieldv();
-                            adminFieldv.setValue(crmLeads.get(leadsFIeld.get("name")));
+                            adminFieldv.setValue(crmLeads.get(leadsField.get("name")));
                             adminFieldv.setFieldId(customerField.getFieldId());
                             adminFieldv.setName(customerField.getName());
                             adminFieldvList.add(adminFieldv);
@@ -226,31 +225,66 @@ public class CrmLeadsService {
                     if(!customerField.getFieldType().equals(0)){
                         continue;
                     }
-                    if ("客户来源".equals(customerField.getName()) && "线索来源".equals(leadsFIeld.getStr("name"))){
+                    if ("客户来源".equals(customerField.getName()) && "线索来源".equals(leadsField.getStr("name"))) {
+//                        if (isNull==1 && ObjectUtil.isEmpty(crmLeads.get(leadsField.get("name")))){
+//                            return R.error(customerField.getName()+"不能为空");
+//                        }
+                        Integer integer = Db.template("crm.customer.queryFieldDuplicate1", Kv.by("key", customerField.getName()).set("value", crmLeads.get(leadsField.get("name")))).queryInt();
+                        if (isUnique == 1 && Db.template("crm.customer.queryFieldDuplicate1",Kv.by("key",customerField.getName()).set("value",crmLeads.get(leadsField.get("name")))).queryInt()>0){
+                            return R.error(customerField.getName()+"已存在");
+                        }
                         AdminFieldv adminFieldv = new AdminFieldv();
-                        adminFieldv.setValue(crmLeads.get(leadsFIeld.get("name")));
+                        adminFieldv.setValue(crmLeads.get(leadsField.get("name")));
                         adminFieldv.setFieldId(customerField.getFieldId());
                         adminFieldv.setName(customerField.getName());
                         adminFieldvList.add(adminFieldv);
                     }
-                    if ("客户行业".equals(customerField.getName()) && "客户行业".equals(leadsFIeld.getStr("name"))){
+                    if ("客户行业".equals(customerField.getName()) && "客户行业".equals(leadsField.getStr("name"))) {
+//                        if (isNull==1 && ObjectUtil.isEmpty(crmLeads.get(leadsField.get("name")))){
+//                            return R.error(customerField.getName()+"不能为空");
+//                        }
+                        if (isUnique == 1 && Db.template("crm.customer.queryFieldDuplicate1",Kv.by("key",customerField.getName()).set("value",crmLeads.get(leadsField.get("name")))).queryInt()>0){
+                            return R.error(customerField.getName()+"已存在");
+                        }
                         AdminFieldv adminFieldv = new AdminFieldv();
-                        adminFieldv.setValue(crmLeads.get(leadsFIeld.get("name")));
+                        adminFieldv.setValue(crmLeads.get(leadsField.get("name")));
                         adminFieldv.setFieldId(customerField.getFieldId());
                         adminFieldv.setName(customerField.getName());
                         adminFieldvList.add(adminFieldv);
                     }
-                    if ("客户级别".equals(customerField.getName()) && "客户级别".equals(leadsFIeld.getStr("name"))){
+                    if ("客户级别".equals(customerField.getName()) && "客户级别".equals(leadsField.getStr("name"))) {
+//                        if (isNull==1 && ObjectUtil.isEmpty(crmLeads.get(leadsField.get("name")))){
+//                            return R.error(customerField.getName()+"不能为空");
+//                        }
+                        if (isUnique == 1 && Db.template("crm.customer.queryFieldDuplicate1",Kv.by("key",customerField.getName()).set("value",crmLeads.get(leadsField.get("name")))).queryInt()>0){
+                            return R.error(customerField.getName()+"已存在");
+                        }
                         AdminFieldv adminFieldv = new AdminFieldv();
-                        adminFieldv.setValue(crmLeads.get(leadsFIeld.get("name")));
+                        adminFieldv.setValue(crmLeads.get(leadsField.get("name")));
                         adminFieldv.setFieldId(customerField.getFieldId());
                         adminFieldv.setName(customerField.getName());
                         adminFieldvList.add(adminFieldv);
                     }
                 }
             }
+            for (AdminField customerField : customerFields) {
+                Integer isNull = customerField.getIsNull();
+                Integer isUnique = customerField.getIsUnique();
+                String name = customerField.getName();
+                Map<String, Object> customerMap = crmCustomer.toRecord().getColumns();
+                for (String key : customerMap.keySet()) {
+                    if (key.equals(customerField.getFieldName())){
+//                        if (isNull==1 && ObjectUtil.isEmpty(customerMap.get(key))){
+//                            return R.error(name+"不能为空");
+//                        }
+                        if (isUnique == 1 && Db.template("crm.customer.queryFieldDuplicate",Kv.by("key",key).set("value",customerMap.get(key))).queryInt()>0){
+                            return R.error(name+"已存在");
+                        }
+                    }
+                }
+            }
             crmCustomer.save();
-            boolean isMaxOwner = Aop.get(CrmCustomerService.class).isMaxOwner(crmLeads.getInt("owner_user_id"),new String[]{crmCustomer.getCustomerId().toString()});
+            boolean isMaxOwner = Aop.get(CrmCustomerService.class).isMaxOwner(crmLeads.getLong("owner_user_id"),new String[]{crmCustomer.getCustomerId().toString()});
             if (!isMaxOwner){
                 return R.error("该员工拥有客户数已达上限");
             }
@@ -262,7 +296,7 @@ public class CrmLeadsService {
             List<AdminFile> adminFileList = new ArrayList<>();
             if (adminRecordList.size() != 0){
                 adminRecordList.forEach(adminRecord -> {
-                    List<AdminFile> leadsRecordFiles = AdminFile.dao.find("select * from 72crm_admin_file where batch_id = ?",adminRecord.getBatchId());
+                    List<AdminFile> leadsRecordFiles = AdminFile.dao.find("select file_id, name, size, create_user_id, create_time, file_path, file_type from 72crm_admin_file where batch_id = ?",adminRecord.getBatchId());
                     String customerRecordBatchId = IdUtil.simpleUUID();
                     leadsRecordFiles.forEach(adminFile -> {
                         adminFile.setBatchId(customerRecordBatchId);
@@ -277,7 +311,7 @@ public class CrmLeadsService {
                 });
                 Db.batchSave(adminRecordList,100);
             }
-            List<AdminFile> fileList = AdminFile.dao.find("select * from 72crm_admin_file where batch_id = ?",crmLeads.getStr("batch_id"));
+            List<AdminFile> fileList = AdminFile.dao.find("select file_id, name, size, create_user_id, create_time, file_path, file_type from 72crm_admin_file where batch_id = ?",crmLeads.getStr("batch_id"));
             if (fileList.size() != 0){
                 fileList.forEach(adminFile -> {
                     adminFile.setBatchId(customerBatchId);
@@ -296,7 +330,7 @@ public class CrmLeadsService {
      */
     public List<Record> queryField(Integer leadsId) {
         Record leads = queryById(leadsId);
-        return adminFieldService.queryUpdateField(1,leads);
+        return adminFieldService.queryUpdateField(CrmEnum.CRM_LEADS.getType(),leads);
     }
 
     /**
@@ -305,9 +339,12 @@ public class CrmLeadsService {
      */
     @Before(Tx.class)
     public R addRecord(AdminRecord adminRecord) {
-        adminRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        adminRecord.setCreateUserId(BaseUtil.getUser().getUserId());
         adminRecord.setCreateTime(DateUtil.date());
         adminRecord.setTypes("crm_leads");
+        if (StrUtil.isEmpty(adminRecord.getCategory())){
+            return R.error("跟进类型不能为空");
+        }
         if (1 == adminRecord.getIsEvent()) {
             OaEvent oaEvent = new OaEvent();
             oaEvent.setTitle(adminRecord.getContent());
@@ -354,7 +391,7 @@ public class CrmLeadsService {
      * @author wyq
      * 导入线索
      */
-    public R uploadExcel(UploadFile file, Integer repeatHandling, Integer ownerUserId) {
+    public R uploadExcel(UploadFile file, Integer repeatHandling, Long ownerUserId) {
         ExcelReader reader = ExcelUtil.getReader(FileUtil.file(file.getUploadPath() + "\\" + file.getFileName()));
         AdminFieldService adminFieldService = new AdminFieldService();
         Kv kv = new Kv();
@@ -362,9 +399,9 @@ public class CrmLeadsService {
         try {
             List<List<Object>> read = reader.read();
             List<Object> list = read.get(1);
-            List<Record> recordList = adminFieldService.customFieldList("1");
+            List<Record> recordList = adminFieldService.customFieldList(1);
             recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
-            List<Record> fieldList = adminFieldService.queryAddField(1);
+            List<Record> fieldList = adminFieldService.queryAddField(CrmEnum.CRM_LEADS);
             fieldList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
             fieldList.forEach(record -> {
                 if (record.getInt("is_null") == 1){
@@ -404,7 +441,7 @@ public class CrmLeadsService {
                         Record leads = Db.findFirst("select leads_id,batch_id from 72crm_crm_leads where leads_name = ?", leadsName);
                         boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_LEADS),leads.getInt("leads_id"));
                         if (auth){
-                            return R.error("第"+errNum+1+"行数据无操作权限，不能覆盖");
+                            return R.error("第"+(errNum+1)+"行数据无操作权限，不能覆盖");
                         }
                         object.fluentPut("entity", new JSONObject().fluentPut("leads_id", leads.getInt("leads_id"))
                                 .fluentPut("leads_name", leadsName)

@@ -1,75 +1,88 @@
 <template>
-  <flexbox orient="vertical"
-           align="stretch"
-           :style="{'height': contentHeight + 'px'}">
-    <div class="title">{{'编辑'+getTitle()+'字段'}}</div>
+  <flexbox
+    :style="{'height': contentHeight + 'px'}"
+    orient="vertical"
+    align="stretch">
+    <div class="title">{{ '编辑'+getTitle()+'字段' }}</div>
     <el-container class="wrapper">
       <el-aside class="left">
         <div class="mini-title">字段库</div>
         <ul>
-          <draggable class="list-wrapper"
-                     :list="fieldList"
-                     :options="{group: {pull: 'clone', put: false, name: 'list'},forceFallback:true, sort:false }"
-                     :clone="handleMove"
-                     @end="handleEnd">
-            <li class="field-item"
-                v-for="item in fieldList"
-                @click="handleClick(item)"
-                :key="item.id">
-              <img class="icon"
-                   :src="item.icon" />
-              <span>{{item.name}}</span>
+          <draggable
+            :list="fieldList"
+            :options="{group: {pull: 'clone', put: false, name: 'list'},forceFallback:true, sort:false }"
+            :clone="handleMove"
+            class="list-wrapper"
+            @end="handleEnd">
+            <li
+              v-for="item in fieldList"
+              :key="item.id"
+              class="field-item"
+              @click="handleClick(item)">
+              <img
+                :src="item.icon"
+                class="icon" >
+              <span>{{ item.name }}</span>
             </li>
           </draggable>
         </ul>
       </el-aside>
-      <el-container class="content"
-                    v-loading="loading">
+      <el-container
+        v-loading="loading"
+        class="content">
         <el-header>
-          <el-button type="text"
-                     style="padding: 8px 22px;border-radius:2px;"
-                     @click="handlePreview">预览</el-button>
-          <el-button type="primary"
-                     style="padding: 8px 22px;border-radius:2px;"
-                     @click="handleSave">保存</el-button>
-          <el-button style="padding: 8px 22px;border-radius:2px;"
-                     @click="handleCancel">返回</el-button>
+          <el-button
+            type="text"
+            style="padding: 8px 22px;border-radius:2px;"
+            @click="handlePreview">预览</el-button>
+          <el-button
+            type="primary"
+            style="padding: 8px 22px;border-radius:2px;"
+            @click="handleSave">保存</el-button>
+          <el-button
+            style="padding: 8px 22px;border-radius:2px;"
+            @click="handleCancel">返回</el-button>
 
         </el-header>
         <el-main>
-          <draggable :list="fieldArr"
-                     :options="{group: 'list',forceFallback:true, fallbackClass:'draggingStyle'}"
-                     @end="handleListMove">
-            <component v-for="(item, index) in fieldArr"
-                       :class="{selected: selectedIndex == index}"
-                       :isShow="selectedIndex == index && (item.operating == null || item.operating == 0 || item.operating == 2)"
-                       :key="index"
-                       :attr="item"
-                       :is="item | typeToComponentName"
-                       @delete="handleDelete(item, index)"
-                       @select="handleChildSelect"
-                       @click.native="handleSelect(item, index)">
-            </component>
+          <draggable
+            :list="fieldArr"
+            :options="{group: 'list',forceFallback:true, fallbackClass:'draggingStyle'}"
+            @end="handleListMove">
+            <component
+              v-for="(item, index) in fieldArr"
+              :class="{selected: selectedIndex == index}"
+              :is-show="selectedIndex == index && (item.operating == null || item.operating == 0 || item.operating == 2)"
+              :key="index"
+              :attr="item"
+              :is="item | typeToComponentName"
+              @delete="handleDelete(item, index)"
+              @select="handleChildSelect"
+              @click.native="handleSelect(item, index)"/>
           </draggable>
-          <p class="no-list"
-             v-if="fieldArr.length == 0">从左侧点击或拖拽来添加字段</p>
+          <p
+            v-if="fieldArr.length == 0"
+            class="no-list">从左侧点击或拖拽来添加字段</p>
         </el-main>
       </el-container>
-      <el-aside class="right"
-                width="310px">
+      <el-aside
+        class="right"
+        width="310px">
         <div class="mini-title">字段属性</div>
-        <field-info v-if="form"
-                    :field="form"
-                    :canTransform="canTransform"
-                    :transformData="transformData"></field-info>
+        <field-info
+          v-if="form"
+          :field="form"
+          :can-transform="canTransform"
+          :transform-data="transformData"/>
       </el-aside>
     </el-container>
     <!-- 表单预览 -->
-    <preview-field-view v-if="showTablePreview"
-                        :types="tablePreviewData.type"
-                        :typesId="tablePreviewData.id"
-                        :label="tablePreviewData.label"
-                        @hiden-view="showTablePreview=false"></preview-field-view>
+    <preview-field-view
+      v-if="showTablePreview"
+      :types="tablePreviewData.type"
+      :types-id="tablePreviewData.id"
+      :label="tablePreviewData.label"
+      @hiden-view="showTablePreview=false"/>
   </flexbox>
 </template>
 
@@ -77,6 +90,7 @@
 import crmTypeModel from '@/views/customermanagement/model/crmTypeModel'
 import {
   customFieldHandle,
+  oaFieldHandle,
   customFieldList
 } from '@/api/systemManagement/SystemCustomer'
 import { filedGetField } from '@/api/customermanagement/common'
@@ -93,10 +107,10 @@ import draggable from 'vuedraggable'
 import Field from './model/field'
 import FieldList from './model/fieldList'
 import FieldInfo from './components/FieldInfo'
-import { objDeepCopy, regexIsCRMMobile, regexIsCRMEmail } from '@/utils'
+import { objDeepCopy } from '@/utils'
 
 export default {
-  name: 'handlefield',
+  name: 'Handlefield',
   components: {
     SingleLineText,
     MultiLineText,
@@ -107,30 +121,6 @@ export default {
     draggable,
     FieldInfo,
     PreviewFieldView
-  },
-  computed: {
-    // 能转移
-    canTransform() {
-      return this.$route.params.type == 'crm_leads'
-    }
-  },
-  data() {
-    return {
-      fieldList: FieldList,
-      fieldArr: [], // 数据没有返回时 根据null 判断不能操作
-      movedItem: {},
-      selectedIndex: -1,
-      rejectHandle: true, // 请求未获取前不能操作
-      /** 右边展示数据 */
-      form: null, // operating 0 改删 1改 2删 3无
-      loading: false, // 加载动画
-      // 展示表单预览
-      tablePreviewData: { types: '', id: '' },
-      showTablePreview: false,
-      contentHeight: document.documentElement.clientHeight - 100,
-      // 转移匹配字段源
-      transformData: null
-    }
   },
   filters: {
     /** 根据type 找到组件 */
@@ -163,6 +153,30 @@ export default {
       } else if (item.formType === 'form') {
         return 'TableForm'
       }
+    }
+  },
+  data() {
+    return {
+      fieldList: FieldList,
+      fieldArr: [], // 数据没有返回时 根据null 判断不能操作
+      movedItem: {},
+      selectedIndex: -1,
+      rejectHandle: true, // 请求未获取前不能操作
+      /** 右边展示数据 */
+      form: null, // operating 0 改删 1改 2删 3无
+      loading: false, // 加载动画
+      // 展示表单预览
+      tablePreviewData: { types: '', id: '' },
+      showTablePreview: false,
+      contentHeight: document.documentElement.clientHeight - 100,
+      // 转移匹配字段源
+      transformData: null
+    }
+  },
+  computed: {
+    // 能转移
+    canTransform() {
+      return this.$route.params.type == 'crm_leads'
     }
   },
   watch: {
@@ -213,7 +227,7 @@ export default {
                 const item = element.setting[i]
                 temps.push({ value: item })
               }
-              element.showSetting = temps //放到showSeeting上
+              element.showSetting = temps // 放到showSeeting上
 
               // 删除无效的多选默认值
               if (element.formType == 'checkbox') {
@@ -222,8 +236,8 @@ export default {
                 })
               }
             }
-            element.isNull = element.isNull == 1 ? true : false
-            element.isUnique = element.isUnique == 1 ? true : false
+            element.isNull = element.isNull == 1
+            element.isUnique = element.isUnique == 1
           }
           this.fieldArr = res.data
           if (res.data.length > 0) {
@@ -233,7 +247,7 @@ export default {
           this.rejectHandle = false
           this.loading = false
         })
-        .catch(error => {
+        .catch(() => {
           this.loading = false
         })
     },
@@ -312,14 +326,17 @@ export default {
         if (this.$route.params.type === 'oa_examine') {
           params.categoryId = this.$route.params.id
         }
-        for (let item of params.data) {
-          for (let key in item) {
+        for (const item of params.data) {
+          for (const key in item) {
             if (JSON.stringify(item[key]) == '{}') {
               item[key] = null
             }
           }
         }
-        customFieldHandle(params)
+
+        // 请求
+        const request = this.$route.params.type === 'oa_examine' ? oaFieldHandle : customFieldHandle
+        request(params)
           .then(res => {
             this.$message({
               type: 'success',
@@ -366,7 +383,7 @@ export default {
     // 从左侧移动到右侧
     handleEnd(e) {
       if (!this.rejectHandle) {
-        let newField = new Field({
+        const newField = new Field({
           name: this.movedItem.name,
           formType: this.movedItem.formType
         })
@@ -423,7 +440,7 @@ export default {
         label: crmTypeModel['customer']
       })
         .then(res => {
-          let data = {
+          const data = {
             text: [],
             textarea: [],
             select: [],
@@ -440,7 +457,7 @@ export default {
 
           for (let index = 0; index < res.data.length; index++) {
             const element = res.data[index]
-            let array = data[element.formType]
+            const array = data[element.formType]
             if (array) {
               array.push({
                 label: element.name,

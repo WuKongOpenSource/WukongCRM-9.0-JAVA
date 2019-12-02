@@ -7,8 +7,8 @@ import {
 /**
  * 时间戳到格式化时间
  * {{item.createTime|filterTimestampToFormatTime('MM-DD dddd')}}
- * @param {*} time 
- * @param {*} cFormat 
+ * @param {*} time
+ * @param {*} cFormat
  */
 export function filterTimestampToFormatTime(time, cFormat) {
   if (!cFormat) {

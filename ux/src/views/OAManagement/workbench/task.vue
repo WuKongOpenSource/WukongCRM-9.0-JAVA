@@ -1,59 +1,68 @@
 <template>
   <div class="v-task">
     <div class="title">任务</div>
-    <div class="content-box"
-         v-loading="loading"
-         :style="{'padding-right': list.length > 4 ? '7px' : '0'}">
+    <div
+      v-loading="loading"
+      :style="{'padding-right': list.length > 4 ? '7px' : '0'}"
+      class="content-box">
       <template v-if="list.length != 0">
-        <div class="content"
-             ref="taskRow"
-             v-for="(item, index) in list"
-             :key="index"
-             @click="checkRowDetail(item, index)">
+        <div
+          v-for="(item, index) in list"
+          ref="taskRow"
+          :key="index"
+          class="content"
+          @click="checkRowDetail(item, index)">
           <div class="name-time">
-            <p class="task-name"
-               @click.stop>
-              <el-checkbox v-model="item.checked"
-                           :disabled="item.checked"
-                           @change="taskOverFun(item, index)"></el-checkbox>
+            <p
+              class="task-name"
+              @click.stop>
+              <el-checkbox
+                v-model="item.checked"
+                :disabled="item.checked"
+                @change="taskOverFun(item, index)"/>
             </p>
             <span :class="item.lineThrough ? 'item-name item-name-active': 'item-name'">
-              {{item.name}}
+              {{ item.name }}
             </span>
-            <p v-if="item.stop_time"
-               class="time"
-               :style="{color: item.task_status == 2 ? 'red' : '#999'}">
-              <span class="el-icon-time"></span>
-              <span>{{item.stop_time | moment("YYYY-MM-DD")}}</span>
+            <p
+              v-if="item.stop_time"
+              :style="{color: item.task_status == 2 ? 'red' : '#999'}"
+              class="time">
+              <span class="el-icon-time"/>
+              <span>{{ item.stop_time | moment("YYYY-MM-DD") }}</span>
             </p>
           </div>
           <div class="rt">
-            <span class="type-color"
-                  v-for="(k, j) in colorGroup"
-                  :key="j"
-                  v-if="item.priority == k.id"
-                  :style="{background: k.color}">
-              {{k.label}}
+            <span
+              v-for="(k, j) in colorGroup"
+              v-if="item.priority == k.id"
+              :key="j"
+              :style="{background: k.color}"
+              class="type-color">
+              {{ k.label }}
             </span>
           </div>
         </div>
       </template>
-      <div class="no-task"
-           v-else-if="list.length == 0 && loading == false">
-        <img src="@/assets/img/no_task.png"
-             alt="">
-        <p>目前没有任务，快去<span class="add"
-                @click="addTask">添加</span>吧！</p>
+      <div
+        v-else-if="list.length == 0 && loading == false"
+        class="no-task">
+        <img
+          src="@/assets/img/no_task.png"
+          alt="">
+        <p>目前没有任务，快去<span
+          class="add"
+          @click="addTask">添加</span>吧！</p>
       </div>
     </div>
     <!-- 详情 -->
-    <particulars v-if="taskDetailShow"
-                 ref="particulars"
-                 :id="taskID"
-                 :detailIndex="detailIndex"
-                 @on-handle="getList"
-                 @close="closeBtn">
-    </particulars>
+    <particulars
+      v-if="taskDetailShow"
+      ref="particulars"
+      :id="taskID"
+      :detail-index="detailIndex"
+      @on-handle="getList"
+      @close="closeBtn"/>
   </div>
 </template>
 
@@ -61,20 +70,17 @@
 import listTaskDetail from '../task/mixins/listTaskDetail.js'
 // API
 import {
-  detailsTask,
-  readLoglist,
-  editTask,
-  deleteTask
+  editTask
 } from '@/api/oamanagement/task'
 import { taskListAPI } from '@/api/oamanagement/workbench'
 // 详情
 import particulars from '../task/components/particulars'
-import { timestampToFormatTime } from '@/utils'
 
 export default {
   components: {
     particulars
   },
+  mixins: [listTaskDetail],
   data() {
     return {
       // 加载中
@@ -89,7 +95,6 @@ export default {
       ]
     }
   },
-  mixins: [listTaskDetail],
   mounted() {
     document
       .getElementById('workbench-main-container')
@@ -101,13 +106,13 @@ export default {
       this.loading = true
       taskListAPI()
         .then(res => {
-          for (let item of res.data) {
+          for (const item of res.data) {
             item.checked = false
           }
           this.list = res.data
           this.loading = false
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
         })
     },
@@ -135,12 +140,12 @@ export default {
           }
           this.$store.dispatch('GetOAMessageNum', 'task')
         })
-        .catch(err => {
+        .catch(() => {
           item.checked = !item.checked
         })
     },
     addTask() {
-      this.$router.push({ path: 'task', query: { routerKey: 1 } })
+      this.$router.push({ path: 'task', query: { routerKey: 1 }})
     }
   }
 }

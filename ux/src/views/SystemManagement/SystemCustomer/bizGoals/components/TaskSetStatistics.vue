@@ -1,100 +1,116 @@
 <template>
-  <div v-loading="loading"
-       class="main-container">
+  <div
+    v-loading="loading"
+    class="main-container">
     <div class="tabs-bar">
-      <el-tabs v-model="tabType"
-               @tab-click="tabTypeClick">
-        <el-tab-pane label="部门目标设置"
-                     name="department"></el-tab-pane>
-        <el-tab-pane label="员工目标设置"
-                     name="user"></el-tab-pane>
+      <el-tabs
+        v-model="tabType"
+        @tab-click="tabTypeClick">
+        <el-tab-pane
+          label="部门目标设置"
+          name="department"/>
+        <el-tab-pane
+          label="员工目标设置"
+          name="user"/>
       </el-tabs>
     </div>
     <div class="handle-bar">
-      <el-date-picker v-model="dateSelect"
-                      type="year"
-                      :clearable="false"
-                      value-format="yyyy"
-                      :picker-options="pickerOptions"
-                      placeholder="选择年">
-      </el-date-picker>
-      <el-select v-model="typeSelect"
-                 placeholder="请选择">
-        <el-option v-for="item in [{label:'合同金额', value:1},{label:'回款金额', value:2}]"
-                   :key="item.value"
-                   :label="item.label"
-                   :value="item.value">
-        </el-option>
+      <el-date-picker
+        v-model="dateSelect"
+        :clearable="false"
+        :picker-options="pickerOptions"
+        type="year"
+        value-format="yyyy"
+        placeholder="选择年"/>
+      <el-select
+        v-model="typeSelect"
+        placeholder="请选择">
+        <el-option
+          v-for="item in [{label:'合同金额', value:1},{label:'回款金额', value:2}]"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"/>
       </el-select>
-      <el-cascader placeholder="选择部门"
-                   change-on-select
-                   :options="deptList"
-                   :show-all-levels="false"
-                   :props="structuresProps"
-                   @change="structuresValueChange"
-                   v-model="structuresSelectValue">
-      </el-cascader>
-      <el-select v-if="this.tabType === 'user'"
-                 v-model="userSelectValue"
-                 :clearable="true"
-                 placeholder="选择员工">
-        <el-option v-for="item in userOptions"
-                   :key="item.userId"
-                   :label="item.realname"
-                   :value="item.userId">
-        </el-option>
+      <el-cascader
+        :options="deptList"
+        :show-all-levels="false"
+        :props="structuresProps"
+        v-model="structuresSelectValue"
+        placeholder="选择部门"
+        change-on-select
+        @change="structuresValueChange"/>
+      <el-select
+        v-if="tabType === 'user'"
+        v-model="userSelectValue"
+        :clearable="true"
+        placeholder="选择员工">
+        <el-option
+          v-for="item in userOptions"
+          :key="item.userId"
+          :label="item.realname"
+          :value="item.userId"/>
       </el-select>
-      <el-button @click.native="handleClick('search')"
-                 type="primary">搜索</el-button>
+      <el-button
+        type="primary"
+        @click.native="handleClick('search')">搜索</el-button>
 
-      <div style="float: right;"
-           v-if="!isEdit">
-        <el-button @click.native="handleClick('edit')"
-                   type="primary">编辑</el-button>
-        <el-button @click.native="handleClick('export')"
-                   type="primary">导出</el-button>
+      <div
+        v-if="!isEdit"
+        style="float: right;">
+        <el-button
+          type="primary"
+          @click.native="handleClick('edit')">编辑</el-button>
+        <el-button
+          type="primary"
+          @click.native="handleClick('export')">导出</el-button>
       </div>
 
-      <div style="float: right;"
-           v-if="isEdit">
-        <el-button @click.native="handleClick('save')"
-                   type="primary">保存</el-button>
-        <el-button @click.native="handleClick('cancel')"
-                   type="primary">取消</el-button>
+      <div
+        v-if="isEdit"
+        style="float: right;">
+        <el-button
+          type="primary"
+          @click.native="handleClick('save')">保存</el-button>
+        <el-button
+          type="primary"
+          @click.native="handleClick('cancel')">取消</el-button>
       </div>
     </div>
     <div class="content">
-      <el-table :data="list"
-                id="task-set-table"
-                :height="tableHeight"
-                border
-                header-align="center"
-                align="center"
-                :cell-style="cellStyle"
-                highlight-current-row>
-        <el-table-column v-for="(item, index) in fieldList"
-                         :key="index"
-                         :fixed="index==0"
-                         show-overflow-tooltip
-                         :prop="item.field"
-                         width="150"
-                         :label="item.name">
+      <el-table
+        id="task-set-table"
+        :data="list"
+        :height="tableHeight"
+        :cell-style="cellStyle"
+        border
+        header-align="center"
+        align="center"
+        highlight-current-row>
+        <el-table-column
+          v-for="(item, index) in fieldList"
+          :key="index"
+          :fixed="index==0"
+          :prop="item.field"
+          :label="item.name"
+          show-overflow-tooltip
+          width="150">
           <template slot-scope="scope">
-            <div v-if="item.field === 'name'
-            || item.field === 'yeartarget'
-            || item.field === 'first'
-            || item.field === 'second'
-            || item.field === 'third'
-            || item.field === 'fourth' || !isEdit || (tabType === 'department'&&scope.$index===1)"
-                 class="table-show-item">
-              {{scope.row[item.field]}}
+            <div
+              v-if="item.field === 'name'
+                || item.field === 'yeartarget'
+                || item.field === 'first'
+                || item.field === 'second'
+                || item.field === 'third'
+              || item.field === 'fourth' || !isEdit || (tabType === 'department'&&scope.$index===1)"
+              class="table-show-item">
+              {{ scope.row[item.field] }}
             </div>
-            <el-input v-else
-                      type="number"
-                      v-model="scope.row[item.field]"
-                      @input="handleInputEdit('change', scope)"
-                      @blur="handleInputEdit('blur', scope)">
-            </el-input>
+            <el-input
+              v-else
+              v-model="scope.row[item.field]"
+              type="number"
+              @input="handleInputEdit('change', scope)"
+              @blur="handleInputEdit('blur', scope)"/>
           </template>
         </el-table-column>
       </el-table>
@@ -115,7 +131,7 @@ import XLSX from 'xlsx'
 
 export default {
   /** 业绩目标设置 */
-  name: 'task-set-statistics',
+  name: 'TaskSetStatistics',
   components: {},
   data() {
     return {
@@ -143,7 +159,7 @@ export default {
       userSelectValue: '',
 
       /** 编辑控制 */
-      isEdit: false, //是否是编辑中
+      isEdit: false, // 是否是编辑中
 
       list: [],
       fieldList: [
@@ -199,7 +215,6 @@ export default {
         deptId: id
       })
         .then(res => {
-          var self = this
           this.list = res.data.map(item => {
             return this.getShowItem(item)
           })
@@ -464,7 +479,6 @@ export default {
         userId: this.userSelectValue
       })
         .then(res => {
-          var self = this
           this.list = res.data.map(item => {
             return this.getShowItem(item)
           })
@@ -481,7 +495,7 @@ export default {
       } else if (type == 'edit') {
         this.isEdit = true
       } else if (type == 'export') {
-        let fix = document.querySelector('.el-table__fixed')
+        const fix = document.querySelector('.el-table__fixed')
         let wb
         if (fix) {
           wb = XLSX.utils.table_to_book(
@@ -493,14 +507,15 @@ export default {
             document.getElementById('task-set-table')
           )
         }
-        let wopts = {
-            bookType: 'xlsx',
-            bookSST: false,
-            type: 'binary'
-          },
-          wbout = XLSX.write(wb, wopts)
+        const wopts = {
+          bookType: 'xlsx',
+          bookSST: false,
+          type: 'binary'
+        }
 
-        let name = `${this.dateSelect} 年${
+        const wbout = XLSX.write(wb, wopts)
+
+        const name = `${this.dateSelect} 年${
           { department: '部门目标', user: '员工目标' }[this.tabType]
         }.xlsx`
         FileSaver.saveAs(

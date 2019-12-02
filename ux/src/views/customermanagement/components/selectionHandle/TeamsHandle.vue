@@ -1,32 +1,39 @@
 <template>
-  <el-dialog :title="title"
-             v-loading="loading"
-             :visible.sync="visible"
-             @close="handleCancel"
-             :append-to-body="true"
-             width="400px">
+  <el-dialog
+    v-loading="loading"
+    :title="title"
+    :visible.sync="visible"
+    :append-to-body="true"
+    width="400px"
+    @close="handleCancel">
     <div class="handle-box">
-      <flexbox class="handle-item"
-               align="stretch">
-        <div class="handle-item-name"
-             style="margin-top: 8px;">选择团队成员：</div>
-        <xh-user-cell class="handle-item-content"
-                      :radio="false"
-                      placeholder="点击选择（多选）"
-                      @value-change="userChage"></xh-user-cell>
-        <div v-if="title!='添加团队成员'"
-             class="tips">此操作不可移除数据负责人</div>
+      <flexbox
+        class="handle-item"
+        align="stretch">
+        <div
+          class="handle-item-name"
+          style="margin-top: 8px;">选择团队成员：</div>
+        <xh-user-cell
+          :radio="false"
+          class="handle-item-content"
+          placeholder="点击选择（多选）"
+          @value-change="userChage"/>
+        <div
+          v-if="title!='添加团队成员'"
+          class="tips">此操作不可移除数据负责人</div>
       </flexbox>
-      <flexbox v-if="title=='添加团队成员'"
-               class="handle-item">
+      <flexbox
+        v-if="title=='添加团队成员'"
+        class="handle-item">
         <div class="handle-item-name">权限：</div>
         <el-radio-group v-model="handleType">
           <el-radio :label="1">只读</el-radio>
           <el-radio :label="2">读写</el-radio>
         </el-radio-group>
       </flexbox>
-      <flexbox v-if="title=='添加团队成员' && crmType === 'customer'"
-               class="handle-item">
+      <flexbox
+        v-if="title=='添加团队成员' && crmType === 'customer'"
+        class="handle-item">
         <div class="handle-item-name">同时添加至：</div>
         <el-checkbox-group v-model="addsTypes">
           <!-- <el-checkbox label="1">联系人</el-checkbox> -->
@@ -35,11 +42,13 @@
         </el-checkbox-group>
       </flexbox>
     </div>
-    <span slot="footer"
-          class="dialog-footer">
+    <span
+      slot="footer"
+      class="dialog-footer">
       <el-button @click.native="handleCancel">取消</el-button>
-      <el-button type="primary"
-                 @click.native="handleConfirm">保存</el-button>
+      <el-button
+        type="primary"
+        @click.native="handleConfirm">保存</el-button>
     </span>
   </el-dialog>
 </template>
@@ -62,22 +71,11 @@ import {
 
 export default {
   /** 客户管理 的 勾选后的 团队成员 操作 移除操作不可移除客户负责人*/
-  name: 'teams-handle',
+  name: 'TeamsHandle',
   components: {
     XhUserCell
   },
   mixins: [],
-  watch: {
-    dialogVisible: {
-      handler(val) {
-        this.visible = val
-        if (val) {
-        }
-      },
-      deep: true,
-      immediate: true
-    }
-  },
   props: {
     dialogVisible: {
       type: Boolean,
@@ -112,6 +110,15 @@ export default {
     }
   },
   computed: {},
+  watch: {
+    dialogVisible: {
+      handler(val) {
+        this.visible = val
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   mounted() {
     this.visible = this.dialogVisible
   },

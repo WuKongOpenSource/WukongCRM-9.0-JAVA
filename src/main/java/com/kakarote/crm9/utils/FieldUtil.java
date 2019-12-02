@@ -109,7 +109,7 @@ public class FieldUtil {
     public void handleType(List<Record> recordList){
         recordList.forEach(record -> {
             if (record.getInt("type") == 8){
-                record.set("value", Db.find("select * from 72crm_admin_file where batch_id = ?",record.getStr("value")));
+                record.set("value", Db.find("select file_id, name, size, create_user_id, create_time, file_path, file_type from 72crm_admin_file where batch_id = ?",record.getStr("value")));
             }else if (record.getInt("type") == 10){
                 List<String> userList = Db.query("select realname from 72crm_admin_user where find_in_set(user_id,ifnull(?,0))",record.getStr("value"));
                 record.set("value", CollectionUtil.join(userList,","));

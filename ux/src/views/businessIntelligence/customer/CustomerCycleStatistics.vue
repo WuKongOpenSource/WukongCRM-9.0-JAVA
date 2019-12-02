@@ -1,12 +1,15 @@
 <template>
-  <el-tabs v-model="tabActiveName"
-           class="main-container">
-    <el-tab-pane v-for="(item, index) in tabList"
-                 :key="index"
-                 :label="item.label"
-                 :name="item.name">
-      <cycle-view :type="item.name"
-                  :show="item.name == tabActiveName"></cycle-view>
+  <el-tabs
+    v-model="tabActiveName"
+    class="main-container">
+    <el-tab-pane
+      v-for="(item, index) in tabList"
+      :key="index"
+      :label="item.label"
+      :name="item.name">
+      <cycle-view
+        :type="item.name"
+        :show="item.name == tabActiveName"/>
     </el-tab-pane>
   </el-tabs>
 </template>
@@ -16,7 +19,7 @@ import CycleView from './components/CycleView'
 
 export default {
   /** 成交周期分析 */
-  name: 'customer-cycle-statistics',
+  name: 'CustomerCycleStatistics',
   components: {
     CycleView
   },

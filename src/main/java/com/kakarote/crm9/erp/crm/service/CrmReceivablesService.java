@@ -5,6 +5,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.service.AdminExamineRecordService;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
@@ -41,9 +42,6 @@ public class CrmReceivablesService {
     @Inject
     private AdminExamineRecordService examineRecordService;
 
-    @Inject
-    private AuthUtil authUtil;
-
     /**
      * 分页查询回款
      */
@@ -59,34 +57,31 @@ public class CrmReceivablesService {
     @Before(Tx.class)
     public R saveOrUpdate(JSONObject jsonObject) {
         CrmReceivables crmReceivables = jsonObject.getObject("entity", CrmReceivables.class);
-        crmReceivables.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        crmReceivables.setCreateUserId(BaseUtil.getUser().getUserId());
         String batchId = StrUtil.isNotEmpty(crmReceivables.getBatchId()) ? crmReceivables.getBatchId() : IdUtil.simpleUUID();
         crmRecordService.updateRecord(jsonObject.getJSONArray("field"), batchId);
         adminFieldService.save(jsonObject.getJSONArray("field"), batchId);
         if (crmReceivables.getReceivablesId() == null) {
-           Integer count =  Db.queryInt(Db.getSql("crm.receivables.queryByNumber"),crmReceivables.getNumber());
-           if (count!=null&&count > 0){
-               return R.error("回款编号已存在，请校对后再添加！");
-           }
+            Integer count = Db.queryInt(Db.getSql("crm.receivables.queryByNumber"), crmReceivables.getNumber());
+            if (count != null && count > 0) {
+                return R.error("回款编号已存在，请校对后再添加！");
+            }
             crmReceivables.setCreateTime(DateUtil.date());
             crmReceivables.setUpdateTime(DateUtil.date());
             crmReceivables.setBatchId(batchId);
-            crmReceivables.setOwnerUserId(BaseUtil.getUser().getUserId().intValue());
+            crmReceivables.setOwnerUserId(BaseUtil.getUser().getUserId());
 
-                Map<String, Integer> map = examineRecordService.saveExamineRecord(2,
-                        jsonObject.getLong("checkUserId"),
-                        crmReceivables.getOwnerUserId(), null,crmReceivables.getCheckStatus());
-                if (map.get("status") == 0) {
-                    return R.error("没有启动的审核步骤，不能添加！");
-                } else {
-                    crmReceivables.setExamineRecordId(map.get("id"));
-                }
-            if (crmReceivables.getCheckStatus() != null && crmReceivables.getCheckStatus() == 5){
-                crmReceivables.setCheckStatus(5);
-            }else {
+            Map<String, Integer> map = examineRecordService.saveExamineRecord(2,
+                    jsonObject.getLong("checkUserId"),
+                    crmReceivables.getOwnerUserId(), null, crmReceivables.getCheckStatus());
+            if (map.get("status") == 0) {
+                return R.error("没有启动的审核步骤，不能添加！");
+            } else {
+                crmReceivables.setExamineRecordId(map.get("id"));
+            }
+            if (!(crmReceivables.getCheckStatus() != null && crmReceivables.getCheckStatus() == 5)) {
                 crmReceivables.setCheckStatus(0);
             }
-
             boolean save = crmReceivables.save();
             CrmReceivablesPlan crmReceivablesPlan = CrmReceivablesPlan.dao.findById(crmReceivables.getPlanId());
             if (crmReceivablesPlan != null) {
@@ -98,24 +93,22 @@ public class CrmReceivablesService {
             return R.isSuccess(save);
         } else {
             CrmReceivables receivables = CrmReceivables.dao.findById(crmReceivables.getReceivablesId());
-            if (receivables.getCheckStatus() != 4 && receivables.getCheckStatus() != 3 && receivables.getCheckStatus() != 5) {
+            if (receivables.getCheckStatus() != 4 && receivables.getCheckStatus() != 2 && receivables.getCheckStatus() != 5) {
                 return R.error("不能编辑，请先撤回再编辑！");
             }
-                Map<String, Integer> map = examineRecordService.saveExamineRecord(2,
-                        jsonObject.getLong("checkUserId"),
-                        receivables.getOwnerUserId(),
-                        receivables.getExamineRecordId(),crmReceivables.getCheckStatus());
-                if (map.get("status") == 0) {
-                    return R.error("没有启动的审核步骤，不能添加！");
-                } else {
-                    crmReceivables.setExamineRecordId(map.get("id"));
-                }
-            if (crmReceivables.getCheckStatus() != null && crmReceivables.getCheckStatus() == 5){
-                    crmReceivables.setCheckStatus(5);
-                }else {
-                    crmReceivables.setCheckStatus(0);
-                }
-            crmRecordService.updateRecord(new CrmReceivables().dao().findById(crmReceivables.getReceivablesId()), crmReceivables,CrmEnum.CRM_RECEIVABLES);
+            Map<String, Integer> map = examineRecordService.saveExamineRecord(2,
+                    jsonObject.getLong("checkUserId"),
+                    receivables.getOwnerUserId(),
+                    receivables.getExamineRecordId(), crmReceivables.getCheckStatus());
+            if (map.get("status") == 0) {
+                return R.error("没有启动的审核步骤，不能添加！");
+            } else {
+                crmReceivables.setExamineRecordId(map.get("id"));
+            }
+            if (!(crmReceivables.getCheckStatus() != null && crmReceivables.getCheckStatus() == 5)) {
+                crmReceivables.setCheckStatus(0);
+            }
+            crmRecordService.updateRecord(new CrmReceivables().dao().findById(crmReceivables.getReceivablesId()), crmReceivables, CrmEnum.CRM_RECEIVABLES);
             crmReceivables.setUpdateTime(DateUtil.date());
             CrmReceivablesPlan crmReceivablesPlan = CrmReceivablesPlan.dao.findById(crmReceivables.getPlanId());
             if (crmReceivablesPlan != null) {
@@ -133,7 +126,7 @@ public class CrmReceivablesService {
     public Record queryById(Integer id) {
         Record record = Db.findFirst(Db.getSql("crm.receivables.queryReceivablesById"), id);
         List<Record> recordList = Db.find("select name,value from `72crm_admin_fieldv` where batch_id = ?", record.getStr("batch_id"));
-        recordList.forEach(field->record.set(field.getStr("name"),field.getStr("value")));
+        recordList.forEach(field -> record.set(field.getStr("name"), field.getStr("value")));
         return record;
     }
 
@@ -141,7 +134,7 @@ public class CrmReceivablesService {
      * 根据id查询回款基本信息
      */
     public List<Record> information(Integer id) {
-        Record record = Db.findFirst(Db.getSql("crm.receivables.queryReceivablesById"),id);
+        Record record = Db.findFirst(Db.getSql("crm.receivables.queryReceivablesById"), id);
         if (record == null) {
             return null;
         }
@@ -154,7 +147,7 @@ public class CrmReceivablesService {
                 .set("回款金额", record.getStr("money"))
                 .set("期数", record.getStr("plan_num"))
                 .set("备注", record.getStr("remark"));
-        List<Record> recordList = Db.find(Db.getSql("admin.field.queryCustomField"),record.getStr("batch_id"));
+        List<Record> recordList = Db.find(Db.getSql("admin.field.queryCustomField"), record.getStr("batch_id"));
         fieldUtil.handleType(recordList);
         fieldList.addAll(recordList);
         return fieldList;
@@ -171,15 +164,17 @@ public class CrmReceivablesService {
             return R.error("该数据已被其他模块引用，不能被删除！");
         }
         for (String id : idsArr) {
-                CrmReceivables receivables = CrmReceivables.dao.findById(id);
-            if (receivables != null) {
-                Db.delete("delete FROM 72crm_admin_fieldv where batch_id = ?",receivables.getBatchId());
+            CrmReceivables receivables = CrmReceivables.dao.findById(id);
+            boolean bol = (receivables.getCheckStatus() != 4) && (!BaseUtil.getUserId().equals(BaseConstant.SUPER_ADMIN_USER_ID) || !BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID));
+            if (bol){
+                return R.noAuth();
             }
-            if (!CrmReceivables.dao.deleteById(id)){
+            Db.delete("delete FROM 72crm_admin_fieldv where batch_id = ?", receivables.getBatchId());
+            if (!CrmReceivables.dao.deleteById(id)) {
                 return R.error();
             }
         }
-            return R.ok();
+        return R.ok();
     }
 
     /**
@@ -189,12 +184,12 @@ public class CrmReceivablesService {
     public List<Record> queryField(Integer receivablesId) {
         Record receivables = queryById(receivablesId);
         List<Record> list = new ArrayList<>();
-        list.add(new Record().set("customer_id",receivables.getInt("customer_id")).set("customer_name",receivables.getStr("customer_name")));
-        receivables.set("customer_id",list);
+        list.add(new Record().set("customer_id", receivables.getInt("customer_id")).set("customer_name", receivables.getStr("customer_name")));
+        receivables.set("customer_id", list);
         list = new ArrayList<>();
         list.add(new Record().set("contract_id", receivables.getStr("contract_id")).set("contract_num", receivables.getStr("contract_num")));
-        receivables.set("contract_id",list);
-        return adminFieldService.queryUpdateField(7,receivables);
+        receivables.set("contract_id", list);
+        return adminFieldService.queryUpdateField(CrmEnum.CRM_RECEIVABLES.getType(), receivables);
     }
 
     /**
@@ -213,30 +208,14 @@ public class CrmReceivablesService {
     }
 
     /**
-     * 根据条件查询回款
-     */
-    public List<Record> queryListByType(String type, Integer id) {
-        String sq = "select * from 72crm_crm_receivables where ";
-        StringBuffer sql = new StringBuffer(sq);
-        if (type.equals(CrmEnum.CRM_CUSTOMER.getType()+"")) {
-            sql.append("  customer_id = ? ");
-        }
-        if (type.equals(CrmEnum.CRM_CONTRACT.getType()+"")) {
-            sql.append("  contract_id = ? ");
-        }
-
-        return Db.find(sql.toString(), id);
-    }
-
-    /**
      * 根据合同id查询回款
      */
     public R qureyListByContractId(BasePageRequest<CrmReceivables> basePageRequest) {
         Integer pageType = basePageRequest.getPageType();
         if (0 == pageType) {
-            return R.ok().put("data", Db.find(Db.getSql("crm.receivables.queryReceivablesPageList"),basePageRequest.getData().getContractId()));
+            return R.ok().put("data", Db.find(Db.getSql("crm.receivables.queryReceivablesPageList"), basePageRequest.getData().getContractId()));
         } else {
-            return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(),new SqlPara().setSql(Db.getSql("crm.receivables.queryReceivablesPageList")).addPara(basePageRequest.getData().getContractId())));
+            return R.ok().put("data", Db.paginate(basePageRequest.getPage(), basePageRequest.getLimit(), new SqlPara().setSql(Db.getSql("crm.receivables.queryReceivablesPageList")).addPara(basePageRequest.getData().getContractId())));
         }
     }
 }

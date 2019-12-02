@@ -1,29 +1,34 @@
 <template>
-  <el-popover v-model="showPopover"
-              placement="bottom"
-              width="700"
-              :disabled="disabled"
-              popper-class="no-padding-popover"
-              trigger="click">
-    <crm-relative ref="crmrelative"
-                  :crm-type="item.data.formType"
-                  :action="relationAction"
-                  v-if="!disabled&&showSelectView"
-                  @close="showPopover=false"
-                  @changeCheckout="checkInfos"></crm-relative>
-    <flexbox slot="reference"
-             wrap="wrap"
-             :class="[disabled ? 'is_disabled' : 'is_valid']"
-             class="user-container"
-             @click.native="contentClick">
-      <div v-for="(aitem, aindex) in dataValue"
-           :key="aindex"
-           @click.stop="deleteinfo(aindex)"
-           class="user-item">{{getShowName(aitem)}}
-        <i class="delete-icon el-icon-close"></i>
+  <el-popover
+    v-model="showPopover"
+    :disabled="disabled"
+    placement="bottom"
+    width="700"
+    popper-class="no-padding-popover"
+    trigger="click">
+    <crm-relative
+      v-if="!disabled&&showSelectView"
+      ref="crmrelative"
+      :crm-type="item.data.formType"
+      :action="relationAction"
+      @close="showPopover=false"
+      @changeCheckout="checkInfos"/>
+    <flexbox
+      slot="reference"
+      :class="[disabled ? 'is_disabled' : 'is_valid']"
+      wrap="wrap"
+      class="user-container"
+      @click.native="contentClick">
+      <div
+        v-for="(aitem, aindex) in dataValue"
+        :key="aindex"
+        class="user-item"
+        @click.stop="deleteinfo(aindex)">{{ getShowName(aitem) }}
+        <i class="delete-icon el-icon-close"/>
       </div>
-      <div class="add-item"
-           v-if="dataValue.length == 0">+添加</div>
+      <div
+        v-if="dataValue.length == 0"
+        class="add-item">+添加</div>
     </flexbox>
   </el-popover>
 </template>
@@ -32,11 +37,28 @@ import CrmRelative from './CrmRelative'
 import arrayMixin from './arrayMixin'
 
 export default {
-  name: 'crm-relative-cell', // 相关模块CRMCell
+  name: 'CrmRelativeCell', // 相关模块CRMCell
   components: {
     CrmRelative
   },
   mixins: [arrayMixin],
+  props: {
+    relation: {
+      // 相关ID
+      type: Object,
+      default: () => {
+        return {}
+      }
+    }
+  },
+  data() {
+    return {
+      showPopover: false, // 展示popover
+      showSelectView: false, // 内容
+      radio: true, // 是否单选
+      relationAction: { type: 'default' }
+    }
+  },
   computed: {
     // 如果有相关ID  展示相关效果 例如客户下的商机和合同
     isRelationShow() {
@@ -49,23 +71,6 @@ export default {
         this.relationAction = { type: 'condition', data: val }
       } else {
         this.relationAction = { type: 'default' }
-      }
-    }
-  },
-  data() {
-    return {
-      showPopover: false, // 展示popover
-      showSelectView: false, // 内容
-      radio: true, // 是否单选
-      relationAction: { type: 'default' }
-    }
-  },
-  props: {
-    relation: {
-      // 相关ID
-      type: Object,
-      default: () => {
-        return {}
       }
     }
   },

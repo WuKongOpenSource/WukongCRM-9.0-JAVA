@@ -5,11 +5,11 @@ import request from '@/utils/request'
  * @param {*} data
  */
 export function workTaskArchListAPI(data) {
-    return request({
-        url: 'work/archList',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/archList',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -17,11 +17,11 @@ export function workTaskArchListAPI(data) {
  * @param {*} data
  */
 export function workWorkReadAPI(data) {
-    return request({
-        url: 'work/getWorkById',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/getWorkById',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -29,11 +29,11 @@ export function workWorkReadAPI(data) {
  * @param {*} data
  */
 export function workWorkDeleteAPI(data) {
-    return request({
-        url: 'work/deleteWork',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/deleteWork',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -41,11 +41,11 @@ export function workWorkDeleteAPI(data) {
  * @param {*} data
  */
 export function workWorkSaveAPI(data) {
-    return request({
-        url: 'work/setWork',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/setWork',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -53,11 +53,11 @@ export function workWorkSaveAPI(data) {
  * @param {*} data
  */
 export function workWorkLeaveAPI(data) {
-    return request({
-        url: 'work/leave',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/leave',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -65,14 +65,14 @@ export function workWorkLeaveAPI(data) {
  * @param {*} data
  */
 export function workTaskIndexAPI(data) {
-    return request({
-        url: 'work/queryTaskByWorkId',
-        method: 'post',
-        headers: {
-            'Content-Type': 'application/json;charset=UTF-8'
-        },
-        data: data
-    })
+  return request({
+    url: 'work/queryTaskByWorkId',
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: data
+  })
 }
 
 /**
@@ -80,11 +80,11 @@ export function workTaskIndexAPI(data) {
  * @param {*} data
  */
 export function workTaskClassSetAPI(data) {
-    return request({
-        url: 'task/setTaskClass',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'task/setTaskClass',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -92,11 +92,11 @@ export function workTaskClassSetAPI(data) {
  * @param {*} data
  */
 export function workTaskclassDeleteAPI(data) {
-    return request({
-        url: 'work/deleteTaskList',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/deleteTaskList',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -104,11 +104,11 @@ export function workTaskclassDeleteAPI(data) {
  * @param {*} data
  */
 export function workWorkFileListAPI(data) {
-    return request({
-        url: 'work/queryTaskFileByWorkId',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/queryTaskFileByWorkId',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -116,11 +116,11 @@ export function workWorkFileListAPI(data) {
  * @param {*} data
  */
 export function workWorkOwnerListAPI(data) {
-    return request({
-        url: 'work/queryOwnerRoleList',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/queryOwnerRoleList',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -128,11 +128,11 @@ export function workWorkOwnerListAPI(data) {
  * @param {*} data
  */
 export function workWorkOwnerDelAPI(data) {
-    return request({
-        url: 'work/removeWorkOwnerUser',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/removeWorkOwnerUser',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -140,11 +140,11 @@ export function workWorkOwnerDelAPI(data) {
  * @param {*} data
  */
 export function workTaskArchiveTaskAPI(data) {
-    return request({
-        url: 'work/archiveTask',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/archiveTask',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -152,14 +152,14 @@ export function workTaskArchiveTaskAPI(data) {
  * @param {*} data
  */
 export function workTaskUpdateOrderAPI(data) {
-    return request({
-        url: 'work/updateOrder',
-        method: 'post',
-        headers: {
-            'Content-Type': 'application/json;charset=UTF-8'
-        },
-        data: data
-    })
+  return request({
+    url: 'work/updateOrder',
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: data
+  })
 }
 
 /**
@@ -167,14 +167,14 @@ export function workTaskUpdateOrderAPI(data) {
  * @param {*} data
  */
 export function workTaskUpdateClassOrderAPI(data) {
-    return request({
-        url: 'work/updateClassOrder',
-        method: 'post',
-        headers: {
-            'Content-Type': 'application/json;charset=UTF-8'
-        },
-        data: data
-    })
+  return request({
+    url: 'work/updateClassOrder',
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: data
+  })
 }
 
 /**
@@ -182,14 +182,14 @@ export function workTaskUpdateClassOrderAPI(data) {
  * @param {*} data
  */
 export function workWorkAddUserGroupAPI(data) {
-    return request({
-        url: 'work/setOwnerRole',
-        method: 'post',
-        headers: {
-            'Content-Type': 'application/json;charset=UTF-8'
-        },
-        data: data
-    })
+  return request({
+    url: 'work/setOwnerRole',
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: data
+  })
 }
 
 /**
@@ -197,10 +197,10 @@ export function workWorkAddUserGroupAPI(data) {
  * @param {*} data
  */
 export function workWorkGroupListAPI(data) {
-    return request({
-        url: 'work/queryRoleList',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/queryRoleList',
+    method: 'post',
+    data: data
+  })
 }
 

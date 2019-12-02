@@ -5,11 +5,11 @@ import request from '@/utils/request'
  * @param {*} data
  */
 export function workTaskMyTaskAPI(data) {
-    return request({
-        url: 'workbench/myTask',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'workbench/myTask',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -17,11 +17,11 @@ export function workTaskMyTaskAPI(data) {
  * @param {*} data
  */
 export function workTaskSaveAPI(data) {
-    return request({
-        url: 'task/setWorkTask',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'task/setWorkTask',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -29,11 +29,11 @@ export function workTaskSaveAPI(data) {
  * @param {*} data
  */
 export function workTaskDeleteAPI(data) {
-    return request({
-        url: 'task/deleteTask',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'task/deleteTask',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -41,14 +41,14 @@ export function workTaskDeleteAPI(data) {
  * @param {*} data
  */
 export function workTaskUpdateTopAPI(data) {
-    return request({
-        url: 'workbench/updateTop',
-        method: 'post',
-        headers: {
-            'Content-Type': 'application/json;charset=UTF-8'
-        },
-        data: data
-    })
+  return request({
+    url: 'workbench/updateTop',
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: data
+  })
 }
 
 /**
@@ -56,11 +56,11 @@ export function workTaskUpdateTopAPI(data) {
  * @param {*} data
  */
 export function workIndexWorkListAPI(data) {
-    return request({
-        url: 'work/queryWorkNameList',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/queryWorkNameList',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -68,11 +68,11 @@ export function workIndexWorkListAPI(data) {
  * @param {*} data
  */
 export function workTaskReadAPI(data) {
-    return request({
-        url: 'task/queryTaskById',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'task/queryTaskById',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -80,11 +80,11 @@ export function workTaskReadAPI(data) {
  * @param {*} data
  */
 export function workTaskUpdateNameAPI(data) {
-    return request({
-        url: 'work/task/updateName',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'work/task/updateName',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -92,11 +92,11 @@ export function workTaskUpdateNameAPI(data) {
  * @param {*} data
  */
 export function workTaskArchiveAPI(data) {
-    return request({
-        url: 'task/archiveByTaskId',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'task/archiveByTaskId',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -104,11 +104,11 @@ export function workTaskArchiveAPI(data) {
  * @param {*} data
  */
 export function workTaskReadLoglistAPI(data) {
-    return request({
-        url: 'task/queryTaskLog',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'task/queryTaskLog',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -116,11 +116,11 @@ export function workTaskReadLoglistAPI(data) {
  * @param {*} data
  */
 export function workTaskcommentSaveAPI(data) {
-    return request({
-        url: 'comment/setWorkTaskComment',
-        method: 'post',
-        data
-    })
+  return request({
+    url: 'comment/setWorkTaskComment',
+    method: 'post',
+    data
+  })
 }
 
 /**
@@ -128,11 +128,11 @@ export function workTaskcommentSaveAPI(data) {
  * @param {*} data
  */
 export function workTaskcommentDeleteAPI(data) {
-    return request({
-        url: 'comment/deleteComment',
-        method: 'post',
-        data
-    })
+  return request({
+    url: 'comment/deleteComment',
+    method: 'post',
+    data
+  })
 }
 
 /**
@@ -140,11 +140,11 @@ export function workTaskcommentDeleteAPI(data) {
  * @param {*} data
  */
 export function workTaskRecoverAPI(data) {
-    return request({
-        url: 'work/activation',
-        method: 'post',
-        data
-    })
+  return request({
+    url: 'work/activation',
+    method: 'post',
+    data
+  })
 }
 
 /**
@@ -152,11 +152,11 @@ export function workTaskRecoverAPI(data) {
  * @param {*} data
  */
 export function queryCommentListAPI(data) {
-    return request({
-        url: 'comment/queryWorkCommentList',
-        method: 'post',
-        data
-    })
+  return request({
+    url: 'comment/queryWorkCommentList',
+    method: 'post',
+    data
+  })
 }
 
 /**
@@ -164,9 +164,9 @@ export function queryCommentListAPI(data) {
  * @param {*} data
  */
 export function taskSvaeTaskRelationAPI(data) {
-    return request({
-        url: 'task/svaeTaskRelation',
-        method: 'post',
-        data: data
-    })
+  return request({
+    url: 'task/svaeTaskRelation',
+    method: 'post',
+    data: data
+  })
 }

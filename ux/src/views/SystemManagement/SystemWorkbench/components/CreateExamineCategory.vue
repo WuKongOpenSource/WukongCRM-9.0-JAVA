@@ -1,80 +1,93 @@
 <template>
-  <create-view :loading="loading"
-               :body-style="{ height: '100%'}">
-    <flexbox direction="column"
-             align="stretch"
-             class="crm-create-container">
+  <create-view
+    :loading="loading"
+    :body-style="{ height: '100%'}">
+    <flexbox
+      direction="column"
+      align="stretch"
+      class="crm-create-container">
       <flexbox class="crm-create-header">
-        <div style="flex:1;font-size:17px;color:#333;">{{title}}</div>
-        <img @click="hidenView"
-             class="close"
-             src="@/assets/img/task_close.png" />
+        <div style="flex:1;font-size:17px;color:#333;">{{ title }}</div>
+        <img
+          class="close"
+          src="@/assets/img/task_close.png"
+          @click="hidenView" >
       </flexbox>
-      <flexbox class="crm-create-flex"
-               direction="column"
-               align="stretch">
-        <div v-show="currentPage == 1"
-             class="crm-create-body">
+      <flexbox
+        class="crm-create-flex"
+        direction="column"
+        align="stretch">
+        <div
+          v-show="currentPage == 1"
+          class="crm-create-body">
           <div class="create-name">基本信息</div>
-          <el-form ref="crmForm"
-                   :model="crmForm"
-                   label-position="top"
-                   class="crm-create-box">
-            <el-form-item v-for="(item, index) in this.crmForm.crmFields"
-                          :key="item.key"
-                          :prop="'crmFields.' + index + '.value'"
-                          :class="{ 'crm-create-block-item': item.showblock, 'crm-create-item': !item.showblock }"
-                          :rules="crmRules[item.key]"
-                          :style="{'padding-left': getPaddingLeft(item, index), 'padding-right': getPaddingRight(item, index)}">
-              <div slot="label"
-                   style="display: inline-block;">
+          <el-form
+            ref="crmForm"
+            :model="crmForm"
+            label-position="top"
+            class="crm-create-box">
+            <el-form-item
+              v-for="(item, index) in crmForm.crmFields"
+              :key="item.key"
+              :prop="'crmFields.' + index + '.value'"
+              :class="{ 'crm-create-block-item': item.showblock, 'crm-create-item': !item.showblock }"
+              :rules="crmRules[item.key]"
+              :style="{'padding-left': getPaddingLeft(item, index), 'padding-right': getPaddingRight(item, index)}">
+              <div
+                slot="label"
+                style="display: inline-block;">
                 <div style="margin:5px 0;font-size:12px;word-wrap:break-word;word-break:break-all;">
-                  {{item.data.name}}
+                  {{ item.data.name }}
                   <span style="color:#999;">
-                    {{item.data.inputTips ? '（'+item.data.inputTips+'）':''}}
+                    {{ item.data.inputTips ? '（'+item.data.inputTips+'）':'' }}
                   </span>
                 </div>
               </div>
-              <component :is="item.data.formType | typeToComponentName"
-                         :value="item.value"
-                         :index="index"
-                         :item="item"
-                         :radio="false"
-                         @value-change="fieldValueChange">
-              </component>
+              <component
+                :is="item.data.formType | typeToComponentName"
+                :value="item.value"
+                :index="index"
+                :item="item"
+                :radio="false"
+                @value-change="fieldValueChange"/>
             </el-form-item>
           </el-form>
         </div>
-        <div v-show="currentPage == 2"
-             class="crm-create-body">
+        <div
+          v-show="currentPage == 2"
+          class="crm-create-body">
           <div style="padding: 0 20px; font-size: 12px;">
-            <el-radio v-model="examineType"
-                      :label="1">固定审批流</el-radio>
+            <el-radio
+              v-model="examineType"
+              :label="1">固定审批流</el-radio>
             <div class="examine-items">
-              <flexbox class="examine-item"
-                       v-for="(item, index) in examineList"
-                       :key="index">
-                <div class="examine-item-name">第{{index+1 | numberToZh}}级</div>
-                <el-select class="examine-item-select"
-                           v-model="item.type"
-                           @focus="selectOptionsFocus(item, index)"
-                           @change="selectOptionsChange(item)"
-                           placeholder="请选择">
-                  <el-option v-for="itemOption in item.options"
-                             :key="itemOption.value"
-                             :label="itemOption.name"
-                             :value="itemOption.value">
-                  </el-option>
+              <flexbox
+                v-for="(item, index) in examineList"
+                :key="index"
+                class="examine-item">
+                <div class="examine-item-name">第{{ index+1 | numberToZh }}级</div>
+                <el-select
+                  v-model="item.type"
+                  class="examine-item-select"
+                  placeholder="请选择"
+                  @focus="selectOptionsFocus(item, index)"
+                  @change="selectOptionsChange(item)">
+                  <el-option
+                    v-for="itemOption in item.options"
+                    :key="itemOption.value"
+                    :label="itemOption.name"
+                    :value="itemOption.value"/>
                 </el-select>
-                <xh-user-cell v-if="item.show"
-                              class="examine-item-user"
-                              :radio="false"
-                              :index='index'
-                              @value-change="flowUserSelect"
-                              :value="item.value">
-                </xh-user-cell>
-                <i class="el-icon-remove examine-item-delete"
-                   @click="deleteExamineItems(index)"></i>
+                <xh-user-cell
+                  v-if="item.show"
+                  :radio="false"
+                  :index="index"
+                  :value="item.value"
+                  class="examine-item-user"
+                  @value-change="flowUserSelect"/>
+                <i
+                  class="el-icon-remove examine-item-delete"
+                  @click="deleteExamineItems(index)"/>
               </flexbox>
             </div>
             <div class="examine-items-add"><span @click="examineItemsAdd">+ 添加审批层级</span></div>
@@ -83,29 +96,37 @@
               <p><span class="examine-add-required">*</span>当选择多个“指定用户”审批时。如果指定用户没有权限查看对应的合同，系统不会通知其审批。 </p>
               <p><span class="examine-add-required">*</span>当选择“指定用户（任意一人）”表示指定用户中任意一人审批即可。当选择“指定用户（多人会签）”表示 指定用户中所有人都要审批。</p>
             </div>
-            <el-radio v-model="examineType"
-                      :label="2">授权审批人</el-radio>
+            <el-radio
+              v-model="examineType"
+              :label="2">授权审批人</el-radio>
           </div>
         </div>
       </flexbox>
-      <div v-if="currentPage == 1"
-           class="handle-bar">
-        <el-button class="handle-button"
-                   @click.native="hidenView">取消</el-button>
-        <el-button class="handle-button"
-                   type="primary"
-                   @click.native="nextPage">下一页</el-button>
+      <div
+        v-if="currentPage == 1"
+        class="handle-bar">
+        <el-button
+          class="handle-button"
+          @click.native="hidenView">取消</el-button>
+        <el-button
+          class="handle-button"
+          type="primary"
+          @click.native="nextPage">下一页</el-button>
       </div>
-      <div v-if="currentPage == 2"
-           class="handle-bar">
-        <el-button class="handle-button"
-                   @click.native="hidenView">取消</el-button>
-        <el-button class="handle-button"
-                   type="primary"
-                   @click.native="saveField">保存</el-button>
-        <el-button class="handle-button"
-                   type="primary"
-                   @click.native="currentPage = 1">上一页</el-button>
+      <div
+        v-if="currentPage == 2"
+        class="handle-bar">
+        <el-button
+          class="handle-button"
+          @click.native="hidenView">取消</el-button>
+        <el-button
+          class="handle-button"
+          type="primary"
+          @click.native="saveField">保存</el-button>
+        <el-button
+          class="handle-button"
+          type="primary"
+          @click.native="currentPage = 1">上一页</el-button>
       </div>
     </flexbox>
   </create-view>
@@ -126,7 +147,7 @@ import {
 import Nzhcn from 'nzh/cn'
 
 export default {
-  name: 'create-examine-category', // 所有新建效果的view
+  name: 'CreateExamineCategory', // 所有新建效果的view
   components: {
     CreateView,
     XhInput,
@@ -135,12 +156,33 @@ export default {
     XhUserCell,
     XhStrucUserCell
   },
-  computed: {
-    title() {
-      if (this.handle.action === 'save') {
-        return '新建审批类型'
-      } else if (this.handle.action === 'update') {
-        return '编辑审批类型'
+  filters: {
+    /** 根据type 找到组件 */
+    typeToComponentName(formType) {
+      if (formType == 'text') {
+        return 'XhInput'
+      } else if (formType == 'textarea') {
+        return 'XhTextarea'
+      } else if (formType == 'select') {
+        return 'XhSelect'
+      } else if (formType == 'structure') {
+        return 'XhStrucUserCell'
+      }
+    },
+    numberToZh: function(value) {
+      return Nzhcn.encodeS(value)
+    }
+  },
+  props: {
+    handle: {
+      type: Object,
+      default: () => {
+        return {
+          type: 'examineflow', // examine 审批 审批流 examineflow
+          action: 'save', // save 创建  update 编辑
+          id: '',
+          data: null // 编辑数据
+        }
       }
     }
   },
@@ -171,33 +213,12 @@ export default {
       ]
     }
   },
-  filters: {
-    /** 根据type 找到组件 */
-    typeToComponentName(formType) {
-      if (formType == 'text') {
-        return 'XhInput'
-      } else if (formType == 'textarea') {
-        return 'XhTextarea'
-      } else if (formType == 'select') {
-        return 'XhSelect'
-      } else if (formType == 'structure') {
-        return 'XhStrucUserCell'
-      }
-    },
-    numberToZh: function(value) {
-      return Nzhcn.encodeS(value)
-    }
-  },
-  props: {
-    handle: {
-      type: Object,
-      default: () => {
-        return {
-          type: 'examineflow', // examine 审批 审批流 examineflow
-          action: 'save', // save 创建  update 编辑
-          id: '',
-          data: null // 编辑数据
-        }
+  computed: {
+    title() {
+      if (this.handle.action === 'save') {
+        return '新建审批类型'
+      } else if (this.handle.action === 'update') {
+        return '编辑审批类型'
       }
     }
   },
@@ -241,12 +262,18 @@ export default {
       }
     }
   },
+  destroyed() {
+    // remove DOM node after destroy
+    if (this.$el && this.$el.parentNode) {
+      this.$el.parentNode.removeChild(this.$el)
+    }
+  },
   methods: {
     // 字段的值更新
     fieldValueChange(data) {
       var item = this.crmForm.crmFields[data.index]
       item.value = data.value
-      //无事件的处理 后期可换成input实现
+      // 无事件的处理 后期可换成input实现
       // if (item.data.formType == 'structure') {
       //   this.$refs.crmForm.validateField('crmFields.' + data.index + '.value')
       // }
@@ -295,7 +322,7 @@ export default {
         /** 规则数据 */
         var tempList = []
 
-        //验证必填
+        // 验证必填
         if (item.isNull == 1) {
           tempList.push({
             required: true,
@@ -505,12 +532,6 @@ export default {
         return '0'
       }
       return index % 2 == 0 ? '25px' : '0'
-    }
-  },
-  destroyed() {
-    // remove DOM node after destroy
-    if (this.$el && this.$el.parentNode) {
-      this.$el.parentNode.removeChild(this.$el)
     }
   }
 }

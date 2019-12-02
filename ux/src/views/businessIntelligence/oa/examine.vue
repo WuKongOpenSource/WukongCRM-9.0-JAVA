@@ -1,43 +1,48 @@
 <template>
-  <div v-loading="loading"
-       class="main-container">
-    <filtrate-handle-view class="filtrate-bar"
-                          moduleType="oa"
-                          @load="loading=true"
-                          @change="getDataList">
-      <el-button @click.native="exportExcel"
-                 class="export-button"
-                 type="primary">导出</el-button>
+  <div
+    v-loading="loading"
+    class="main-container">
+    <filtrate-handle-view
+      class="filtrate-bar"
+      module-type="oa"
+      @load="loading=true"
+      @change="getDataList">
+      <el-button
+        class="export-button"
+        type="primary"
+        @click.native="exportExcel">导出</el-button>
     </filtrate-handle-view>
     <div class="content">
       <div class="table-content">
-        <el-table :data="list"
-                  :height="tableHeight"
-                  :cell-style="cellStyle"
-                  @row-click="handleRowClick"
-                  stripe
-                  border
-                  show-overflow-tooltip
-                  highlight-current-row>
-          <el-table-column v-for="(item, index) in fieldList"
-                           :key="index"
-                           :fixed="index==0"
-                           align="center"
-                           header-align="center"
-                           :formatter="fieldFormatter"
-                           :prop="item.field"
-                           :min-width="item.width"
-                           :label="item.name">
-          </el-table-column>
+        <el-table
+          :data="list"
+          :height="tableHeight"
+          :cell-style="cellStyle"
+          stripe
+          border
+          show-overflow-tooltip
+          highlight-current-row
+          @row-click="handleRowClick">
+          <el-table-column
+            v-for="(item, index) in fieldList"
+            :key="index"
+            :fixed="index==0"
+            :formatter="fieldFormatter"
+            :prop="item.field"
+            :min-width="item.width"
+            :label="item.name"
+            align="center"
+            header-align="center"/>
         </el-table>
       </div>
     </div>
 
     <!-- 列表详情 -->
-    <examine-list v-if="showList"
-                  :request="indexRequest"
-                  :params="indexParams"
-                  @hide="showList = false"></examine-list>
+    <examine-list
+      v-if="showList"
+      :request="indexRequest"
+      :params="indexParams"
+      @hide="showList = false"/>
   </div>
 </template>
 
@@ -52,7 +57,7 @@ import filtrateHandleView from '../components/filtrateHandleView'
 
 export default {
   /** 审批统计表 */
-  name: 'examine-statistics',
+  name: 'ExamineStatistics',
 
   components: {
     filtrateHandleView,
@@ -155,10 +160,10 @@ export default {
      */
     handleRowClick(row, column, event) {
       if (column.property !== 'realname' && row[column.property]) {
-        let propertys = column.property.split('_')
-        let categoryId = propertys.length > 1 ? propertys[1] : ''
+        const propertys = column.property.split('_')
+        const categoryId = propertys.length > 1 ? propertys[1] : ''
 
-        let params = {
+        const params = {
           userId: row.userId,
           categoryId: categoryId
         }
@@ -186,16 +191,16 @@ export default {
             type: 'application/vnd.ms-excel;charset=utf-8'
           })
           var downloadElement = document.createElement('a')
-          var href = window.URL.createObjectURL(blob) //创建下载的链接
+          var href = window.URL.createObjectURL(blob) // 创建下载的链接
           downloadElement.href = href
           downloadElement.download =
             decodeURI(
               res.headers['content-disposition'].split('filename=')[1]
-            ) || '' //下载后文件名
+            ) || '' // 下载后文件名
           document.body.appendChild(downloadElement)
-          downloadElement.click() //点击下载
-          document.body.removeChild(downloadElement) //下载完成移除元素
-          window.URL.revokeObjectURL(href) //释放掉blob对象
+          downloadElement.click() // 点击下载
+          document.body.removeChild(downloadElement) // 下载完成移除元素
+          window.URL.revokeObjectURL(href) // 释放掉blob对象
         })
         .catch(() => {
           this.loading = false

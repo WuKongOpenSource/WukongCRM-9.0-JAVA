@@ -4,6 +4,9 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Inject;
+import com.jfinal.core.Controller;
+import com.jfinal.core.paragetter.Para;
 import com.jfinal.kit.Kv;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
@@ -22,9 +25,6 @@ import com.kakarote.crm9.erp.crm.entity.CrmContacts;
 import com.kakarote.crm9.erp.crm.service.CrmContactsService;
 import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.R;
-import com.jfinal.aop.Inject;
-import com.jfinal.core.Controller;
-import com.jfinal.core.paragetter.Para;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -207,7 +207,7 @@ public class CrmContactsController extends Controller {
         try {
             writer = ExcelUtil.getWriter();
             AdminFieldService adminFieldService = new AdminFieldService();
-            List<Record> fieldList = adminFieldService.customFieldList("3");
+            List<Record> fieldList = adminFieldService.customFieldList(CrmEnum.CRM_CONTACTS.getType());
             writer.addHeaderAlias("name", "姓名");
             writer.addHeaderAlias("customer_name", "客户名称");
             writer.addHeaderAlias("next_time", "下次联系时间");
@@ -274,12 +274,18 @@ public class CrmContactsController extends Controller {
      */
     @LoginFormCookie
     public void downloadExcel() {
-        List<Record> recordList = adminFieldService.queryAddField(3);
+        List<Record> recordList = adminFieldService.queryAddField(CrmEnum.CRM_CONTACTS);
         recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType")) || "user".equals(record.getStr("formType")) || "structure".equals(record.getStr("formType")));
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("联系人导入表");
-        sheet.setDefaultColumnWidth(12);
         sheet.setDefaultRowHeight((short)400);
+        CellStyle textStyle = wb.createCellStyle();
+        DataFormat format = wb.createDataFormat();
+        textStyle.setDataFormat(format.getFormat("@"));
+        for (int i=0;i < recordList.size();i++){
+            sheet.setDefaultColumnStyle(i,textStyle);
+            sheet.setColumnWidth(i,20*256);
+        }
         HSSFRow titleRow = sheet.createRow(0);
         CellStyle cellStyle = wb.createCellStyle();
         cellStyle.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
@@ -341,7 +347,7 @@ public class CrmContactsController extends Controller {
      */
     @Permissions("crm:contacts:excelimport")
     @NotNullValidate(value = "ownerUserId", message = "请选择负责人")
-    public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling, @Para("ownerUserId") Integer ownerUserId) {
+    public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling, @Para("ownerUserId") Long ownerUserId) {
         Db.tx(() -> {
             R result = crmContactsService.uploadExcel(file, repeatHandling, ownerUserId);
             renderJson(result);

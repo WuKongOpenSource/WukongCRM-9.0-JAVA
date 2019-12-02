@@ -1,6 +1,7 @@
 package com.kakarote.crm9.utils;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jfinal.aop.Aop;
 import com.jfinal.aop.Inject;
@@ -114,9 +115,7 @@ public class AuthUtil {
             return ! userIds.contains(userId);
         }
         StringBuilder authSql = new StringBuilder("select count(*) from  ");
-        if(!"72crm_task".equals(tablePara.get("tableName"))){
-            authSql.append(tablePara.get("tableName")).append(" where ").append(tablePara.get("tableId")).append(" = ").append(id).append(" and create_user_id = ").append(userId);
-        }else {
+        if("72crm_task".equals(tablePara.get("tableName"))){
             List<Long> childIdList = Aop.get(AdminUserService.class).queryChileUserIds(userId, 20);
             authSql.append(tablePara.get("tableName")).append(" where ").append(tablePara.get("tableId")).append(" = ").append(id);
             if(childIdList != null && childIdList.size()>0){
@@ -128,6 +127,10 @@ public class AuthUtil {
             }else {
                 authSql.append(" and ").append(" (owner_user_id like CONCAT('%,','").append(userId).append("',',%')").append(" or main_user_id = ").append(userId).append(") ");
             }
+        }else if ("72crm_task_comment".equals(tablePara.get("tableName"))) {
+            authSql.append(tablePara.get("tableName")).append(" where ").append(tablePara.get("tableId")).append(" = ").append(id).append(" and user_id = ").append(userId);
+        }else {
+            authSql.append(tablePara.get("tableName")).append(" where ").append(tablePara.get("tableId")).append(" = ").append(id).append(" and create_user_id = ").append(userId);
         }
         return Db.queryInt(authSql.toString()) == 0;
     }
@@ -154,6 +157,10 @@ public class AuthUtil {
             case 5:
                 tableParaMap.put("tableName", "72crm_oa_examine");
                 tableParaMap.put("tableId", "examine_id");
+                break;
+            case 6:
+                tableParaMap.put("tableName", "72crm_task_comment");
+                tableParaMap.put("tableId", "comment_id");
                 break;
             default:
                 return null;
@@ -189,10 +196,10 @@ public class AuthUtil {
      * 团队成员是否有操作权限
      */
     public static boolean isRwAuth(Integer id, String realm){
-        Integer userId = BaseUtil.getUserId().intValue();
+        Long userId = BaseUtil.getUserId();
         Record record = Db.findFirst("select owner_user_id,rw_user_id from 72crm_crm_"+realm+" where "+realm+"_id = ?",id);
         String idsArr = record.getStr("rw_user_id");
-        return idsArr.contains("," + userId + ",") || userId.equals(record.getInt("owner_user_id"));
+        return idsArr.contains("," + userId + ",") || userId.equals(record.getLong("owner_user_id"));
     }
 
     /**
@@ -208,4 +215,60 @@ public class AuthUtil {
             return AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_CUSTOMER), customerId);
         }
     }
+
+    public static List<String> queryAuth(Map<String,Object> map,String key){
+        List<String> permissions=new ArrayList<>();
+        map.keySet().forEach(str->{
+            if(map.get(str) instanceof Map){
+                permissions.addAll(queryAuth((Map<String, Object>) map.get(str),key+str+":"));
+            }else {
+                permissions.add(key+str);
+            }
+        });
+        return permissions;
+    }
+    /**
+     * 拼客户管理数据权限sql
+     * @param crmEnum
+     * @return
+     */
+    public static String getCrmAuthSql(CrmEnum crmEnum, String alias, Integer readOnly) {
+        AdminUser user = BaseUtil.getUser();
+        List<Integer> roles = user.getRoles();
+        Long userId = user.getUserId();
+        if (BaseConstant.SUPER_ADMIN_USER_ID.equals(userId) || roles.contains(BaseConstant.SUPER_ADMIN_ROLE_ID) || crmEnum.equals(CrmEnum.CRM_PRODUCT) || crmEnum.equals(CrmEnum.CRM_CUSTOMER_POOL)) {
+            return "";
+        }
+        Map<String, String> tablePara = getCrmTablePara(crmEnum);
+        StringBuilder conditions = new StringBuilder();
+        List<Long> longs = Aop.get(AdminUserService.class).queryUserByAuth(userId,StrUtil.subAfter(tablePara.get("tableName"),"72crm_crm_",false));
+        if(longs != null && longs.size() > 0){
+            conditions.append(" and ({alias}owner_user_id in (").append(StrUtil.join(",", longs)).append(")");
+            boolean b = crmEnum.equals(CrmEnum.CRM_CUSTOMER) || crmEnum.equals(CrmEnum.CRM_BUSINESS) || crmEnum.equals(CrmEnum.CRM_CONTRACT);
+            if (readOnly != null && b) {
+                if (0 == readOnly) {
+                    conditions.append(" or {alias}rw_user_id like CONCAT('%,','").append(userId).append("',',%')");
+                } else if (1 == readOnly) {
+                    conditions.append(" or {alias}ro_user_id like CONCAT('%,','").append(userId).append("',',%')").append(" or {alias}rw_user_id like CONCAT('%,','").append(userId).append("',',%')");
+                }
+            }
+            conditions.append(")");
+        }
+        Map<String, String> map = new HashMap<>();
+        if (StrUtil.isEmpty(alias)){
+            map.put("alias","");
+        }else {
+            map.put("alias",alias+".");
+        }
+        return StrUtil.format(conditions.toString(),map);
+    }
+
+    public static String getCrmAuthSql(CrmEnum crmEnum, Integer readOnly) {
+        return getCrmAuthSql(crmEnum, "", readOnly);
+    }
+    public static String getCrmAuthSql(CrmEnum crmEnum,  String alias) {
+        return getCrmAuthSql(crmEnum, alias, 1);
+    }
+
+
 }

@@ -48,9 +48,6 @@ public class CrmProductService {
     @Inject
     private AdminSceneService adminSceneService;
 
-    @Inject
-    private AuthUtil authUtil;
-
     /**
      * 分页条件查询产品
      */
@@ -74,10 +71,10 @@ public class CrmProductService {
             if (product != 0){
                 return R.error("产品编号已存在，请校对后再添加！");
             }
-            crmProduct.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            crmProduct.setCreateUserId(BaseUtil.getUser().getUserId());
             crmProduct.setCreateTime(DateUtil.date());
             crmProduct.setUpdateTime(DateUtil.date());
-            crmProduct.setOwnerUserId(BaseUtil.getUser().getUserId().intValue());
+            crmProduct.setOwnerUserId(BaseUtil.getUser().getUserId());
             crmProduct.setBatchId(batchId);
             boolean save = crmProduct.save();
             crmRecordService.addRecord(crmProduct.getProductId(), CrmEnum.CRM_PRODUCT);
@@ -169,7 +166,7 @@ public class CrmProductService {
         Integer[] categoryIds = new Integer[list.size()];
         categoryIds = list.toArray(categoryIds);
         product.set("category_id",categoryIds);
-        return adminFieldService.queryUpdateField(4,product);
+        return adminFieldService.queryUpdateField(CrmEnum.CRM_PRODUCT.getType(),product);
     }
 
     /**
@@ -187,13 +184,24 @@ public class CrmProductService {
     public R getCheckingField(){
         return R.ok().put("data","产品名称");
     }
+    /**
+     * @author zxy
+     * 获取上架商品
+     */
+    public R queryByStatus(BasePageRequest<CrmProduct> basePageRequest) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.fluentPut("status",new JSONObject().fluentPut("name","status").fluentPut("condition","is").fluentPut("value","1"));
+        basePageRequest.setJsonObject(jsonObject);
+        return adminSceneService.getCrmPageList(basePageRequest);
+    }
+
 
     /**
      * 导入产品
      *
      * @author zxy
      */
-    public R uploadExcel(UploadFile file, Integer repeatHandling, Integer ownerUserId) {
+    public R uploadExcel(UploadFile file, Integer repeatHandling, Long ownerUserId) {
         ExcelReader reader = ExcelUtil.getReader(FileUtil.file(file.getUploadPath() + "\\" + file.getFileName()));
         AdminFieldService adminFieldService = new AdminFieldService();
         Kv kv = new Kv();
@@ -201,9 +209,9 @@ public class CrmProductService {
         try {
             List<List<Object>> read = reader.read();
             List<Object> list = read.get(1);
-            List<Record> recordList = adminFieldService.customFieldList("4");
+            List<Record> recordList = adminFieldService.customFieldList(CrmEnum.CRM_PRODUCT.getType());
             recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
-            List<Record> fieldList = adminFieldService.queryAddField(4);
+            List<Record> fieldList = adminFieldService.queryAddField(CrmEnum.CRM_PRODUCT);
             fieldList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
             fieldList.forEach(record -> {
                 if (record.getInt("is_null") == 1){
@@ -231,14 +239,13 @@ public class CrmProductService {
                     }
                     String productName = productList.get(kv.getInt("name")).toString();
                     Integer number = Db.queryInt("select count(*) from 72crm_crm_product where name = ?", productName);
-                    Integer categoryId = Db.queryInt("select category_id from 72crm_crm_product_category where name = ? limit 1",productList.get(kv.getInt("产品类型(*)")));
+                    Integer categoryId = Db.queryInt("select category_id from 72crm_crm_product_category where name = ? limit 1",productList.get(kv.getInt("category_id")));
                     if (categoryId == null){
-                        return R.error("第"+errNum+1+"行填写的产品类型不存在");
+                        return R.error("第"+(errNum+1)+"行填写的产品类型不存在");
                     }
                     if (0 == number) {
                         object.fluentPut("entity", new JSONObject().fluentPut("name", productName)
                                 .fluentPut("num", productList.get(kv.getInt("num")))
-                                .fluentPut("unit", productList.get(kv.getInt("unit")))
                                 .fluentPut("price", productList.get(kv.getInt("price")))
                                 .fluentPut("category_id", categoryId)
                                 .fluentPut("description", productList.get(kv.getInt("description")))
@@ -247,12 +254,11 @@ public class CrmProductService {
                         Record product = Db.findFirst("select product_id,batch_id from 72crm_crm_product where name = ?", productName);
                         boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_PRODUCT),product.getInt("product_id"));
                         if (auth){
-                            return R.error("第"+errNum+1+"行数据无操作权限，不能覆盖");
+                            return R.error("第"+(errNum+1)+"行数据无操作权限，不能覆盖");
                         }
                         object.fluentPut("entity", new JSONObject().fluentPut("product_id", product.getInt("product_id"))
                                 .fluentPut("name", productName)
                                 .fluentPut("num", productList.get(kv.getInt("num")))
-                                .fluentPut("unit", productList.get(kv.getInt("unit")))
                                 .fluentPut("price", productList.get(kv.getInt("price")))
                                 .fluentPut("category_id", categoryId)
                                 .fluentPut("description", productList.get(kv.getInt("description")))
@@ -279,15 +285,5 @@ public class CrmProductService {
             reader.close();
         }
         return R.ok();
-    }
-    /**
-     * @author zxy
-     * 获取上架商品
-     */
-    public R queryByStatus(BasePageRequest<CrmProduct> basePageRequest) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.fluentPut("status",new JSONObject().fluentPut("name","status").fluentPut("condition","is").fluentPut("value","1"));
-        basePageRequest.setJsonObject(jsonObject);
-        return adminSceneService.getCrmPageList(basePageRequest);
     }
 }

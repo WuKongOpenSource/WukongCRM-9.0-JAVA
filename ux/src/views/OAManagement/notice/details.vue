@@ -1,33 +1,38 @@
 <template>
   <create-view :body-style="{height: '100%'}">
     <div class="details-box">
-      <div slot="header"
-           class="header">
+      <div
+        slot="header"
+        class="header">
         <span class="text">公告详情</span>
-        <span class="el-icon-close rt"
-              @click="close"></span>
+        <span
+          class="el-icon-close rt"
+          @click="close"/>
       </div>
       <div class="content">
-        <div class="title">{{titleList.title}}</div>
-        <div class="time">{{titleList.createTime}}</div>
-        <div class="text">{{titleList.content}}</div>
+        <div class="title">{{ titleList.title }}</div>
+        <div class="time">{{ titleList.createTime }}</div>
+        <div class="text">{{ titleList.content }}</div>
       </div>
-      <div class="btn-box"
-           v-if="btnShow">
-        <el-button type="primary"
-                   v-if="permissionUpdate"
-                   @click="onEdit">编辑</el-button>
-        <el-button type="danger"
-                   v-if="permissionDelete"
-                   @click="deleteFun">删除</el-button>
+      <div
+        v-if="btnShow"
+        class="btn-box">
+        <el-button
+          v-if="permissionUpdate"
+          type="primary"
+          @click="onEdit">编辑</el-button>
+        <el-button
+          v-if="permissionDelete"
+          type="danger"
+          @click="deleteFun">删除</el-button>
       </div>
     </div>
-    <v-edit :formData="formData"
-            v-if="showEdit"
-            :loading="loading"
-            @editSubmit="editSubmit"
-            @editClose="editClose">
-    </v-edit>
+    <v-edit
+      v-if="showEdit"
+      :form-data="formData"
+      :loading="loading"
+      @editSubmit="editSubmit"
+      @editClose="editClose"/>
   </create-view>
 </template>
 
@@ -43,6 +48,13 @@ export default {
     CreateView,
     VEdit
   },
+  props: {
+    titleList: Object,
+    btnShow: {
+      type: Boolean,
+      default: true
+    }
+  },
   data() {
     return {
       showEdit: false,
@@ -57,13 +69,6 @@ export default {
     },
     permissionDelete() {
       return this.oa && this.oa.announcement && this.oa.announcement.delete
-    }
-  },
-  props: {
-    titleList: Object,
-    btnShow: {
-      type: Boolean,
-      default: true
     }
   },
   methods: {
@@ -118,7 +123,7 @@ export default {
           this.$message.success('公告编辑成功')
           this.loading = false
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false
           this.$message.error('公告编辑失败')
         })

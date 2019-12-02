@@ -5,26 +5,25 @@ import request from '@/utils/request'
  * count：合同数量分析；money：金额分析；back：回款金额分析
  */
 export function biAchievementAnalysisAPI(data) {
-  if(data.type==='count'){
+  if (data.type === 'count') {
     return request({
       url: 'biEmployee/contractNumStats',
       method: 'post',
       data: data
     })
-  }else if(data.type==='money'){
+  } else if (data.type === 'money') {
     return request({
       url: 'biEmployee/contractMoneyStats',
       method: 'post',
       data: data
     })
-  }else if(data.type==='back'){
+  } else if (data.type === 'back') {
     return request({
       url: 'biEmployee/receivablesMoneyStats',
       method: 'post',
       data: data
     })
   }
-
 }
 
 /**

@@ -2,64 +2,76 @@
   <div class="cr-body-content">
     <flexbox class="content-header">
       <div v-if="!isRelationShow">场景：</div>
-      <el-dropdown v-if="!isRelationShow"
-                   trigger="click"
-                   @command="handleTypeDrop">
+      <el-dropdown
+        v-if="!isRelationShow"
+        trigger="click"
+        @command="handleTypeDrop">
         <flexbox>
-          <div>{{sceneInfo ? sceneInfo.name : '请选择'}}</div>
-          <i class="el-icon-arrow-down el-icon--right"
-             style="color:#777;"></i>
+          <div>{{ sceneInfo ? sceneInfo.name : '请选择' }}</div>
+          <i
+            class="el-icon-arrow-down el-icon--right"
+            style="color:#777;"/>
         </flexbox>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item v-for="(item, index) in scenesList"
-                            :key="index"
-                            :command="item ">{{item.name}}</el-dropdown-item>
+          <el-dropdown-item
+            v-for="(item, index) in scenesList"
+            :key="index"
+            :command="item ">{{ item.name }}</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <el-input class="search-container"
-                v-model="searchContent">
-        <el-button slot="append"
-                   @click.native="searchInput"
-                   icon="el-icon-search"></el-button>
+      <el-input
+        v-model="searchContent"
+        class="search-container">
+        <el-button
+          slot="append"
+          icon="el-icon-search"
+          @click.native="searchInput"/>
       </el-input>
-      <el-button class="create-button"
-                 @click="isCreate=true"
-                 type="primary">新建</el-button>
+      <el-button
+        class="create-button"
+        type="primary"
+        @click="isCreate=true">新建</el-button>
     </flexbox>
-    <el-table class="cr-table"
-              ref="relativeTable"
-              :data="list"
-              v-loading="loading"
-              :height="250"
-              stripe
-              border
-              highlight-current-row
-              style="width: 100%"
-              @select-all="selectAll"
-              @selection-change="handleSelectionChange"
-              @row-click="handleRowClick">
-      <el-table-column show-overflow-tooltip
-                       type="selection"
-                       align="center"
-                       width="55"></el-table-column>
-      <el-table-column v-for="(item, index) in fieldList"
-                       :key="index"
-                       show-overflow-tooltip
-                       :prop="item.field"
-                       :label="item.name"
-                       :width="150"></el-table-column>
-      <el-table-column></el-table-column>
+    <el-table
+      v-loading="loading"
+      ref="relativeTable"
+      :data="list"
+      :height="250"
+      class="cr-table"
+      stripe
+      border
+      highlight-current-row
+      style="width: 100%"
+      @select-all="selectAll"
+      @selection-change="handleSelectionChange"
+      @row-click="handleRowClick">
+      <el-table-column
+        show-overflow-tooltip
+        type="selection"
+        align="center"
+        width="55"/>
+      <el-table-column
+        v-for="(item, index) in fieldList"
+        :key="index"
+        :prop="item.field"
+        :label="item.name"
+        :width="150"
+        show-overflow-tooltip/>
+      <el-table-column/>
     </el-table>
     <div class="table-footer">
-      <el-button @click.native="changePage('up')"
-                 :disabled="currentPage <= 1">上一页</el-button>
-      <el-button @click.native="changePage('down')"
-                 :disabled="currentPage >= totalPage">下一页</el-button>
+      <el-button
+        :disabled="currentPage <= 1"
+        @click.native="changePage('up')">上一页</el-button>
+      <el-button
+        :disabled="currentPage >= totalPage"
+        @click.native="changePage('down')">下一页</el-button>
     </div>
-    <c-r-m-create-view v-if="isCreate"
-                       :crm-type="crmType"
-                       @save-success="getList"
-                       @hiden-view="isCreate=false"></c-r-m-create-view>
+    <c-r-m-create-view
+      v-if="isCreate"
+      :crm-type="crmType"
+      @save-success="getList"
+      @hiden-view="isCreate=false"/>
   </div>
 </template>
 <script type="text/javascript">
@@ -78,77 +90,11 @@ import {
   crmCustomerQueryContacts
 } from '@/api/customermanagement/customer'
 
-import { getDateFromTimestamp } from '@/utils'
-import moment from 'moment'
-
 export default {
-  name: 'crm-relative-table', // 相关模块CRMCell
+  name: 'CrmRelativeTable', // 相关模块CRMCell
   components: {
     CRMCreateView: () =>
       import('@/views/customermanagement/components/CRMCreateView')
-  },
-  computed: {
-    // 展示相关效果 去除场景
-    isRelationShow() {
-      return this.action.type === 'condition'
-    }
-  },
-  watch: {
-    crmType: function(newValue, oldValue) {
-      if (newValue != oldValue) {
-        this.fieldList = []
-        this.getFieldList()
-      }
-    },
-    action: function(val) {
-      if (this.action != val) {
-        this.sceneInfo = null
-        this.list = [] // 表数据
-        this.fieldList = [] // 表头数据
-        this.currentPage = 1 // 当前页数
-        this.totalPage = 1 //总页数
-        if (!this.isRelationShow) {
-          this.getSceneList()
-        } else {
-          this.getFieldList()
-        }
-      }
-    },
-    show: {
-      handler(val) {
-        if (val && this.fieldList.length == 0) {
-          // 相关列表展示时不需要场景 直接获取展示字段
-          if (!this.isRelationShow) {
-            this.getSceneList()
-          } else {
-            this.getFieldList()
-          }
-        }
-      },
-      deep: true,
-      immediate: true
-    },
-    // 选择
-    selectedData: function() {
-      this.checkItemsWithSelectedData()
-    }
-  },
-  data() {
-    return {
-      loading: false, // 加载进度
-      searchContent: '', // 输入内容
-      isCreate: false, // 控制新建
-      scenesList: [], // 场景信息
-      sceneInfo: null,
-
-      list: [], // 表数据
-      fieldList: [], // 表头数据
-      currentPage: 1, // 当前页数
-      totalPage: 1, //总页数
-
-      otherItems: [],
-      selectedItem: [] // 勾选的数据 点击确定 传递给父组件
-    }
   },
   props: {
     show: {
@@ -184,6 +130,69 @@ export default {
           data: {}
         }
       }
+    }
+  },
+  data() {
+    return {
+      loading: false, // 加载进度
+      searchContent: '', // 输入内容
+      isCreate: false, // 控制新建
+      scenesList: [], // 场景信息
+      sceneInfo: null,
+
+      list: [], // 表数据
+      fieldList: [], // 表头数据
+      currentPage: 1, // 当前页数
+      totalPage: 1, // 总页数
+
+      otherItems: [],
+      selectedItem: [] // 勾选的数据 点击确定 传递给父组件
+    }
+  },
+  computed: {
+    // 展示相关效果 去除场景
+    isRelationShow() {
+      return this.action.type === 'condition'
+    }
+  },
+  watch: {
+    crmType: function(newValue, oldValue) {
+      if (newValue != oldValue) {
+        this.fieldList = []
+        this.getFieldList()
+      }
+    },
+    action: function(val) {
+      if (this.action != val) {
+        this.sceneInfo = null
+        this.list = [] // 表数据
+        this.fieldList = [] // 表头数据
+        this.currentPage = 1 // 当前页数
+        this.totalPage = 1 // 总页数
+        if (!this.isRelationShow) {
+          this.getSceneList()
+        } else {
+          this.getFieldList()
+        }
+      }
+    },
+    show: {
+      handler(val) {
+        if (val && this.fieldList.length == 0) {
+          // 相关列表展示时不需要场景 直接获取展示字段
+          if (!this.isRelationShow) {
+            this.getSceneList()
+          } else {
+            this.getFieldList()
+          }
+        }
+      },
+      deep: true,
+      immediate: true
+    },
+    // 选择
+    selectedData: function() {
+      this.checkItemsWithSelectedData()
     }
   },
   mounted() {},
@@ -254,7 +263,7 @@ export default {
       } else if (this.crmType === 'business') {
         return [
           { name: '商机名称', field: 'businessName', formType: 'text' },
-          { name: '商机金额', field: 'totalPrice', formType: 'text' },
+          { name: '商机金额', field: 'money', formType: 'text' },
           { name: '客户名称', field: 'customerName', formType: 'text' },
           { name: '商机状态组 ', field: 'typeName', formType: 'text' },
           { name: '状态 ', field: 'statusName', formType: 'text' }
@@ -277,8 +286,8 @@ export default {
           { name: '产品名称', field: 'name', formType: 'text' },
           { name: '单位', field: '单位', formType: 'text' },
           { name: '价格', field: 'price', formType: 'text' },
-          { name: '产品类别', field: 'categoryId', formType: 'text' },
-          { name: '状态 ', field: 'status', formType: 'text' }
+          { name: '产品类别', field: 'categoryName', formType: 'text' },
+          { name: '状态', field: '是否上下架', formType: 'text' }
         ]
       }
     },
@@ -286,7 +295,7 @@ export default {
     getList() {
       this.loading = true
       let crmIndexRequest = this.getIndexRequest()
-      let params = { search: this.searchContent }
+      const params = { search: this.searchContent }
       // 注入场景
       if (this.sceneInfo) {
         params.sceneId = this.sceneInfo.sceneId
@@ -307,7 +316,7 @@ export default {
             this.action.data.moduleType + 'Id'
           ]
           if (this.action.data.params) {
-            for (let field in this.action.data.params) {
+            for (const field in this.action.data.params) {
               params[field] = this.action.data.params[field]
             }
           }
@@ -339,12 +348,12 @@ export default {
     },
     // 标记选择数据
     checkItemsWithSelectedData() {
-      let selectedArray = this.selectedData[this.crmType].map(item => {
+      const selectedArray = this.selectedData[this.crmType].map(item => {
         item.has = false
         return item
       })
 
-      let selectedRows = []
+      const selectedRows = []
       this.otherItems = []
 
       this.list.forEach((item, index) => {
@@ -393,7 +402,7 @@ export default {
     /** 列表操作 */
     // 当某一行被点击时会触发该事件
     handleRowClick(row, column, event) {},
-    //当选择项发生变化时会触发该事件
+    // 当选择项发生变化时会触发该事件
     handleSelectionChange(val) {
       if (this.radio) {
         // this.$refs.relativeTable.clearSelection();

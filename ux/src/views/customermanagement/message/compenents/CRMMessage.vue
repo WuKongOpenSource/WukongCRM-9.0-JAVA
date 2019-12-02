@@ -1,136 +1,147 @@
 <template>
   <div class="ec-container">
-    <div class="title">{{infoTitle}}
-      <el-tooltip v-if="infoTips"
-                  effect="dark"
-                  :content="infoTips"
-                  placement="top">
-        <i class="wukong wukong-help_tips"></i>>
+    <div class="title">{{ infoTitle }}
+      <el-tooltip
+        v-if="infoTips"
+        :content="infoTips"
+        effect="dark"
+        placement="top">
+        <i class="wukong wukong-help_tips"/>>
       </el-tooltip>
     </div>
     <div class="option-bar">
       <div v-if="selectionList.length == 0">
-        <el-select v-if="showOptions"
-                   v-model="optionsType"
-                   @change="refreshList"
-                   placeholder="请选择">
-          <el-option v-for="item in options"
-                     :key="item.value"
-                     :label="item.name"
-                     :value="item.value">
-          </el-option>
+        <el-select
+          v-if="showOptions"
+          v-model="optionsType"
+          placeholder="请选择"
+          @change="refreshList">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.name"
+            :value="item.value"/>
         </el-select>
-        <el-select v-if="showSubType"
-                   v-model="isSubType"
-                   @change="refreshList"
-                   :style="{'margin-left': showOptions ? '10px' : 0}"
-                   style="width: 120px;"
-                   placeholder="请选择">
-          <el-option v-for="item in [{name: '我的', value: 1}, {name: '我下属的', value: 2}]"
-                     :key="item.value"
-                     :label="item.name"
-                     :value="item.value">
-          </el-option>
+        <el-select
+          v-if="showSubType"
+          v-model="isSubType"
+          :style="{'margin-left': showOptions ? '10px' : 0}"
+          style="width: 120px;"
+          placeholder="请选择"
+          @change="refreshList">
+          <el-option
+            v-for="item in [{name: '我的', value: 1}, {name: '我下属的', value: 2}]"
+            :key="item.value"
+            :label="item.name"
+            :value="item.value"/>
         </el-select>
-        <div v-if="showFilterView"
-             class="filtrate-button"
-             @click="getFilterFieldInfo">
-          <img class="filtrate-button-img"
-               src="@/assets/img/c_filtrate.png" />
+        <div
+          v-if="showFilterView"
+          class="filtrate-button"
+          @click="getFilterFieldInfo">
+          <img
+            class="filtrate-button-img"
+            src="@/assets/img/c_filtrate.png" >
           <span class="filtrate-button-title">高级筛选</span>
         </div>
-        <filter-form :fieldList="filterFieldList"
-                     :dialogVisible.sync="showFilter"
-                     :obj="filterObj"
-                     :crmType="crmType"
-                     :isSeas="true"
-                     @filter="handleFilter">
-        </filter-form>
+        <filter-form
+          :field-list="filterFieldList"
+          :dialog-visible.sync="showFilter"
+          :obj="filterObj"
+          :crm-type="crmType"
+          :is-seas="true"
+          @filter="handleFilter"/>
       </div>
-      <flexbox v-else
-               class="selection-bar">
-        <div class="selected—title">已选中<span class="selected—count">{{selectionList.length}}</span>项</div>
+      <flexbox
+        v-else
+        class="selection-bar">
+        <div class="selected—title">已选中<span class="selected—count">{{ selectionList.length }}</span>项</div>
         <flexbox class="selection-items-box">
-          <flexbox class="selection-item"
-                   v-for="(item, index) in selectionButtonList"
-                   :key="index"
-                   @click.native="selectionBarClick(item.type)">
-            <img class="selection-item-icon"
-                 :src="item.icon" />
-            <div class="selection-item-name">{{item.name}}</div>
+          <flexbox
+            v-for="(item, index) in selectionButtonList"
+            :key="index"
+            class="selection-item"
+            @click.native="selectionBarClick(item.type)">
+            <img
+              :src="item.icon"
+              class="selection-item-icon" >
+            <div class="selection-item-name">{{ item.name }}</div>
           </flexbox>
         </flexbox>
       </flexbox>
     </div>
-    <filter-content v-if="filterObj.form && filterObj.form.length > 0"
-                    :obj="filterObj"
-                    @delete="handleDeleteField">
-    </filter-content>
-    <el-table class="n-table--border"
-              id="crm-table"
-              v-loading="loading"
-              :data="list"
-              :height="tableHeight"
-              stripe
-              border
-              highlight-current-row
-              style="width: 100%"
-              :cell-style="cellStyle"
-              @row-click="handleRowClick"
-              @selection-change="handleSelectionChange">
-      <el-table-column v-if="showSelection"
-                       show-overflow-tooltip
-                       type="selection"
-                       align="center"
-                       width="55">
-      </el-table-column>
-      <el-table-column v-for="(item, index) in fieldList"
-                       :key="index"
-                       show-overflow-tooltip
-                       :prop="item.prop"
-                       :label="item.label"
-                       :width="item.width"
-                       :formatter="fieldFormatter">
-      </el-table-column>
-      <el-table-column :resizable="false">
-      </el-table-column>
-      <el-table-column v-if="showCheckStatus"
-                       show-overflow-tooltip
-                       prop="checkStatus"
-                       label="状态"
-                       :resizable="false"
-                       width="100"
-                       align="center"
-                       fixed="right">
-        <template slot="header"
-                  slot-scope="scope">
-          <div class="table-head-name">{{scope.column.label}}</div>
+    <filter-content
+      v-if="filterObj.form && filterObj.form.length > 0"
+      :obj="filterObj"
+      @delete="handleDeleteField"/>
+    <el-table
+      v-loading="loading"
+      id="crm-table"
+      :data="list"
+      :height="tableHeight"
+      :cell-style="cellStyle"
+      class="n-table--border"
+      stripe
+      border
+      highlight-current-row
+      style="width: 100%"
+      @row-click="handleRowClick"
+      @selection-change="handleSelectionChange">
+      <el-table-column
+        v-if="showSelection"
+        show-overflow-tooltip
+        type="selection"
+        align="center"
+        width="55"/>
+      <el-table-column
+        v-for="(item, index) in fieldList"
+        :key="index"
+        :prop="item.prop"
+        :label="item.label"
+        :width="item.width"
+        :formatter="fieldFormatter"
+        show-overflow-tooltip/>
+      <el-table-column :resizable="false"/>
+      <el-table-column
+        v-if="showCheckStatus"
+        :resizable="false"
+        show-overflow-tooltip
+        prop="checkStatus"
+        label="状态"
+        width="100"
+        align="center"
+        fixed="right">
+        <template
+          slot="header"
+          slot-scope="scope">
+          <div class="table-head-name">{{ scope.column.label }}</div>
         </template>
         <template slot-scope="scope">
-          <div class="status_button"
-               :style="getStatusStyle(scope.row.checkStatus)">
-            {{getStatusName(scope.row.checkStatus)}}
+          <div
+            :style="getStatusStyle(scope.row.checkStatus)"
+            class="status_button">
+            {{ getStatusName(scope.row.checkStatus) }}
           </div>
         </template>
       </el-table-column>
     </el-table>
     <div class="p-contianer">
-      <el-pagination class="p-bar"
-                     @size-change="handleSizeChange"
-                     @current-change="handleCurrentChange"
-                     :current-page="currentPage"
-                     :page-sizes="pageSizes"
-                     :page-size.sync="pageSize"
-                     layout="total, sizes, prev, pager, next, jumper"
-                     :total="total">
-      </el-pagination>
+      <el-pagination
+        :current-page="currentPage"
+        :page-sizes="pageSizes"
+        :page-size.sync="pageSize"
+        :total="total"
+        class="p-bar"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"/>
     </div>
 
     <!-- 相关详情页面 -->
-    <c-r-m-all-detail :visible.sync="showDview"
-                      :crmType="rowType"
-                      :id="rowID">
-    </c-r-m-all-detail>
+    <c-r-m-all-detail
+      :visible.sync="showDview"
+      :crm-type="rowType"
+      :id="rowID"/>
   </div>
 </template>
 
@@ -146,7 +157,7 @@ import CRMAllDetail from '@/views/customermanagement/components/CRMAllDetail'
 
 export default {
   /** 客户管理 的待审核系统 */
-  name: 'c-r-m-message',
+  name: 'CRMMessage',
 
   components: {
     filterForm,
@@ -155,12 +166,6 @@ export default {
   },
 
   mixins: [message_table],
-
-  watch: {
-    show() {
-      this.initTableHead()
-    }
-  },
 
   props: {
     // crm类型
@@ -207,7 +212,7 @@ export default {
       ], // 操作按钮列表
       /** 控制详情展示 */
       rowID: '', // 行信息
-      rowType: '', //详情类型
+      rowType: '', // 详情类型
       showDview: false
     }
   },
@@ -281,6 +286,12 @@ export default {
     }
   },
 
+  watch: {
+    show() {
+      this.initTableHead()
+    }
+  },
+
   mounted() {
     if (this.showOptions && this.options.length > 0) {
       this.optionsType = this.options[0].value
@@ -329,7 +340,7 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            let request = {
+            const request = {
               followLeads: crmLeadsSetFollowAPI,
               followCustomer: crmCustomerSetFollowAPI
             }[this.infoType]

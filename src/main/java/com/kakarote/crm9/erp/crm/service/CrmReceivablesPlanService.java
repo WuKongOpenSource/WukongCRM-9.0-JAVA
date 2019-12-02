@@ -4,6 +4,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Before;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.crm.entity.CrmReceivables;
@@ -33,7 +35,7 @@ public class CrmReceivablesPlanService {
         adminFieldService.save(jsonObject.getJSONArray("field"), batchId);
         if (null == crmReceivablesPlan.getPlanId()) {
             crmReceivablesPlan.setCreateTime(DateUtil.date());
-            crmReceivablesPlan.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            crmReceivablesPlan.setCreateUserId(BaseUtil.getUser().getUserId());
             crmReceivablesPlan.setFileBatch(batchId);
             CrmReceivablesPlan receivablesPlan = CrmReceivablesPlan.dao.findFirst(Db.getSql("crm.receivablesplan.queryByContractId"), crmReceivablesPlan.getContractId());
             if (receivablesPlan == null) {
@@ -56,21 +58,14 @@ public class CrmReceivablesPlanService {
      * @author wyq
      * 删除回款计划
      */
+    @Before(Tx.class)
     public R deleteByIds(String planIds){
         String[] idsArr = planIds.split(",");
         List<Record> idsList = new ArrayList<>();
         for (String id : idsArr) {
-            Integer number = Db.queryInt("select count(*) from 72crm_crm_receivables where plan_id = ?",id);
-            if (number > 0 ){
-                return R.error("该回款计划已关联回款，禁止删除");
-            }
-            Record record = new Record();
-            idsList.add(record.set("plan_id", Integer.valueOf(id)));
+            CrmReceivablesPlan.dao.deleteById(id);
         }
-        return Db.tx(() -> {
-            Db.batch(Db.getSql("crm.receivablesplan.deleteByIds"), "plan_id", idsList, 100);
-            return true;
-        }) ? R.ok() : R.error();
+        return R.ok();
     }
 
     /**

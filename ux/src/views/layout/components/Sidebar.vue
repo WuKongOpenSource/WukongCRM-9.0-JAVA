@@ -1,83 +1,100 @@
 <template>
   <div class="container">
-    <div class="create-button-container"
-         :style="{ 'padding-top': createButtonTitle != '' ? '40px' : '25px', 'background-color':backgroundColor }">
-      <el-popover v-if="createButtonTitle != ''"
-                  placement="right"
-                  :offset="addOffset"
-                  popper-class="no-padding-popover"
-                  :visible-arrow="false"
-                  trigger="hover">
-        <slot name="add"></slot>
-        <div slot="reference"
-             @click="quicklyCreate"
-             class="create-button"
-             :style="{ 'background-color': createButtonBackgroundColor }">
-          <div v-show="!buttonNameCollapse"
-               class="button-name">{{createButtonTitle}}</div>
-          <div v-show="!buttonNameCollapse"
-               class="button-line"></div>
-          <i class="button-mark"
-             :class="createButtonIcon"></i>
+    <div
+      :style="{ 'padding-top': createButtonTitle != '' ? '40px' : '25px', 'background-color':backgroundColor }"
+      class="create-button-container">
+      <el-popover
+        v-if="createButtonTitle != ''"
+        :offset="addOffset"
+        :visible-arrow="false"
+        placement="right"
+        popper-class="no-padding-popover"
+        trigger="hover">
+        <slot name="add"/>
+        <div
+          slot="reference"
+          :style="{ 'background-color': createButtonBackgroundColor }"
+          class="create-button"
+          @click="quicklyCreate">
+          <div
+            v-show="!buttonNameCollapse"
+            class="button-name">{{ createButtonTitle }}</div>
+          <div
+            v-show="!buttonNameCollapse"
+            class="button-line"/>
+          <i
+            :class="createButtonIcon"
+            class="button-mark"/>
         </div>
       </el-popover>
     </div>
-    <el-menu :default-active="activeIndex"
-             :style="{'border-right-color': backgroundColor, 'padding-top': createButtonTitle != '' ? '90px' : '40px'}"
-             class="el-menu-vertical"
-             :text-color="textColor"
-             :background-color="backgroundColor"
-             :active-text-color="activeTextColor"
-             :collapse="collapse"
-             unique-opened>
-      <template v-for="(item, index) in items"
-                v-if="!item.hidden">
-        <router-link v-if="!item.children"
-                     :key="index"
-                     :to="getFullPath(item.path)">
-          <el-menu-item :index="getFullPath(item.path)"
-                        class="menu-item-defalt"
-                        :class="{'menu-item-select': activeIndex == getFullPath(item.path)}">
-            <i class="wukong"
-               :class="'wukong-' + item.meta.icon"
-               :style="{ 'color': activeIndex == getFullPath(item.path) ? activeTextColor : textColor, fontSize: item.meta.fontSize || '16px'}"></i>
-            <span slot="title">{{item.meta.title}}</span>
-            <el-badge v-if="item.meta.num && item.meta.num > 0"
-                      :max="99"
-                      :value="item.meta.num"></el-badge>
+    <el-menu
+      :default-active="activeIndex"
+      :style="{'border-right-color': backgroundColor, 'padding-top': createButtonTitle != '' ? '90px' : '40px'}"
+      :text-color="textColor"
+      :background-color="backgroundColor"
+      :active-text-color="activeTextColor"
+      :collapse="collapse"
+      class="el-menu-vertical"
+      unique-opened>
+      <template
+        v-for="(item, index) in getShowMenu(items)">
+        <router-link
+          v-if="!item.children"
+          :key="index"
+          :to="getFullPath(item.path)">
+          <el-menu-item
+            :index="getFullPath(item.path)"
+            :class="{'menu-item-select': activeIndex == getFullPath(item.path)}"
+            class="menu-item-defalt">
+            <i
+              :class="'wukong-' + item.meta.icon"
+              :style="{ 'color': activeIndex == getFullPath(item.path) ? activeTextColor : textColor, fontSize: item.meta.fontSize || '16px'}"
+              class="wukong"/>
+            <span slot="title">{{ item.meta.title }}</span>
+            <el-badge
+              v-if="item.meta.num && item.meta.num > 0"
+              :max="99"
+              :value="item.meta.num"/>
           </el-menu-item>
         </router-link>
-        <el-submenu v-else
-                    :key="index"
-                    :index="getFullPath(item.path)">
-          <template slot="title"
-                    v-if="!item.hidden">
-            <i class="wukong"
-               :class="'wukong-' + item.meta.icon"
-               :style="{fontSize: item.meta.fontSize || '16px'}"></i>
-            <span slot="title">{{item.meta.title}}</span>
+        <el-submenu
+          v-else
+          :key="index"
+          :index="getFullPath(item.path)">
+          <template
+            v-if="!item.hidden"
+            slot="title">
+            <i
+              :class="'wukong-' + item.meta.icon"
+              :style="{fontSize: item.meta.fontSize || '16px'}"
+              class="wukong"/>
+            <span slot="title">{{ item.meta.title }}</span>
           </template>
-          <router-link v-for="(subitem, subindex) in item.children"
-                       v-if="!item.hidden"
-                       :key="subindex"
-                       :to="getFullPath(subitem.path)">
-            <el-menu-item :index="getFullPath(subitem.path)"
-                          class="menu-item-defalt"
-                          :class="{'menu-item-select': activeIndex == getFullPath(subitem.path) }">
-              {{subitem.meta.title}}
+          <router-link
+            v-for="(subitem, subindex) in getShowMenu(item.children)"
+            :key="subindex"
+            :to="getFullPath(subitem.path)">
+            <el-menu-item
+              :index="getFullPath(subitem.path)"
+              :class="{'menu-item-select': activeIndex == getFullPath(subitem.path) }"
+              class="menu-item-defalt">
+              {{ subitem.meta.title }}
             </el-menu-item>
           </router-link>
         </el-submenu>
       </template>
     </el-menu>
-    <div class="sidebar-bottom"
-         :style="{ 'background-color':backgroundColor }">
+    <div
+      :style="{ 'background-color':backgroundColor }"
+      class="sidebar-bottom">
       <div class="sidebar-container">
-        <img class="collapse-button"
-             :style="{ 'right': buttonNameCollapse ? '3px' : '0' }"
-             src="@/assets/img/collapse_white.png"
-             alt=""
-             @click="toggleSideBarClick">
+        <img
+          :style="{ 'right': buttonNameCollapse ? '3px' : '0' }"
+          class="collapse-button"
+          src="@/assets/img/collapse_white.png"
+          alt=""
+          @click="toggleSideBarClick">
       </div>
     </div>
   </div>
@@ -88,26 +105,6 @@ import { mapGetters } from 'vuex'
 
 export default {
   name: 'Sidebar',
-  data() {
-    return {
-      collapse: false, //菜单开关
-      buttonNameCollapse: false
-    }
-  },
-  watch: {
-    collapse: function(val) {
-      if (val) {
-        this.buttonNameCollapse = val
-      } else {
-        setTimeout(() => {
-          this.buttonNameCollapse = val
-        }, 300)
-      }
-    }
-  },
-  computed: {
-    ...mapGetters(['activeIndex'])
-  },
   props: {
     mainRouter: {
       type: String,
@@ -120,7 +117,9 @@ export default {
     /** 选择项目 */
     items: {
       type: Array,
-      default: []
+      default: () => {
+        return []
+      }
     },
     backgroundColor: {
       type: String,
@@ -155,6 +154,26 @@ export default {
       default: 'el-icon-arrow-right'
     }
   },
+  data() {
+    return {
+      collapse: false, // 菜单开关
+      buttonNameCollapse: false
+    }
+  },
+  computed: {
+    ...mapGetters(['activeIndex'])
+  },
+  watch: {
+    collapse: function(val) {
+      if (val) {
+        this.buttonNameCollapse = val
+      } else {
+        setTimeout(() => {
+          this.buttonNameCollapse = val
+        }, 300)
+      }
+    }
+  },
   mounted() {},
   methods: {
     toggleSideBarClick() {
@@ -168,6 +187,12 @@ export default {
 
     getFullPath(path) {
       return `/${this.mainRouter}/${path}`
+    },
+
+    getShowMenu(array) {
+      return array.filter(item => {
+        return !item.hidden
+      })
     }
   }
 }

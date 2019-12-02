@@ -27,7 +27,7 @@ public class BiService{
      * 产品销售情况统计
      * startTime 开始时间 endTime 结束时间 userId用户ID deptId部门ID
      */
-    public R queryProductSell(Date startTime, Date endTime, Integer userId, Integer deptId){
+    public R queryProductSell(Date startTime, Date endTime, Long userId, Integer deptId){
         List<Record> recordList = Db.find(Db.getSqlPara("bi.base.queryProductSell", Kv.by("startTime", startTime).set("endTime", endTime).set("userId", userId).set("deptId", deptId)));
         List<Record> productList = recordList.stream().sorted(Comparator.comparing(record -> record.getStr("productName"))).collect(Collectors.toList());
         return R.ok().put("data", productList);

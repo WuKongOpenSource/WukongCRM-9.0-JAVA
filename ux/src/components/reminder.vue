@@ -1,11 +1,13 @@
 <template>
   <flexbox class="reminder-wrapper">
-    <flexbox align="stretch"
-             class="reminder-body">
-      <i class="wukong wukong-reminder reminder-icon"></i>
-      <div class="reminder-content"
-           :style="{'font-size': fontSize + 'px'}">
-        {{content}}
+    <flexbox
+      align="stretch"
+      class="reminder-body">
+      <i class="wukong wukong-reminder reminder-icon"/>
+      <div
+        :style="{'font-size': fontSize + 'px'}"
+        class="reminder-content">
+        {{ content }}
       </div>
     </flexbox>
   </flexbox>
@@ -15,12 +17,8 @@
 // 警示信息
 
 export default {
-  name: 'reminder',
+  name: 'Reminder',
   components: {},
-  computed: {},
-  data() {
-    return {}
-  },
   props: {
     content: {
       type: String,
@@ -31,9 +29,13 @@ export default {
       default: '13'
     }
   },
+  data() {
+    return {}
+  },
+  computed: {},
   mounted() {},
-  methods: {},
-  destroyed() {}
+  destroyed() {},
+  methods: {}
 }
 </script>
 <style lang="scss" scoped>

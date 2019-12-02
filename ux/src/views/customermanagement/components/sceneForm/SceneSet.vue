@@ -1,66 +1,79 @@
 <template>
-  <el-dialog title="场景管理"
-             :visible.sync="visible"
-             @close="handleCancel"
-             :append-to-body="true"
-             width="700px">
+  <el-dialog
+    :visible.sync="visible"
+    :append-to-body="true"
+    title="场景管理"
+    width="700px"
+    @close="handleCancel">
     <div class="scene-name">您可通过拖拽管理标签</div>
     <flexbox class="scene-list">
       <div class="scene-list-box">
         <flexbox class="scene-list-head">
-          <el-checkbox :indeterminate="isleftIndeterminate"
-                       v-model="checkleftAll"
-                       @change="handleleftCheckAllChange">
-          </el-checkbox>
+          <el-checkbox
+            :indeterminate="isleftIndeterminate"
+            v-model="checkleftAll"
+            @change="handleleftCheckAllChange"/>
           <div class="scene-list-head-name">显示的标签</div>
-          <div class="scene-list-head-detail">{{leftCheckItems.length + '/' + checkedLeftData.length}}</div>
+          <div class="scene-list-head-detail">{{ leftCheckItems.length + '/' + checkedLeftData.length }}</div>
         </flexbox>
         <div class="scene-list-body">
-          <flexbox v-if="item.isSystem == 1"
-                   class="list-item"
-                   v-for="(item, index) in checkedLeftData"
-                   :key="index">
-            <div :class="{'default-mark-active': item.sceneId == defaultId}"
-                 class="default-mark"></div>
-            <el-checkbox class="list-item-check"
-                         v-model="item.check"
-                         :disabled="true"
-                         @change="leftCheckItemChange"></el-checkbox>
-            <div class="list-item-name">{{item.name}}</div>
+          <flexbox
+            v-for="(item, index) in checkedLeftData"
+            v-if="item.isSystem == 1"
+            :key="index"
+            class="list-item">
+            <div
+              :class="{'default-mark-active': item.sceneId == defaultId}"
+              class="default-mark"/>
+            <el-checkbox
+              v-model="item.check"
+              :disabled="true"
+              class="list-item-check"
+              @change="leftCheckItemChange"/>
+            <div class="list-item-name">{{ item.name }}</div>
             <div class="list-item-handle">
-              <el-dropdown @command="defaultHandle"
-                           trigger="click">
-                <i class="el-icon-arrow-down"
-                   @click="itemHandle('default', item, index)"></i>
+              <el-dropdown
+                trigger="click"
+                @command="defaultHandle">
+                <i
+                  class="el-icon-arrow-down"
+                  @click="itemHandle('default', item, index)"/>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item>设置为默认标签</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </div>
           </flexbox>
-          <draggable style="min-height: 100px;"
-                     v-model="checkedLeftData"
-                     @end="leftMoveEnd"
-                     :move="leftMove"
-                     :options="{group: 'list',forceFallback:false, fallbackClass:'draggingStyle'}">
-            <flexbox v-if="item.isSystem != 1"
-                     class="list-item"
-                     v-for="(item, index) in checkedLeftData"
-                     :key="index">
-              <div :class="{'default-mark-active': item.sceneId == defaultId}"
-                   class="default-mark"></div>
-              <el-checkbox class="list-item-check"
-                           v-model="item.check"
-                           @change="leftCheckItemChange"></el-checkbox>
-              <div class="list-item-name">{{item.name}}</div>
+          <draggable
+            v-model="checkedLeftData"
+            :move="leftMove"
+            :options="{group: 'list',forceFallback:false, fallbackClass:'draggingStyle'}"
+            style="min-height: 100px;"
+            @end="leftMoveEnd">
+            <flexbox
+              v-for="(item, index) in checkedLeftData"
+              v-if="item.isSystem != 1"
+              :key="index"
+              class="list-item">
+              <div
+                :class="{'default-mark-active': item.sceneId == defaultId}"
+                class="default-mark"/>
+              <el-checkbox
+                v-model="item.check"
+                class="list-item-check"
+                @change="leftCheckItemChange"/>
+              <div class="list-item-name">{{ item.name }}</div>
               <div class="list-item-handle">
-                <i class="el-icon-edit"
-                   @click="itemHandle('edit', item, index)"></i>
-                <i class="el-icon-delete"
-                   @click="itemHandle('delete', item, index)"></i>
+                <i
+                  class="el-icon-edit"
+                  @click="itemHandle('edit', item, index)"/>
+                <i
+                  class="el-icon-delete"
+                  @click="itemHandle('delete', item, index)"/>
                 <el-dropdown @command="defaultHandle">
-                  <i class="el-icon-arrow-down"
-                     @click="itemHandle('default', item, index)"></i>
+                  <i
+                    class="el-icon-arrow-down"
+                    @click="itemHandle('default', item, index)"/>
                   <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item>设置为默认标签</el-dropdown-item>
                   </el-dropdown-menu>
@@ -72,65 +85,72 @@
         </div>
       </div>
       <div class="scene-middle-list">
-        <el-button class="scene-middle-left-button"
-                   :class="{'scene-middle-button-select':rightCheckItems.length > 0}"
-                   @click="changePositon('left')"
-                   :disabled="rightCheckItems.length == 0">
-          <i class="el-icon-arrow-left scene-middle-icon"></i>
+        <el-button
+          :class="{'scene-middle-button-select':rightCheckItems.length > 0}"
+          :disabled="rightCheckItems.length == 0"
+          class="scene-middle-left-button"
+          @click="changePositon('left')">
+          <i class="el-icon-arrow-left scene-middle-icon"/>
         </el-button>
-        <el-button class="scene-middle-right-button"
-                   :class="{'scene-middle-button-select':leftCheckItems.length > 0}"
-                   @click="changePositon('right')"
-                   :disabled="leftCheckItems.length == 0">
-          <i class="el-icon-arrow-right scene-middle-icon"></i>
+        <el-button
+          :class="{'scene-middle-button-select':leftCheckItems.length > 0}"
+          :disabled="leftCheckItems.length == 0"
+          class="scene-middle-right-button"
+          @click="changePositon('right')">
+          <i class="el-icon-arrow-right scene-middle-icon"/>
         </el-button>
       </div>
       <div class="scene-list-box">
         <flexbox class="scene-list-head">
-          <el-checkbox :indeterminate="isrightIndeterminate"
-                       v-model="checkrightAll"
-                       @change="handlerightCheckAllChange">
-          </el-checkbox>
+          <el-checkbox
+            :indeterminate="isrightIndeterminate"
+            v-model="checkrightAll"
+            @change="handlerightCheckAllChange"/>
           <div class="scene-list-head-name">隐藏的标签</div>
-          <div class="scene-list-head-detail">{{rightCheckItems.length + '/' + checkedRightData.length}}</div>
+          <div class="scene-list-head-detail">{{ rightCheckItems.length + '/' + checkedRightData.length }}</div>
         </flexbox>
         <div class="scene-list-body">
-          <draggable style="min-height: 100px;"
-                     v-model="checkedRightData"
-                     @end="rightMoveEnd"
-                     :move="rightMove"
-                     :options="{group: 'list',forceFallback:false, fallbackClass:'draggingStyle'}">
-            <flexbox class="list-item"
-                     v-for="(item, index) in checkedRightData"
-                     :key="index">
-              <el-checkbox v-model="item.check"
-                           style="margin-left:9px;"
-                           class="list-item-check"
-                           @change="rightCheckItemChange"></el-checkbox>
-              <div class="list-item-name">{{item.name}}</div>
+          <draggable
+            v-model="checkedRightData"
+            :move="rightMove"
+            :options="{group: 'list',forceFallback:false, fallbackClass:'draggingStyle'}"
+            style="min-height: 100px;"
+            @end="rightMoveEnd">
+            <flexbox
+              v-for="(item, index) in checkedRightData"
+              :key="index"
+              class="list-item">
+              <el-checkbox
+                v-model="item.check"
+                style="margin-left:9px;"
+                class="list-item-check"
+                @change="rightCheckItemChange"/>
+              <div class="list-item-name">{{ item.name }}</div>
             </flexbox>
           </draggable>
         </div>
       </div>
     </flexbox>
     <div class="handle-bar">
-      <div class="handle-bar-add"
-           @click="addAndEditScene('add',{})">+ 新建场景</div>
+      <div
+        class="handle-bar-add"
+        @click="addAndEditScene('add',{})">+ 新建场景</div>
       <div class="handle-bar-save">
         <el-button @click.native="handleCancel">取消</el-button>
-        <el-button type="primary"
-                   @click.native="handleConfirm">保存</el-button>
+        <el-button
+          type="primary"
+          @click.native="handleConfirm">保存</el-button>
       </div>
     </div>
-    <scene-create :fieldList="fieldList"
-                  :crmType="crmType"
-                  :dialogVisible.sync="showCreateScene"
-                  :obj="filterObj"
-                  :name="filterName"
-                  :edit_id="filterEditId"
-                  :isDefault="filterDefault"
-                  @saveSuccess="getSceneList">
-    </scene-create>
+    <scene-create
+      :field-list="fieldList"
+      :crm-type="crmType"
+      :dialog-visible.sync="showCreateScene"
+      :obj="filterObj"
+      :name="filterName"
+      :edit_id="filterEditId"
+      :is-default="filterDefault"
+      @saveSuccess="getSceneList"/>
   </el-dialog>
 </template>
 
@@ -147,16 +167,27 @@ import draggable from 'vuedraggable'
 import SceneCreate from './SceneCreate' // 新建编辑场景
 
 export default {
-  name: 'scene-set', //场景 设置
+  name: 'SceneSet', // 场景 设置
   components: {
     draggable,
     SceneCreate
   },
-  computed: {},
+  props: {
+    dialogVisible: {
+      type: Boolean,
+      required: true,
+      default: false
+    },
+    /** 没有值就是全部类型 有值就是当个类型 */
+    crmType: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       defaultId: '', // 默认场景id
-      visible: false, //控制展示
+      visible: false, // 控制展示
       isleftIndeterminate: false, // 标注头部是多选框效果
       checkleftAll: false, // 关联全选操作多选框
 
@@ -169,8 +200,8 @@ export default {
       checkedRightData: [],
       rightCheckItems: [],
 
-      moveItem: {}, //移动中的item
-      handlDefaultItem: {}, //设置默认的中间item
+      moveItem: {}, // 移动中的item
+      handlDefaultItem: {}, // 设置默认的中间item
 
       /** 添加 编辑 场景 */
       showCreateScene: false, // 展示场景添加
@@ -181,6 +212,7 @@ export default {
       filterEditId: '' // 编辑id
     }
   },
+  computed: {},
   watch: {
     dialogVisible: {
       handler(val) {
@@ -191,18 +223,6 @@ export default {
       },
       deep: true,
       immediate: true
-    }
-  },
-  props: {
-    dialogVisible: {
-      type: Boolean,
-      required: true,
-      default: false
-    },
-    /** 没有值就是全部类型 有值就是当个类型 */
-    crmType: {
-      type: String,
-      default: ''
     }
   },
   mounted() {},
@@ -329,7 +349,7 @@ export default {
           if (type == 'edit') {
             this.filterObj = { form: [], obj: data.data }
             this.filterName = data.name
-            this.filterDefault = data.isDefault == 1 ? true : false
+            this.filterDefault = data.isDefault == 1
             this.filterEditId = data.sceneId.toString()
           } else {
             this.filterObj = { form: [] }
@@ -437,7 +457,7 @@ export default {
         this.isrightIndeterminate = false
       }
     },
-    //按钮操作
+    // 按钮操作
     changePositon(type) {
       var self = this
       // 从右往左

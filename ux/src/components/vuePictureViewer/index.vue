@@ -1,102 +1,121 @@
 <template>
-  <div :style="maskContainer"
-       id="vue-picture-viewer">
+  <div
+    id="vue-picture-viewer"
+    :style="maskContainer">
     <!-- 头部 -->
     <flexbox class="perview-header">
-      <div class="left">{{imgIndex + 1}} / {{imgLength}}</div>
-      <div class="center">{{bigImgName.slice(0,bigImgName.indexOf('.'))}}</div>
-      <img class="close"
-           @click="closeViewer"
-           src="./img/pre_close.png" />
+      <div class="left">{{ imgIndex + 1 }} / {{ imgLength }}</div>
+      <div class="center">{{ bigImgName.slice(0,bigImgName.indexOf('.')) }}</div>
+      <img
+        class="close"
+        src="./img/pre_close.png"
+        @click="closeViewer" >
     </flexbox>
     <!-- 图片容器 -->
-    <div class="imgContainer"
-         ref="imgContainer"
-         :style="imgContainer">
-      <img :src="bigImgUrl"
-           v-if="bigShowType.isImage"
-           ref="bigImg"
-           :style="bigImgStyle"
-           alt="">
-      <flexbox class="file-show"
-               v-if="!bigShowType.isImage">
+    <div
+      ref="imgContainer"
+      :style="imgContainer"
+      class="imgContainer">
+      <img
+        v-if="bigShowType.isImage"
+        ref="bigImg"
+        :src="bigImgUrl"
+        :style="bigImgStyle"
+        alt="">
+      <flexbox
+        v-if="!bigShowType.isImage"
+        class="file-show">
         <div class="file-icon">
-          <img :src="bigShowType.icon" />
+          <img :src="bigShowType.icon" >
         </div>
         <div class="file-handle">
           <!-- <el-button type="primary"
                      @click.native="fileHandle('online')">在线预览</el-button> -->
-          <el-button type="primary"
-                     @click.native="fileHandle('download')"
-                     plain>下载</el-button>
+          <el-button
+            type="primary"
+            plain
+            @click.native="fileHandle('download')">下载</el-button>
         </div>
       </flexbox>
       <!-- tips -->
       <transition name="fade">
-        <div v-show="showTips"
-             class="tips">{{tipsText}}</div>
+        <div
+          v-show="showTips"
+          class="tips">{{ tipsText }}</div>
       </transition>
     </div>
     <div class="fixedHandle">
       <!-- 操作按钮 -->
-      <flexbox v-if="bigShowType.isImage"
-               class="handleContainer">
-        <img @click="enlarge"
-             src="./img/pre_max.png" />
-        <img @click="reduce"
-             src="./img/pre_min.png" />
-        <img style="padding: 4.5px;"
-             @click="rotate"
-             src="./img/pre_rotate.png" />
-        <img @click="downloadImg(bigImgUrl, bigImgName)"
-             src="./img/pre_down.png" />
+      <flexbox
+        v-if="bigShowType.isImage"
+        class="handleContainer">
+        <img
+          src="./img/pre_max.png"
+          @click="enlarge" >
+        <img
+          src="./img/pre_min.png"
+          @click="reduce" >
+        <img
+          style="padding: 4.5px;"
+          src="./img/pre_rotate.png"
+          @click="rotate" >
+        <img
+          src="./img/pre_down.png"
+          @click="downloadImg(bigImgUrl, bigImgName)" >
       </flexbox>
       <!-- 缩略图容器 -->
-      <div class="thumbnailContainer"
-           v-if="imgLength > 1">
+      <div
+        v-if="imgLength > 1"
+        class="thumbnailContainer">
         <ul>
-          <li ref="thumbnailItem"
-              v-for="(item, index) in this.imgData"
-              @click="switchImgUrl(index, $event)"
-              :key="index">
-            <img :src="item.url"
-                 v-if="isShowImage(item.url)"
-                 alt="">
-            <img :src="getFileTypeIconWithSuffix(item.url)"
-                 v-if="!isShowImage(item.url)"
-                 alt="">
+          <li
+            v-for="(item, index) in imgData"
+            ref="thumbnailItem"
+            :key="index"
+            @click="switchImgUrl(index, $event)">
+            <img
+              v-if="isShowImage(item.url)"
+              :src="item.url"
+              alt="">
+            <img
+              v-if="!isShowImage(item.url)"
+              :src="getFileTypeIconWithSuffix(item.url)"
+              alt="">
           </li>
         </ul>
       </div>
     </div>
     <!-- 左边箭头 -->
-    <div class="leftArrowCon"
-         @click="handlePrev"
-         @mouseenter="enterLeft"
-         @mouseout="outLeft">
-      <img class="leftArrow"
-           v-show="leftArrowShow"
-           @click="enlarge"
-           src="./img/pre_left.png" />
+    <div
+      class="leftArrowCon"
+      @click="handlePrev"
+      @mouseenter="enterLeft"
+      @mouseout="outLeft">
+      <img
+        v-show="leftArrowShow"
+        class="leftArrow"
+        src="./img/pre_left.png"
+        @click="enlarge" >
     </div>
     <!-- 右边箭头 -->
-    <div class="rightArrowCon"
-         @click="handleNext"
-         @mouseenter="enterRight"
-         @mouseout="outRight">
-      <img class="rightArrow"
-           v-show="rightArrowShow"
-           src="./img/pre_right.png" />
+    <div
+      class="rightArrowCon"
+      @click="handleNext"
+      @mouseenter="enterRight"
+      @mouseout="outRight">
+      <img
+        v-show="rightArrowShow"
+        class="rightArrow"
+        src="./img/pre_right.png" >
     </div>
   </div>
 </template>
 
 <script>
-var env = require('zrender/lib/core/env')
 import { getMaxIndex, downloadImage } from '@/utils'
 
 export default {
-  name: 'vue-picture-viewer',
+  name: 'VuePictureViewer',
   props: {
     imgData: {
       type: Array,
@@ -122,7 +141,7 @@ export default {
       // 图片容器数据
       rotateDeg: 0,
       bigImgUrl: '',
-      bigShowType: { isImage: true, icon: '' }, //不是图片的时候 展示 icon
+      bigShowType: { isImage: true, icon: '' }, // 不是图片的时候 展示 icon
       bigImgName: '',
       imgLength: 0,
       imgIndex: 0,
@@ -188,16 +207,25 @@ export default {
 
     this.maskContainer['z-index'] = getMaxIndex()
   },
+  beforeDestroy() {
+    if (document.getElementById('vue-picture-viewer')) {
+      document
+        .getElementById('vue-picture-viewer')
+        .removeEventListener('click', e => {
+          e.stopPropagation()
+        })
+    }
+  },
   methods: {
     // init
     init() {
-      let screenW =
+      const screenW =
         document.documentElement.offsetWidth || document.body.offsetWidth
-      let screenH =
+      const screenH =
         document.documentElement.scrollHeight || document.body.scrollHeight
       this.$nextTick(function() {
         const ratio = [0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9]
-        for (let item of ratio) {
+        for (const item of ratio) {
           if (
             this.$refs.bigImg.naturalWidth * item < screenW &&
             this.$refs.bigImg.naturalHeight * item < screenH - 200
@@ -216,12 +244,10 @@ export default {
     },
     // rotate init
     rotateInit() {
-      let screenW =
-        document.documentElement.offsetWidth || document.body.offsetWidth
-      let screenH =
+      const screenH =
         document.documentElement.scrollHeight || document.body.scrollHeight
       const ratio = [0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 0.9]
-      for (let item of ratio) {
+      for (const item of ratio) {
         if (this.$refs.bigImg.naturalWidth * item < screenH - 160) {
           this.bigImgConWidth = this.$refs.bigImg.naturalWidth * item
           this.bigImgConHeight = this.$refs.bigImg.naturalHeight * item
@@ -237,9 +263,9 @@ export default {
     // 放大
     enlarge() {
       this.$nextTick(function() {
-        let screenW =
+        const screenW =
           document.documentElement.offsetWidth || document.body.offsetWidth
-        let screenH =
+        const screenH =
           document.documentElement.scrollHeight || document.body.scrollHeight
         if (
           (this.$refs.bigImg.offsetWidth >= this.$refs.bigImg.offsetHeight &&
@@ -263,7 +289,7 @@ export default {
     // 缩小
     reduce() {
       if (this.$refs.bigImg.offsetWidth > 80) {
-        /** 
+        /**
            * clientWidth = width + padding
              offsetWidth = width + padding + border  */
         this.$refs.bigImg.style.width =
@@ -365,7 +391,7 @@ export default {
     tips(msg) {
       this.showTips = true
       this.tipsText = msg
-      let _this = this
+      const _this = this
       setTimeout(function() {
         _this.showTips = false
       }, 10000)
@@ -403,7 +429,7 @@ export default {
       document.body.removeChild(a)
     },
     getShowTypeInfo(url) {
-      let temps = url ? url.split('.') : []
+      const temps = url ? url.split('.') : []
       var ext = ''
       if (temps.length > 0) {
         ext = temps[temps.length - 1]
@@ -443,7 +469,7 @@ export default {
       this.bigShowType = { isImage: isImage, icon: icon }
     },
     getFileTypeIconWithSuffix(url) {
-      let temps = url ? url.split('.') : []
+      const temps = url ? url.split('.') : []
       var ext = ''
       if (temps.length > 0) {
         ext = temps[temps.length - 1]
@@ -470,7 +496,7 @@ export default {
       return require('@/assets/img/file_unknown.png')
     },
     isShowImage(url) {
-      let temps = url ? url.split('.') : []
+      const temps = url ? url.split('.') : []
       var ext = ''
       if (temps.length > 0) {
         ext = temps[temps.length - 1]
@@ -486,15 +512,6 @@ export default {
       return array.some(item => {
         return item === string
       })
-    }
-  },
-  beforeDestroy() {
-    if (document.getElementById('vue-picture-viewer')) {
-      document
-        .getElementById('vue-picture-viewer')
-        .removeEventListener('click', e => {
-          e.stopPropagation()
-        })
     }
   }
 }

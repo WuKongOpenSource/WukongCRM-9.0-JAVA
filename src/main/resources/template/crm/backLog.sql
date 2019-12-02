@@ -6,11 +6,7 @@
   #end
 
   #sql ("setLeadsFollowup")
-  update 72crm_crm_leads set followup = 1 where leads_id in (
-    #for(i : ids)
-      #(for.index > 0 ? "," : "")#para(i)
-    #end
-  )
+    update 72crm_crm_leads set followup = 1 where leads_id in (#fori(ids))
   #end
 
   #sql ("followLeadsNum")
@@ -34,17 +30,13 @@
   #end
 
   #sql ("checkContractNum")
-  select count(*)
-  from 72crm_crm_contract as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id
-  left join 72crm_admin_examine_log as c on b.record_id = c.record_id
-  where c.examine_user = ? and a.check_status in (0,1) and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and c.is_recheck != 1
+  select  count(*) from 72crm_crm_contract as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id left join 72crm_admin_examine_log as c on b.record_id = c.record_id where c.is_recheck != 1 and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and
+   a.check_status in (0,3) and c.examine_status in (0,3) and c.examine_user = ?
   #end
 
   #sql ("checkReceivablesNum")
-  select count(*)
-  from 72crm_crm_receivables as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id
-  left join 72crm_admin_examine_log as c on b.record_id = c.record_id
-  where c.examine_user = ? and a.check_status in (0,1) and ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and c.is_recheck != 1
+    select count(*) from 72crm_crm_receivables as a inner join 72crm_admin_examine_record as b on a.examine_record_id = b.record_id left join 72crm_admin_examine_log as c on b.record_id = c.record_id where ifnull(b.examine_step_id, 1) = ifnull(c.examine_step_id, 1) and
+    a.check_status in (0,3) and c.examine_status in (0,3) and c.examine_user = ?
   #end
 
   #sql ("remindReceivablesPlanNum")
@@ -56,13 +48,13 @@
   #end
 
   #sql ("endContractNum")
-  select count(*) from 72crm_crm_contract as a inner join 72crm_crm_customer as b on a.customer_id = b.customer_id
-  where to_days(a.end_time) >= to_days(now()) and to_days(a.end_time) <= to_days(now()) + IFNULL(?,0) and a.owner_user_id = ?
+  select count(*) from 72crm_crm_contract as a
+  where a.check_status = 1 and  to_days(a.end_time) >= to_days(now()) and to_days(a.end_time) <= to_days(now()) + IFNULL(?,0) and a.owner_user_id = ?
   #end
 
   #sql ("putInPoolRemindNum")
   select count(*) from 72crm_crm_customer as a
-  where owner_user_id is not null and deal_status ='未成交' and is_lock = 0  and owner_user_id = ? and
+  where owner_user_id is not null and deal_status =0 and is_lock = 0  and owner_user_id = ? and
       ((to_days(now()) - to_days(IFNULL((
             SELECT car.create_time
             FROM 72crm_admin_record as car

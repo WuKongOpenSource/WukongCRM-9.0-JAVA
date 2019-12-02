@@ -1,32 +1,35 @@
 <template>
-  <div class="cycle-content"
-       v-loading="loading">
-    <filtrate-handle-view v-if="initView"
-                          class="filtrate-bar"
-                          moduleType="customer"
-                          @load="loading=true"
-                          @change="getDataList">
-    </filtrate-handle-view>
+  <div
+    v-loading="loading"
+    class="cycle-content">
+    <filtrate-handle-view
+      v-if="initView"
+      class="filtrate-bar"
+      module-type="customer"
+      @load="loading=true"
+      @change="getDataList"/>
     <div class="content">
       <div class="axis-content">
-        <div class="content-title">{{title}}</div>
-        <div class="axismain"
-             :id="'axismain' + type"></div>
+        <div class="content-title">{{ title }}</div>
+        <div
+          :id="'axismain' + type"
+          class="axismain"/>
       </div>
       <div class="table-content">
-        <el-table :data="list"
-                  height="400"
-                  stripe
-                  border
-                  highlight-current-row>
-          <el-table-column v-for="(item, index) in fieldList"
-                           :key="index"
-                           align="center"
-                           header-align="center"
-                           show-overflow-tooltip
-                           :prop="item.field"
-                           :label="item.name">
-          </el-table-column>
+        <el-table
+          :data="list"
+          height="400"
+          stripe
+          border
+          highlight-current-row>
+          <el-table-column
+            v-for="(item, index) in fieldList"
+            :key="index"
+            :prop="item.field"
+            :label="item.name"
+            align="center"
+            header-align="center"
+            show-overflow-tooltip/>
         </el-table>
       </div>
     </div>
@@ -43,15 +46,18 @@ import {
 } from '@/api/businessIntelligence/customer'
 
 export default {
-  name: 'cycle-view',
+  name: 'CycleView',
   components: {},
-  computed: {
-    title() {
-      return {
-        customer: '员工客户成交周期（根据合同下单时间和客户创建时间计算）',
-        address: '地区成交周期（根据合同下单时间和客户创建时间计算）',
-        product: '产品成交周期（根据合同下单时间和客户创建时间计算）'
-      }[this.type]
+  mixins: [base],
+  props: {
+    type: {
+      required: true,
+      type: String
+    }, // 'customer' 'product' 'address'
+    show: {
+      // 是否展示
+      required: true,
+      type: Boolean
     }
   },
   data() {
@@ -66,6 +72,15 @@ export default {
       initView: false // 默认没有初始化
     }
   },
+  computed: {
+    title() {
+      return {
+        customer: '员工客户成交周期（根据合同下单时间和客户创建时间计算）',
+        address: '地区成交周期（根据合同下单时间和客户创建时间计算）',
+        product: '产品成交周期（根据合同下单时间和客户创建时间计算）'
+      }[this.type]
+    }
+  },
   watch: {
     show: function(value) {
       if (value && !this.initView) {
@@ -75,18 +90,6 @@ export default {
           this.getDataList(this.postParams)
         })
       }
-    }
-  },
-  mixins: [base],
-  props: {
-    type: {
-      required: true,
-      type: String
-    }, // 'customer' 'product' 'address'
-    show: {
-      // 是否展示
-      required: true,
-      type: Boolean
     }
   },
   mounted() {
@@ -103,7 +106,7 @@ export default {
         return
       }
       this.loading = true
-      let request = {
+      const request = {
         customer: biCustomerUserCycleAPI,
         product: biCustomerProductCycleAPI,
         address: biCustomerAddressCycleAPI
@@ -111,13 +114,13 @@ export default {
       request(params)
         .then(res => {
           this.loading = false
-          if(this.type != 'customer'){
+          if (this.type != 'customer') {
             this.list = res.data
           }
-          let axisList = res.data
-          let cycleData = []
-          let dealData = []
-          let xAxis = []
+          const axisList = res.data
+          const cycleData = []
+          const dealData = []
+          const xAxis = []
           for (let index = 0; index < axisList.length; index++) {
             const element = axisList[index]
             cycleData.push(element.cycle)
@@ -138,7 +141,7 @@ export default {
         .catch(() => {
           this.loading = false
         })
-      if(this.type == 'customer'){
+      if (this.type == 'customer') {
         employeeCycleInfo(params)
           .then(res => {
             this.loading = false
@@ -149,16 +152,14 @@ export default {
             this.loading = false
           })
       }
-
-
     },
     /** 柱状图 */
     initAxis() {
-      let axisChart = echarts.init(
+      const axisChart = echarts.init(
         document.getElementById('axismain' + this.type)
       )
 
-      let option = {
+      const option = {
         color: ['#6ca2ff', '#ff7474'],
         tooltip: {
           trigger: 'axis',

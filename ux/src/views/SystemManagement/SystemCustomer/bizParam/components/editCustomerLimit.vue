@@ -1,39 +1,48 @@
 <template>
-  <el-dialog :visible.sync="visible"
-             width="550px"
-             :title="title"
-             :append-to-body="true"
-             :before-close="close">
+  <el-dialog
+    :visible.sync="visible"
+    :title="title"
+    :append-to-body="true"
+    :before-close="close"
+    width="550px">
     <div class="position-relative">
-      <flexbox class="handle-item"
-               align="stretch">
-        <div class="handle-item-name"
-             style="margin-top: 8px;">适用范围：</div>
-        <xh-struc-user-cell style="width: 100%;"
-                            :users="users"
-                            :strucs="strucs"
-                            @value-change="strcUserChange"></xh-struc-user-cell>
+      <flexbox
+        class="handle-item"
+        align="stretch">
+        <div
+          class="handle-item-name"
+          style="margin-top: 8px;">适用范围：</div>
+        <xh-struc-user-cell
+          :users="users"
+          :strucs="strucs"
+          style="width: 100%;"
+          @value-change="strcUserChange"/>
       </flexbox>
-      <flexbox class="handle-item"
-               align="stretch">
-        <div class="handle-item-name"
-             style="margin-top: 8px;">{{valueLabel}}</div>
-        <el-input v-model="customerNum"
-                  placeholder="请输入内容"></el-input>
+      <flexbox
+        class="handle-item"
+        align="stretch">
+        <div
+          class="handle-item-name"
+          style="margin-top: 8px;">{{ valueLabel }}</div>
+        <el-input
+          v-model="customerNum"
+          placeholder="请输入内容"/>
       </flexbox>
       <flexbox v-if="showDeal" class="handle-item">
-        <div class="handle-item-name">{{dealLabel}}</div>
+        <div class="handle-item-name">{{ dealLabel }}</div>
         <el-radio-group v-model="customerDeal">
           <el-radio :label="1">是</el-radio>
           <el-radio :label="0">否</el-radio>
         </el-radio-group>
       </flexbox>
     </div>
-    <span slot="footer"
-          class="dialog-footer">
+    <span
+      slot="footer"
+      class="dialog-footer">
       <el-button @click.native="close">取消</el-button>
-      <el-button type="primary"
-                 @click="sure">确 定</el-button>
+      <el-button
+        type="primary"
+        @click="sure">确 定</el-button>
     </span>
   </el-dialog>
 </template>
@@ -43,17 +52,9 @@ import { crmSettingCustomerConfigSetAPI } from '@/api/systemManagement/SystemCus
 import { XhStrucUserCell } from '@/components/CreateCom'
 
 export default {
-  name: 'edit-customer-limit',
+  name: 'EditCustomerLimit',
   components: {
     XhStrucUserCell
-  },
-  data() {
-    return {
-      customerDeal: 1,
-      customerNum: '',
-      users: [],
-      strucs: []
-    }
   },
   props: {
     types: [String, Number], // 1拥有客户上限2锁定客户上限
@@ -72,21 +73,12 @@ export default {
       }
     }
   },
-  watch: {
-    visible(val) {
-      if (val) {
-        if (this.action.type == 'save') {
-          this.clearInfo()
-        } else if (this.action.type == 'update') {
-          let data = this.action.data
-          this.customerDeal = data.customerDeal
-          this.customerNum = data.customerNum
-          this.$nextTick(() => {
-            this.users = data.userIds
-            this.strucs = data.deptIds
-          })
-        }
-      }
+  data() {
+    return {
+      customerDeal: 1,
+      customerNum: '',
+      users: [],
+      strucs: []
     }
   },
   computed: {
@@ -113,6 +105,23 @@ export default {
       return this.types == 1
     }
   },
+  watch: {
+    visible(val) {
+      if (val) {
+        if (this.action.type == 'save') {
+          this.clearInfo()
+        } else if (this.action.type == 'update') {
+          const data = this.action.data
+          this.customerDeal = data.customerDeal
+          this.customerNum = data.customerNum
+          this.$nextTick(() => {
+            this.users = data.userIds
+            this.strucs = data.deptIds
+          })
+        }
+      }
+    }
+  },
   mounted() {},
   methods: {
     close() {
@@ -128,7 +137,7 @@ export default {
       if ((!this.users.length && !this.strucs.length) || !this.customerNum) {
         this.$message.error('请完善信息')
       } else {
-        let params = {
+        const params = {
           userList: this.users.map(item => {
             return item.userId
           }),
@@ -152,7 +161,7 @@ export default {
             this.$emit('success')
             this.close()
           })
-          .catch(err => {})
+          .catch(() => {})
       }
     },
 

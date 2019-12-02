@@ -1,63 +1,76 @@
 <template>
   <div class="rc-cont">
-    <flexbox v-if="!isSeas"
-             class="rc-head"
-             direction="row-reverse">
-      <el-button class="rc-head-item"
-                 @click.native="addFile"
-                 type="primary">上传附件</el-button>
-      <input type="file"
-             id="file"
-             class="rc-head-file"
-             accept="*/*"
-             @change="uploadFile"
-             multiple>
+    <flexbox
+      v-if="!isSeas"
+      class="rc-head"
+      direction="row-reverse">
+      <el-button
+        class="rc-head-item"
+        type="primary"
+        @click.native="addFile">上传附件</el-button>
+      <input
+        id="file"
+        type="file"
+        class="rc-head-file"
+        accept="*/*"
+        multiple
+        @change="uploadFile">
     </flexbox>
-    <el-table :data="list"
-              :height="tableHeight"
-              align="center"
-              header-align="center"
-              stripe
-              style="width: 100%;border: 1px solid #E6E6E6;"
-              :header-cell-style="headerRowStyle"
-              :cell-style="cellStyle"
-              @row-click="handleRowClick">
-      <el-table-column v-for="(item, index) in fieldList"
-                       :key="index"
-                       show-overflow-tooltip
-                       :prop="item.prop"
-                       :label="item.label">
-      </el-table-column>
-      <el-table-column label="操作"
-                       width="150">
+    <el-table
+      :data="list"
+      :height="tableHeight"
+      :header-cell-style="headerRowStyle"
+      :cell-style="cellStyle"
+      align="center"
+      header-align="center"
+      stripe
+      style="width: 100%;border: 1px solid #E6E6E6;"
+      @row-click="handleRowClick">
+      <el-table-column
+        v-for="(item, index) in fieldList"
+        :key="index"
+        :prop="item.prop"
+        :label="item.label"
+        show-overflow-tooltip/>
+      <el-table-column
+        label="操作"
+        width="150">
         <template slot-scope="scope">
           <flexbox justify="center">
-            <el-button type="text"
-                       @click.native="handleFile('preview', scope)">预览</el-button>
-            <el-button type="text"
-                       @click.native="handleFile('edit', scope)">重命名</el-button>
-            <el-button type="text"
-                       @click.native="handleFile('delete', scope)">删除</el-button>
+            <el-button
+              type="text"
+              @click.native="handleFile('preview', scope)">预览</el-button>
+            <el-button
+              type="text"
+              @click.native="handleFile('edit', scope)">重命名</el-button>
+            <el-button
+              type="text"
+              @click.native="handleFile('delete', scope)">删除</el-button>
           </flexbox>
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog title="编辑"
-               width="30%"
-               :append-to-body="true"
-               :visible.sync="editDialog">
+    <el-dialog
+      :append-to-body="true"
+      :visible.sync="editDialog"
+      title="编辑"
+      width="30%">
       <el-form :model="editForm">
-        <el-form-item label="新名称"
-                      label-width="100">
-          <el-input v-model="editForm.name"
-                    autocomplete="off"></el-input>
+        <el-form-item
+          label="新名称"
+          label-width="100">
+          <el-input
+            v-model="editForm.name"
+            autocomplete="off"/>
         </el-form-item>
       </el-form>
-      <div slot="footer"
-           class="dialog-footer">
+      <div
+        slot="footer"
+        class="dialog-footer">
         <el-button @click="editDialog = false">取 消</el-button>
-        <el-button type="primary"
-                   @click="confirmEdit">确 定</el-button>
+        <el-button
+          type="primary"
+          @click="confirmEdit">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -73,27 +86,9 @@ import {
 } from '@/api/common'
 
 export default {
-  name: 'relative-files', //相关附件  可能再很多地方展示 放到客户管理目录下
+  name: 'RelativeFiles', // 相关附件  可能再很多地方展示 放到客户管理目录下
   components: {},
-  computed: {},
   mixins: [loading],
-  data() {
-    return {
-      list: [],
-      fieldList: [],
-      tableHeight: '400px',
-      /** 重命名 弹窗 */
-      editDialog: false,
-      /** 编辑信息 */
-      editForm: { name: '', data: {} }
-    }
-  },
-  watch: {
-    id: function(val) {
-      this.list = []
-      this.getDetail()
-    }
-  },
   props: {
     /** 模块ID */
     id: [String, Number],
@@ -113,6 +108,24 @@ export default {
     isSeas: {
       type: Boolean,
       default: false
+    }
+  },
+  data() {
+    return {
+      list: [],
+      fieldList: [],
+      tableHeight: '400px',
+      /** 重命名 弹窗 */
+      editDialog: false,
+      /** 编辑信息 */
+      editForm: { name: '', data: {}}
+    }
+  },
+  computed: {},
+  watch: {
+    id: function(val) {
+      this.list = []
+      this.getDetail()
     }
   },
   mounted() {
@@ -153,7 +166,6 @@ export default {
     /** 图片选择出发 */
     uploadFile(event) {
       var files = event.target.files
-      var self = this
       for (let index = 0; index < files.length; index++) {
         const file = files[index]
         // if (file.type.indexOf('image') != -1) {
@@ -171,7 +183,7 @@ export default {
 
       event.target.value = ''
     },
-    //当某一行被点击时会触发该事件
+    // 当某一行被点击时会触发该事件
     handleRowClick(row, column, event) {},
     /** 编辑删除cell */
     handleFile(type, item) {

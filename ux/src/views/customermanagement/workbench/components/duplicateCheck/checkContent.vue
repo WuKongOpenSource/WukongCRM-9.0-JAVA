@@ -1,66 +1,74 @@
 <template>
   <div class="check-container">
     <div class="condition-content">
-      <el-form label-position="top"
-               class="condition-items">
-        <el-form-item v-for="(item, index) in conditionList"
-                      :key="item.field"
-                      class="condition-item"
-                      :style="{'padding-left': getPaddingLeft(item, index), 'padding-right': getPaddingRight(item, index)}">
-          <div slot="label"
-               class="form-label">
-            {{item.name}}
-            <el-tooltip class="item"
-                        effect="dark"
-                        placement="top-start">
-              <div slot="content"
-                   style="line-height: 20px;"
-                   v-html="item.tips">
-              </div>
-              <i v-if="item.showTips"
-                 class="wukong wukong-help_tips"></i>
+      <el-form
+        label-position="top"
+        class="condition-items">
+        <el-form-item
+          v-for="(item, index) in conditionList"
+          :key="item.field"
+          :style="{'padding-left': getPaddingLeft(item, index), 'padding-right': getPaddingRight(item, index)}"
+          class="condition-item">
+          <div
+            slot="label"
+            class="form-label">
+            {{ item.name }}
+            <el-tooltip
+              class="item"
+              effect="dark"
+              placement="top-start">
+              <div
+                slot="content"
+                style="line-height: 20px;"
+                v-html="item.tips"/>
+              <i
+                v-if="item.showTips"
+                class="wukong wukong-help_tips"/>
             </el-tooltip>
           </div>
-          <el-input v-model="item.value"
-                    type="text"></el-input>
+          <el-input
+            v-model="item.value"
+            type="text"/>
         </el-form-item>
       </el-form>
-      <el-button type="primary"
-                 class="condition-button"
-                 @click="getList">查询</el-button>
+      <el-button
+        type="primary"
+        class="condition-button"
+        @click="getList">查询</el-button>
     </div>
     <div class="table-content">
-      <el-table v-loading="loading"
-                id="crm-table"
-                :data="list"
-                height="400"
-                stripe
-                border
-                highlight-current-row
-                :cell-style="cellStyle"
-                @row-click="handleRowClick"
-                style="width: 100%">
-        <el-table-column v-for="(item, index) in fieldList"
-                         :key="index"
-                         show-overflow-tooltip
-                         :prop="item.field"
-                         :label="item.name">
-        </el-table-column>
+      <el-table
+        v-loading="loading"
+        id="crm-table"
+        :data="list"
+        :cell-style="cellStyle"
+        height="400"
+        stripe
+        border
+        highlight-current-row
+        style="width: 100%"
+        @row-click="handleRowClick">
+        <el-table-column
+          v-for="(item, index) in fieldList"
+          :key="index"
+          :prop="item.field"
+          :label="item.name"
+          show-overflow-tooltip/>
       </el-table>
       <div class="p-contianer">
-        <el-pagination layout="prev, pager, next"
-                       @current-change="getList"
-                       :current-page.sync="currentPage"
-                       :total="total">
-        </el-pagination>
+        <el-pagination
+          :current-page.sync="currentPage"
+          :total="total"
+          layout="prev, pager, next"
+          @current-change="getList"/>
       </div>
     </div>
     <!-- 相关详情页面 -->
-    <c-r-m-all-detail :visible.sync="showDview"
-                      :crmType="rowType"
-                      :id="rowID"
-                      :listenerIDs="['duplicate-check-container']">
-    </c-r-m-all-detail>
+    <c-r-m-all-detail
+      :visible.sync="showDview"
+      :crm-type="rowType"
+      :id="rowID"
+      :listener-ids="['duplicate-check-container']"/>
   </div>
 </template>
 <script type="text/javascript">
@@ -72,11 +80,34 @@ import { XhInput } from '@/components/CreateCom'
 import CRMAllDetail from '@/views/customermanagement/components/CRMAllDetail'
 
 export default {
-  name: 'check-content', // 验重内容
+  name: 'CheckContent', // 验重内容
 
   components: {
     XhInput,
     CRMAllDetail
+  },
+
+  props: {
+    type: {
+      required: true,
+      type: String
+    }
+  },
+
+  data() {
+    return {
+      // 条件数组
+      conditionList: this.getConditionList(),
+      currentPage: 1,
+      total: 1,
+      loading: false,
+      list: [],
+
+      /** 控制详情展示 */
+      rowID: '', // 行信息
+      rowType: '', // 详情类型
+      showDview: false
+    }
   },
 
   computed: {
@@ -105,36 +136,14 @@ export default {
 
   watch: {},
 
-  data() {
-    return {
-      // 条件数组
-      conditionList: this.getConditionList(),
-      currentPage: 1,
-      total: 1,
-      loading: false,
-      list: [],
-
-      /** 控制详情展示 */
-      rowID: '', // 行信息
-      rowType: '', //详情类型
-      showDview: false
-    }
-  },
-
-  props: {
-    type: {
-      required: true,
-      type: String
-    }
-  },
-
   mounted() {},
+  destroyed() {},
 
   methods: {
     /** 获取列表数据 */
     getList() {
       this.loading = true
-      let params = {
+      const params = {
         page: this.currentPage,
         limit: 10,
         types: 'crm_' + this.type
@@ -149,7 +158,7 @@ export default {
       }
 
       if (pass) {
-        let request = {
+        const request = {
           customer: crmCustomerQueryListAPI,
           contacts: crmContactsQueryListAPI,
           leads: crmLeadsQueryListAPI
@@ -184,11 +193,11 @@ export default {
      * 获取条件数组信息
      */
     getConditionList() {
-      let customerTips = `为确保客户信息安全性，客户名称字段增加了防作弊机制，以<br />
+      const customerTips = `为确保客户信息安全性，客户名称字段增加了防作弊机制，以<br />
                 下关键词为禁搜关键词：<br />
                 1.省、市名；<br />
                 2.中国、公司、有限公司、有限责任公司、股份有限公司；`
-      let leadsTips = `为确保客户信息安全性，线索名称字段增加了防作弊机制，以<br />
+      const leadsTips = `为确保客户信息安全性，线索名称字段增加了防作弊机制，以<br />
                 下关键词为禁搜关键词：<br />
                 1.省、市名；<br />
                 2.中国、公司、有限公司、有限责任公司、股份有限公司；`
@@ -260,8 +269,7 @@ export default {
         return ''
       }
     }
-  },
-  destroyed() {}
+  }
 }
 </script>
 <style lang="scss" scoped>

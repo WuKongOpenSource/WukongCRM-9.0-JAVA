@@ -1,113 +1,125 @@
 <template>
   <transition name="opacity-fade">
-    <div class="container"
-         :style="{'padding': padding+' 0', 'z-index': zIndex }">
+    <div
+      :style="{'padding': padding+' 0', 'z-index': zIndex }"
+      class="container">
       <div class="content">
-        <div class="header"
-             @click="showDview = false">
-          <span class="title">{{title}}</span>
-          <el-input v-if="placeholder"
-                    class="search-input"
-                    :placeholder="placeholder"
-                    v-model="inputContent"
-                    @keyup.enter.native="searchInput">
-            <el-button slot="append"
-                       @click.native="searchInput"
-                       icon="el-icon-search"></el-button>
+        <div
+          class="header"
+          @click="showDview = false">
+          <span class="title">{{ title }}</span>
+          <el-input
+            v-if="placeholder"
+            :placeholder="placeholder"
+            v-model="inputContent"
+            class="search-input"
+            @keyup.enter.native="searchInput">
+            <el-button
+              slot="append"
+              icon="el-icon-search"
+              @click.native="searchInput"/>
           </el-input>
-          <img @click="hideView"
-               class="close"
-               src="@/assets/img/task_close.png" />
+          <img
+            class="close"
+            src="@/assets/img/task_close.png"
+            @click="hideView" >
         </div>
         <div class="list-body">
-          <el-table id="crm-table"
-                    v-loading="loading"
-                    :data="list"
-                    :height="tableHeight"
-                    stripe
-                    border
-                    highlight-current-row
-                    style="width: 100%"
-                    :cell-style="cellStyle"
-                    @row-click="handleRowClick"
-                    @sort-change="sortChange">
-            <el-table-column v-for="(item, index) in showFieldList"
-                             :key="index"
-                             :sortable="sortable"
-                             show-overflow-tooltip
-                             :fixed="index==0"
-                             :prop="item.prop"
-                             :label="item.label"
-                             :width="item.width"
-                             :formatter="fieldFormatter">
-              <template slot="header"
-                        slot-scope="scope">
-                <div class="table-head-name">{{scope.column.label}}</div>
+          <el-table
+            v-loading="loading"
+            id="crm-table"
+            :data="list"
+            :height="tableHeight"
+            :cell-style="cellStyle"
+            stripe
+            border
+            highlight-current-row
+            style="width: 100%"
+            @row-click="handleRowClick"
+            @sort-change="sortChange">
+            <el-table-column
+              v-for="(item, index) in showFieldList"
+              :key="index"
+              :sortable="sortable"
+              :fixed="index==0"
+              :prop="item.prop"
+              :label="item.label"
+              :width="item.width"
+              :formatter="fieldFormatter"
+              show-overflow-tooltip>
+              <template
+                slot="header"
+                slot-scope="scope">
+                <div class="table-head-name">{{ scope.column.label }}</div>
               </template>
             </el-table-column>
-            <el-table-column v-if="showPoolDayField"
-                             prop="poolDay"
-                             show-overflow-tooltip
-                             :resizable='false'
-                             label="距进入公海天数"
-                             width="120">
+            <el-table-column
+              v-if="showPoolDayField"
+              :resizable="false"
+              prop="poolDay"
+              show-overflow-tooltip
+              label="距进入公海天数"
+              width="120">
               <template slot-scope="scope">
-                <div v-if="scope.row.isLock == 0">{{scope.row.poolDay}}</div>
-                <i v-else
-                   class="wukong wukong-lock customer-lock"></i>
+                <div v-if="scope.row.isLock == 0">{{ scope.row.poolDay }}</div>
+                <i
+                  v-else
+                  class="wukong wukong-lock customer-lock"/>
               </template>
             </el-table-column>
-            <el-table-column v-if="showExamineStatus"
-                             show-overflow-tooltip
-                             prop="checkStatus"
-                             label="状态"
-                             :resizable="false"
-                             width="100"
-                             align="center"
-                             fixed="right">
-              <template slot="header"
-                        slot-scope="scope">
-                <div class="table-head-name">{{scope.column.label}}</div>
+            <el-table-column
+              v-if="showExamineStatus"
+              :resizable="false"
+              show-overflow-tooltip
+              prop="checkStatus"
+              label="状态"
+              width="100"
+              align="center"
+              fixed="right">
+              <template
+                slot="header"
+                slot-scope="scope">
+                <div class="table-head-name">{{ scope.column.label }}</div>
               </template>
               <template slot-scope="scope">
-                <div class="status_button"
-                     :style="getStatusStyle(scope.row.checkStatus)">
-                  {{scope.row.checkStatus}}
+                <div
+                  :style="getStatusStyle(scope.row.checkStatus)"
+                  class="status_button">
+                  {{ scope.row.checkStatus }}
                 </div>
               </template>
             </el-table-column>
-            <el-table-column v-if="showFillColumn">
-            </el-table-column>
+            <el-table-column v-if="showFillColumn"/>
           </el-table>
-          <div class="p-contianer"
-               v-if="showPagination">
-            <el-pagination class="p-bar"
-                           @size-change="handleSizeChange"
-                           @current-change="handleCurrentChange"
-                           :current-page="currentPage"
-                           :page-sizes="pageSizes"
-                           :page-size.sync="pageSize"
-                           layout="total, sizes, prev, pager, next, jumper"
-                           :total="total">
-            </el-pagination>
+          <div
+            v-if="showPagination"
+            class="p-contianer">
+            <el-pagination
+              :current-page="currentPage"
+              :page-sizes="pageSizes"
+              :page-size.sync="pageSize"
+              :total="total"
+              class="p-bar"
+              layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"/>
           </div>
         </div>
       </div>
       <!-- 相关详情页面 -->
-      <c-r-m-all-detail :visible.sync="showDview"
-                        :crmType="rowType"
-                        :id="rowID"
-                        @handle="handleHandle"
-                        class="d-view">
-      </c-r-m-all-detail>
+      <c-r-m-all-detail
+        :visible.sync="showDview"
+        :crm-type="rowType"
+        :id="rowID"
+        class="d-view"
+        @handle="handleHandle"/>
 
-      <record-list v-if="recordShow"
-                   :crmType="rowType"
-                   :params="recordParams"
-                   @handle="getList"
-                   @hide="recordShow = false">
-
-      </record-list>
+      <record-list
+        v-if="recordShow"
+        :crm-type="rowType"
+        :params="recordParams"
+        @handle="getList"
+        @hide="recordShow = false"/>
     </div>
   </transition>
 </template>
@@ -117,16 +129,59 @@ import crmTypeModel from '@/views/customermanagement/model/crmTypeModel'
 import { getMaxIndex } from '@/utils/index'
 import { mapGetters } from 'vuex'
 import Lockr from 'lockr'
-import { getDateFromTimestamp } from '@/utils'
-import moment from 'moment'
 import CRMAllDetail from '@/views/customermanagement/components/CRMAllDetail'
 import RecordList from './components/recordList'
 
 export default {
-  name: 'report-list', // 简报列表
+  name: 'ReportList', // 简报列表
   components: {
     CRMAllDetail,
     RecordList
+  },
+  props: {
+    /** 展示内容的上下padding */
+    padding: {
+      type: String,
+      default: '0'
+    },
+    title: String,
+    placeholder: {
+      type: String,
+      default: '请输入搜索内容'
+    },
+    crmType: String,
+    fieldList: Array,
+    request: {
+      type: Function,
+      required: true
+    },
+    params: Object
+  },
+  data() {
+    return {
+      zIndex: getMaxIndex(),
+      inputContent: '',
+
+      loading: false, // 加载动画
+      tableHeight: document.documentElement.clientHeight - 115, // 表的高度
+      list: [],
+      showFieldList: [],
+      sortData: {}, // 字段排序
+      currentPage: 1,
+      pageSize: Lockr.get('crmPageSizes') || 15,
+      pageSizes: [15, 30, 60, 100],
+      total: 0,
+
+      /** 控制详情展示 */
+      rowID: '', // 行信息
+      rowType: '', // 详情类型
+      showDview: false,
+      /** 格式化规则 */
+      formatterRules: {},
+
+      recordParams: {},
+      recordShow: false
+    }
   },
   computed: {
     ...mapGetters(['crm', 'CRMConfig']),
@@ -162,51 +217,6 @@ export default {
     }
   },
   watch: {},
-  data() {
-    return {
-      zIndex: getMaxIndex(),
-      inputContent: '',
-
-      loading: false, // 加载动画
-      tableHeight: document.documentElement.clientHeight - 115, // 表的高度
-      list: [],
-      showFieldList: [],
-      sortData: {}, // 字段排序
-      currentPage: 1,
-      pageSize: Lockr.get('crmPageSizes') || 15,
-      pageSizes: [15, 30, 60, 100],
-      total: 0,
-
-      /** 控制详情展示 */
-      rowID: '', // 行信息
-      rowType: '', //详情类型
-      showDview: false,
-      /** 格式化规则 */
-      formatterRules: {},
-
-      recordParams: {},
-      recordShow: false
-    }
-  },
-  props: {
-    /** 展示内容的上下padding */
-    padding: {
-      type: String,
-      default: '0'
-    },
-    title: String,
-    placeholder: {
-      type: String,
-      default: '请输入搜索内容'
-    },
-    crmType: String,
-    fieldList: Array,
-    request: {
-      type: Function,
-      required: true
-    },
-    params: Object
-  },
   mounted() {
     document.body.appendChild(this.$el)
 
@@ -218,6 +228,13 @@ export default {
       this.getList()
     } else {
       this.getFieldList()
+    }
+  },
+
+  destroyed() {
+    // remove DOM node after destroy
+    if (this.$el && this.$el.parentNode) {
+      this.$el.parentNode.removeChild(this.$el)
     }
   },
   methods: {
@@ -267,7 +284,7 @@ export default {
     getFieldList() {
       if (this.showFieldList.length == 0) {
         this.loading = true
-        let crmType =
+        const crmType =
           this.crmType == 'business_status' ? 'business' : this.crmType
         var params = {
           label: crmTypeModel[crmType]
@@ -533,13 +550,6 @@ export default {
      */
     hideView() {
       this.$emit('hide')
-    }
-  },
-
-  destroyed() {
-    // remove DOM node after destroy
-    if (this.$el && this.$el.parentNode) {
-      this.$el.parentNode.removeChild(this.$el)
     }
   }
 }

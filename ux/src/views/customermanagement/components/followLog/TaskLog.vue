@@ -2,27 +2,30 @@
   <div v-loading="loading">
     <div v-empty="list.length === 0">
       <div class="log-items">
-        <task-cell v-for="(item, index) in list"
-                   :data="item"
-                   :dataIndex="index"
-                   :key="index"
-                   @on-handle="taskCellHandle"></task-cell>
+        <task-cell
+          v-for="(item, index) in list"
+          :data="item"
+          :data-index="index"
+          :key="index"
+          @on-handle="taskCellHandle"/>
         <div class="load">
-          <el-button type="text"
-                     :loading="loadMoreLoading">{{loadMoreLoading ? '加载更多' : '没有更多了'}}</el-button>
+          <el-button
+            :loading="loadMoreLoading"
+            type="text">{{ loadMoreLoading ? '加载更多' : '没有更多了' }}</el-button>
         </div>
       </div>
     </div>
     <!-- 详情 -->
-    <div v-if="taskDetailShow"
-         ref="taskShade"
-         class="full-container">
-      <particulars class="d-view"
-                   :id="taskID"
-                   :detailIndex="detailIndex"
-                   @on-handle="detailHandle"
-                   @close="closeBtn">
-      </particulars>
+    <div
+      v-if="taskDetailShow"
+      ref="taskShade"
+      class="full-container">
+      <particulars
+        :id="taskID"
+        :detail-index="detailIndex"
+        class="d-view"
+        @on-handle="detailHandle"
+        @close="closeBtn"/>
     </div>
   </div>
 </template>
@@ -36,12 +39,13 @@ import { getMaxIndex } from '@/utils'
 
 export default {
   /** 任务 跟进记录*/
-  name: 'task-log',
+  name: 'TaskLog',
   components: {
     TaskCell,
     Particulars: () =>
       import('@/views/OAManagement/task/components/particulars')
   },
+  mixins: [listTaskDetail],
   props: {
     /** 模块ID */
     id: [String, Number],
@@ -49,12 +53,6 @@ export default {
     crmType: {
       type: String,
       default: ''
-    }
-  },
-  mixins: [listTaskDetail],
-  watch: {
-    id: function(val) {
-      this.refreshList()
     }
   },
   data() {
@@ -67,12 +65,17 @@ export default {
     }
   },
   computed: {},
+  watch: {
+    id: function(val) {
+      this.refreshList()
+    }
+  },
   mounted() {
     // 分批次加载
-    let dom = document.getElementById('follow-log-content')
+    const dom = document.getElementById('follow-log-content')
     dom.onscroll = () => {
-      let scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
-      //滚动条到底部的条件
+      const scrollOff = dom.scrollTop + dom.clientHeight - dom.scrollHeight
+      // 滚动条到底部的条件
       if (Math.abs(scrollOff) < 10 && this.loadMoreLoading == true) {
         if (!this.isPost) {
           this.isPost = true
@@ -91,11 +94,11 @@ export default {
   methods: {
     getList() {
       this.loading = true
-      let params = { page: this.page, limit: 10 }
+      const params = { page: this.page, limit: 10 }
       params[this.crmType + 'Ids'] = this.id
       crmQueryTaskRelation(params)
         .then(res => {
-          for (let item of res.data.list) {
+          for (const item of res.data.list) {
             if (item.dataInfo.status == 5) {
               item.dataInfo.checked = true
             }

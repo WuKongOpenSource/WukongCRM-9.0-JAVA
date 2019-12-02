@@ -1,23 +1,31 @@
 <template>
-  <el-select style="width: 100%;"
-             v-model="dataValue"
-             :disabled="disabled"
-             @change="valueChange"
-             placeholder="请选择">
-    <el-option v-for="(item, index) in option"
-               :key="index"
-               :label="item.name"
-               :value="item.value">
-    </el-option>
+  <el-select
+    v-model="dataValue"
+    :disabled="disabled"
+    style="width: 100%;"
+    placeholder="请选择"
+    @change="valueChange">
+    <el-option
+      v-for="(item, index) in option"
+      :key="index"
+      :label="item.name"
+      :value="item.value"/>
   </el-select>
 </template>
 <script type="text/javascript">
 import stringMixin from './stringMixin'
 
 export default {
-  name: 'xh-select', // 新建 select
+  name: 'XhSelect', // 新建 select
   components: {},
   mixins: [stringMixin],
+  props: {},
+  data() {
+    return {
+      option: []
+    }
+  },
+  computed: {},
   watch: {
     item: {
       handler(val) {
@@ -51,13 +59,6 @@ export default {
       immediate: true
     }
   },
-  computed: {},
-  data() {
-    return {
-      option: []
-    }
-  },
-  props: {},
   mounted() {},
   methods: {}
 }

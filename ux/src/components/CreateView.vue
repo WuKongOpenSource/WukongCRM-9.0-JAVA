@@ -1,13 +1,15 @@
 <template>
   <transition name="opacity-fade">
-    <div class="c-view"
-         :style="{ 'background-color': backgroundColor, 'padding': padding+' 0', 'z-index': zIndex }">
-      <el-card v-loading="loading"
-               class="crm-create-card-container"
-               :style="{ 'width': width}"
-               :body-style="bodyStyle">
-        <slot name="header"></slot>
-        <slot></slot>
+    <div
+      :style="{ 'background-color': backgroundColor, 'padding': padding+' 0', 'z-index': zIndex }"
+      class="c-view">
+      <el-card
+        v-loading="loading"
+        :style="{ 'width': width}"
+        :body-style="bodyStyle"
+        class="crm-create-card-container">
+        <slot name="header"/>
+        <slot/>
       </el-card>
     </div>
   </transition>
@@ -16,16 +18,8 @@
 import { getMaxIndex } from '@/utils/index'
 
 export default {
-  name: 'create-view', // 所有新建效果的view
+  name: 'CreateView', // 所有新建效果的view
   components: {},
-  computed: {},
-  watch: {},
-  data() {
-    return {
-      zIndex: getMaxIndex(),
-      loadingObj: null
-    }
-  },
   props: {
     bodyStyle: {
       type: Object,
@@ -37,7 +31,7 @@ export default {
       type: Boolean,
       default: false
     },
-    //更改背景颜色颜色
+    // 更改背景颜色颜色
     backgroundColor: {
       type: String,
       default: '#F5F6F9' // rgba(0, 0, 0, 0.6) 黑色半透明
@@ -53,6 +47,14 @@ export default {
       default: '40px'
     }
   },
+  data() {
+    return {
+      zIndex: getMaxIndex(),
+      loadingObj: null
+    }
+  },
+  computed: {},
+  watch: {},
   mounted() {},
   methods: {}
 }

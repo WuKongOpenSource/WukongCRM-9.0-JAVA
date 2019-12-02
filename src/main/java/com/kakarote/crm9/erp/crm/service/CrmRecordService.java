@@ -10,6 +10,7 @@ import com.jfinal.aop.Inject;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Model;
 import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.TableMapping;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
  *
  * @author hmb
  */
-public class CrmRecordService<T>{
+public class CrmRecordService<T extends Model>{
 
     @Inject
     private AdminFileService adminFileService;
@@ -62,50 +63,15 @@ public class CrmRecordService<T>{
      * @param newObj  新对象
      * @param crmEnum 类型
      */
+    @SuppressWarnings("unchecked")
     void updateRecord(T oldObj, T newObj, CrmEnum crmEnum){
         init();
         CrmActionRecord crmActionRecord = new CrmActionRecord();
-        crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId());
         crmActionRecord.setCreateTime(new Date());
-        switch(crmEnum){
-            case CRM_PRODUCT:
-                searchChange(textList, ((CrmProduct) oldObj)._getAttrsEntrySet(), ((CrmProduct) newObj)._getAttrsEntrySet(), crmEnum.getType() + "");
-                crmActionRecord.setTypes(crmEnum.getType() + "");
-                crmActionRecord.setActionId(((CrmProduct) oldObj).getProductId());
-                break;
-            case CRM_CONTACTS:
-                searchChange(textList, ((CrmContacts) oldObj)._getAttrsEntrySet(), ((CrmContacts) newObj)._getAttrsEntrySet(), crmEnum.getType() + "");
-                crmActionRecord.setTypes(crmEnum.getType() + "");
-                crmActionRecord.setActionId(((CrmContacts) oldObj).getContactsId());
-                break;
-            case CRM_CUSTOMER:
-                searchChange(textList, ((CrmCustomer) oldObj)._getAttrsEntrySet(), ((CrmCustomer) newObj)._getAttrsEntrySet(), crmEnum.getType() + "");
-                crmActionRecord.setTypes(crmEnum.getType() + "");
-                crmActionRecord.setActionId(((CrmCustomer) oldObj).getCustomerId());
-                break;
-            case CRM_LEADS:
-                searchChange(textList, ((CrmLeads) oldObj)._getAttrsEntrySet(), ((CrmLeads) newObj)._getAttrsEntrySet(), crmEnum.getType() + "");
-                crmActionRecord.setTypes(crmEnum.getType() + "");
-                crmActionRecord.setActionId(((CrmLeads) oldObj).getLeadsId());
-                break;
-            case CRM_CONTRACT:
-                searchChange(textList, ((CrmContract) oldObj)._getAttrsEntrySet(), ((CrmContract) newObj)._getAttrsEntrySet(), crmEnum.getType() + "");
-                crmActionRecord.setTypes(crmEnum.getType() + "");
-                crmActionRecord.setActionId(((CrmContract) oldObj).getContractId());
-                break;
-            case CRM_RECEIVABLES:
-                searchChange(textList, ((CrmReceivables) oldObj)._getAttrsEntrySet(), ((CrmReceivables) newObj)._getAttrsEntrySet(), crmEnum.getType() + "");
-                crmActionRecord.setTypes(crmEnum.getType() + "");
-                crmActionRecord.setActionId(((CrmReceivables) oldObj).getReceivablesId());
-                break;
-            case CRM_BUSINESS:
-                searchChange(textList, ((CrmBusiness) oldObj)._getAttrsEntrySet(), ((CrmBusiness) newObj)._getAttrsEntrySet(), crmEnum.getType() + "");
-                crmActionRecord.setTypes(crmEnum.getType() + "");
-                crmActionRecord.setActionId(((CrmBusiness) oldObj).getBusinessId());
-                break;
-            default:
-                break;
-        }
+        searchChange(textList, oldObj._getAttrsEntrySet(), (newObj)._getAttrsEntrySet(), crmEnum.getType() + "");
+        crmActionRecord.setTypes(crmEnum.getType() + "");
+        crmActionRecord.setActionId(oldObj.getInt(TableMapping.me().getTable(oldObj.getClass()).getPrimaryKey()[0]));
         crmActionRecord.setContent(JSON.toJSONString(textList));
         if(textList.size() > 0){
             crmActionRecord.save();
@@ -115,7 +81,7 @@ public class CrmRecordService<T>{
 
     public void addRecord(Integer actionId, CrmEnum crmEnum){
         CrmActionRecord crmActionRecord = new CrmActionRecord();
-        crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId());
         crmActionRecord.setCreateTime(new Date());
         crmActionRecord.setTypes(crmEnum.getType() + "");
         crmActionRecord.setActionId(actionId);
@@ -207,12 +173,11 @@ public class CrmRecordService<T>{
      * 添加转移记录
      *
      * @param actionId
-     * @param crmTypes
      */
-    public void addConversionRecord(Integer actionId, CrmEnum crmEnum, Integer userId){
+    public void addConversionRecord(Integer actionId, CrmEnum crmEnum, Long userId){
         String name = Db.queryStr("select realname from 72crm_admin_user where user_id = ?", userId);
         CrmActionRecord crmActionRecord = new CrmActionRecord();
-        crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId());
         crmActionRecord.setCreateTime(new Date());
         crmActionRecord.setTypes(crmEnum.getType() + "");
         crmActionRecord.setActionId(actionId);
@@ -227,7 +192,7 @@ public class CrmRecordService<T>{
      */
     public void addIsLockRecord(String[] ids, String crmTypes, Integer isLock){
         CrmActionRecord crmActionRecord = new CrmActionRecord();
-        crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId());
         crmActionRecord.setCreateTime(new Date());
         crmActionRecord.setTypes(crmTypes);
         ArrayList<String> strings = new ArrayList<>();
@@ -252,7 +217,7 @@ public class CrmRecordService<T>{
      */
     public void addConversionCustomerRecord(Integer actionId, String crmTypes, String name){
         CrmActionRecord crmActionRecord = new CrmActionRecord();
-        crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+        crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId());
         crmActionRecord.setCreateTime(new Date());
         crmActionRecord.setTypes(crmTypes);
         crmActionRecord.setActionId(actionId);
@@ -265,15 +230,13 @@ public class CrmRecordService<T>{
     /**
      * 放入公海
      *
-     * @param actionIds
-     * @param crmTypes
      */
     public void addPutIntoTheOpenSeaRecord(Collection actionIds, String crmTypes){
         CrmActionRecord crmActionRecord = new CrmActionRecord();
         if(BaseUtil.getRequest() == null){
-            crmActionRecord.setCreateUserId(BaseConstant.SUPER_ADMIN_USER_ID.intValue());
+            crmActionRecord.setCreateUserId(BaseConstant.SUPER_ADMIN_USER_ID);
         }else{
-            crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId());
         }
         crmActionRecord.setCreateTime(new Date());
         crmActionRecord.setTypes(crmTypes);
@@ -291,8 +254,6 @@ public class CrmRecordService<T>{
     /**
      * 添加分配客户记录
      *
-     * @param actionId
-     * @param crmTypes
      */
     public void addDistributionRecord(String actionId, String crmTypes, Long userId){
         for(String id : actionId.split(",")){
@@ -302,7 +263,7 @@ public class CrmRecordService<T>{
             ArrayList<String> strings = new ArrayList<>();
             String name = Db.queryStr("select realname from 72crm_admin_user where user_id = ?", userId);
             CrmActionRecord crmActionRecord = new CrmActionRecord();
-            crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId());
             crmActionRecord.setCreateTime(new Date());
             crmActionRecord.setTypes(crmTypes);
             crmActionRecord.setActionId(Integer.valueOf(id));

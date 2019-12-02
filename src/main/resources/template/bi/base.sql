@@ -55,7 +55,7 @@
       LEFT JOIN 72crm_admin_user as sau on sau.user_id = scc.owner_user_id
       LEFT JOIN 72crm_crm_customer as sccu on sccu.customer_id = scc.customer_id
 		  LEFT JOIN 72crm_crm_product_category as scpc on scpc.category_id = scp.category_id
-      where 1 = 1
+      where 1 = 1 and scc.check_status != 6
       #if(startTime)
         and unix_timestamp(#para(startTime)) - unix_timestamp(scc.order_date) < 0
       #end
@@ -65,12 +65,12 @@
       #if(userId)
         and sau.user_id = #para(userId)
       #end
-      #if(deptId)
+      #if(deptId && userId==null )
         and sau.dept_id = #para(deptId)
       #end
    #end
   #sql("salesTrend")
-    select #para(beginTime) as type,IFNULL(SUM(money),0) as contractMoneys, (SELECT IFNULL(SUM(money),0) FROM 72crm_crm_receivables WHERE DATE_FORMAT( return_time,#para(sqlDateFormat) ) = #para(beginTime)  and check_status = 2 AND owner_user_id in (#for(x:userIds) #(for.index == 0 ? "" : ",") #para(x) #end)) as receivablesMoneys FROM 72crm_crm_contract as ccco where DATE_FORMAT(ccco.order_date,#para(sqlDateFormat))=#para(beginTime) and ccco.check_status = 2 AND owner_user_id in (#for(x:userIds) #(for.index == 0 ? "" : ",") #para(x) #end)
+    select #para(beginTime) as type,IFNULL(SUM(money),0) as contractMoneys, (SELECT IFNULL(SUM(money),0) FROM 72crm_crm_receivables WHERE DATE_FORMAT( return_time,#para(sqlDateFormat) ) = #para(beginTime)  and check_status = 1 AND owner_user_id in (#for(x:userIds) #(for.index == 0 ? "" : ",") #para(x) #end)) as receivablesMoneys FROM 72crm_crm_contract as ccco where DATE_FORMAT(ccco.order_date,#para(sqlDateFormat))=#para(beginTime) and ccco.check_status = 1 AND owner_user_id in (#for(x:userIds) #(for.index == 0 ? "" : ",") #para(x) #end)
   #end
   #sql ("taskCompleteStatistics")
     #for(x : map)
@@ -86,13 +86,13 @@
            from 72crm_crm_contract
            where owner_user_id = #para(userId)
            and DATE_FORMAT(order_date, '%Y%m') = CONCAT('#(year)', '#(x.value)')
-           and check_status = 2) as b
+           and check_status = 1) as b
           #else if(status == 2)
           (select IFNULL(SUM(money), 0) as receivables
           from 72crm_crm_receivables
           where owner_user_id = #para(userId)
             and DATE_FORMAT(return_time, '%Y%m') = CONCAT('#(year)', '#(x.value)')
-          and check_status = 2)       as b
+          and check_status = 1)       as b
           #end
       #else if(type == 2)
           #if(status == 1)
@@ -102,7 +102,7 @@
              where a.owner_user_id = b.user_id
              and b.dept_id = #para(deptId)
              and DATE_FORMAT(order_date, '%Y%m') = CONCAT('#(year)', '#(x.value)')
-             and check_status = 2) as b
+             and check_status = 1) as b
           #else if(status == 2)
             (select IFNULL(SUM(a.money), 0)  as receivables
             from 72crm_crm_receivables as a
@@ -110,7 +110,7 @@
             where a.owner_user_id = b.user_id
               and b.dept_id = #para(deptId)
               and DATE_FORMAT(return_time, '%Y%m') = CONCAT('#(year)', '#(x.value)')
-            and check_status = 2) as b
+            and check_status = 1) as b
           #end
       #end
       where a.obj_id = #para(objId)

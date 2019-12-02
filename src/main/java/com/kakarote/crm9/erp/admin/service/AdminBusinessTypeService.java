@@ -17,14 +17,21 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AdminBusinessTypeService {
 
     @Before(Tx.class)
-    public R addBusinessType(CrmBusinessType crmBusinessType, JSONArray crmBusinessStatusList){
+    public R addBusinessType(CrmBusinessType crmBusinessType, JSONArray crmBusinessStatusList) {
+        boolean b = crmBusinessStatusList.stream()
+                .map(obj -> TypeUtils.castToJavaBean(obj, CrmBusinessStatus.class).getRate())
+                .anyMatch(rate -> Integer.parseInt(rate) > 100);
+        if (b) {
+            return R.error("赢单率不能大于100");
+        }
         if (crmBusinessType.getTypeId() == null) {
             crmBusinessType.setCreateTime(new Date());
-            crmBusinessType.setCreateUserId(BaseUtil.getUser().getUserId().intValue());
+            crmBusinessType.setCreateUserId(BaseUtil.getUser().getUserId());
             crmBusinessType.save();
         } else {
             Integer count = Db.queryInt("select count(*) from 72crm_crm_business where type_id = ?", crmBusinessType.getTypeId());
@@ -33,14 +40,14 @@ public class AdminBusinessTypeService {
             }
             crmBusinessType.setUpdateTime(new Date());
             crmBusinessType.update();
-            Db.delete(Db.getSql("admin.businessType.deleteBusinessStatus"),crmBusinessType.getTypeId());
+            Db.delete(Db.getSql("admin.businessType.deleteBusinessStatus"), crmBusinessType.getTypeId());
         }
         Integer typeId = crmBusinessType.getTypeId();
-        for(int i = 0; i < crmBusinessStatusList.size(); i++){
+        for (int i = 0; i < crmBusinessStatusList.size(); i++) {
             CrmBusinessStatus crmBusinessStatus = TypeUtils.castToJavaBean(crmBusinessStatusList.getJSONObject(i), CrmBusinessStatus.class);
             crmBusinessStatus.setStatusId(null);
             crmBusinessStatus.setTypeId(typeId);
-            crmBusinessStatus.setOrderNum(i+1);
+            crmBusinessStatus.setOrderNum(i + 1);
             crmBusinessStatus.save();
         }
         return R.ok();
@@ -50,10 +57,10 @@ public class AdminBusinessTypeService {
         Page<Record> paginate = Db.paginate(request.getPage(), request.getLimit(), Db.getSqlPara("admin.businessType.queryBusinessTypeList"));
         paginate.getList().forEach(record -> {
             System.out.println(record.getStr("dept_ids"));
-            if(record.getStr("dept_ids") != null && record.getStr("dept_ids").split(",").length > 0){
+            if (record.getStr("dept_ids") != null && record.getStr("dept_ids").split(",").length > 0) {
                 List<Record> deptList = Db.find(Db.getSqlPara("admin.dept.queryByIds", Kv.by("ids", record.getStr("dept_ids").split(","))));
                 record.set("deptIds", deptList);
-            }else{
+            } else {
                 record.set("deptIds", new ArrayList<>());
             }
         });
@@ -62,10 +69,10 @@ public class AdminBusinessTypeService {
 
     public R getBusinessType(String typeId) {
         Record record = Db.findFirst(Db.getSql("admin.businessType.getBusinessType"), typeId);
-        if(record.getStr("dept_ids") != null && record.getStr("dept_ids").split(",").length > 0){
+        if (record.getStr("dept_ids") != null && record.getStr("dept_ids").split(",").length > 0) {
             List<Record> deptList = Db.find(Db.getSqlPara("admin.dept.queryByIds", Kv.by("ids", record.getStr("dept_ids").split(","))));
             record.set("deptIds", deptList);
-        }else{
+        } else {
             record.set("deptIds", new ArrayList<>());
         }
         List<Record> statusList = Db.find(Db.getSql("admin.businessType.queryBusinessStatus"), typeId);

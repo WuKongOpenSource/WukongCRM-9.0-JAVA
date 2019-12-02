@@ -8,8 +8,7 @@
   #sql ("poolTable")
   select a.realname,b.name as deptName,
   (select count(type_id) from 72crm_crm_owner_record where DATE_FORMAT(create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime) and type = 8 and pre_owner_user_id = a.user_id) as putInNum,
-  (select count(type_id) from 72crm_crm_owner_record where DATE_FORMAT(create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime) and type = 8 and post_owner_user_id = a.user_id) as receiveNum,
-  IFNULL((select c.customer_num from 72crm_crm_customer_stats as c where DATE_FORMAT(create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime) and c.user_id = a.user_id limit 1),0) as customerNum
+  (select count(type_id) from 72crm_crm_owner_record where DATE_FORMAT(create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime) and type = 8 and post_owner_user_id = a.user_id) as receiveNum
   from 72crm_admin_user as a left join 72crm_admin_dept as b on a.dept_id = b.dept_id
   where user_id in (
     #for(i:ids)
@@ -21,13 +20,13 @@
   #sql ("customerRecodCategoryStats")
   select category,IFNULL(count(record_id),0) as recordNum,
          IFNULL(count(record_id)*100/(select count(*) from 72crm_admin_record
-                                      where DATE_FORMAT(create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime)
+                                      where DATE_FORMAT(create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime) and types = 'crm_customer'
                                       and create_user_id in (
                                       #for(i:ids)
                                         #(for.index > 0 ? "," : "") #para(i)
                                       #end
                                       )),0) as proportion
-  from 72crm_admin_record where DATE_FORMAT(create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime)
+  from 72crm_admin_record where types = 'crm_customer' and DATE_FORMAT(create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime)
   and create_user_id in (
     #for(i:ids)
         #(for.index > 0 ? "," : "") #para(i)
@@ -47,7 +46,7 @@
         left join 72crm_admin_user as d on a.owner_user_id = d.user_id
         left join 72crm_admin_user as e on a.create_user_id = e.user_id
         where DATE_FORMAT(a.create_time,#para(sqlDateFormat)) between #para(beginTime) and #para(finalTime)
-              and b.check_status = 2 and a.owner_user_id in (
+              and b.check_status = 1 and a.owner_user_id in (
         #for(i:ids)
            #(for.index > 0 ? "," : "") #para(i)
         #end

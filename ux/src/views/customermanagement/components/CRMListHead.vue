@@ -1,43 +1,50 @@
 <template>
   <div class="c-container">
-    <div class="title">{{title}}</div>
-    <el-input class="sc-container"
-              :placeholder="placeholder"
-              v-model="inputContent"
-              @input="inputChange"
-              @keyup.enter.native="searchInput">
-      <el-button slot="append"
-                 @click.native="searchInput"
-                 icon="el-icon-search"></el-button>
+    <div class="title">{{ title }}</div>
+    <el-input
+      :placeholder="placeholder"
+      v-model="inputContent"
+      class="sc-container"
+      @input="inputChange"
+      @keyup.enter.native="searchInput">
+      <el-button
+        slot="append"
+        icon="el-icon-search"
+        @click.native="searchInput"/>
     </el-input>
     <div class="right-container">
-      <el-button @click="createClick"
-                 v-if="canSave"
-                 type="primary">{{mainTitle}}</el-button>
-      <el-dropdown trigger="click"
-                   v-if="moreTypes.length > 0"
-                   @command="handleTypeDrop">
+      <el-button
+        v-if="canSave"
+        type="primary"
+        @click="createClick">{{ mainTitle }}</el-button>
+      <el-dropdown
+        v-if="moreTypes.length > 0"
+        trigger="click"
+        @command="handleTypeDrop">
         <flexbox class="right-more-item">
           <div>更多</div>
-          <i class="el-icon-arrow-down el-icon--right"
-             style="color:#777;"></i>
+          <i
+            class="el-icon-arrow-down el-icon--right"
+            style="color:#777;"/>
         </flexbox>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item v-for="(item, index) in moreTypes"
-                            :key="index"
-                            :command="item.type">{{item.name}}</el-dropdown-item>
+          <el-dropdown-item
+            v-for="(item, index) in moreTypes"
+            :key="index"
+            :command="item.type">{{ item.name }}</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
-    <c-r-m-create-view v-if="isCreate"
-                       :crm-type="createCRMType"
-                       :action="createActionInfo"
-                       @save-success="createSaveSuccess"
-                       @hiden-view="hideView"></c-r-m-create-view>
-    <c-r-m-import :show="showCRMImport"
-                  @close="showCRMImport=false"
-                  :crmType="crmType">
-    </c-r-m-import>
+    <c-r-m-create-view
+      v-if="isCreate"
+      :crm-type="createCRMType"
+      :action="createActionInfo"
+      @save-success="createSaveSuccess"
+      @hiden-view="hideView"/>
+    <c-r-m-import
+      :show="showCRMImport"
+      :crm-type="crmType"
+      @close="showCRMImport=false"/>
   </div>
 </template>
 
@@ -47,32 +54,10 @@ import CRMCreateView from './CRMCreateView'
 import CRMImport from './CRMImport'
 
 export default {
-  name: 'CRM-list-head', //客户管理下 重要提醒 回款计划提醒
+  name: 'CRMListHead', // 客户管理下 重要提醒 回款计划提醒
   components: {
     CRMCreateView,
     CRMImport
-  },
-  computed: {
-    ...mapGetters(['crm']),
-    canSave() {
-      if (this.isSeas) {
-        return false
-      }
-      return this.crm[this.crmType].save
-    }
-  },
-  data() {
-    return {
-      inputContent: '',
-      /** 更多操作 */
-      moreTypes: [],
-      // 创建的相关信息
-      createActionInfo: { type: 'save' },
-      createCRMType: '',
-      isCreate: false, //是创建
-      // 导入
-      showCRMImport: false
-    }
   },
   props: {
     title: {
@@ -98,6 +83,28 @@ export default {
       default: false
     },
     search: String
+  },
+  data() {
+    return {
+      inputContent: '',
+      /** 更多操作 */
+      moreTypes: [],
+      // 创建的相关信息
+      createActionInfo: { type: 'save' },
+      createCRMType: '',
+      isCreate: false, // 是创建
+      // 导入
+      showCRMImport: false
+    }
+  },
+  computed: {
+    ...mapGetters(['crm']),
+    canSave() {
+      if (this.isSeas) {
+        return false
+      }
+      return this.crm[this.crmType].save
+    }
   },
   mounted() {
     // 线索和客户判断更多操作

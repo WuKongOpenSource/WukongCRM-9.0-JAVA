@@ -1,15 +1,16 @@
 <template>
   <div class="box-wrapper">
     <div class="title">
-      <span>{{attr.isNull ? '*' : ''}}</span>{{attr.name}}<span v-if="attr.inputTips">{{'（'+attr.inputTips+'）'}}</span>
+      <span>{{ attr.isNull ? '*' : '' }}</span>{{ attr.name }}<span v-if="attr.inputTips">{{ '（'+attr.inputTips+'）' }}</span>
     </div>
     <div class="box">
-      <div class="box-content">{{attr.defaultValue}}</div>
-      <div class="max-tips">{{attr.defaultValue.length+'/'+attr.maxLength}}</div>
+      <div class="box-content">{{ attr.defaultValue }}</div>
+      <div class="max-tips">{{ attr.defaultValue.length+'/'+attr.maxLength }}</div>
     </div>
-    <span class="el-icon-delete control"
-          @click="handleDelete"
-          v-if="isShow"></span>
+    <span
+      v-if="isShow"
+      class="el-icon-delete control"
+      @click="handleDelete"/>
 
   </div>
 </template>

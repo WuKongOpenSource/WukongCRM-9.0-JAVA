@@ -9,50 +9,50 @@ import com.jfinal.plugin.activerecord.IBean;
 @SuppressWarnings("serial")
 public abstract class BaseCrmCustomerSetting<M extends BaseCrmCustomerSetting<M>> extends Model<M> implements IBean {
 
-	public void setSettingId(Integer settingId) {
+	public void setSettingId(java.lang.Integer settingId) {
 		set("setting_id", settingId);
 	}
-
-	public Integer getSettingId() {
+	
+	public java.lang.Integer getSettingId() {
 		return getInt("setting_id");
 	}
 
-	public void setSettingName(String settingName) {
+	public void setSettingName(java.lang.String settingName) {
 		set("setting_name", settingName);
 	}
-
-	public String getSettingName() {
+	
+	public java.lang.String getSettingName() {
 		return getStr("setting_name");
 	}
 
-	public void setCustomerNum(Integer customerNum) {
+	public void setCustomerNum(java.lang.Integer customerNum) {
 		set("customer_num", customerNum);
 	}
-
-	public Integer getCustomerNum() {
+	
+	public java.lang.Integer getCustomerNum() {
 		return getInt("customer_num");
 	}
 
-	public void setCustomerDeal(Integer customerDeal) {
+	public void setCustomerDeal(java.lang.Integer customerDeal) {
 		set("customer_deal", customerDeal);
 	}
-
-	public Integer getCustomerDeal() {
+	
+	public java.lang.Integer getCustomerDeal() {
 		return getInt("customer_deal");
 	}
 
-	public void setType(Integer type) {
+	public void setType(java.lang.Integer type) {
 		set("type", type);
 	}
-
-	public Integer getType() {
+	
+	public java.lang.Integer getType() {
 		return getInt("type");
 	}
 
 	public void setCreateTime(java.util.Date createTime) {
 		set("create_time", createTime);
 	}
-
+	
 	public java.util.Date getCreateTime() {
 		return get("create_time");
 	}

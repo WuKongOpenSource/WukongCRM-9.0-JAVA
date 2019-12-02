@@ -475,13 +475,13 @@
    #end
    #sql("queryMoneys")
      SELECT distinct
-    (select IFNULL(SUM(money),0) FROM 72crm_crm_contract where DATE_FORMAT(create_time,'%Y%m') between  #para(startTime)  and #para(endTime) AND
+    (select IFNULL(SUM(money),0) FROM 72crm_crm_contract where check_status = 1 and DATE_FORMAT(order_date,'%Y%m') between  #para(startTime)  and #para(endTime) AND
      create_user_id in (
      #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractMoneys,
-    (select IFNULL(SUM(money),0) FROM 72crm_crm_receivables where DATE_FORMAT(create_time,'%Y%m') between  #para(startTime)  and #para(endTime) AND
+    (select IFNULL(SUM(money),0) FROM 72crm_crm_receivables where check_status = 1 and DATE_FORMAT(return_time,'%Y%m') between  #para(startTime)  and #para(endTime) AND
      create_user_id in (
      #for(x:userIds)
           #(for.index == 0 ? "" : ",")
@@ -619,7 +619,7 @@
     #sql("queryContractMoeny")
        SELECT IFNULL(SUM(money),0) as money
       FROM 72crm_crm_contract
-      where check_status = 2
+      where check_status = 1
       and  owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
@@ -662,7 +662,7 @@
     #sql("queryReceivablesMoeny")
        SELECT IFNULL(SUM(money),0) as money
       FROM 72crm_crm_receivables
-      where check_status = 2
+      where check_status = 1
       and  owner_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
@@ -703,7 +703,7 @@
           #end
     #end
     #sql ("queryRecordCount")
-        SELECT types as crmType,COUNT(types) as count FROM 72crm_admin_record WHERE
+        SELECT types as crmType,COUNT(record_id) as count FROM 72crm_admin_record WHERE
             create_user_id in ( #for(x:userIds)
                                       #(for.index == 0 ? "" : ",")
                                       #para(x)

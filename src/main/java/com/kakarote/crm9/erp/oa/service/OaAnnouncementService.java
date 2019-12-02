@@ -2,7 +2,9 @@ package com.kakarote.crm9.erp.oa.service;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.jfinal.aop.Aop;
 import com.jfinal.kit.Kv;
+import com.kakarote.crm9.erp.admin.common.AdminMessageEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.OaAnnouncement;
@@ -58,8 +60,8 @@ public class OaAnnouncementService {
             userIds = Db.queryStr("select group_concat(user_id) from `72crm_admin_user`");
             deptIds = Db.queryStr("select group_concat(dept_id) from `72crm_admin_dept`");
         }else {
-            userIds = oaActionRecordService.getJoinIds(user.getUserId().intValue(), oaAnnouncement.getOwnerUserIds());
-            deptIds = oaActionRecordService.getJoinIds(user.getDeptId(), oaAnnouncement.getDeptIds());
+            userIds = oaActionRecordService.getJoinIds(user.getUserId(), oaAnnouncement.getOwnerUserIds());
+            deptIds = oaActionRecordService.getJoinIds(Long.valueOf(user.getDeptId()), oaAnnouncement.getDeptIds());
         }
 
         oaActionRecordService.addRecord(oaAnnouncement.getAnnouncementId(), OaEnum.ANNOUNCEMENT_TYPE_KEY.getTypes(), oaAnnouncement.getUpdateTime() == null ? 1 : 2, userIds, deptIds);

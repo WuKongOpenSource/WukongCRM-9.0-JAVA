@@ -1,33 +1,35 @@
 <template>
-  <div v-loading="loading"
-       class="main-container">
-    <filtrate-handle-view class="filtrate-bar"
-                          moduleType="customer"
-                          :showCustomSelect="true"
-                          :customDefault="showType"
-                          :customOptions="[{name:'折线图', value: 'line'}, {name:'饼状图', value: 'pie'},{name:'柱状图', value: 'bar'}]"
-                          @load="loading=true"
-                          @change="searchClick"
-                          @typeChange="showTypeChange">
-    </filtrate-handle-view>
+  <div
+    v-loading="loading"
+    class="main-container">
+    <filtrate-handle-view
+      :show-custom-select="true"
+      :custom-default="showType"
+      :custom-options="[{name:'折线图', value: 'line'}, {name:'饼状图', value: 'pie'},{name:'柱状图', value: 'bar'}]"
+      class="filtrate-bar"
+      module-type="customer"
+      @load="loading=true"
+      @change="searchClick"
+      @typeChange="showTypeChange"/>
     <div class="content">
       <div class="axis-content">
-        <div id="axismain"></div>
+        <div id="axismain"/>
       </div>
       <div class="table-content">
-        <el-table :data="list"
-                  height="400"
-                  stripe
-                  border
-                  highlight-current-row>
-          <el-table-column v-for="(item, index) in fieldList"
-                           :key="index"
-                           align="center"
-                           header-align="center"
-                           show-overflow-tooltip
-                           :prop="item.field"
-                           :label="item.name">
-          </el-table-column>
+        <el-table
+          :data="list"
+          height="400"
+          stripe
+          border
+          highlight-current-row>
+          <el-table-column
+            v-for="(item, index) in fieldList"
+            :key="index"
+            :prop="item.field"
+            :label="item.name"
+            align="center"
+            header-align="center"
+            show-overflow-tooltip/>
         </el-table>
       </div>
     </div>
@@ -44,7 +46,8 @@ import {
 
 export default {
   /** 客户转化率分析 */
-  name: 'customer-conversion-statistics',
+  name: 'CustomerConversionStatistics',
+  mixins: [base],
   data() {
     return {
       loading: false,
@@ -71,7 +74,6 @@ export default {
       ]
     }
   },
-  mixins: [base],
   computed: {},
   mounted() {
     this.initPie()
@@ -106,12 +108,12 @@ export default {
       biCustomerConversionAPI(this.postParams)
         .then(res => {
           this.loading = false
-          let list = res.data || []
+          const list = res.data || []
           this.axisList = list
 
-          let pieData = []
-          let axisData = []
-          let legendData = []
+          const pieData = []
+          const axisData = []
+          const legendData = []
           for (let index = 0; index < list.length; index++) {
             const element = list[index]
             pieData.push({ name: element.type, value: element.pro })
@@ -140,7 +142,7 @@ export default {
       let params = {}
 
       if (typeof dataIndex !== 'undefined') {
-        let dataItem = this.axisList[dataIndex]
+        const dataItem = this.axisList[dataIndex]
         params.userId = this.postParams.userId
         params.deptId = this.postParams.deptId
         params.startTime = dataItem.startTime

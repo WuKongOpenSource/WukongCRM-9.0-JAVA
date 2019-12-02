@@ -1,14 +1,17 @@
 <template>
   <div class="navbar">
-    <img class="logo"
-         :src="logo" />
+    <img
+      :src="logo"
+      class="logo" >
     <div class="nav-title">
       系统设置
     </div>
-    <div @click="enterHome"
-         class="back-home">返回首页</div>
-    <div @click="enterLogin"
-         class="go-out">退出系统</div>
+    <div
+      class="back-home"
+      @click="enterHome">返回首页</div>
+    <div
+      class="go-out"
+      @click="enterLogin">退出系统</div>
   </div>
 </template>
 
@@ -17,16 +20,16 @@ import { Loading } from 'element-ui'
 import { mapGetters } from 'vuex'
 
 export default {
-  data() {
-    return {}
-  },
+  components: {},
   props: {
     navIndex: {
       type: Number,
       default: 0
     }
   },
-  components: {},
+  data() {
+    return {}
+  },
   computed: {
     ...mapGetters(['logo'])
   },

@@ -43,7 +43,7 @@ public class OaActionRecordService {
      */
     public void addRecord(Integer actionId, Integer types, Integer status, String joinUserIds, String deptIds) {
         OaActionRecord oaActionRecord = new OaActionRecord();
-        oaActionRecord.setUserId(BaseUtil.getUser().getUserId().intValue());
+        oaActionRecord.setUserId(BaseUtil.getUser().getUserId());
         oaActionRecord.setType(types);
         oaActionRecord.setActionId(actionId);
         oaActionRecord.setCreateTime(new Date());
@@ -57,7 +57,7 @@ public class OaActionRecordService {
         oaActionRecord.save();
     }
 
-    public String getJoinIds(Integer id, String ids) {
+    public String getJoinIds(Long id, String ids) {
         StringBuilder joinIds = new StringBuilder(",").append(id);
         if (StrUtil.isNotEmpty(ids)) {
             joinIds.append(ids);

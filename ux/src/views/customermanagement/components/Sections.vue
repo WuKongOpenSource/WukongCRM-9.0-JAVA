@@ -1,41 +1,42 @@
 <template>
   <div class="section">
-    <div class="section-header"
-         v-if="title && title.length > 0">
-      <div class="section-mark"
-           :style="{ 'border-left-color': mColor }"></div>
-      <div class="section-title">{{title}}</div>
-      <flexbox v-if="showF"
-               class="f-container">
-        <div v-for="(item, index) in fItems"
-             :key="index"
-             @click="fClick(item)"
-             class="f-item"
-             :class="{ 'f-item-select':fIndex==item.type }">{{item.title}}</div>
+    <div
+      v-if="title && title.length > 0"
+      class="section-header">
+      <div
+        :style="{ 'border-left-color': mColor }"
+        class="section-mark"/>
+      <div class="section-title">{{ title }}</div>
+      <flexbox
+        v-if="showF"
+        class="f-container">
+        <div
+          v-for="(item, index) in fItems"
+          :key="index"
+          :class="{ 'f-item-select':fIndex==item.type }"
+          class="f-item"
+          @click="fClick(item)">{{ item.title }}</div>
       </flexbox>
     </div>
-    <div class="content"
-         :style="{ 'height': contentHeight }">
-      <div v-if="showNoData"
-           class="no-data-container">
-        <img class="no-data"
-             src="@/assets/img/no_data.png" />
+    <div
+      :style="{ 'height': contentHeight }"
+      class="content">
+      <div
+        v-if="showNoData"
+        class="no-data-container">
+        <img
+          class="no-data"
+          src="@/assets/img/no_data.png" >
         <div class="no-data-name">暂无数据</div>
       </div>
-      <slot></slot>
+      <slot/>
     </div>
   </div>
 </template>
 <script type="text/javascript">
 export default {
-  name: 'sections',
+  name: 'Sections',
   components: {},
-  computed: {},
-  data() {
-    return {
-      fIndex: -1
-    }
-  },
   props: {
     title: {
       type: String,
@@ -67,6 +68,12 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      fIndex: -1
+    }
+  },
+  computed: {},
   mounted() {},
   methods: {
     fClick(item) {

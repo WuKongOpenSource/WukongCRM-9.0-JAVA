@@ -1,140 +1,166 @@
 <template>
-  <div class="list"
-       :id="'journal-cell' + logIndex">
+  <div
+    :id="'journal-cell' + logIndex"
+    class="list">
     <div class="list-content">
       <div class="header">
-        <div v-photo="data.createUser"
-             class="div-photo head-img header-circle"
-             :key="data.createUser.img"
-             v-lazy:background-image="$options.filters.filterUserLazyImg(data.createUser.img)">
-        </div>
+        <div
+          v-photo="data.createUser"
+          v-lazy:background-image="$options.filters.filterUserLazyImg(data.createUser.img)"
+          :key="data.createUser.img"
+          class="div-photo head-img header-circle"/>
         <div class="row">
           <p class="row-title">
-            <span class="name">{{data.createUser.realname}}</span>
-            <span v-if="showWorkbench"
-                  class="item-content">{{data.actionContent}}</span>
-            <span v-else
-                  class="read"
-                  :style="{'color': data.isRead == 0 ? '#3E84E9' : '#ccc'}">{{data.isRead == 0 ? '未读' : '已读'}}</span>
+            <span class="name">{{ data.createUser.realname }}</span>
+            <span
+              v-if="showWorkbench"
+              class="item-content">{{ data.actionContent }}</span>
+            <span
+              v-else
+              :style="{'color': data.isRead == 0 ? '#3E84E9' : '#ccc'}"
+              class="read">{{ data.isRead == 0 ? '未读' : '已读' }}</span>
           </p>
-          <span class="time">{{data.createTime | moment("YYYY-MM-DD HH:mm")}}</span>
-          <el-tooltip :disabled="!(data.sendUserList.length > 0 || data.sendDeptList.length > 0)"
-                      placement="bottom"
-                      effect="light"
-                      popper-class="tooltip-change-border">
+          <span class="time">{{ data.createTime | moment("YYYY-MM-DD HH:mm") }}</span>
+          <el-tooltip
+            :disabled="!(data.sendUserList.length > 0 || data.sendDeptList.length > 0)"
+            placement="bottom"
+            effect="light"
+            popper-class="tooltip-change-border">
             <div slot="content">
               <div class="members-dep-title">
                 <!-- hover员工 -->
                 <span v-if="data.sendUserList">
                   <!-- 如果没有部门而且员工最后一个 - 不显示逗号 -->
-                  <span v-for="(k, i) in data.sendUserList"
-                        :key="i">
-                    {{data.sendDeptList.length == 0 && i == data.sendUserList.length-1 ? k.realname : k.realname + "，"}}
+                  <span
+                    v-for="(k, i) in data.sendUserList"
+                    :key="i">
+                    {{ data.sendDeptList.length == 0 && i == data.sendUserList.length-1 ? k.realname : k.realname + "，" }}
                   </span>
                 </span>
                 <!-- hover部门 -->
-                <span v-for="(dep, depIndex) in data.sendDeptList"
-                      :key="depIndex"
-                      v-if="data.sendDeptList.legnth != 0">
-                  {{ depIndex == data.sendDeptList.length-1 ? dep.name : dep.name+"，"}}
+                <span
+                  v-for="(dep, depIndex) in data.sendDeptList"
+                  v-show="data.sendDeptList.legnth != 0"
+                  :key="depIndex">
+                  {{ depIndex == data.sendDeptList.length-1 ? dep.name : dep.name+"，" }}
                 </span>
               </div>
             </div>
-            <p class="row-title"
-               style="display: inline-block;">
-              <span v-if="data.sendDeptList">{{data.sendDeptList.length}} 个部门，</span>
-              <span v-if="data.sendUserList">{{data.sendUserList.length}}个同事</span>
+            <p
+              class="row-title"
+              style="display: inline-block;">
+              <span v-if="data.sendDeptList">{{ data.sendDeptList.length }} 个部门，</span>
+              <span v-if="data.sendUserList">{{ data.sendUserList.length }}个同事</span>
             </p>
           </el-tooltip>
         </div>
-        <div class="rt-setting"
-             v-if="!showWorkbench && (data.permission && (data.permission.isUpdate || data.permission.isDelete))">
-          <el-dropdown @command="handleCommand"
-                       trigger="click">
-            <i style="color:#CDCDCD; cursor: pointer;"
-               class="el-icon-arrow-down el-icon-more"></i>
+        <div
+          v-if="!showWorkbench && (data.permission && (data.permission.isUpdate || data.permission.isDelete))"
+          class="rt-setting">
+          <el-dropdown
+            trigger="click"
+            @command="handleCommand">
+            <i
+              style="color:#CDCDCD; cursor: pointer;"
+              class="el-icon-arrow-down el-icon-more"/>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item v-if="data.permission.isUpdate"
-                                command="edit">编辑</el-dropdown-item>
-              <el-dropdown-item v-if="data.permission.isDelete"
-                                command="delete">删除</el-dropdown-item>
+              <el-dropdown-item
+                v-if="data.permission.isUpdate"
+                command="edit">编辑</el-dropdown-item>
+              <el-dropdown-item
+                v-if="data.permission.isDelete"
+                command="delete">删除</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
       </div>
       <div class="text">
-        <p class="row"
-           v-if="data.content">
-          <span class="title">{{data.categoryId == 1 ? "今日工作内容" : data.categoryId == 2 ? "本周工作内容" : "本月工作内容"}}：</span>{{data.content}}</p>
-        <p class="row"
-           v-if="data.tomorrow">
-          <span class="title">{{data.categoryId == 1 ? "明日工作内容" : data.categoryId == 2 ? "下周工作内容" : "下月工作内容"}}：</span>{{data.tomorrow}}</p>
-        <p class="row"
-           v-if="data.question">
-          <span class="title">遇到的问题：</span>{{data.question}}</p>
+        <p
+          v-if="data.content"
+          class="row">
+        <span class="title">{{ data.categoryId == 1 ? "今日工作内容" : data.categoryId == 2 ? "本周工作内容" : "本月工作内容" }}：</span>{{ data.content }}</p>
+        <p
+          v-if="data.tomorrow"
+          class="row">
+        <span class="title">{{ data.categoryId == 1 ? "明日工作内容" : data.categoryId == 2 ? "下周工作内容" : "下月工作内容" }}：</span>{{ data.tomorrow }}</p>
+        <p
+          v-if="data.question"
+          class="row">
+        <span class="title">遇到的问题：</span>{{ data.question }}</p>
       </div>
       <div class="accessory">
-        <div class="upload-img-box"
-             v-if="data.img.length != 0">
-          <div v-for="(imgItem, k) in data.img"
-               :key="k"
-               class="img-list"
-               @click="imgZoom(data.img, k)">
-            <img v-lazy="imgItem.filePath"
-                 :key="imgItem.filePath">
+        <div
+          v-if="data.img.length != 0"
+          class="upload-img-box">
+          <div
+            v-for="(imgItem, k) in data.img"
+            :key="k"
+            class="img-list"
+            @click="imgZoom(data.img, k)">
+            <img
+              v-lazy="imgItem.filePath"
+              :key="imgItem.filePath">
           </div>
         </div>
-        <div class="accessory-box"
-             v-if="data.file.length != 0">
-          <file-cell v-for="(file, fileIndex) in data.file"
-                     :key="fileIndex"
-                     :data="file"
-                     :cellIndex="fileIndex"></file-cell>
+        <div
+          v-if="data.file.length != 0"
+          class="accessory-box">
+          <file-cell
+            v-for="(file, fileIndex) in data.file"
+            :key="fileIndex"
+            :data="file"
+            :cell-index="fileIndex"/>
         </div>
       </div>
       <!-- 关联业务 -->
-      <related-business v-if="allDataShow"
-                        :marginLeft="'0'"
-                        :alterable="false"
-                        :allData="allData"
-                        @checkRelatedDetail="checkRelatedDetail">
-      </related-business>
+      <related-business
+        v-if="allDataShow"
+        :margin-left="'0'"
+        :alterable="false"
+        :all-data="allData"
+        @checkRelatedDetail="checkRelatedDetail"/>
       <!-- 评论 -->
-      <div class="discuss"
-           v-if="replyList && replyList.length != 0">
-        <div class="border"></div>
-        <div class="discuss-list"
-             v-for="(discussItem, k) in replyList"
-             :key="k">
-          <div v-photo="discussItem.user"
-               v-lazy:background-image="$options.filters.filterUserLazyImg(discussItem.user.img)"
-               :key="discussItem.user.img"
-               class="div-photo head-img header-circle"></div>
-          <span class="name">{{discussItem.user.realname}}</span>
-          <span class="time">{{discussItem.createTime}}</span>
+      <div
+        v-if="replyList && replyList.length != 0"
+        class="discuss">
+        <div class="border"/>
+        <div
+          v-for="(discussItem, k) in replyList"
+          :key="k"
+          class="discuss-list">
+          <div
+            v-photo="discussItem.user"
+            v-lazy:background-image="$options.filters.filterUserLazyImg(discussItem.user.img)"
+            :key="discussItem.user.img"
+            class="div-photo head-img header-circle"/>
+          <span class="name">{{ discussItem.user.realname }}</span>
+          <span class="time">{{ discussItem.createTime }}</span>
           <div class="rt">
             <span @click="discussDelete(discussItem, replyList, k)">删除</span>
             <span @click="discussBtn(discussItem, -1)">回复</span>
           </div>
 
           <p class="reply-title">
-            <span v-html="emoji(discussItem.content)"></span>
+            <span v-html="emoji(discussItem.content)"/>
           </p>
 
           <!-- <p class="discuss-content"
              v-html="emoji(discussItem.replyContent)"></p> -->
 
-          <div class="children-reply"
-               v-if="discussItem.childCommentList && discussItem.childCommentList.length > 0">
-            <div class="discuss-list"
-                 v-for="(childDiscussItem, k) in discussItem.childCommentList"
-                 :key="k">
-              <div v-photo="childDiscussItem.user"
-                   v-lazy:background-image="$options.filters.filterUserLazyImg(childDiscussItem.user.img)"
-                   :key="childDiscussItem.user.img"
-                   class="div-photo head-img header-circle"></div>
-              <span class="name">{{childDiscussItem.user.realname}}</span>
-              <span class="time">{{childDiscussItem.createTime}}</span>
+          <div
+            v-if="discussItem.childCommentList && discussItem.childCommentList.length > 0"
+            class="children-reply">
+            <div
+              v-for="(childDiscussItem, k) in discussItem.childCommentList"
+              :key="k"
+              class="discuss-list">
+              <div
+                v-photo="childDiscussItem.user"
+                v-lazy:background-image="$options.filters.filterUserLazyImg(childDiscussItem.user.img)"
+                :key="childDiscussItem.user.img"
+                class="div-photo head-img header-circle"/>
+              <span class="name">{{ childDiscussItem.user.realname }}</span>
+              <span class="time">{{ childDiscussItem.createTime }}</span>
               <div class="rt">
                 <span @click="discussDelete(childDiscussItem, discussItem.childCommentList, k)">删除</span>
                 <span @click="discussBtn(discussItem, k)">回复</span>
@@ -142,76 +168,86 @@
               <p class="reply-title">
                 <template>
                   <span>回复</span>
-                  <span class="reply"
-                        v-if="childDiscussItem.replyUser">@{{childDiscussItem.replyUser.realname}}：</span>
+                  <span
+                    v-if="childDiscussItem.replyUser"
+                    class="reply">@{{ childDiscussItem.replyUser.realname }}：</span>
                 </template>
-                <span v-html="emoji(childDiscussItem.content)"></span>
+                <span v-html="emoji(childDiscussItem.content)"/>
               </p>
             </div>
           </div>
 
           <!-- 评论 -- 回复  -->
-          <div class="comment-box"
-               v-if="discussItem.show">
-            <el-input type="textarea"
-                      @blur="blurFun"
-                      :rows="2"
-                      placeholder="请输入内容"
-                      v-model="childCommentsTextarea"></el-input>
+          <div
+            v-if="discussItem.show"
+            class="comment-box">
+            <el-input
+              :rows="2"
+              v-model="childCommentsTextarea"
+              type="textarea"
+              placeholder="请输入内容"
+              @blur="blurFun"/>
             <div class="btn-group">
-              <el-popover placement="top"
-                          width="400"
-                          v-model="childCommentsPopover"
-                          trigger="click">
+              <el-popover
+                v-model="childCommentsPopover"
+                placement="top"
+                width="400"
+                trigger="click">
                 <!-- 表情 -->
-                <emoji @select="childSelectEmoji">
-                </emoji>
-                <img src="@/assets/img/smiling_face.png"
-                     class="smiling-img"
-                     slot="reference">
+                <emoji @select="childSelectEmoji"/>
+                <img
+                  slot="reference"
+                  src="@/assets/img/smiling_face.png"
+                  class="smiling-img">
               </el-popover>
               <div class="btn-box">
-                <el-button type="primary"
-                           @click="childCommentSubmit()"
-                           :loading="contentLoading">回复</el-button>
+                <el-button
+                  :loading="contentLoading"
+                  type="primary"
+                  @click="childCommentSubmit()">回复</el-button>
                 <el-button @click="discussItem.show= false">取消</el-button>
               </div>
             </div>
           </div>
-          <div class="border"></div>
+          <div class="border"/>
         </div>
       </div>
     </div>
     <div class="footer">
-      <el-button type="primary"
-                 icon="el-icon-chat-line-round"
-                 @click="commentBtn(data)">回复</el-button>
-      <!-- <img @click="commentBtn(item)" class="comment" src="@/assets/img/journal_comment.png"> -->
+      <el-button
+        type="primary"
+        icon="el-icon-chat-line-round"
+        @click="commentBtn(data)">回复</el-button>
+        <!-- <img @click="commentBtn(item)" class="comment" src="@/assets/img/journal_comment.png"> -->
     </div>
     <!-- 底部评论 -->
-    <div class="comment-box"
-         v-if="data.showComment">
-      <el-input v-model="commentsTextarea"
-                @blur="blurFun"
-                type="textarea"
-                :rows="3"
-                placeholder="请输入内容"></el-input>
+    <div
+      v-if="data.showComment"
+      class="comment-box">
+      <el-input
+        v-model="commentsTextarea"
+        :rows="3"
+        type="textarea"
+        placeholder="请输入内容"
+        @blur="blurFun"/>
       <div class="btn-group">
-        <el-popover placement="top"
-                    width="400"
-                    v-model="commentsPopover"
-                    trigger="click">
+        <el-popover
+          v-model="commentsPopover"
+          placement="top"
+          width="400"
+          trigger="click">
           <!-- 表情 -->
-          <emoji @select="selectEmoji">
-          </emoji>
-          <img src="@/assets/img/smiling_face.png"
-               class="smiling-img"
-               slot="reference">
+          <emoji @select="selectEmoji"/>
+          <img
+            slot="reference"
+            src="@/assets/img/smiling_face.png"
+            class="smiling-img">
         </el-popover>
         <div class="btn-box">
-          <el-button type="primary"
-                     @click="commentSubmit()"
-                     :loading="contentLoading">回复</el-button>
+          <el-button
+            :loading="contentLoading"
+            type="primary"
+            @click="commentSubmit()">回复</el-button>
           <el-button @click="data.showComment = false">取消</el-button>
         </div>
       </div>
@@ -237,37 +273,25 @@ import { mapGetters } from 'vuex'
 import FileCell from '@/views/OAManagement/components/fileCell'
 
 export default {
-  name: 'journal-cell', // 日志cell
+  name: 'JournalCell', // 日志cell
   components: {
     emoji,
     relatedBusiness,
     FileCell
   },
   mixins: [],
-  computed: {
-    ...mapGetters(['userInfo']),
-    allData() {
-      let allData = {}
-      allData.business = this.data.businessList
-      allData.contacts = this.data.contactsList
-      allData.contract = this.data.contractList
-      allData.customer = this.data.customerList
-      return allData
+  props: {
+    data: Object,
+    logIndex: {
+      type: Number,
+      default: 0
     },
-    allDataShow() {
-      if (
-        this.data.businessList.length != 0 ||
-        this.data.contactsList.length != 0 ||
-        this.data.contractList.length != 0 ||
-        this.data.customerList.length != 0
-      ) {
-        return true
-      } else {
-        return false
-      }
+    // 工作台操作动态展示
+    showWorkbench: {
+      type: Boolean,
+      default: false
     }
   },
-  watch: {},
   data() {
     return {
       // 评论
@@ -288,18 +312,30 @@ export default {
       replyList: []
     }
   },
-  props: {
-    data: Object,
-    logIndex: {
-      type: Number,
-      default: 0
+  computed: {
+    ...mapGetters(['userInfo']),
+    allData() {
+      const allData = {}
+      allData.business = this.data.businessList
+      allData.contacts = this.data.contactsList
+      allData.contract = this.data.contractList
+      allData.customer = this.data.customerList
+      return allData
     },
-    // 工作台操作动态展示
-    showWorkbench: {
-      type: Boolean,
-      default: false
+    allDataShow() {
+      if (
+        this.data.businessList.length != 0 ||
+        this.data.contactsList.length != 0 ||
+        this.data.contractList.length != 0 ||
+        this.data.customerList.length != 0
+      ) {
+        return true
+      } else {
+        return false
+      }
     }
   },
+  watch: {},
   mounted() {
     if (this.data.isRead == 0 && !this.showWorkbench) {
       this.$bus.on('journal-list-box-scroll', target => {
@@ -312,6 +348,9 @@ export default {
 
     this.replyList = this.data.replyList
   },
+  beforeDestroy() {
+    this.$bus.off('journal-list-box-scroll')
+  },
   methods: {
     /**
      * 观察预览
@@ -321,12 +360,12 @@ export default {
         if (target) {
           this.parentTarget = target
         }
-        let ispreview = this.whetherPreview()
+        const ispreview = this.whetherPreview()
         if (!this.awaitMoment && ispreview) {
           this.awaitMoment = true
           setTimeout(() => {
             this.awaitMoment = false
-            let ispreview = this.whetherPreview()
+            const ispreview = this.whetherPreview()
             if (ispreview) {
               this.submiteIsRead()
             }
@@ -339,9 +378,9 @@ export default {
      * 是否预览
      */
     whetherPreview() {
-      let dom = this.parentTarget.children[this.logIndex]
+      const dom = this.parentTarget.children[this.logIndex]
       if (this.parentTarget.getBoundingClientRect()) {
-        let offsetTop =
+        const offsetTop =
           this.parentTarget.getBoundingClientRect().top -
           dom.getBoundingClientRect().top
         let ispreview = false
@@ -366,7 +405,7 @@ export default {
           this.$store.dispatch('GetOAMessageNum', 'log')
           this.data.isRead = 1
         })
-        .catch(err => {})
+        .catch(() => {})
     },
 
     // 获取评论信息
@@ -384,7 +423,7 @@ export default {
     verifyAwaitInfo() {},
     // 编辑 删除
     handleCommand(command) {
-      this.$emit('on-handle', { type: command, data: { item: this.data } })
+      this.$emit('on-handle', { type: command, data: { item: this.data }})
     },
     checkRelatedDetail(type, data) {
       this.$emit('on-handle', {
@@ -433,7 +472,7 @@ export default {
         this.replyChildIndex = index
       }
     },
-    //子评论 回复 -- 提交
+    // 子评论 回复 -- 提交
     childCommentSubmit() {
       if (this.replyChildComment && this.childCommentsTextarea) {
         var item =
@@ -466,7 +505,7 @@ export default {
               data: { item: this.data }
             })
           })
-          .catch(err => {
+          .catch(() => {
             this.$message.error('回复失败')
             this.contentLoading = false
           })
@@ -493,7 +532,7 @@ export default {
             this.$message.success('回复成功')
             this.contentLoading = false
           })
-          .catch(err => {
+          .catch(() => {
             this.$message.error('回复失败')
             this.contentLoading = false
           })
@@ -512,14 +551,14 @@ export default {
     },
     // 评论选中功能
     selectEmoji(val) {
-      let list = this.commentsTextarea.split('')
+      const list = this.commentsTextarea.split('')
       list.splice(this.blurIndex, 0, val)
       this.commentsTextarea = list.join('')
       this.commentsPopover = false
     },
     // 回复选中功能
     childSelectEmoji(val) {
-      let list = this.childCommentsTextarea.split('')
+      const list = this.childCommentsTextarea.split('')
       list.splice(this.blurIndex, 0, val)
       this.childCommentsTextarea = list.join('')
       this.childCommentsPopover = false
@@ -539,9 +578,6 @@ export default {
         })
       })
     }
-  },
-  beforeDestroy() {
-    this.$bus.off('journal-list-box-scroll')
   }
 }
 </script>

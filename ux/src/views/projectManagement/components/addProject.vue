@@ -1,72 +1,85 @@
 <template>
-  <create-view :body-style="{height: '100%'}"
-               v-loading="loading">
+  <create-view
+    v-loading="loading"
+    :body-style="{height: '100%'}">
     <div class="add-project">
-      <div slot="header"
-           class="header">
+      <div
+        slot="header"
+        class="header">
         <span class="text">创建项目</span>
-        <span class="el-icon-close"
-              @click="close"></span>
+        <span
+          class="el-icon-close"
+          @click="close"/>
       </div>
       <div class="content">
         <div class="project-name">
           <div class="label color-label">项目名称</div>
-          <el-input placeholder="请输入内容"
-                    v-model="name">
-            <i slot="prefix"
-               class="el-input__icon">
-              <span class="bg-color"
-                    :style="{'background': typeColor}"></span>
+          <el-input
+            v-model="name"
+            placeholder="请输入内容">
+            <i
+              slot="prefix"
+              class="el-input__icon">
+              <span
+                :style="{'background': typeColor}"
+                class="bg-color"/>
             </i>
           </el-input>
           <div class="color-box">
-            <span v-for="(item, index) in typeColorList"
-                  :key="index"
-                  :style="{'background': item}"
-                  @click="typeColor = item">
-            </span>
+            <span
+              v-for="(item, index) in typeColorList"
+              :key="index"
+              :style="{'background': item}"
+              @click="typeColor = item"/>
           </div>
         </div>
         <div class="describe">
           <div class="label">项目描述</div>
-          <el-input type="textarea"
-                    :rows="4"
-                    placeholder="请输入内容"
-                    v-model="description"></el-input>
+          <el-input
+            :rows="4"
+            v-model="description"
+            type="textarea"
+            placeholder="请输入内容"/>
         </div>
         <div class="range">
           <div class="label">可见范围</div>
-          <el-select v-model="openType"
-                     placeholder="请选择">
-            <el-option v-for="item in openOptions"
-                       :key="item.value"
-                       :label="item.label"
-                       :value="item.value">
-            </el-option>
+          <el-select
+            v-model="openType"
+            placeholder="请选择">
+            <el-option
+              v-for="item in openOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"/>
           </el-select>
         </div>
-        <div class="member"
-             v-if="openType == 0">
+        <div
+          v-if="openType == 0"
+          class="member">
           <div class="label">项目成员</div>
           <div>
-            <div v-photo="k"
-                 v-lazy:background-image="$options.filters.filterUserLazyImg(k.img)"
-                 v-for="(k, j) in selectUserList"
-                 :key="j"
-                 class="div-photo k-img header-circle"></div>
-            <members-dep :userCheckedData="selectUserList"
-                         :contentBlock="false"
-                         :closeDep="true"
-                         @popoverSubmit="userSelectChange">
-              <img slot="membersDep"
-                   class="sent-img"
-                   src="@/assets/img/task_add.png">
+            <div
+              v-photo="k"
+              v-lazy:background-image="$options.filters.filterUserLazyImg(k.img)"
+              v-for="(k, j) in selectUserList"
+              :key="j"
+              class="div-photo k-img header-circle"/>
+            <members-dep
+              :user-checked-data="selectUserList"
+              :content-block="false"
+              :close-dep="true"
+              @popoverSubmit="userSelectChange">
+              <img
+                slot="membersDep"
+                class="sent-img"
+                src="@/assets/img/task_add.png">
             </members-dep>
           </div>
         </div>
         <div class="footer">
-          <el-button type="primary"
-                     @click="submitBtn">确定</el-button>
+          <el-button
+            type="primary"
+            @click="submitBtn">确定</el-button>
           <el-button @click="close">取消</el-button>
         </div>
       </div>
@@ -76,7 +89,6 @@
 <script>
 import { mapGetters } from 'vuex'
 import CreateView from '@/components/CreateView'
-import { usersList } from '@/api/common'
 import { workWorkSaveAPI } from '@/api/projectManagement/project'
 import MembersDep from '@/components/selectEmployee/membersDep'
 
@@ -135,13 +147,20 @@ export default {
     document.body.appendChild(this.$el)
   },
 
+  destroyed() {
+    // if appendToBody is true, remove DOM node after destroy
+    if (this.appendToBody && this.$el && this.$el.parentNode) {
+      this.$el.parentNode.removeChild(this.$el)
+    }
+  },
+
   methods: {
     /**
      * 保存
      */
     submitBtn() {
       this.loading = true
-      let params = {
+      const params = {
         name: this.name,
         description: this.description,
         color: this.typeColor,
@@ -161,7 +180,7 @@ export default {
           this.$bus.$emit('add-project', this.name, res.work.workId)
           this.close()
         })
-        .catch(error => {
+        .catch(() => {
           this.loading = false
         })
     },
@@ -178,13 +197,6 @@ export default {
      */
     userSelectChange(members, dep) {
       this.selectUserList = members
-    }
-  },
-
-  destroyed() {
-    // if appendToBody is true, remove DOM node after destroy
-    if (this.appendToBody && this.$el && this.$el.parentNode) {
-      this.$el.parentNode.removeChild(this.$el)
     }
   }
 }

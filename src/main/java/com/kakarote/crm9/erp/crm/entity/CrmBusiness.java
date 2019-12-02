@@ -13,9 +13,9 @@ public class CrmBusiness extends BaseCrmBusiness<CrmBusiness> {
 	//权限（1.只读2.读写）
 	private Integer power;
 	private String ids;
-	private Integer newOwnerUserId;
+	private Long newOwnerUserId;
 	private String memberIds;
-	private Integer orderNum;
+	private Long orderNum;
 	private String businessIds;
 
 	public Integer getTransferType() {
@@ -50,19 +50,19 @@ public class CrmBusiness extends BaseCrmBusiness<CrmBusiness> {
 		this.memberIds = memberIds;
 	}
 
-	public Integer getOrderNum() {
+	public Long getOrderNum() {
 		return orderNum;
 	}
 
-	public void setOrderNum(Integer orderNum) {
+	public void setOrderNum(Long orderNum) {
 		this.orderNum = orderNum;
 	}
 
-	public Integer getNewOwnerUserId() {
+	public Long getNewOwnerUserId() {
 		return newOwnerUserId;
 	}
 
-	public void setNewOwnerUserId(Integer newOwnerUserId) {
+	public void setNewOwnerUserId(Long newOwnerUserId) {
 		this.newOwnerUserId = newOwnerUserId;
 	}
 

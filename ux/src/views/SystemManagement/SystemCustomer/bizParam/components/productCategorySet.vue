@@ -6,32 +6,41 @@
     <div class="product-setting">
       <div class="product-setting-con">
         <div>
-          <span class="el-icon-plus"
-                style="color: #409EFF;"></span>
-          <el-button @click.native="handleTreeSetDrop({type:'create-one'})"
-                     type="text">新增一级分类</el-button>
+          <span
+            class="el-icon-plus"
+            style="color: #409EFF;"/>
+          <el-button
+            type="text"
+            @click.native="handleTreeSetDrop({type:'create-one'})">新增一级分类</el-button>
         </div>
         <div class="tree-box">
-          <el-tree :data="treeData"
-                   default-expand-all
-                   :props="defaultProps">
-            <flexbox slot-scope="{ node, data }"
-                     class="node-data">
-              <img class="node-img"
-                   v-if="node.expanded"
-                   src="@/assets/img/fold.png">
-              <img class="node-img"
-                   v-if="!node.expanded"
-                   src="@/assets/img/unfold.png">
+          <el-tree
+            :data="treeData"
+            :props="defaultProps"
+            default-expand-all>
+            <flexbox
+              slot-scope="{ node, data }"
+              class="node-data">
+              <img
+                v-if="node.expanded"
+                class="node-img"
+                src="@/assets/img/fold.png">
+              <img
+                v-if="!node.expanded"
+                class="node-img"
+                src="@/assets/img/unfold.png">
               <div class="node-label">{{ node.label }}</div>
-              <el-dropdown trigger="click"
-                           @command="handleTreeSetDrop">
-                <div @click.stop="getChild(node)"
-                     class="node-label-set">设置</div>
+              <el-dropdown
+                trigger="click"
+                @command="handleTreeSetDrop">
+                <div
+                  class="node-label-set"
+                  @click.stop="getChild(node)">设置</div>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item v-for="(item, index) in treeSetTypes"
-                                    :key="index"
-                                    :command="item">{{item.name}}</el-dropdown-item>
+                  <el-dropdown-item
+                    v-for="(item, index) in treeSetTypes"
+                    :key="index"
+                    :command="item">{{ item.name }}</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </flexbox>
@@ -39,21 +48,26 @@
         </div>
       </div>
     </div>
-    <el-dialog title="提示"
-               :visible.sync="productHandleDialog"
-               width="400px">
+    <el-dialog
+      :visible.sync="productHandleDialog"
+      title="提示"
+      width="400px">
       <el-form :model="productForm">
-        <el-form-item label="类别名称"
-                      label-width="80">
-          <el-input v-model="productForm.name"
-                    autocomplete="off"></el-input>
+        <el-form-item
+          label="类别名称"
+          label-width="80">
+          <el-input
+            v-model="productForm.name"
+            autocomplete="off"/>
         </el-form-item>
       </el-form>
-      <div slot="footer"
-           class="dialog-footer">
+      <div
+        slot="footer"
+        class="dialog-footer">
         <el-button @click="productHandleDialog = false">取 消</el-button>
-        <el-button type="primary"
-                   @click="handleProduct">确 定</el-button>
+        <el-button
+          type="primary"
+          @click="handleProduct">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -67,7 +81,7 @@ import {
 } from '@/api/systemManagement/SystemCustomer'
 
 export default {
-  name: 'product-category-set',
+  name: 'ProductCategorySet',
 
   components: {},
 
@@ -142,15 +156,15 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            })
             this.loading = true
             productCategoryDelete({
               id: command.node.data.categoryId
             })
               .then(res => {
+                this.$message({
+                  type: 'success',
+                  message: '删除成功!'
+                })
                 this.getProductCategoryIndex()
                 this.loading = false
               })
@@ -186,6 +200,7 @@ export default {
         })
           .then(res => {
             this.getProductCategoryIndex()
+            this.$message.success('新增成功')
             this.loading = false
           })
           .catch(() => {
@@ -200,6 +215,7 @@ export default {
         })
           .then(res => {
             this.getProductCategoryIndex()
+            this.$message.success('新建成功')
             this.loading = false
           })
           .catch(() => {
@@ -213,6 +229,7 @@ export default {
         })
           .then(res => {
             this.getProductCategoryIndex()
+            this.$message.success('新建成功')
             this.loading = false
           })
           .catch(() => {
@@ -227,6 +244,7 @@ export default {
         })
           .then(res => {
             this.getProductCategoryIndex()
+            this.$message.success('编辑成功')
             this.loading = false
           })
           .catch(() => {
