@@ -1,5 +1,7 @@
 SET FOREIGN_KEY_CHECKS=0;
 
+INSERT INTO `72crm_admin_menu` VALUES (192, 13, '合同作废', 'discard', 3, 1, 1, NULL);
+
 ALTER TABLE `72crm_admin_fieldv` ADD INDEX `batch_id`(`batch_id`) USING BTREE;
 
 ALTER TABLE `72crm_admin_file` MODIFY COLUMN `create_user_id` bigint(20) NOT NULL COMMENT '创建人ID' AFTER `size`;

@@ -480,6 +480,7 @@ INSERT INTO `72crm_admin_menu` VALUES (188, 187, '新建', 'save', 3, 1, 1, NULL
 INSERT INTO `72crm_admin_menu` VALUES (189, 187, '编辑', 'update', 3, 2, 1, NULL);
 INSERT INTO `72crm_admin_menu` VALUES (190, 187, '删除', 'delete', 3, 3, 1, NULL);
 INSERT INTO `72crm_admin_menu` VALUES (191, 10, '设置成交状态', 'dealStatus', 3, 0, 1, NULL);
+INSERT INTO `72crm_admin_menu` VALUES (192, 13, '合同作废', 'discard', 3, 1, 1, NULL);
 
 -- ----------------------------
 -- Table structure for 72crm_admin_record
