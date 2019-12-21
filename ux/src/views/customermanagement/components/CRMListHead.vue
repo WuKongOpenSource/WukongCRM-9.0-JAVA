@@ -45,6 +45,15 @@
       :show="showCRMImport"
       :crm-type="crmType"
       @close="showCRMImport=false"/>
+    <c-r-m-export
+      :show="showCRMExport"
+      :crm-type="crmType"
+      :search="search"
+      :scene_id="scene_id"
+      :filter-obj="filterObj"
+      :is-seas="isSeas"
+      :export-params="exportParams"
+      @close="showCRMExport=false"/>
   </div>
 </template>
 
@@ -52,12 +61,14 @@
 import { mapGetters } from 'vuex'
 import CRMCreateView from './CRMCreateView'
 import CRMImport from './CRMImport'
+import CRMExport from './CRMExport'
 
 export default {
   name: 'CRMListHead', // 客户管理下 重要提醒 回款计划提醒
   components: {
     CRMCreateView,
-    CRMImport
+    CRMImport,
+    CRMExport
   },
   props: {
     title: {
@@ -82,7 +93,17 @@ export default {
       type: Boolean,
       default: false
     },
-    search: String
+    search: String,
+    scene_id: {
+      type: [Number, String],
+      default: ''
+    },
+    filterObj: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    }
   },
   data() {
     return {
@@ -94,7 +115,11 @@ export default {
       createCRMType: '',
       isCreate: false, // 是创建
       // 导入
-      showCRMImport: false
+      showCRMImport: false,
+      // 导出
+      showCRMExport: false,
+      // 导出选中参数
+      exportParams: {}
     }
   },
   computed: {
@@ -123,9 +148,17 @@ export default {
     }
   },
   methods: {
-    handleTypeDrop(command) {
+    handleTypeDrop(command, params = {}) {
       if (command == 'out') {
-        this.$emit('on-export')
+        let paramsData = {}
+        if (params.__export) {
+          paramsData = params
+          delete paramsData.__export
+        } else {
+          paramsData = {}
+        }
+        this.exportParams = paramsData
+        this.showCRMExport = true
       } else if (command == 'enter') {
         this.showCRMImport = true
       }

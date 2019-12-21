@@ -98,11 +98,11 @@ export default {
       params[this.crmType + 'Ids'] = this.id
       crmQueryTaskRelation(params)
         .then(res => {
-          for (const item of res.data.list) {
-            if (item.dataInfo.status == 5) {
-              item.dataInfo.checked = true
+          res.data.list.forEach(item => {
+            if (item.status == 5) {
+              item.checked = true
             }
-          }
+          })
           this.list = this.list.concat(res.data.list)
           if (res.data.list.length < 10) {
             this.loadMoreLoading = false

@@ -185,4 +185,13 @@ public abstract class BaseCrmCustomer<M extends BaseCrmCustomer<M>> extends Mode
 		return getStr("batch_id");
 	}
 
+	public M setLastContent(java.lang.String lastContent) {
+		set("last_content", lastContent);
+		return (M)this;
+	}
+
+	public java.lang.String getLastContent() {
+		return getStr("last_content");
+	}
+
 }

@@ -20,6 +20,7 @@
         :key="index"
         :prop="item.prop"
         :label="item.label"
+        :formatter="fieldFormatter"
         show-overflow-tooltip/>
     </el-table>
     <flexbox class="handle-footer">
@@ -37,6 +38,7 @@
 import loading from '../mixins/loading'
 import { crmBusinessProduct } from '@/api/customermanagement/business'
 import { crmContractProduct } from '@/api/customermanagement/contract'
+import { moneyFormat } from '@/utils'
 
 export default {
   name: 'RelativeProduct', // 相关产品  可能再很多地方展示 放到客户管理目录下
@@ -121,7 +123,7 @@ export default {
           this.nopermission = false
           this.loading = false
           this.list = res.data.list
-          this.totalInfo.money = res.data.money
+          this.totalInfo.money = moneyFormat(res.data.money)
           this.totalInfo.discountRate = res.data.discountRate
         })
         .catch(data => {
@@ -163,6 +165,15 @@ export default {
     /** 通过回调控制style */
     cellStyle({ row, column, rowIndex, columnIndex }) {
       return { textAlign: 'center' }
+    },
+    /**
+     * 格式化表格
+     */
+    fieldFormatter(row, column) {
+      if (['price', 'subtotal', 'salesPrice'].includes(column.property)) {
+        return moneyFormat(row[column.property])
+      }
+      return row[column.property] || '--'
     }
   }
 }

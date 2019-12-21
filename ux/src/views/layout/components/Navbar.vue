@@ -55,7 +55,7 @@
         <div
           :style="{'margin-bottom': manage ? '15px' : '0'}"
           class="handel-item hr-top"
-          style="pointer-events: none;"><i class="wukong wukong-versions"/>版本 V9.2.2.191129</div>
+          style="pointer-events: none;"><i class="wukong wukong-versions"/>版本 V9.2.3.191220</div>
         <div
           v-if="manage"
           class="handel-box">

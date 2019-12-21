@@ -45,7 +45,7 @@ export function editTask(data) {
 // 编辑关联业务
 export function editTaskRelation(data) {
   return request({
-    url: 'task/svaeTaskRelation',
+    url: 'task/saveTaskRelation',
     method: 'post',
     data: data
   })

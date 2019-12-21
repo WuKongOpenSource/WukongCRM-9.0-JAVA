@@ -1,22 +1,19 @@
 package com.kakarote.crm9.utils;
 
 import cn.hutool.core.date.DateUtil;
-import com.jfinal.kit.PropKit;
-import com.jfinal.log.Log;
 import com.kakarote.crm9.common.config.JfinalConfig;
 import com.kakarote.crm9.common.config.redis.Redis;
 import com.kakarote.crm9.common.config.redis.RedisManager;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
-import com.jfinal.kit.Prop;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Date;
 
 public class BaseUtil {
 
-    private static ThreadLocal<HttpServletRequest> threadLocal = new ThreadLocal<>();
+    private static ThreadLocal<AdminUser> threadLocal = new ThreadLocal<>();
 
     private static final String USER_ADMIN_TOKEN = "72CRM_USER_ADMIN_TOKEN";
 
@@ -72,64 +69,29 @@ public class BaseUtil {
     }
 
     //FIXME 如果获取的地址不正确,直接返回一个固定地址也可以
-    public static String getIpAddress() {
-        Prop prop = PropKit.use("config/undertow.txt");
-        try {
-            if (isDevelop()) {
-                return "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + prop.get("undertow.port", "8080") + "/";
-            }
-        } catch (Exception e) {
-            Log.getLog(BaseUtil.class).error("",e);
+    public static String getIpAddress(HttpServletRequest request) {
+        StringBuilder str=new StringBuilder();
+        str.append(request.getScheme()).append("://").append(request.getServerName());
+        if(!Arrays.asList(80,443).contains(request.getServerPort())){
+            str.append(":").append(request.getServerPort());
         }
-        HttpServletRequest request=getRequest();
-        String proxy=request.getHeader("proxy_url")!=null?"/"+request.getHeader("proxy_url"):"";
-        return "http://" + request.getServerName()+":"+ request.getServerPort()+ request.getContextPath()+proxy+"/";
-    }
-
-    public static String getLoginAddress(HttpServletRequest request){
-        String ip = request.getHeader("x-forwarded-for");
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        if (ip.contains(",")) {
-            return ip.split(",")[0];
-        } else {
-            return ip;
-        }
-    }
-
-    public static String getLoginAddress() {
-        return getLoginAddress(getRequest());
-    }
-
-    public static void setRequest(HttpServletRequest request) {
-        threadLocal.set(request);
-    }
-
-    public static HttpServletRequest getRequest() {
-        return threadLocal.get();
+        str.append(request.getContextPath());
+        str.append("/");
+        return str.toString();
     }
 
     public static AdminUser getUser() {
-        return RedisManager.getRedis().get(getToken());
+        return threadLocal.get();
     }
-
+    public static void setUser(AdminUser adminUser) {
+        threadLocal.set(adminUser);
+    }
     public static Long getUserId(){
         return getUser().getUserId();
     }
 
     public static void removeThreadLocal(){
         threadLocal.remove();
-    }
-
-    public static String getToken(){
-        return getToken(getRequest());
     }
 
     public static String getToken(HttpServletRequest request){

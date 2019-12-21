@@ -31,7 +31,7 @@ public class AdminRoleController extends Controller {
 
     /**
      * 根据角色类型查询角色列表
-     * @param roleType
+     * @param roleType 角色类型
      */
     public void getRoleByType(@Para("roleType")Integer roleType){
         renderJson(R.ok().put("data",adminRoleService.getRoleByType(roleType)));

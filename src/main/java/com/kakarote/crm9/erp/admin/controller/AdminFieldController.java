@@ -152,7 +152,7 @@ public class AdminFieldController extends Controller {
         if(types.equals(2)){
             auth = AuthUtil.isPoolAuth(id);
         }else {
-            auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.parse(types)), id);
+            auth = AuthUtil.isCrmAuth(CrmEnum.parse(types), id);
         }
         if(auth){renderJson(R.noAuth()); return; }
         if (1 == types){

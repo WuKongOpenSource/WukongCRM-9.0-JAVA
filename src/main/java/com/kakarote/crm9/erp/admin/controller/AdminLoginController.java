@@ -2,8 +2,7 @@ package com.kakarote.crm9.erp.admin.controller;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson.JSONObject;
+import cn.hutool.extra.servlet.ServletUtil;
 import com.jfinal.core.paragetter.Para;
 import com.jfinal.kit.Prop;
 import com.jfinal.kit.PropKit;
@@ -22,10 +21,7 @@ import com.jfinal.plugin.activerecord.Db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 用户登录
@@ -84,9 +80,8 @@ public class AdminLoginController extends Controller{
             }
             redis.del(key);
             String token = IdUtil.simpleUUID();
-            user.setLastLoginIp(BaseUtil.getLoginAddress(getRequest()));
+            user.setLastLoginIp(ServletUtil.getClientIP(getRequest()));
             user.setLastLoginTime(new Date());
-
             user.update();
             user.setRoles(adminRoleService.queryRoleIdsByUserId(user.getUserId()));
             redis.setex(token, 3600, user);

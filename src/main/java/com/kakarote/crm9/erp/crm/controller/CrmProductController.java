@@ -1,9 +1,11 @@
 package com.kakarote.crm9.erp.crm.controller;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Aop;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
 import com.jfinal.core.paragetter.Para;
@@ -12,16 +14,17 @@ import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.upload.UploadFile;
-import com.kakarote.crm9.common.annotation.LoginFormCookie;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.Permissions;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
-import com.kakarote.crm9.erp.admin.entity.AdminField;
+import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
+import com.kakarote.crm9.erp.crm.common.CrmExcelUtil;
 import com.kakarote.crm9.erp.crm.entity.CrmProduct;
 import com.kakarote.crm9.erp.crm.service.CrmProductService;
+import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
@@ -86,6 +89,11 @@ public class CrmProductController extends Controller {
     @Permissions("crm:product:read")
     @NotNullValidate(value = "productId", message = "产品id不能为空")
     public void queryById(@Para("productId") Integer productId) {
+        Integer number = Db.queryInt("select count(1) from `72crm_crm_product` where product_id = ? and status != 3",productId);
+        if (number == 0) {
+            renderJson(R.error("产品已删除"));
+            return;
+        }
         renderJson(R.ok().put("data",crmProductService.queryById(productId)));
     }
 
@@ -95,9 +103,9 @@ public class CrmProductController extends Controller {
      * @author zxy
      */
     @Permissions("crm:product:delete")
-    @NotNullValidate(value = "productId", message = "产品id不能为空")
-    public void deleteById(@Para("productId") Integer productId) {
-        renderJson(crmProductService.deleteById(productId));
+    @NotNullValidate(value = "productIds", message = "产品id不能为空")
+    public void deleteByIds(@Para("productIds") String productIds) {
+        renderJson(crmProductService.deleteByIds(productIds));
     }
 
     /**
@@ -118,11 +126,15 @@ public class CrmProductController extends Controller {
      * 批量导出产品
      */
     @Permissions("crm:product:excelexport")
-    public void batchExportExcel(@Para("ids") String productIds) throws IOException {
-        Map<String, AdminField> fieldMap = adminSceneService.getAdminFieldMap(4);
-        String[] productIdsArr = productIds.split(",");
-        Kv kv = Kv.by("ids", productIdsArr).set("fieldMap",fieldMap);
-        List<Record> recordList = crmProductService.exportProduct(kv);
+    public void batchExportExcel(BasePageRequest basePageRequest) {
+        JSONObject jsonObject=basePageRequest.getJsonObject();
+        String ids=jsonObject.getString("ids");
+        JSONObject data =new JSONObject();
+        data.fluentPut("productExport",new JSONObject().fluentPut("name","product_id").fluentPut("condition","in").fluentPut("value", ids));
+        jsonObject.fluentPut("data",data).fluentPut("search","").fluentPut("type",4);
+        basePageRequest.setJsonObject(jsonObject);
+        JSONObject resultData = (JSONObject)adminSceneService.getCrmPageList(basePageRequest).get("data");
+        List<Record> recordList = resultData.getJSONArray("list").toJavaList(Record.class);
         export(recordList);
         renderNull();
     }
@@ -132,7 +144,7 @@ public class CrmProductController extends Controller {
      * 导出全部产品
      */
     @Permissions("crm:product:excelexport")
-    public void allExportExcel(BasePageRequest basePageRequest) throws IOException {
+    public void allExportExcel(BasePageRequest basePageRequest){
         JSONObject jsonObject = basePageRequest.getJsonObject();
         jsonObject.fluentPut("excel", "yes").fluentPut("type", "4");
         AdminSceneService adminSceneService = new AdminSceneService();
@@ -142,41 +154,26 @@ public class CrmProductController extends Controller {
         renderNull();
     }
 
-    private void export(List<Record> recordList) throws IOException {
-        ExcelWriter writer = null;
-        try {
-            writer = ExcelUtil.getWriter();
-            AdminFieldService adminFieldService = new AdminFieldService();
-            List<Record> fieldList = adminFieldService.customFieldList(CrmEnum.CRM_PRODUCT.getType());
-            writer.addHeaderAlias("name", "产品名称");
-            writer.addHeaderAlias("num", "产品编码");
-            writer.addHeaderAlias("category_name", "产品类别");
-            writer.addHeaderAlias("price", "价格");
-            writer.addHeaderAlias("description", "产品描述");
-            writer.addHeaderAlias("create_user_name", "创建人");
-            writer.addHeaderAlias("owner_user_name", "负责人");
-            writer.addHeaderAlias("create_time", "创建时间");
-            writer.addHeaderAlias("update_time", "更新时间");
-            for (Record field : fieldList) {
-                writer.addHeaderAlias(field.getStr("name"), field.getStr("name"));
-            }
-            writer.merge(8 + fieldList.size(), "产品信息");
+    private void export(List<Record> recordList){
+        try (ExcelWriter writer = ExcelUtil.getWriter()) {
+            AdminFieldSort adminFieldSort = new AdminFieldSort();
+            adminFieldSort.setLabel(CrmEnum.CRM_PRODUCT.getType());
+            List<Record> headList = Aop.get(AdminFieldService.class).queryListHead(adminFieldSort);
+            headList.forEach(head -> writer.addHeaderAlias(StrUtil.toUnderlineCase(head.getStr("fieldName")), head.getStr("name")));
+            writer.merge(headList.size() - 1, "产品信息");
             HttpServletResponse response = getResponse();
             List<Map<String, Object>> list = new ArrayList<>();
-            if (recordList.size() == 0){
-                Record record = new Record().set("name","").set("num","").set("category_name","").set("price","").set("description","").set("create_user_name","").set("owner_user_name","").set("create_time","").set("update_time","");
-                for (Record field : fieldList) {
-                    record.set(field.getStr("name"),"");
-                }
+            if (recordList.size() == 0) {
+                Record record = new Record();
+                headList.forEach(head -> record.set(StrUtil.toUnderlineCase(head.getStr("fieldName")), ""));
                 list.add(record.getColumns());
             }
-            for (Record record : recordList) {
-                list.add(record.remove("batch_id", "status", "unit", "category_id", "product_id", "owner_user_id", "create_user_id", "field_batch_id", "multi_spec", "using_sn").getColumns());
-            }
+            recordList.forEach(record -> list.add(record.getColumns()));
+            writer.setOnlyAlias(true);
             writer.write(list, true);
             writer.setRowHeight(0, 20);
             writer.setRowHeight(1, 20);
-            for (int i = 0; i < fieldList.size() + 15; i++) {
+            for (int i = 0; i < headList.size(); i++) {
                 writer.setColumnWidth(i, 20);
             }
             Cell cell = writer.getCell(0, 0);
@@ -197,10 +194,7 @@ public class CrmProductController extends Controller {
             ServletOutputStream out = response.getOutputStream();
             writer.flush(out);
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            // 关闭writer，释放内存
-            writer.close();
+            Log.getLog(getClass()).error("导出产品错误：",e);
         }
     }
 
@@ -208,7 +202,6 @@ public class CrmProductController extends Controller {
      * @author zxy
      * 获取导入模板
      */
-    @LoginFormCookie
     public void downloadExcel() {
         List<Record> recordList = adminFieldService.queryAddField(CrmEnum.CRM_PRODUCT);
         recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType")) || "user".equals(record.getStr("formType")) || "structure".equals(record.getStr("formType")));
@@ -281,15 +274,14 @@ public class CrmProductController extends Controller {
      * 导入产品
      */
     @Permissions("crm:product:excelimport")
-    public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling, @Para("ownerUserId") Long ownerUserId) {
-        Db.tx(() -> {
-            R result = crmProductService.uploadExcel(file, repeatHandling, ownerUserId);
-            renderJson(result);
-            if (result.get("code").equals(500)) {
-                return false;
-            }
-            return true;
-        });
+    public void uploadExcel() {
+        String prefix= BaseUtil.getDate();
+        UploadFile file=getFile("file",prefix);
+        Integer repeatHandling=getParaToInt("repeatHandling");
+        Long ownerUserId=getParaToLong("ownerUserId");
+        CrmExcelUtil excelUtil=new CrmExcelUtil();
+        Long messageId = excelUtil.addWork(CrmEnum.CRM_PRODUCT,file.getFile().getAbsolutePath(),ownerUserId,repeatHandling);
+        renderJson(R.ok().put("data",messageId));
     }
 
     /**

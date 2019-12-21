@@ -8,11 +8,11 @@
     #end
 
     #sql("queryById")
-    select a.*,b.*,c.realname,GROUP_CONCAT(d.realname) as 'owner_user_name'
-    from 72crm_oa_event as a left join 72crm_oa_event_relation as b on a.event_id = b.event_id
-    left join 72crm_admin_user as c on a.create_user_id = c.user_id
-    left join 72crm_admin_user as d on FIND_IN_SET(d.user_id,IFNULL(a.owner_user_ids, 0))
-    where a.event_id = ?
+      select a.*,b.*,c.realname,GROUP_CONCAT(d.realname) as 'owner_user_name'
+      from 72crm_oa_event as a left join 72crm_oa_event_relation as b on a.event_id = b.event_id
+      left join 72crm_admin_user as c on a.create_user_id = c.user_id
+      left join 72crm_admin_user as d on FIND_IN_SET(d.user_id,IFNULL(a.owner_user_ids, 0))
+      where a.event_id = ?
     #end
 
     #sql ("queryOwnerList")

@@ -39,12 +39,7 @@
       #end
     #end
     #sql("queryByIds")
-      select user_id,realname,img from 72crm_admin_user where user_id in (
-        #for(x:ids)
-          #(for.index == 0 ? "" : ",")
-              #para(x)
-        #end
-      )
+      select user_id,realname,img from 72crm_admin_user where user_id in (#fori(ids))
     #end
     #sql("queryUserByRealName")
       select   au.realname,au.mobile,au.post as postName ,ad.name as deptName from 72crm_admin_user as au
@@ -94,8 +89,6 @@
     #end
 
     #sql ("updateScene")
-    delete from 72crm_admin_scene where user_id in (
-        #fori(ids)
-    )
+      delete from 72crm_admin_scene where user_id in (#fori(ids))
     #end
 #end

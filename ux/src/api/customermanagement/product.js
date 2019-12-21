@@ -106,3 +106,16 @@ export function crmProductDownloadExcelAPI(data) {
     responseType: 'blob'
   })
 }
+
+/**
+ * 删除
+ * @param {*} data
+ *
+ */
+export function crmProductDelete(data) {
+  return request({
+    url: 'CrmProduct/deleteByIds',
+    method: 'post',
+    data: data
+  })
+}

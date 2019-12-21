@@ -1,23 +1,17 @@
 package com.kakarote.crm9.erp.crm.service;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.poi.excel.ExcelReader;
-import cn.hutool.poi.excel.ExcelUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
-import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
-import com.jfinal.upload.UploadFile;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.erp.admin.entity.AdminField;
 import com.kakarote.crm9.erp.admin.entity.AdminFieldv;
@@ -27,17 +21,15 @@ import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
 import com.kakarote.crm9.erp.crm.common.CrmParamValid;
+import com.kakarote.crm9.erp.crm.entity.CrmActionRecord;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
 import com.kakarote.crm9.erp.crm.entity.CrmLeads;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
-import com.kakarote.crm9.utils.AuthUtil;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.FieldUtil;
 import com.kakarote.crm9.utils.R;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CrmLeadsService {
@@ -107,16 +99,10 @@ public class CrmLeadsService {
      * 基本信息
      */
     public List<Record> information(Integer leadsId) {
-        CrmLeads crmLeads = CrmLeads.dao.findById(leadsId);
-        List<Record> fieldList = new ArrayList<>();
-        FieldUtil field = new FieldUtil(fieldList);
-        field.set("线索名称", crmLeads.getLeadsName()).set("电话", crmLeads.getMobile())
-                .set("手机", crmLeads.getTelephone()).set("下次联系时间", DateUtil.formatDateTime(crmLeads.getNextTime()))
-                .set("地址", crmLeads.getAddress()).set("备注", crmLeads.getRemark());
-        List<Record> recordList = Db.find(Db.getSql("admin.field.queryCustomField"),crmLeads.getBatchId());
-        fieldUtil.handleType(recordList);
-        fieldList.addAll(recordList);
-        return fieldList;
+        Record record = queryById(leadsId);
+        List<String> keyList = Arrays.asList("leads_name", "mobile", "address","telephone","next_time","remark");
+        List<Record> recordList = adminFieldService.queryInformation(CrmEnum.CRM_LEADS,record, keyList);
+        return recordList.stream().sorted(Comparator.comparingInt(r->-r.getInt("field_type"))).map(r-> r.remove("field_type","field_name","setting","type")).collect(Collectors.toList());
     }
 
     /**
@@ -226,9 +212,6 @@ public class CrmLeadsService {
                         continue;
                     }
                     if ("客户来源".equals(customerField.getName()) && "线索来源".equals(leadsField.getStr("name"))) {
-//                        if (isNull==1 && ObjectUtil.isEmpty(crmLeads.get(leadsField.get("name")))){
-//                            return R.error(customerField.getName()+"不能为空");
-//                        }
                         Integer integer = Db.template("crm.customer.queryFieldDuplicate1", Kv.by("key", customerField.getName()).set("value", crmLeads.get(leadsField.get("name")))).queryInt();
                         if (isUnique == 1 && Db.template("crm.customer.queryFieldDuplicate1",Kv.by("key",customerField.getName()).set("value",crmLeads.get(leadsField.get("name")))).queryInt()>0){
                             return R.error(customerField.getName()+"已存在");
@@ -240,9 +223,6 @@ public class CrmLeadsService {
                         adminFieldvList.add(adminFieldv);
                     }
                     if ("客户行业".equals(customerField.getName()) && "客户行业".equals(leadsField.getStr("name"))) {
-//                        if (isNull==1 && ObjectUtil.isEmpty(crmLeads.get(leadsField.get("name")))){
-//                            return R.error(customerField.getName()+"不能为空");
-//                        }
                         if (isUnique == 1 && Db.template("crm.customer.queryFieldDuplicate1",Kv.by("key",customerField.getName()).set("value",crmLeads.get(leadsField.get("name")))).queryInt()>0){
                             return R.error(customerField.getName()+"已存在");
                         }
@@ -274,9 +254,6 @@ public class CrmLeadsService {
                 Map<String, Object> customerMap = crmCustomer.toRecord().getColumns();
                 for (String key : customerMap.keySet()) {
                     if (key.equals(customerField.getFieldName())){
-//                        if (isNull==1 && ObjectUtil.isEmpty(customerMap.get(key))){
-//                            return R.error(name+"不能为空");
-//                        }
                         if (isUnique == 1 && Db.template("crm.customer.queryFieldDuplicate",Kv.by("key",key).set("value",customerMap.get(key))).queryInt()>0){
                             return R.error(name+"已存在");
                         }
@@ -293,7 +270,14 @@ public class CrmLeadsService {
             Db.update("update 72crm_crm_leads set is_transform = 1,update_time = ?,customer_id = ? where leads_id = ?",
                     DateUtil.date(), crmCustomer.getCustomerId(), Integer.valueOf(leadsId));
             List<AdminRecord> adminRecordList = AdminRecord.dao.find("select * from 72crm_admin_record where types = 'crm_leads' and types_id = ?",Integer.valueOf(leadsId));
+            List<CrmActionRecord> crmActionRecordList = CrmActionRecord.dao.find("select * from `72crm_crm_action_record` where action_id = ? and types = 1", Integer.valueOf(leadsId));
             List<AdminFile> adminFileList = new ArrayList<>();
+            crmActionRecordList.forEach(crmActionRecord -> {
+                crmActionRecord.setId(null);
+                crmActionRecord.setTypes(String.valueOf(CrmEnum.CRM_CUSTOMER.getType()));
+                crmActionRecord.setActionId(crmCustomer.getCustomerId());
+            });
+            Db.batchSave(crmActionRecordList,500);
             if (adminRecordList.size() != 0){
                 adminRecordList.forEach(adminRecord -> {
                     List<AdminFile> leadsRecordFiles = AdminFile.dao.find("select file_id, name, size, create_user_id, create_time, file_path, file_type from 72crm_admin_file where batch_id = ?",adminRecord.getBatchId());
@@ -354,7 +338,12 @@ public class CrmLeadsService {
             oaEvent.setCreateTime(DateUtil.date());
             oaEvent.save();
         }
-        Db.update("update 72crm_crm_leads set followup = 1 where leads_id = ?",adminRecord.getTypesId());
+        CrmLeads crmLeads = new CrmLeads();
+        crmLeads.setLastContent(adminRecord.getContent());
+        crmLeads.setLeadsId(adminRecord.getTypesId());
+        crmLeads.setFollowup(1);
+        crmLeads.setNextTime(adminRecord.getNextTime());
+        crmLeads.update();
         return adminRecord.save() ? R.ok() : R.error();
     }
 
@@ -373,106 +362,9 @@ public class CrmLeadsService {
 
     /**
      * @author wyq
-     * 线索导出
-     */
-    public List<Record> exportLeads(Kv kv) {
-        return Db.find(Db.getSqlPara("crm.leads.excelExport",kv));
-    }
-
-    /**
-     * @author wyq
      * 获取线索导入查重字段
      */
     public R getCheckingField(){
         return R.ok().put("data","线索名称");
-    }
-
-    /**
-     * @author wyq
-     * 导入线索
-     */
-    public R uploadExcel(UploadFile file, Integer repeatHandling, Long ownerUserId) {
-        ExcelReader reader = ExcelUtil.getReader(FileUtil.file(file.getUploadPath() + "\\" + file.getFileName()));
-        AdminFieldService adminFieldService = new AdminFieldService();
-        Kv kv = new Kv();
-        Integer errNum = 0;
-        try {
-            List<List<Object>> read = reader.read();
-            List<Object> list = read.get(1);
-            List<Record> recordList = adminFieldService.customFieldList(1);
-            recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
-            List<Record> fieldList = adminFieldService.queryAddField(CrmEnum.CRM_LEADS);
-            fieldList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType"))|| "user".equals(record.getStr("formType"))|| "structure".equals(record.getStr("formType")));
-            fieldList.forEach(record -> {
-                if (record.getInt("is_null") == 1){
-                    record.set("name",record.getStr("name")+"(*)");
-                }
-            });
-            List<String> nameList = fieldList.stream().map(record -> record.getStr("name")).collect(Collectors.toList());
-            if (nameList.size() != list.size() || !nameList.containsAll(list)){
-                return R.error("请使用最新导入模板");
-            }
-            Kv nameMap = new Kv();
-            fieldList.forEach(record -> nameMap.set(record.getStr("name"),record.getStr("field_name")));
-            for (int i = 0; i < list.size(); i++) {
-                kv.set(nameMap.get(list.get(i)), i);
-            }
-            if (read.size() > 2) {
-                JSONObject object = new JSONObject();
-                for (int i = 2; i < read.size(); i++) {
-                    errNum = i;
-                    List<Object> leadsList = read.get(i);
-                    if (leadsList.size() < list.size()) {
-                        for (int j = leadsList.size() - 1; j < list.size(); j++) {
-                            leadsList.add(null);
-                        }
-                    }
-                    String leadsName = leadsList.get(kv.getInt("leads_name")).toString();
-                    Integer number = Db.queryInt("select count(*) from 72crm_crm_leads where leads_name = ?", leadsName);
-                    if (0 == number) {
-                        object.fluentPut("entity", new JSONObject().fluentPut("leads_name", leadsName)
-                                .fluentPut("telephone", leadsList.get(kv.getInt("telephone")))
-                                .fluentPut("mobile", leadsList.get(kv.getInt("mobile")))
-                                .fluentPut("address", leadsList.get(kv.getInt("address")))
-                                .fluentPut("next_time", leadsList.get(kv.getInt("next_time")))
-                                .fluentPut("remark", leadsList.get(kv.getInt("remark")))
-                                .fluentPut("owner_user_id", ownerUserId));
-                    } else if (number > 0 && repeatHandling == 1) {
-                        Record leads = Db.findFirst("select leads_id,batch_id from 72crm_crm_leads where leads_name = ?", leadsName);
-                        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_LEADS),leads.getInt("leads_id"));
-                        if (auth){
-                            return R.error("第"+(errNum+1)+"行数据无操作权限，不能覆盖");
-                        }
-                        object.fluentPut("entity", new JSONObject().fluentPut("leads_id", leads.getInt("leads_id"))
-                                .fluentPut("leads_name", leadsName)
-                                .fluentPut("telephone", leadsList.get(kv.getInt("telephone")))
-                                .fluentPut("mobile", leadsList.get(kv.getInt("mobile")))
-                                .fluentPut("address", leadsList.get(kv.getInt("address")))
-                                .fluentPut("next_time", leadsList.get(kv.getInt("next_time")))
-                                .fluentPut("remark", leadsList.get(kv.getInt("remark")))
-                                .fluentPut("batch_id", leads.getStr("batch_id")));
-                    } else if (number > 0 && repeatHandling == 2) {
-                        continue;
-                    }
-                    JSONArray jsonArray = new JSONArray();
-                    for (Record record : recordList) {
-                        Integer columnsNum = kv.getInt(record.getStr("name"))!=null?kv.getInt(record.getStr("name")):kv.getInt(record.getStr("name")+"(*)");
-                        record.set("value", leadsList.get(columnsNum));
-                        jsonArray.add(JSONObject.parseObject(record.toJson()));
-                    }
-                    object.fluentPut("field", jsonArray);
-                    addOrUpdate(object);
-                }
-            }
-        } catch (Exception e) {
-            Log.getLog(getClass()).error("",e);
-            if (errNum != 0){
-                return R.error("第" + (errNum+1) + "行错误!");
-            }
-            return R.error();
-        } finally {
-            reader.close();
-        }
-        return R.ok();
     }
 }

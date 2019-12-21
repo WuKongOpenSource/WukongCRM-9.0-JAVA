@@ -174,4 +174,17 @@
   #sql("queryExamineCategoryByType")
     SELECT * FROM 72crm_oa_examine_category WHERE type= ? limit 0,1
   #end
+    #sql("queryExamineUserByExamineStepId")
+    SELECT * FROM `72crm_oa_examine_log`
+    WHERE record_id = #para(recordId) and examine_step_id = #para(examineStepId)
+    and (is_recheck = 0 or is_recheck is null)
+     #if(examineStatus)
+      and examine_status =  #para(examineStatus)
+    #end
+    ORDER BY log_id desc LIMIT 0 , 1
+  #end
+  #sql("queryExamineStepByLastExamineIdOrderByStepId")
+        SELECT * FROM 72crm_oa_examine_step WHERE category_id = ?
+        and step_num =  (SELECT step_num FROM 72crm_oa_examine_step where step_id = ?) - 1
+   #end
 #end

@@ -5,6 +5,7 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
@@ -17,10 +18,12 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
 import com.kakarote.crm9.common.annotation.*;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
+import com.kakarote.crm9.erp.admin.entity.AdminFieldSort;
 import com.kakarote.crm9.erp.admin.entity.AdminRecord;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
 import com.kakarote.crm9.erp.admin.service.AdminSceneService;
 import com.kakarote.crm9.erp.crm.common.CrmEnum;
+import com.kakarote.crm9.erp.crm.common.CrmExcelUtil;
 import com.kakarote.crm9.erp.crm.entity.CrmBusiness;
 import com.kakarote.crm9.erp.crm.entity.CrmContract;
 import com.kakarote.crm9.erp.crm.entity.CrmCustomer;
@@ -376,7 +379,7 @@ public class CrmCustomerController extends Controller {
     @NotNullValidate(value = "content", message = "内容不能为空")
     @NotNullValidate(value = "category", message = "跟进类型不能为空")
     public void addRecord(@Para("") AdminRecord adminRecord) {
-        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_CUSTOMER), adminRecord.getTypesId());
+        boolean auth = AuthUtil.isCrmAuth(CrmEnum.CRM_CUSTOMER, adminRecord.getTypesId());
         if (auth) {
             renderJson(R.noAuth());
             return;
@@ -402,8 +405,15 @@ public class CrmCustomerController extends Controller {
      * 客户批量导出
      */
     @Permissions("crm:customer:excelexport")
-    public void batchExportExcel(@Para("ids") String customerIds) throws IOException {
-        List<Record> recordList = crmCustomerService.exportCustomer(customerIds);
+    public void batchExportExcel(BasePageRequest basePageRequest){
+        JSONObject jsonObject=basePageRequest.getJsonObject();
+        String ids=jsonObject.getString("ids");
+        JSONObject data =new JSONObject();
+        data.fluentPut("customerExport",new JSONObject().fluentPut("name","customer_id").fluentPut("condition","in").fluentPut("value", ids));
+        jsonObject.fluentPut("data",data).fluentPut("search","").fluentPut("type",2);
+        basePageRequest.setJsonObject(jsonObject);
+        JSONObject resultData = (JSONObject)adminSceneService.getCrmPageList(basePageRequest).get("data");
+        List<Record> recordList = resultData.getJSONArray("list").toJavaList(Record.class);
         export(recordList);
         renderNull();
     }
@@ -413,7 +423,7 @@ public class CrmCustomerController extends Controller {
      * 全部导出
      */
     @Permissions("crm:customer:excelexport")
-    public void allExportExcel(BasePageRequest basePageRequest) throws IOException {
+    public void allExportExcel(BasePageRequest basePageRequest){
         JSONObject jsonObject = basePageRequest.getJsonObject();
         jsonObject.fluentPut("excel", "yes").fluentPut("type", 2);
         AdminSceneService adminSceneService = new AdminSceneService();
@@ -428,8 +438,15 @@ public class CrmCustomerController extends Controller {
      * 公海批量导出
      */
     @Permissions("crm:pool:excelexport")
-    public void poolBatchExportExcel(@Para("ids") String customerIds) throws IOException {
-        List<Record> recordList = crmCustomerService.exportCustomer(customerIds);
+    public void poolBatchExportExcel(BasePageRequest basePageRequest){
+        JSONObject jsonObject=basePageRequest.getJsonObject();
+        String ids=jsonObject.getString("ids");
+        JSONObject data =new JSONObject();
+        data.fluentPut("customerExport",new JSONObject().fluentPut("name","customer_id").fluentPut("condition","in").fluentPut("value", ids));
+        jsonObject.fluentPut("data",data).fluentPut("search","").fluentPut("type",9);
+        basePageRequest.setJsonObject(jsonObject);
+        JSONObject resultData = (JSONObject)adminSceneService.getCrmPageList(basePageRequest).get("data");
+        List<Record> recordList = resultData.getJSONArray("list").toJavaList(Record.class);
         export(recordList);
         renderNull();
     }
@@ -439,7 +456,7 @@ public class CrmCustomerController extends Controller {
      * 公海全部导出
      */
     @Permissions("crm:pool:excelexport")
-    public void poolAllExportExcel(BasePageRequest basePageRequest) throws IOException {
+    public void poolAllExportExcel(BasePageRequest basePageRequest){
         JSONObject jsonObject = basePageRequest.getJsonObject();
         jsonObject.fluentPut("excel", "yes").fluentPut("type", 8);
         AdminSceneService adminSceneService = new AdminSceneService();
@@ -449,50 +466,30 @@ public class CrmCustomerController extends Controller {
         renderNull();
     }
 
-    private void export(List<Record> recordList) throws IOException {
+    private void export(List<Record> recordList){
         ExcelWriter writer = ExcelUtil.getWriter();
         try {
-            AdminFieldService adminFieldService = new AdminFieldService();
-            List<Record> fieldList = adminFieldService.customFieldList(CrmEnum.CRM_CUSTOMER.getType());
-            List<Record> customerFields = adminFieldService.list(CrmEnum.CRM_CUSTOMER.getType());
-            Kv kv = new Kv();
-            customerFields.forEach(customerField -> kv.set(customerField.getStr("field_name"), customerField.getStr("name")));
-            writer.addHeaderAlias("customer_name", kv.getStr("customer_name"));
-            writer.addHeaderAlias("telephone", kv.getStr("telephone"));
-            writer.addHeaderAlias("mobile", kv.getStr("mobile"));
-            writer.addHeaderAlias("website", kv.getStr("website"));
-            writer.addHeaderAlias("next_time", kv.getStr("next_time"));
-            writer.addHeaderAlias("deal_status", "成交状态");
-            writer.addHeaderAlias("create_user_name", "创建人");
-            writer.addHeaderAlias("owner_user_name", "负责人");
-            writer.addHeaderAlias("address", "省市区");
-            writer.addHeaderAlias("location", "定位信息");
-            writer.addHeaderAlias("detail_address", "详细地址");
-            writer.addHeaderAlias("lng", "地理位置经度");
-            writer.addHeaderAlias("lat", "地理位置维度");
-            writer.addHeaderAlias("create_time", "创建时间");
-            writer.addHeaderAlias("update_time", "更新时间");
-            writer.addHeaderAlias("remark", kv.getStr("remark"));
-            for (Record field : fieldList) {
-                writer.addHeaderAlias(field.getStr("name"), field.getStr("name"));
-            }
-            writer.merge(fieldList.size() + 15, "客户信息");
+            AdminFieldSort adminFieldSort = new AdminFieldSort();
+            adminFieldSort.setLabel(CrmEnum.CRM_CUSTOMER.getType());
+            List<Record> headList = Aop.get(AdminFieldService.class).queryListHead(adminFieldSort);
+            headList.forEach(head -> writer.addHeaderAlias(StrUtil.toUnderlineCase(head.getStr("fieldName")),head.getStr("name")));
+            writer.merge(headList.size()-1, "客户信息");
             HttpServletResponse response = getResponse();
             List<Map<String, Object>> list = new ArrayList<>();
             if (recordList.size() == 0){
-                Record record = new Record().set("customer_name","").set("telephone","").set("mobile","").set("website","").set("next_time","").set("deal_status","").set("create_user_name","").set("owner_user_name","").set("address","").set("location","").set("detail_address","").set("lng","").set("lat","").set("create_time","").set("update_time","").set("remark","");
-                for (Record field : fieldList) {
-                    record.set(field.getStr("name"),"");
-                }
+                Record record = new Record();
+                headList.forEach(head -> record.set(StrUtil.toUnderlineCase(head.getStr("fieldName")), ""));
                 list.add(record.getColumns());
             }
-            for (Record record : recordList) {
-                list.add(record.remove("batch_id", "create_user_id", "customer_id", "is_lock", "owner_user_id", "ro_user_id", "rw_user_id", "followup", "field_batch_id", "business_count", "pool_day").getColumns());
-            }
+            recordList.forEach(record -> {
+                record.set("deal_status",record.getInt("deal_status").equals(1)?"已成交":"未成交");
+                list.add(record.getColumns());
+            });
+            writer.setOnlyAlias(true);
             writer.write(list, true);
             writer.setRowHeight(0, 20);
             writer.setRowHeight(1, 20);
-            for (int i = 0; i < fieldList.size() + 16; i++) {
+            for (int i = 0; i < headList.size(); i++) {
                 writer.setColumnWidth(i, 20);
             }
             Cell cell = writer.getCell(0, 0);
@@ -513,12 +510,80 @@ public class CrmCustomerController extends Controller {
             ServletOutputStream out = response.getOutputStream();
             writer.flush(out);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.getLog(getClass()).error("导出客户错误：",e);
         } finally {
             // 关闭writer，释放内存
             writer.close();
         }
     }
+
+//    private void export(List<Record> recordList){
+//        try (ExcelWriter writer = ExcelUtil.getWriter()) {
+//            AdminFieldService adminFieldService = new AdminFieldService();
+//            List<Record> fieldList = adminFieldService.customFieldList(CrmEnum.CRM_CUSTOMER.getType());
+//            List<Record> customerFields = adminFieldService.list(CrmEnum.CRM_CUSTOMER.getType());
+//            Kv kv = new Kv();
+//            customerFields.forEach(customerField -> kv.set(customerField.getStr("field_name"), customerField.getStr("name")));
+//            writer.addHeaderAlias("customer_name", kv.getStr("customer_name"));
+//            writer.addHeaderAlias("telephone", kv.getStr("telephone"));
+//            writer.addHeaderAlias("mobile", kv.getStr("mobile"));
+//            writer.addHeaderAlias("website", kv.getStr("website"));
+//            writer.addHeaderAlias("next_time", kv.getStr("next_time"));
+//            writer.addHeaderAlias("deal_status", "成交状态");
+//            writer.addHeaderAlias("create_user_name", "创建人");
+//            writer.addHeaderAlias("owner_user_name", "负责人");
+//            writer.addHeaderAlias("address", "省市区");
+//            writer.addHeaderAlias("location", "定位信息");
+//            writer.addHeaderAlias("detail_address", "详细地址");
+//            writer.addHeaderAlias("lng", "地理位置经度");
+//            writer.addHeaderAlias("lat", "地理位置维度");
+//            writer.addHeaderAlias("create_time", "创建时间");
+//            writer.addHeaderAlias("update_time", "更新时间");
+//            writer.addHeaderAlias("remark", kv.getStr("remark"));
+//            writer.addHeaderAlias("last_content", "最后跟进记录");
+//            for (Record field : fieldList) {
+//                writer.addHeaderAlias(field.getStr("name"), field.getStr("name"));
+//            }
+//            writer.merge(fieldList.size() + 16, "客户信息");
+//            HttpServletResponse response = getResponse();
+//            List<Map<String, Object>> list = new ArrayList<>();
+//            if (recordList.size() == 0) {
+//                Record record = new Record().set("customer_name", "").set("telephone", "").set("mobile", "").set("website", "").set("next_time", "").set("deal_status", "").set("create_user_name", "").set("owner_user_name", "").set("address", "").set("location", "").set("detail_address", "").set("lng", "").set("lat", "").set("create_time", "").set("update_time", "").set("remark", "");
+//                for (Record field : fieldList) {
+//                    record.set(field.getStr("name"), "");
+//                }
+//                list.add(record.getColumns());
+//            }
+//            for (Record record : recordList) {
+//                list.add(record.remove("batch_id", "create_user_id", "customer_id", "is_lock", "owner_user_id", "ro_user_id", "rw_user_id", "followup", "field_batch_id", "business_count", "pool_day").getColumns());
+//            }
+//            writer.write(list, true);
+//            writer.setRowHeight(0, 20);
+//            writer.setRowHeight(1, 20);
+//            for (int i = 0; i < fieldList.size() + 17; i++) {
+//                writer.setColumnWidth(i, 20);
+//            }
+//            Cell cell = writer.getCell(0, 0);
+//            CellStyle cellStyle = cell.getCellStyle();
+//            cellStyle.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
+//            cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+//            Font font = writer.createFont();
+//            font.setBold(true);
+//            font.setFontHeightInPoints((short) 16);
+//            cellStyle.setFont(font);
+//            cell.setCellStyle(cellStyle);
+//            //自定义标题别名
+//            //response为HttpServletResponse对象
+//            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+//            response.setCharacterEncoding("UTF-8");
+//            //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+//            response.setHeader("Content-Disposition", "attachment;filename=customer.xls");
+//            ServletOutputStream out = response.getOutputStream();
+//            writer.flush(out);
+//        } catch (Exception e) {
+//            Log.getLog(getClass()).error("导出客户错误：",e);
+//        }
+//    }
 
     /**
      * 客户放入公海
@@ -559,7 +624,6 @@ public class CrmCustomerController extends Controller {
      * @author wyq
      * 获取导入模板
      */
-    @LoginFormCookie
     public void downloadExcel() {
         List<Record> recordList = adminFieldService.queryAddField(CrmEnum.CRM_CUSTOMER);
         recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType")) || "user".equals(record.getStr("formType")) || "structure".equals(record.getStr("formType")));
@@ -569,7 +633,7 @@ public class CrmCustomerController extends Controller {
         CellStyle textStyle = wb.createCellStyle();
         DataFormat format = wb.createDataFormat();
         textStyle.setDataFormat(format.getFormat("@"));
-        for (int i=0;i < recordList.size();i++){
+        for (int i = 0; i < recordList.size() + 2; i++) {
             sheet.setDefaultColumnStyle(i,textStyle);
             sheet.setColumnWidth(i,20*256);
         }
@@ -584,31 +648,78 @@ public class CrmCustomerController extends Controller {
         titleRow.createCell(0).setCellValue("客户导入模板(*)为必填项");
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
         titleRow.getCell(0).setCellStyle(cellStyle);
-        CellRangeAddress region = new CellRangeAddress(0,0 , 0, recordList.size()-1);
+        CellRangeAddress region = new CellRangeAddress(0, 0, 0, recordList.size() + 1);
         sheet.addMergedRegion(region);
         try {
             HSSFRow row = sheet.createRow(1);
             for (int i = 0; i < recordList.size(); i++) {
                 Record record = recordList.get(i);
+                //省市区需特殊处理
                 if ("map_address".equals(record.getStr("field_name"))) {
-                    record.set("name", "详细地址").set("setting", new String[]{});
-                }
-                String[] setting = record.get("setting");
-                HSSFCell cell = row.createCell(i);
-                if (record.getInt("is_null") == 1) {
-                    cell.setCellValue(record.getStr("name") + "(*)");
+                    HSSFCell cell1 = row.createCell(i);
+                    cell1.setCellValue("省");
+                    HSSFCell cell2 = row.createCell(i + 1);
+                    cell2.setCellValue("市");
+                    HSSFCell cell3 = row.createCell(i + 2);
+                    cell3.setCellValue("区");
+                    HSSFSheet hideSheet = wb.createSheet("address");
+                    wb.setSheetHidden(wb.getSheetIndex(hideSheet), true);
+                    int rowId = 0;
+                    // 设置第一行，存省的信息
+                    Row provinceRow = hideSheet.createRow(rowId++);
+                    provinceRow.createCell(0).setCellValue("省列表");
+                    List<String> provinceList = Db.query("select city_name from 72crm_crm_area where parent_id = ?", 100000);
+                    for (int x = 0; x < provinceList.size(); x++) {
+                        Cell provinceCell = provinceRow.createCell(x + 1);
+                        provinceCell.setCellValue(provinceList.get(x));
+                    }
+                    // 将具体的数据写入到每一行中，行开头为父级区域，后面是子区域。
+                    Map<String, List<String>> areaMap = CrmExcelUtil.getAreaMap();
+                    for (String key : areaMap.keySet()) {
+                        List<String> son = areaMap.get(key);
+                        Row subRow = hideSheet.createRow(rowId++);
+                        subRow.createCell(0).setCellValue(key);
+                        for (int x = 0; x < son.size(); x++) {
+                            Cell cell = subRow.createCell(x + 1);
+                            cell.setCellValue(son.get(x));
+                        }
+                        // 添加名称管理器
+                        String range = CrmExcelUtil.getRange(1, rowId, son.size());
+                        Name name = wb.createName();
+                        // key不可重复
+                        name.setNameName(key);
+                        String formula = "address!" + range;
+                        name.setRefersToFormula(formula);
+                    }
+                    // 省级下拉框
+                    CellRangeAddressList provRangeAddressList = new CellRangeAddressList(2, Integer.MAX_VALUE, i, i);
+                    String[] arr = provinceList.toArray(new String[]{});
+                    DVConstraint provConstraint = DVConstraint.createExplicitListConstraint(arr);
+                    HSSFDataValidation provinceDataValidation = new HSSFDataValidation(provRangeAddressList, provConstraint);
+                    provinceDataValidation.createErrorBox("error", "请选择正确的省份");
+                    sheet.addValidationData(provinceDataValidation);
+                    //市 区下拉框
+                    for (int x = 2; x < 10000; x++) {
+                        CrmExcelUtil.setDataValidation(CrmExcelUtil.getCorrespondingLabel(i + 1), sheet, x, i + 1);
+                        CrmExcelUtil.setDataValidation(CrmExcelUtil.getCorrespondingLabel(i + 2), sheet, x, i + 2);
+                    }
                 } else {
-                    cell.setCellValue(record.getStr("name"));
-                }
-                if (setting != null && setting.length != 0) {
-                    CellRangeAddressList regions = new CellRangeAddressList(2, Integer.MAX_VALUE, i, i);
-                    DVConstraint constraint = DVConstraint.createExplicitListConstraint(setting);
-                    HSSFDataValidation dataValidation = new HSSFDataValidation(regions, constraint);
-                    sheet.addValidationData(dataValidation);
+                    HSSFCell cell = row.createCell(i);
+                    if (record.getInt("is_null") == 1) {
+                        cell.setCellValue(record.getStr("name") + "(*)");
+                    } else {
+                        cell.setCellValue(record.getStr("name"));
+                    }
+                    String[] setting = record.get("setting");
+                    if (setting != null && setting.length != 0) {
+                        CellRangeAddressList regions = new CellRangeAddressList(2, Integer.MAX_VALUE, i, i);
+                        DVConstraint constraint = DVConstraint.createExplicitListConstraint(setting);
+                        HSSFDataValidation dataValidation = new HSSFDataValidation(regions, constraint);
+                        sheet.addValidationData(dataValidation);
+                    }
                 }
             }
             HttpServletResponse response = getResponse();
-
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             response.setCharacterEncoding("UTF-8");
             //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
@@ -633,16 +744,14 @@ public class CrmCustomerController extends Controller {
      * 导入客户
      */
     @Permissions("crm:customer:excelimport")
-    @NotNullValidate(value = "ownerUserId", message = "请选择负责人")
-    public void uploadExcel(@Para("file") UploadFile file, @Para("repeatHandling") Integer repeatHandling, @Para("ownerUserId") Integer ownerUserId) {
-        Db.tx(() -> {
-            R result = crmCustomerService.uploadExcel(file, repeatHandling, ownerUserId);
-            renderJson(result);
-            if (result.get("code").equals(500)) {
-                return false;
-            }
-            return true;
-        });
+    public void uploadExcel() {
+        String prefix= BaseUtil.getDate();
+        UploadFile file=getFile("file",prefix);
+        Integer repeatHandling=getParaToInt("repeatHandling");
+        Long ownerUserId=getParaToLong("ownerUserId");
+        CrmExcelUtil excelUtil=new CrmExcelUtil();
+        Long messageId = excelUtil.addWork(CrmEnum.CRM_CUSTOMER,file.getFile().getAbsolutePath(),ownerUserId,repeatHandling);
+        renderJson(R.ok().put("data",messageId));
     }
 
     @NotNullValidate(value = "customerNum", message = "请填写客户数量",type = HttpEnum.JSON)

@@ -233,7 +233,7 @@ public class CrmRecordService<T extends Model>{
      */
     public void addPutIntoTheOpenSeaRecord(Collection actionIds, String crmTypes){
         CrmActionRecord crmActionRecord = new CrmActionRecord();
-        if(BaseUtil.getRequest() == null){
+        if(BaseUtil.getUser() == null){
             crmActionRecord.setCreateUserId(BaseConstant.SUPER_ADMIN_USER_ID);
         }else{
             crmActionRecord.setCreateUserId(BaseUtil.getUser().getUserId());

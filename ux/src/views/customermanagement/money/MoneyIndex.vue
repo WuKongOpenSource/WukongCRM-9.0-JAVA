@@ -1,6 +1,7 @@
 <template>
   <div>
     <c-r-m-list-head
+      ref="listHead"
       :search.sync="search"
       :crm-type="crmType"
       title="回款管理"
@@ -17,6 +18,7 @@
         ref="crmTableHead"
         :crm-type="crmType"
         @filter="handleFilter"
+        @exportData="exportData"
         @handle="handleHandle"
         @scene="handleScene"/>
       <el-table

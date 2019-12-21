@@ -32,11 +32,17 @@ export default {
 
   methods: {
     // 输入的值
-    valueChange(val) {
-      this.$emit('value-change', {
+    valueChange(val, planList = []) {
+      const data = {
         index: this.index,
         value: val
-      })
+      }
+      if (planList.length > 0) {
+        data.plan = planList.filter(item => {
+          return item.planId == this.dataValue
+        })[0]
+      }
+      this.$emit('value-change', data)
     }
   }
 

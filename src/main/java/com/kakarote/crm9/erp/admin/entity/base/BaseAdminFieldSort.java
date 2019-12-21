@@ -45,14 +45,23 @@ public abstract class BaseAdminFieldSort<M extends BaseAdminFieldSort<M>> extend
 		return getStr("name");
 	}
 
-	public BaseAdminFieldSort setSort(java.lang.Integer sort) {
-		set("sort", sort);
+    public BaseAdminFieldSort setType(Integer type) {
+        set("type", type);
 		return this;
 	}
-	
-	public java.lang.Integer getSort() {
-		return getInt("sort");
-	}
+
+    public Integer getType() {
+        return getInt("type");
+    }
+
+    public BaseAdminFieldSort setSort(Integer sort) {
+        set("sort", sort);
+        return  this;
+    }
+
+    public Integer getSort() {
+        return getInt("sort");
+    }
 
 	public BaseAdminFieldSort setUserId(java.lang.Long userId) {
 		set("user_id", userId);

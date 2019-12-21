@@ -13,6 +13,7 @@ import com.kakarote.crm9.common.annotation.HttpEnum;
 import com.kakarote.crm9.common.annotation.NotNullValidate;
 import com.kakarote.crm9.common.annotation.RequestBody;
 import com.kakarote.crm9.common.config.redis.RedisManager;
+import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 
@@ -24,12 +25,13 @@ public class ErpInterceptor implements Interceptor {
     public void intercept(Invocation invocation) {
         try {
             Controller controller = invocation.getController();
-            BaseUtil.setRequest(controller.getRequest());
-            String token = BaseUtil.getToken();
-            if (!RedisManager.getRedis().exists(token)) {
+            String token = BaseUtil.getToken(controller.getRequest());
+            AdminUser adminUser = RedisManager.getRedis().get(token);
+            if (adminUser==null) {
                 controller.renderJson(R.error(302, "请先登录！"));
                 return;
             }
+            BaseUtil.setUser(adminUser);
             //数据非空验证
             if(!this.notNullValidate(invocation)){
                 return;

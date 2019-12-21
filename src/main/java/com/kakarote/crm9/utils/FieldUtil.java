@@ -68,16 +68,16 @@ public class FieldUtil {
         return this;
     }
 
-    public FieldUtil add(String fieldName, String name){
+    public FieldUtil add(String fieldName, String name, Integer type) {
         AdminFieldSort adminFieldSort = new AdminFieldSort();
-        adminFieldSort.setLabel(label).setIsHide(0).setUserId(userId).setFieldName(fieldName).setName(name);
+        adminFieldSort.setLabel(label).setIsHide(0).setUserId(userId).setFieldName(fieldName).setName(name).setType(type);
         adminFieldSortList.add(adminFieldSort);
         return this;
     }
 
-    public FieldUtil add(String fieldName, String name, Integer fieldId){
+    public FieldUtil add(String fieldName, String name, Integer type, Integer fieldId) {
         AdminFieldSort adminFieldSort = new AdminFieldSort();
-        adminFieldSort.setLabel(label).setIsHide(0).setUserId(userId).setFieldName(fieldName).setName(name).setFieldId(fieldId);
+        adminFieldSort.setLabel(label).setIsHide(0).setUserId(userId).setFieldName(fieldName).setName(name).setType(type).setFieldId(fieldId);
         adminFieldSortList.add(adminFieldSort);
         return this;
     }

@@ -102,3 +102,28 @@ export function crmReceivablesRevokeCheck(data) {
     data: data
   })
 }
+
+/**
+ * 导出
+ * @param {*} data
+ */
+export function crmReceivablesExcelExport(data) {
+  return request({
+    url: 'CrmReceivables/batchExportExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob'
+  })
+}
+
+export function crmReceivablesExcelAllExport(data) {
+  return request({
+    url: 'CrmReceivables/allExportExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}

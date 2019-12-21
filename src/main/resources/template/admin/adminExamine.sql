@@ -24,15 +24,15 @@
     select * from 72crm_admin_examine where  category_type = ? AND status = 1 order by update_time desc limit 1
   #end
   #sql("queryAllExamine")
-      select adminExamine.*,adminUser.realname from 72crm_admin_examine as adminExamine
+    select adminExamine.*,adminUser.realname from 72crm_admin_examine as adminExamine
     LEFT JOIN 72crm_admin_user as adminUser on adminUser.user_id = adminExamine.update_user_id
     where  adminExamine.status = 1
   #end
   #sql("queryExaminePage")
      select adminExamine.*,adminUser.realname as updateUserName,createUser.realname as createUserName
      from 72crm_admin_examine as adminExamine
-    LEFT JOIN 72crm_admin_user as adminUser on adminUser.user_id = adminExamine.update_user_id
-    LEFT JOIN 72crm_admin_user as createUser on createUser.user_id = adminExamine.create_user_id
+     LEFT JOIN 72crm_admin_user as adminUser on adminUser.user_id = adminExamine.update_user_id
+     LEFT JOIN 72crm_admin_user as createUser on createUser.user_id = adminExamine.create_user_id
     where  adminExamine.status != 2
   #end
   #sql("queryExaminePageTotal")

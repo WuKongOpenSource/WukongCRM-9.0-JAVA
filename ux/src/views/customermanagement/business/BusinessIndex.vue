@@ -1,6 +1,7 @@
 <template>
   <div>
     <c-r-m-list-head
+      ref="listHead"
       :search.sync="search"
       :crm-type="crmType"
       title="商机管理"
@@ -16,6 +17,7 @@
       <c-r-m-table-head
         ref="crmTableHead"
         :crm-type="crmType"
+        @exportData="exportData"
         @filter="handleFilter"
         @handle="handleHandle"
         @scene="handleScene"/>

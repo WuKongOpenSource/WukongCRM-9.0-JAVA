@@ -2,6 +2,7 @@ package com.kakarote.crm9.erp.crm.service;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
@@ -24,9 +25,8 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.SqlPara;
 import com.jfinal.plugin.activerecord.tx.Tx;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CrmReceivablesService {
 
@@ -134,23 +134,20 @@ public class CrmReceivablesService {
      * 根据id查询回款基本信息
      */
     public List<Record> information(Integer id) {
-        Record record = Db.findFirst(Db.getSql("crm.receivables.queryReceivablesById"), id);
-        if (record == null) {
-            return null;
-        }
-        List<Record> fieldList = new ArrayList<>();
-        FieldUtil field = new FieldUtil(fieldList);
-        field.set("回款编号", record.getStr("number"))
-                .set("客户名称", record.getStr("customer_name"))
-                .set("合同编号", record.getStr("contract_num"))
-                .set("回款日期", DateUtil.formatDate(record.getDate("return_time")))
-                .set("回款金额", record.getStr("money"))
-                .set("期数", record.getStr("plan_num"))
-                .set("备注", record.getStr("remark"));
-        List<Record> recordList = Db.find(Db.getSql("admin.field.queryCustomField"), record.getStr("batch_id"));
-        fieldUtil.handleType(recordList);
-        fieldList.addAll(recordList);
-        return fieldList;
+        Record record = queryById(id);
+        List<String> keyList = Arrays.asList("number","return_time","money","plan_id","remark");
+        List<Record> recordList = adminFieldService.queryInformation(CrmEnum.CRM_RECEIVABLES,record, keyList);
+        recordList.add(new Record().set("name","合同编号").set("value",new Record().set("contactId",record.getInt("contract_id")).set("contractNum",record.getStr("contract_num"))).set("formType","contract").set("field_type",1));
+        recordList.add(new Record().set("name","客户名称").set("value",new Record().set("customerId",record.getInt("customer_id")).set("customerName",record.getStr("customer_name"))).set("formType","customer").set("field_type",1));
+        recordList.forEach(record1 -> {
+            String name = record1.getStr("name");
+            if ("回款日期".equals(name)){
+                if (ObjectUtil.isNotEmpty(record1.get("value"))){
+                    record1.set("value",DateUtil.formatDate(record1.getDate("value")));
+                }
+            }
+        });
+        return recordList.stream().sorted(Comparator.comparingInt(r->-r.getInt("field_type"))).map(r-> r.remove("field_type","field_name","setting","type")).collect(Collectors.toList());
     }
 
     /**

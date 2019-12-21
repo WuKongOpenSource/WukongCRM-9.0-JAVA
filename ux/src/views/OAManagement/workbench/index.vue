@@ -128,7 +128,7 @@ export default {
       workbenchList({
         type: type,
         page: page,
-        limit: 5
+        limit: 15
       })
         .then(res => {
           this.listData = this.listData.concat(res.data.list)

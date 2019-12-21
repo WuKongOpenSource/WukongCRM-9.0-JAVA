@@ -1,6 +1,5 @@
 package com.kakarote.crm9.common.constant;
 
-import com.jfinal.plugin.activerecord.Db;
 import com.kakarote.crm9.utils.BaseUtil;
 
 import java.io.Serializable;
@@ -12,14 +11,14 @@ public class BaseConstant implements Serializable {
 
     public static final String NAME = "72CRM";
 
-    public static final String VERSION = "1.3.3";
+    public static final String VERSION = "1.4.0";
 
     private static final long serialVersionUID = 1L;
     /**
      * 默认的上传文件路径
      * TODO 默认配置文件路径
      */
-    public final static String UPLOAD_PATH = BaseUtil.isWindows() ? "D:/upload/" : "/usr/local/upload/";
+    public final static String UPLOAD_PATH = BaseUtil.isWindows() ? "D:\\upload\\" : "/usr/local/upload/";
 
 
     /**

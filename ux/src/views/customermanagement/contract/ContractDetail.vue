@@ -189,9 +189,9 @@ export default {
 
           this.headDetails[0].value = res.data.num
           this.headDetails[1].value = res.data.customerName
-          this.headDetails[2].value = res.data.money
+          this.headDetails[2].value = this.moneyFormat(res.data.money)
           this.headDetails[3].value = res.data.orderDate
-          this.headDetails[4].value = res.data.receivablesMoney
+          this.headDetails[4].value = this.moneyFormat(res.data.receivablesMoney)
           this.headDetails[5].value = res.data.ownerUserName
         })
         .catch(() => {

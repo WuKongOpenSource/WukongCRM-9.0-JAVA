@@ -197,3 +197,28 @@ export function crmBusinessQueryContactsAPI(data) {
     data: data
   })
 }
+
+/**
+ * 导出
+ * @param {*} data
+ */
+export function crmBusinessExcelExport(data) {
+  return request({
+    url: 'CrmBusiness/batchExportExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob'
+  })
+}
+
+export function crmBusinessExcelAllExport(data) {
+  return request({
+    url: 'CrmBusiness/allExportExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}

@@ -3,11 +3,6 @@
 # 启动入口类，该脚本文件用于别的项目时要改这里
 MAIN_CLASS=com.kakarote.crm9.Application
 
-if [[ "$MAIN_CLASS" == "com.yourpackage.YourMainClass" ]]; then
-    echo "请先修改 MAIN_CLASS 的值为你自己项目启动Class，然后再执行此脚本。"
-	exit 0
-fi
-
 COMMAND="$1"
 
 if [[ "$COMMAND" != "start" ]] && [[ "$COMMAND" != "stop" ]] && [[ "$COMMAND" != "restart" ]]; then

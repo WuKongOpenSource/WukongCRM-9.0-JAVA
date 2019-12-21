@@ -447,6 +447,8 @@ public class AdminSceneService{
             conditions.append(" and owner_user_id is not null");
         }else if(9 == type){
             conditions.append(" and owner_user_id is null");
+        }else if(4 == type){
+            conditions.append(" and status != '3'");
         }
         Long userId = BaseUtil.getUserId();
         List<Integer> roles = BaseUtil.getUser().getRoles();
@@ -648,12 +650,12 @@ public class AdminSceneService{
                         if("datetime".equals(formType)){
                             conditions.append(" between '").append(jsonObject.getString("start")).append("' and '").append(jsonObject.getString("end")).append("'");
                             sqlObject.put("connector","between");
-                            sqlObject.put("value","('"+jsonObject.getString("start")+"'"+" and '"+jsonObject.getString("end")+"')");
+                            sqlObject.put("value","'"+jsonObject.getString("start")+"'"+" and '"+jsonObject.getString("end")+"'");
                         }
                         if("date".equals(formType)){
                             conditions.append(" between '").append(jsonObject.getString("startDate")).append("' and '").append(jsonObject.getString("endDate")).append("'");
                             sqlObject.put("connector","between");
-                            sqlObject.put("value","('"+jsonObject.getString("startDate")+"'"+" and '"+jsonObject.getString("endDate")+"')");
+                            sqlObject.put("value","'"+jsonObject.getString("startDate")+"'"+" and '"+jsonObject.getString("endDate")+"'");
                         }
                         sqlObject.put("type", fieldMap.get(name) != null ? fieldMap.get(name).getFieldType() : 2);
                     }
@@ -695,8 +697,11 @@ public class AdminSceneService{
             adminFieldMap.put("deal_status",adminField);
             adminFieldMap.put("customer_id",adminField);
             adminFieldMap.put("contract_id",adminField);
+            adminFieldMap.put("contacts_id",adminField);
             adminFieldMap.put("leads_id",adminField);
             adminFieldMap.put("receivables_id",adminField);
+            adminFieldMap.put("product_id",adminField);
+            adminFieldMap.put("business_id",adminField);
         }
         return adminFieldMap;
     }

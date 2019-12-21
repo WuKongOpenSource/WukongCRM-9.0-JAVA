@@ -241,7 +241,7 @@ ps:可以使用`nginx`代理静态文件，后台只做接口响应，项目本�
 
 以下为悟空CRM9.0 JAVA版部分功能系统截图
 
-![](https://github.com/72crm/72crm/blob/master/ux/intro_img/g1.png)
+![](https://github.com/72crm/72crm/tree/master/ux/g1.png)
 ![](https://github.com/72crm/72crm/blob/master/ux/intro_img/g2.png)
 ![](https://github.com/72crm/72crm/blob/master/ux/intro_img/g3.png)
 ![](https://github.com/72crm/72crm/blob/master/ux/intro_img/g4.png)

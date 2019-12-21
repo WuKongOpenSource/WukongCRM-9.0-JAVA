@@ -48,7 +48,7 @@ public class AdminSysConfigController extends Controller {
         UploadFile file = getFile("file", prefix);
         Kv kv = getKv();
         if(file!=null){
-            R r=adminFileService.upload(file,null,"file","/"+prefix);
+            R r=adminFileService.upload(file,null,"file","/"+prefix,getRequest());
             kv.set("logo",r.get("url"));
         }
         Db.deleteById("72crm_admin_config","name",SYS_CONFIG_KEY);

@@ -24,7 +24,6 @@ import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -88,15 +87,15 @@ public class OaLogService {
 
     public void queryLogDetail(Record record, Long userId) {
         adminFileService.queryByBatchId(record.get("batch_id"), record);
-        record.set("sendUserList", (StrUtil.isNotEmpty(record.getStr("send_user_ids")) && record.getStr("send_user_ids").split(",").length > 0) ? Db.find(Db.getSqlPara("admin.user.queryByIds", Kv.by("ids", record.getStr("send_user_ids").split(",")))) : new ArrayList<>());
-        record.set("sendDeptList", (StrUtil.isNotEmpty(record.getStr("send_dept_ids")) && record.getStr("send_dept_ids").split(",").length > 0) ? Db.find(Db.getSqlPara("admin.dept.queryByIds", Kv.by("ids", record.getStr("send_dept_ids").split(",")))) : new ArrayList<>());
-        record.set("customerList", (StrUtil.isNotEmpty(record.getStr("customer_ids")) && record.getStr("customer_ids").split(",").length > 0) ? Db.find(Db.getSqlPara("crm.customer.queryByIds", Kv.by("ids", record.getStr("customer_ids").split(",")))) : new ArrayList<>());
-        record.set("businessList", (StrUtil.isNotEmpty(record.getStr("business_ids")) && record.getStr("business_ids").split(",").length > 0) ? Db.find(Db.getSqlPara("crm.business.queryByIds", Kv.by("ids", record.getStr("business_ids").split(",")))) : new ArrayList<>());
-        record.set("contactsList", (StrUtil.isNotEmpty(record.getStr("contacts_ids")) && record.getStr("contacts_ids").split(",").length > 0) ? Db.find(Db.getSqlPara("crm.contact.queryByIds", Kv.by("ids", record.getStr("contacts_ids").split(",")))) : new ArrayList<>());
-        record.set("contractList", (StrUtil.isNotEmpty(record.getStr("contract_ids")) && record.getStr("contract_ids").split(",").length > 0) ? Db.find(Db.getSqlPara("crm.contract.queryByIds", Kv.by("ids", record.getStr("contract_ids").split(",")))) : new ArrayList<>());
+        record.set("sendUserList", Db.find(Db.getSqlPara("admin.user.queryByIds", Kv.by("ids", record.getStr("send_user_ids")))));
+        record.set("sendDeptList", Db.find(Db.getSqlPara("admin.dept.queryByIds", Kv.by("ids", record.getStr("send_dept_ids")))));
+        record.set("customerList", Db.find(Db.getSqlPara("crm.customer.queryByIds", Kv.by("ids", record.getStr("customer_ids")))));
+        record.set("businessList", Db.find(Db.getSqlPara("crm.business.queryByIds", Kv.by("ids", record.getStr("business_ids")))));
+        record.set("contactsList", Db.find(Db.getSqlPara("crm.contact.queryByIds", Kv.by("ids", record.getStr("contacts_ids")))));
+        record.set("contractList", Db.find(Db.getSqlPara("crm.contract.queryByIds", Kv.by("ids", record.getStr("contract_ids")))));
         record.set("createUser", Db.findFirst(Db.getSql("admin.user.queryUserByUserId"), record.getStr("create_user_id")));
         Integer isRead = record.getStr("read_user_ids").contains("," + userId + ",") ? 1 : 0;
-        int isEdit = userId == record.getLong("create_user_id") ? 1 : 0;
+        int isEdit = userId.equals(record.getLong("create_user_id")) ? 1 : 0;
         int isDel = 0;
         if((System.currentTimeMillis()-1000*3600*72)>record.getDate("create_time").getTime()){
             if(BaseUtil.getUser().getRoles().contains(BaseConstant.SUPER_ADMIN_ROLE_ID)){

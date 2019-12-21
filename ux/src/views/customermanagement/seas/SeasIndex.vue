@@ -1,6 +1,7 @@
 <template>
   <div>
     <c-r-m-list-head
+      ref="listHead"
       :search.sync="search"
       :is-seas="true"
       title="公海管理"
@@ -19,6 +20,7 @@
         ref="crmTableHead"
         :is-seas="isSeas"
         crm-type="customer"
+        @exportData="exportData"
         @filter="handleFilter"
         @handle="handleHandle"
         @scene="handleScene"/>

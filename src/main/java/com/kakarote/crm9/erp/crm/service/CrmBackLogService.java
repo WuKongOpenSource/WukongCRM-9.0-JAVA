@@ -389,9 +389,7 @@ public class CrmBackLogService {
             }else {
                 return R.error("isSub参数不正确");
             }
-        Integer page = basePageRequest.getPage();
-        Integer limit = basePageRequest.getLimit();
-        stringBuffer.append(" limit ").append((page - 1) * limit).append(",").append(limit);
+
         List<Integer> customerIds = Db.query(stringBuffer.toString());
         if (customerIds.size() == 0){
             customerIds.add(0);

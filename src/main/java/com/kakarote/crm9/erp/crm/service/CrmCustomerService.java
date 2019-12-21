@@ -2,15 +2,10 @@ package com.kakarote.crm9.erp.crm.service;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.poi.excel.ExcelReader;
-import cn.hutool.poi.excel.ExcelUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
-import com.jfinal.log.Log;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.entity.AdminConfig;
@@ -37,7 +32,6 @@ import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.SqlPara;
 import com.jfinal.plugin.activerecord.tx.Tx;
-import com.jfinal.upload.UploadFile;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -137,24 +131,17 @@ public class CrmCustomerService{
      * @author wyq
      * 基本信息
      */
-    public List<Record> information(Integer customerId){
-        CrmCustomer crmCustomer = CrmCustomer.dao.findById(customerId);
-        List<Record> fieldList = new ArrayList<>();
-        FieldUtil field = new FieldUtil(fieldList);
-        field.set("客户名称", crmCustomer.getCustomerName())
-                .set("成交状态", crmCustomer.getDealStatus() == 0 ? "未成交" : "已成交")
-                .set("下次联系时间", DateUtil.formatDateTime(crmCustomer.getNextTime()))
-                .set("网址", crmCustomer.getWebsite())
-                .set("备注", crmCustomer.getRemark())
-                .set("电话", crmCustomer.getTelephone())
-                .set("手机", crmCustomer.getMobile())
-                .set("定位", crmCustomer.getLocation())
-                .set("区域", crmCustomer.getAddress())
-                .set("详细地址", crmCustomer.getDetailAddress());
-        List<Record> recordList = Db.find(Db.getSql("admin.field.queryCustomField"), crmCustomer.getBatchId());
-        fieldUtil.handleType(recordList);
-        fieldList.addAll(recordList);
-        return fieldList;
+    public List<Record> information(Integer customerId) {
+        Record record = queryById(customerId);
+        List<String> keyList = Arrays.asList("customer_name", "next_time", "website", "remark", "telephone", "mobile");
+        List<Record> recordList = adminFieldService.queryInformation(CrmEnum.CRM_CUSTOMER, record, keyList);
+        recordList.add(new Record().set("name","成交状态").set("value",record.getInt("deal_status") == 0 ? "未成交" : "已成交").set("formType","deal_status").set("field_type",1));
+        recordList.add(new Record().set("name","地区定位").set("value",Kv.by("location", record.getStr("location"))
+                        .set("address", record.getStr("address"))
+                        .set("detailAddress", record.getStr("detail_address"))
+                        .set("lng", record.getStr("lng"))
+                        .set("lat", record.getStr("lat"))).set("formType","map_address").set("field_type",1));
+        return recordList.stream().sorted(Comparator.comparingInt(r->-r.getInt("field_type"))).map(r-> r.remove("field_type","field_name","setting","type")).collect(Collectors.toList());
     }
 
     /**
@@ -564,12 +551,13 @@ public class CrmCustomerService{
             oaEventRelation.setCreateTime(DateUtil.date());
             oaEventRelation.save();
         }
+        CrmCustomer crmCustomer = new CrmCustomer();
+        crmCustomer.setLastContent(adminRecord.getContent());
+        crmCustomer.setCustomerId(adminRecord.getTypesId());
+        crmCustomer.setFollowup(1);
         if(adminRecord.getNextTime() != null){
             Date nextTime = adminRecord.getNextTime();
-            CrmCustomer crmCustomer = new CrmCustomer();
-            crmCustomer.setCustomerId(adminRecord.getTypesId());
             crmCustomer.setNextTime(nextTime);
-            crmCustomer.update();
             if(adminRecord.getContactsIds() != null){
                 String[] idsArr = adminRecord.getContactsIds().split(",");
                 for(String id : idsArr){
@@ -589,7 +577,7 @@ public class CrmCustomerService{
                 }
             }
         }
-        Db.update("update 72crm_crm_customer set followup = 1 where customer_id = ?", adminRecord.getTypesId());
+        crmCustomer.update();
         return adminRecord.save() ? R.ok() : R.error();
     }
 
@@ -621,16 +609,6 @@ public class CrmCustomerService{
             record.set("business_list", businessList).set("contacts_list", contactsList);
         });
         return recordList;
-    }
-
-    /**
-     * @author wyq
-     * 导出客户
-     */
-    public List<Record> exportCustomer(String customerIds){
-        Map<String,AdminField> fieldMap = adminSceneService.getAdminFieldMap(2);
-        String[] customerIdsArr = customerIds.split(",");
-        return Db.find(Db.getSqlPara("crm.customer.excelExport", Kv.by("ids", customerIdsArr).set("fieldMap", fieldMap)));
     }
 
     /**
@@ -781,103 +759,6 @@ public class CrmCustomerService{
     public R getCheckingField(){
         return R.ok().put("data", "客户名称");
     }
-
-    /**
-     * 导入客户
-     *
-     * @author wyq
-     */
-    public R uploadExcel(UploadFile file, Integer repeatHandling, Integer ownerUserId){
-        ExcelReader reader = ExcelUtil.getReader(FileUtil.file(file.getUploadPath() + "\\" + file.getFileName()));
-        AdminFieldService adminFieldService = new AdminFieldService();
-        Kv kv = new Kv();
-        int errNum = 0;
-        try{
-            List<List<Object>> read = reader.read();
-            List<Object> list = read.get(1);
-            List<Record> recordList = adminFieldService.customFieldList(2);
-            recordList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType")) || "user".equals(record.getStr("formType")) || "structure".equals(record.getStr("formType")));
-            List<Record> fieldList = adminFieldService.queryAddField(CrmEnum.CRM_CUSTOMER);
-            fieldList.removeIf(record -> "file".equals(record.getStr("formType")) || "checkbox".equals(record.getStr("formType")) || "user".equals(record.getStr("formType")) || "structure".equals(record.getStr("formType")));
-            fieldList.forEach(record -> {
-                if(record.getInt("is_null") == 1){
-                    record.set("name", record.getStr("name") + "(*)");
-                }
-                if("map_address".equals(record.getStr("field_name"))){
-                    record.set("name", "详细地址");
-                }
-            });
-            List<String> nameList = fieldList.stream().map(record -> record.getStr("name")).collect(Collectors.toList());
-            if(nameList.size() != list.size() || ! nameList.containsAll(list)){
-                return R.error("请使用最新导入模板");
-            }
-            Kv nameMap = new Kv();
-            fieldList.forEach(record -> nameMap.set(record.getStr("name"), record.getStr("field_name")));
-            for(int i = 0; i < list.size(); i++){
-                kv.set(nameMap.get(list.get(i)), i);
-            }
-            if(read.size() > 2){
-                JSONObject object = new JSONObject();
-                for(int i = 2; i < read.size(); i++){
-                    errNum = i;
-                    List<Object> customerList = read.get(i);
-                    if(customerList.size() < list.size()){
-                        for(int j = customerList.size() - 1; j < list.size(); j++){
-                            customerList.add(null);
-                        }
-                    }
-                    String customerName = customerList.get(kv.getInt("customer_name")).toString();
-                    Integer number = Db.queryInt("select count(*) from 72crm_crm_customer where customer_name = ?", customerName);
-                    if(0 == number){
-                        object.fluentPut("entity", new JSONObject().fluentPut("customer_name", customerName)
-                                .fluentPut("mobile", customerList.get(kv.getInt("mobile")))
-                                .fluentPut("telephone", customerList.get(kv.getInt("telephone")))
-                                .fluentPut("website", customerList.get(kv.getInt("website")))
-                                .fluentPut("next_time", customerList.get(kv.getInt("next_time")))
-                                .fluentPut("remark", customerList.get(kv.getInt("remark")))
-                                .fluentPut("detail_address", customerList.get(kv.getInt("map_address")))
-                                .fluentPut("owner_user_id", ownerUserId));
-                    }else if(number > 0 && repeatHandling == 1){
-                        Record customer = Db.findFirst("select customer_id,batch_id from 72crm_crm_customer where customer_name = ?", customerName);
-                        boolean auth = AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_CUSTOMER), customer.getInt("customer_id"));
-                        if(auth){
-                            return R.error("第" + errNum + 1 + "行数据无操作权限，不能覆盖");
-                        }
-                        object.fluentPut("entity", new JSONObject().fluentPut("customer_id", customer.getInt("customer_id"))
-                                .fluentPut("customer_name", customerName)
-                                .fluentPut("mobile", customerList.get(kv.getInt("mobile")))
-                                .fluentPut("telephone", customerList.get(kv.getInt("telephone")))
-                                .fluentPut("website", customerList.get(kv.getInt("website")))
-                                .fluentPut("next_time", customerList.get(kv.getInt("next_time")))
-                                .fluentPut("remark", customerList.get(kv.getInt("remark")))
-                                .fluentPut("detail_address", customerList.get(kv.getInt("map_address")))
-                                .fluentPut("batch_id", customer.getStr("batch_id")));
-                    }else if(number > 0 && repeatHandling == 2){
-                        continue;
-                    }
-                    JSONArray jsonArray = new JSONArray();
-                    for(Record record : recordList){
-                        Integer columnsNum = kv.getInt(record.getStr("name")) != null ? kv.getInt(record.getStr("name")) : kv.getInt(record.getStr("name") + "(*)");
-                        record.set("value", customerList.get(columnsNum));
-                        jsonArray.add(JSONObject.parseObject(record.toJson()));
-                    }
-                    object.fluentPut("field", jsonArray);
-                    addOrUpdate(object, null);
-                }
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-            Log.getLog(getClass()).error("", e);
-            if(errNum != 0){
-                return R.error("第" + (errNum + 1) + "行错误!");
-            }
-            return R.error();
-        }finally{
-            reader.close();
-        }
-        return R.ok();
-    }
-
 
     public R customerSetting(CrmCustomerSetting customerSetting){
         List<String> errorList = new ArrayList<>();

@@ -107,27 +107,23 @@ import {
 } from '@/api/customermanagement/common'
 import {
   crmLeadsTransform,
-  crmLeadsExcelExport,
   crmLeadsDelete
 } from '@/api/customermanagement/clue'
 import {
   crmCustomerLock,
   crmCustomerPutInPool,
-  crmCustomerExcelExport,
-  crmCustomerPoolExcelExportAPI,
   crmCustomerDelete,
   crmCustomerReceive
 } from '@/api/customermanagement/customer'
 import {
-  crmContactsDelete,
-  crmContactsExcelExport
+  crmContactsDelete
 } from '@/api/customermanagement/contacts'
 import { crmBusinessDelete } from '@/api/customermanagement/business'
 import { crmContractDelete } from '@/api/customermanagement/contract'
 import { crmReceivablesDelete } from '@/api/customermanagement/money'
 import {
   crmProductStatus,
-  crmProductExcelExport
+  crmProductDelete
 } from '@/api/customermanagement/product'
 
 import filterForm from './filterForm'
@@ -277,62 +273,13 @@ export default {
         // 转移
         this.transferDialogShow = true
       } else if (type == 'export') {
-        var params = {}
-        var request = null
-        if (this.isSeas) {
-          request = crmCustomerPoolExcelExportAPI
-          params.ids = this.selectionList
-            .map(function(item, index, array) {
-              return item.customerId
-            })
-            .join(',')
-        } else if (this.crmType == 'customer') {
-          request = crmCustomerExcelExport
-          params.ids = this.selectionList
-            .map(function(item, index, array) {
-              return item.customerId
-            })
-            .join(',')
-        } else if (this.crmType == 'leads') {
-          request = crmLeadsExcelExport
-          params.ids = this.selectionList
-            .map(function(item, index, array) {
-              return item.leadsId
-            })
-            .join(',')
-        } else if (this.crmType == 'contacts') {
-          request = crmContactsExcelExport
-          params.ids = this.selectionList
-            .map(function(item, index, array) {
-              return item.contactsId
-            })
-            .join(',')
-        } else if (this.crmType == 'product') {
-          request = crmProductExcelExport
-          params.ids = this.selectionList
-            .map(function(item, index, array) {
-              return item.productId
-            })
-            .join(',')
-        }
-        request(params)
-          .then(res => {
-            var blob = new Blob([res.data], {
-              type: 'application/vnd.ms-excel;charset=utf-8'
-            })
-            var downloadElement = document.createElement('a')
-            var href = window.URL.createObjectURL(blob) // 创建下载的链接
-            downloadElement.href = href
-            downloadElement.download =
-              decodeURI(
-                res.headers['content-disposition'].split('filename=')[1]
-              ) || '' // 下载后文件名
-            document.body.appendChild(downloadElement)
-            downloadElement.click() // 点击下载
-            document.body.removeChild(downloadElement) // 下载完成移除元素
-            window.URL.revokeObjectURL(href) // 释放掉blob对象
-          })
-          .catch(() => {})
+        const params = {}
+
+        params['ids'] = this.selectionList.map(item => {
+          return item[this.crmType + 'Id']
+        }).join(',')
+        params.__export = true
+        this.$emit('exportData', params)
       } else if (
         type == 'transform' ||
         type == 'put_seas' ||
@@ -465,7 +412,8 @@ export default {
           contacts: crmContactsDelete,
           business: crmBusinessDelete,
           contract: crmContractDelete,
-          receivables: crmReceivablesDelete
+          receivables: crmReceivablesDelete,
+          product: crmProductDelete
         }[this.crmType]
         request({
           [this.crmType + 'Ids']: ids.join(',')
@@ -582,6 +530,7 @@ export default {
           return this.forSelectionHandleItems(handleInfos, [
             'alloc',
             'get',
+            'delete',
             'export'
           ])
         } else {
@@ -608,22 +557,28 @@ export default {
           'transfer',
           'delete',
           'add_user',
-          'delete_user'
+          'delete_user',
+          'export'
         ])
       } else if (this.crmType == 'contract') {
         return this.forSelectionHandleItems(handleInfos, [
           'transfer',
           'delete',
           'add_user',
-          'delete_user'
+          'delete_user',
+          'export'
         ])
       } else if (this.crmType == 'receivables') {
-        return this.forSelectionHandleItems(handleInfos, ['delete'])
+        return this.forSelectionHandleItems(handleInfos, [
+          'delete',
+          'export'
+        ])
       } else if (this.crmType == 'product') {
         return this.forSelectionHandleItems(handleInfos, [
-          'export',
           'start',
-          'disable'
+          'disable',
+          'delete',
+          'export'
         ])
       }
     },

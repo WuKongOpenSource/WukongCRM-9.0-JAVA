@@ -1,9 +1,4 @@
 #namespace("admin.file")
-    #sql("saveFile")
-      INSERT INTO `72crm_admin_file`
-      (`types`, `name`, `size`, `create_user_id`, `create_time`, `file_path`, `batch_id`)
-       VALUES (?,?,?,?,?,?,?);
-    #end
     #sql("queryByBatchId")
       SELECT a.file_id,a.name, CONCAT(FLOOR(a.size/1000),"KB") as size,a.create_user_id,b.realname as create_user_name,a.create_time,a.file_path,a.file_type,a.batch_id
       FROM `72crm_admin_file` as a inner join `72crm_admin_user` as b on a.create_user_id = b.user_id

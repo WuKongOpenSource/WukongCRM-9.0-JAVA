@@ -92,8 +92,8 @@
             </div>
             <div class="examine-items-add"><span @click="examineItemsAdd">+ 添加审批层级</span></div>
             <div class="examine-add-des">
-              <p><span class="examine-add-required">*</span>当选择“负责人主管”审批时。系统仅会通知负责人主管，但负责人所有上级（主管、主管的主管）均可审批。</p>
-              <p><span class="examine-add-required">*</span>当选择多个“指定用户”审批时。如果指定用户没有权限查看对应的合同，系统不会通知其审批。 </p>
+              <p><span class="examine-add-required">*</span>当选择“负责人主管”审批时。系统仅会通知负责人主管。</p>
+              <p><span class="examine-add-required">*</span>当选择多个“指定用户”审批时。如果指定用户没有权限查看对应的合同，系统会通知其审批，但是他无法查看此数据信息。 </p>
               <p><span class="examine-add-required">*</span>当选择“指定用户（任意一人）”表示指定用户中任意一人审批即可。当选择“指定用户（多人会签）”表示 指定用户中所有人都要审批。</p>
             </div>
             <el-radio

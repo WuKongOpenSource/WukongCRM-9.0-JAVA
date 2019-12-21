@@ -9,6 +9,7 @@ import com.jfinal.template.io.Writer;
 import com.jfinal.template.stat.Scope;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Sql模板的for循环简易版
@@ -19,7 +20,10 @@ public class CrmDirective extends Directive {
 
     @Override
     public void exec(Env env, Scope scope, Writer writer) {
-        Object obj = scope.getData().get(name);
+        Object obj = scope.get(name);
+        if(Objects.isNull(obj)){
+            obj=new String[0];
+        }
         if (obj instanceof String) {
             write(scope, writer, (Object[]) ((String) obj).split(","));
         } else if (obj instanceof Collection) {

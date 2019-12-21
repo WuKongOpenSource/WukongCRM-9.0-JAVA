@@ -79,14 +79,6 @@
           #end)) as recordStatusCount
       FROM 72crm_crm_customer
    #end
-   #sql("queryBulletinInfo")
-      select * from #(viewName) as a where 1=1 and (a.create_time between #para(beginDate) and  #para(endDate))
-      and create_user_id in ( #for(x:userIds) #(for.index == 0 ? "" : ",") #para(x) #end)
-      #if(tn)
-        and (SELECT COUNT(*) FROM 72crm_crm_business_change as b WHERE b.business_id = a.business_id and (b.create_time between #para(beginDate) and  #para(endDate)))>0
-      #end
-      order by #(sortField) #(orderType)
-   #end
    #sql("thisWeek")
        select distinct
       (SELECT COUNT(*) FROM 72crm_crm_business WHERE YEARWEEK(date_format(create_time,'%Y-%m-%d')) = YEARWEEK(now()) AND create_user_id in ( #for(x:userIds)

@@ -429,3 +429,41 @@ export function guid() {
   }
   return (S4() + S4() + S4() + S4() + S4() + S4() + S4() + S4())
 }
+
+/**
+ * 金额格式化 增加千分符
+ * @param {*} val
+ */
+export function moneyFormat(val) {
+  if (!val) return '0.00'
+  const i = Math.floor(val)
+  const d = val.split('.')[1] || '00'
+  return i.toLocaleString('en-US') + '.' + d
+}
+
+/**
+ * 下载excel
+ */
+export function downloadExcelWithResData(res) {
+  let fileName = res.headers['content-disposition'].split('filename=')[1]
+  if (!fileName) {
+    fileName = res.headers['content-disposition'].split('UTF-8\'\'')[1]
+  }
+  fileName = fileName ? fileName.replace(/\"/g, '') : 'file.xlsx'
+  fileName = decodeURI(fileName) || ''
+  downloadFileWithBuffer(res.data, fileName, 'application/vnd.ms-excel;charset=utf-8')
+}
+
+export function downloadFileWithBuffer(data, name, type) {
+  var blob = new Blob([data], {
+    type: type || ''
+  })
+  var downloadElement = document.createElement('a')
+  var href = window.URL.createObjectURL(blob) // 创建下载的链接
+  downloadElement.href = href
+  downloadElement.download = name // 下载后文件名
+  document.body.appendChild(downloadElement)
+  downloadElement.click() // 点击下载
+  document.body.removeChild(downloadElement) // 下载完成移除元素
+  window.URL.revokeObjectURL(href) // 释放掉blob对象
+}

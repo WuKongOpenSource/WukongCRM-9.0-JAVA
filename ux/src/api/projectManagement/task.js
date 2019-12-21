@@ -165,7 +165,7 @@ export function queryCommentListAPI(data) {
  */
 export function taskSvaeTaskRelationAPI(data) {
   return request({
-    url: 'task/svaeTaskRelation',
+    url: 'task/saveTaskRelation',
     method: 'post',
     data: data
   })

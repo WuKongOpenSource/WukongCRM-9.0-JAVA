@@ -144,7 +144,7 @@ export default {
 
           this.headDetails[0].value = res.data.categoryName
           this.headDetails[1].value = res.data.单位
-          this.headDetails[2].value = res.data.price
+          this.headDetails[2].value = this.moneyFormat(res.data.price)
           this.headDetails[3].value = res.data.num
         })
         .catch(() => {

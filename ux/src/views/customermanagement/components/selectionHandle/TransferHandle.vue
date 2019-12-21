@@ -38,7 +38,7 @@
         class="handle-item">
         <div class="handle-item-name">同时变更负责人至：</div>
         <el-checkbox-group v-model="addsTypes">
-          <el-checkbox label="1">联系人</el-checkbox>
+          <el-checkbox label="1" checked>联系人</el-checkbox>
           <el-checkbox label="2">商机</el-checkbox>
           <el-checkbox label="3">合同</el-checkbox>
         </el-checkbox-group>

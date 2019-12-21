@@ -177,3 +177,32 @@ export function crmQueryReceivablesPlansByContractId(data) {
     data: data
   })
 }
+
+/**
+ * 导出
+ * @param {*} data
+ */
+export function crmContractExcelExport(data) {
+  return request({
+    url: 'CrmContract/batchExportExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob'
+  })
+}
+
+/**
+ * 导出
+ * @param {*} data
+ */
+export function crmContractExcelAllExport(data) {
+  return request({
+    url: 'CrmContract/allExportExcel',
+    method: 'post',
+    data: data,
+    responseType: 'blob',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
+}

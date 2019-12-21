@@ -1,6 +1,9 @@
 import {
   mapGetters
 } from 'vuex'
+
+import { moneyFormat } from '@/utils'
+
 export default {
   data() {
     return {}
@@ -49,6 +52,9 @@ export default {
         this.getDetial()
       }
       this.$emit('handle', data)
+    },
+    moneyFormat(money) {
+      return moneyFormat(money)
     }
   },
 

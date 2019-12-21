@@ -76,6 +76,44 @@ public class AdminFieldService {
     }
 
     /**
+     * 查询详情页基本信息
+     * @param crmEnum
+     * @param record
+     * @param fieldKey
+     */
+    public List<Record> queryInformation(CrmEnum crmEnum,Record record,List<String> fieldKey){
+        List<Record> recordList = Db.find(Db.getSql("admin.field.queryInformationField"),crmEnum.getType());
+        Map<Integer, List<Record>> fieldTypeMap = recordList.stream().collect(Collectors.groupingBy(filed -> filed.getInt("field_type")));
+        List<Record> resultList = new ArrayList<>();
+        fieldTypeMap.forEach((type,list)->{
+            if (type == 1){
+                list.forEach(field->{
+                    String fieldName=field.getStr("field_name");
+                    if (fieldKey.contains(fieldName)){
+                        field.set("value",record.get(fieldName)!=null ? record.get(fieldName):"");
+                        resultList.add(field);
+                    }
+                });
+            }else {
+                list.forEach(field->{
+                    if (field.getInt("type") == FormTypeEnum.FILE.getType()){
+                        field.set("value",Db.find("select file_id, name, size, create_time, file_path, file_type, batch_id from 72crm_admin_file where batch_id = ?",StrUtil.isNotEmpty(record.get(field.getStr("field_name")))?record.get(field.getStr("field_name")):""));
+                    }else if (field.getInt("type") == FormTypeEnum.USER.getType()){
+                        field.set("value",Db.find("select user_id,realname from 72crm_admin_user where find_in_set(user_id,ifnull(?,0))",record.getStr(field.getStr("field_name"))));
+                    }else if (field.getInt("type") == FormTypeEnum.STRUCTURE.getType()){
+                        field.set("value",Db.find("select dept_id,name from 72crm_admin_dept where find_in_set(dept_id,ifnull(?,0))",record.getStr(field.getStr("field_name"))));
+                    }else {
+                        field.set("value",record.get(field.getStr("field_name"))!=null ? record.get(field.getStr("field_name")):"");
+                    }
+                    resultList.add(field);
+                });
+            }
+        });
+        recordToFormType(resultList);
+        return resultList;
+    }
+
+    /**
      * author zhangzhiwei
      * 保存自定义字段信息
      *
@@ -347,22 +385,28 @@ public class AdminFieldService {
             FieldUtil fieldUtil = new FieldUtil(sortList, userId, adminFieldSort.getLabel());
             if (null != fieldList) {
                 for (Record record : fieldList) {
-                    fieldUtil.add(record.getStr("field_name"), record.getStr("name"), record.getInt("field_id"));
+                    fieldUtil.add(record.getStr("field_name"), record.getStr("name"), record.getInt("type"), record.getInt("field_id"));
                 }
             }
             if (CrmEnum.CRM_CUSTOMER.getType() == adminFieldSort.getLabel()){
-                fieldUtil.add("dealStatus","成交状态").add("poolDay","距进入公海客户天数");
+                fieldUtil.add("dealStatus", "成交状态", 3)
+                        .add("poolDay", "距进入公海客户天数", 5)
+                        .add("lastTime", "最后跟进时间", 4)
+                        .add("lastContent","最后跟进记录",1);
             }else if (CrmEnum.CRM_BUSINESS.getType() == adminFieldSort.getLabel()){
-                fieldUtil.add("typeName", "商机状态组").add("statusName", "商机阶段");
+                fieldUtil.add("typeName", "商机状态组", 3).add("statusName", "商机阶段", 3);
             }else if (CrmEnum.CRM_CONTRACT.getType() == adminFieldSort.getLabel()){
-                fieldUtil.add("receivedMoney","已收款金额").add("unreceivedMoney","未收款金额");
+                fieldUtil.add("receivedMoney","已收款金额",6).add("unreceivedMoney","未收款金额",6);
             }else if (CrmEnum.CRM_RECEIVABLES.getType() == adminFieldSort.getLabel()){
-                fieldUtil.add("contractMoney","合同金额");
+                fieldUtil.add("contractMoney","合同金额",6);
             }else if (CrmEnum.CRM_CUSTOMER_POOL.getType() == adminFieldSort.getLabel()){
-                fieldUtil.add("dealStatus","成交状态");
+                fieldUtil.add("dealStatus","成交状态",3)
+                        .add("lastContent","最后跟进记录",1);
+            }else if(CrmEnum.CRM_LEADS.getType() == adminFieldSort.getLabel()){
+                fieldUtil.add("lastContent","最后跟进记录",1);
             }
-            fieldUtil.add("updateTime", "更新时间").add("createTime", "创建时间")
-                    .add("ownerUserName", "负责人").add("createUserName", "创建人");
+            fieldUtil.add("updateTime", "更新时间",4).add("createTime", "创建时间",4)
+                    .add("ownerUserName", "负责人",1).add("createUserName", "创建人",1);
             fieldUtil.getAdminFieldSortList().forEach(fieldSort -> {
                 String fieldName = StrUtil.toCamelCase(fieldSort.getFieldName());
                 fieldSort.setFieldName(fieldName);
@@ -388,7 +432,9 @@ public class AdminFieldService {
                 newUserFieldSort.setSort(i).save();
             }
         }
-        return Db.findByCache("field", "listHead:" + adminFieldSort.getLabel() + userId, Db.getSql("admin.field.queryListHead"), adminFieldSort.getLabel(), userId);
+        List<Record> recordList = Db.findByCache("field", "listHead:" + adminFieldSort.getLabel() + userId, Db.getSql("admin.field.queryListHead"), adminFieldSort.getLabel(), userId);
+        recordToFormType(recordList);
+        return recordList;
     }
 
     /**

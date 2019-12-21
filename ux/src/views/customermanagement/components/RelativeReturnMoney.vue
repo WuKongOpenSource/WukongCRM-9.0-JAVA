@@ -21,6 +21,7 @@
         :key="index"
         :prop="item.prop"
         :label="item.label"
+        :formatter="fieldFormatter"
         show-overflow-tooltip/>
       <el-table-column
         label="操作"
@@ -93,7 +94,7 @@ import {
   crmReceivablesPlanDeleteAPI
 } from '@/api/customermanagement/money'
 /** 注意  需要删除接口 */
-import { objDeepCopy } from '@/utils'
+import { objDeepCopy, moneyFormat } from '@/utils'
 
 export default {
   name: 'RelativeReturnMoney', // 相关回款  可能再很多地方展示 放到客户管理目录下
@@ -336,12 +337,14 @@ export default {
     /**
      * 格式化字段
      */
-    fieldFormatter(row, column) {
+    fieldFormatter(row, column, cellValue) {
       // 如果需要格式化
       if (column.property === 'checkStatus') {
         return this.getStatusName(row.checkStatus)
+      } else if (['contractMoney', 'receivablesMoney', 'money'].includes(column.property)) {
+        return moneyFormat(cellValue)
       }
-      return row[column.property]
+      return cellValue
     },
 
     /**

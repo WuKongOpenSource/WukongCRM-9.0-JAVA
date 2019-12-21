@@ -15,6 +15,7 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.upload.UploadFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ public class AdminFileService {
      * @param file    文件
      * @param batchId 批次ID
      */
-    public R upload(UploadFile file, String batchId,String fileType,String prefix) {
+    public R upload(UploadFile file, String batchId, String fileType, String prefix, HttpServletRequest request) {
         if (batchId == null || "".equals(batchId)) {
             batchId = IdUtil.simpleUUID();
         }
@@ -35,9 +36,9 @@ public class AdminFileService {
         adminFile.setCreateUserId(BaseUtil.getUser().getUserId());
         adminFile.setPath(file.getFile().getAbsolutePath());
         if(ClassLoaderUtil.isPresent("com.jfinal.server.undertow.UndertowServer")){
-            adminFile.setFilePath(BaseUtil.getIpAddress() + prefix + "/" + file.getFileName());
+            adminFile.setFilePath(BaseUtil.getIpAddress(request) + prefix + "/" + file.getFileName());
         }else {
-            adminFile.setFilePath(BaseUtil.getIpAddress()+new Constants().getBaseUploadPath()+"/"+ prefix + "/" + file.getFileName());
+            adminFile.setFilePath(BaseUtil.getIpAddress(request)+new Constants().getBaseUploadPath()+"/"+ prefix + "/" + file.getFileName());
         }
         adminFile.setName(file.getFileName());
         if(StrUtil.isNotBlank(fileType)){

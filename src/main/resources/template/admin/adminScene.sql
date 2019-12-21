@@ -225,8 +225,14 @@
     #end
 
     #sql ("queryPutInPoolTodayNum")
-    select count(*)
-    from 72crm_crm_customer as a left join 72crm_crm_owner_record as b on a.customer_id = b.type_id
-    where b.type = 8 and TO_DAYS(b.create_time) = TO_DAYS(NOW())
+      select count(*)
+      from 72crm_crm_customer as a left join 72crm_crm_owner_record as b on a.customer_id = b.type_id
+      where b.type = 8 and TO_DAYS(b.create_time) = TO_DAYS(NOW())
+    #end
+    #sql ("queryBatchId")
+      select batch_id from #(dataTableName) where name=#para(name) and `value` #(connector) #(value)
+      #if(batchList&&batchList.size()>0)
+        and batch_id in ( #fori(batchList))
+      #end
     #end
 #end

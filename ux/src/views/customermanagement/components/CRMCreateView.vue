@@ -424,6 +424,16 @@ export default {
               break
             }
           }
+        } else if (item.data.formType == 'receivables_plan') {
+          this.crmForm.crmFields.forEach(item => {
+            if (item.key == 'return_time') {
+              item.value = data.plan.returnDate
+            } else if (item.key == '回款方式') {
+              item.value = data.plan.returnType
+            } else if (item.key == 'money') {
+              item.value = data.plan.money
+            }
+          })
         }
       }
 

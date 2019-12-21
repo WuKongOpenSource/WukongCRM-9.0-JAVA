@@ -1,11 +1,14 @@
 package com.kakarote.crm9.erp.admin.controller;
 
+import com.jfinal.core.paragetter.Para;
 import com.kakarote.crm9.erp.admin.entity.AdminFile;
 import com.kakarote.crm9.erp.admin.service.AdminFileService;
 import com.kakarote.crm9.utils.BaseUtil;
 import com.kakarote.crm9.utils.R;
 import com.jfinal.aop.Inject;
 import com.jfinal.core.Controller;
+
+import java.io.File;
 
 public class AdminFileController extends Controller {
     @Inject
@@ -22,7 +25,7 @@ public class AdminFileController extends Controller {
      */
     public void upload(){
         String prefix=BaseUtil.getDate();
-        renderJson(adminFileService.upload(getFile("file",prefix),getPara("batchId"),getPara("type"),prefix));
+        renderJson(adminFileService.upload(getFile("file",prefix),getPara("batchId"),getPara("type"),prefix,getRequest()));
     }
 
     /**
@@ -67,5 +70,18 @@ public class AdminFileController extends Controller {
         file.setFileId(getInt("fileId"));
         file.setName(getPara("name"));
         renderJson(adminFileService.renameFileById(file)?R.ok():R.error());
+    }
+
+    /**
+     * 下载文件
+     */
+    public void downFile(@Para("fileId") String fileId) {
+        fileId="/file/downFile?fileId="+fileId;
+        AdminFile adminFile = AdminFile.dao.findFirst("SELECT * FROM `72crm_admin_file` where file_path=? LIMIT 0,1",fileId);
+        if (adminFile != null) {
+            renderFile(new File(adminFile.getPath()));
+            return;
+        }
+        renderNull();
     }
 }

@@ -6,7 +6,6 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
-import com.jfinal.aop.Aop;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
@@ -17,7 +16,6 @@ import com.jfinal.plugin.activerecord.SqlPara;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.kakarote.crm9.common.config.paragetter.BasePageRequest;
 import com.kakarote.crm9.common.constant.BaseConstant;
-import com.kakarote.crm9.erp.admin.common.AdminMessageEnum;
 import com.kakarote.crm9.erp.admin.entity.AdminExamineLog;
 import com.kakarote.crm9.erp.admin.entity.AdminUser;
 import com.kakarote.crm9.erp.admin.service.AdminFieldService;
@@ -31,6 +29,7 @@ import com.kakarote.crm9.erp.oa.entity.*;
 import com.kakarote.crm9.utils.*;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class OaExamineService{
@@ -386,7 +385,12 @@ public class OaExamineService{
                         if(stepType == 1){
                             checkUserIds = Db.queryInt("select parent_id from 72crm_admin_user where user_id = ?", createUserId) + "";
                         }else if(stepType == 4){
-                            checkUserIds = Db.queryInt("select parent_id from 72crm_admin_user where user_id = (select parent_id from 72crm_admin_user where user_id = ?)", createUserId) + "";
+                            AdminUser adminUser = AdminUser.dao.findById(nowadayExamineLog.getExamineUser());
+                            if (adminUser != null && adminUser.getParentId() != null) {
+                                checkUserIds = adminUser.getParentId()+"";
+                            }else {
+                                checkUserIds = BaseConstant.SUPER_ADMIN_USER_ID+"";
+                            }
                         }else{
                             checkUserIds = nextExamineStep.getCheckUserId();
                         }
@@ -638,10 +642,14 @@ public class OaExamineService{
             jsonObject.put("examineType", 1);
             //固定审批
             List<Record> steps = Db.find("select * from 72crm_oa_examine_step where  category_id = ? ORDER BY step_num", oaExamineCategory.getCategoryId());
+            //上一审核步骤
+            AtomicReference<Long> lsatuUserId = null;
+
             steps.forEach(step -> {
+                List<Record> logs = new ArrayList<>();
                 if(step.getInt("step_type") == 1){
                     //负责人主管
-                    List<Record> logs = Db.find(Db.getSql("oa.examine.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
+                    logs = Db.find(Db.getSql("oa.examine.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
                     //已经创建审核日志
                     if(logs != null && logs.size() > 0){
                         for(Record record : logs){
@@ -660,7 +668,7 @@ public class OaExamineService{
                     }
                 }else if(step.getInt("step_type") == 2 || step.getInt("step_type") == 3){
                     //先判断是否已经审核过
-                    List<Record> logs = Db.find(Db.getSql("oa.examine.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
+                    logs = Db.find(Db.getSql("oa.examine.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
                     if(logs != null && logs.size() != 0){
                         //已经创建审核日志
                         int status = 0;
@@ -705,7 +713,7 @@ public class OaExamineService{
                     }
                 }else{
                     //主管的主管
-                    List<Record> logs = Db.find(Db.getSql("oa.examine.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
+                    logs = Db.find(Db.getSql("oa.examine.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
                     //已经创建审核日志
                     if(logs != null && logs.size() != 0){
                         for(Record record : logs){
@@ -716,15 +724,18 @@ public class OaExamineService{
                         step.set("examine_status", 0);
                         //还未创建审核日志
                         //查询负责人主管的主管
-                        Record r = Db.findFirst(Db.getSql("oa.examine.queryUserByUserId"), Db.findFirst(Db.getSql("oa.examine.queryUserByUserId"), oaExamine.getCreateUserId()).getLong("user_id"));
-                        if(r != null && r.getInt("user_id") == null){
-                            r = null;
+                        AdminUser adminUser = AdminUser.dao.findById(lsatuUserId);
+                        if (adminUser != null && adminUser.getParentId() != null) {
+                            logs = Db.find(Db.getSql("admin.examineLog.queryUserByUserIdAnd"),adminUser.getParentId());
+                        }else {
+                            logs = Db.find(Db.getSql("admin.examineLog.queryUserByUserIdAnd"), lsatuUserId.get());
                         }
-                        if(r == null){
-                            r = Db.findFirst(Db.getSql("admin.examineLog.queryUserByUserIdAnd"), BaseConstant.SUPER_ADMIN_USER_ID);
-                        }
-                        step.set("userList", r);
+                        //查询负责人主管的主管
+                        step.set("userList", logs );
                     }
+                }
+                if (logs.size()>0){
+                    lsatuUserId.set(logs.get(0).getLong("user_id"));
                 }
             });
             SqlPara sqlPara = Db.getSqlPara("oa.examine.queryExamineLog", Kv.by("recordId", recordId).set("examineUser", auditUserId).set("stepId", examineRecord.get("examine_step_id")));
@@ -753,6 +764,50 @@ public class OaExamineService{
         Page<Record> paginate = Db.paginate(pageRequest.getPage(), pageRequest.getLimit(), Db.getSqlPara("oa.examine.queryExamineRelation", Kv.by("businessIds", relation.getBusinessIds()).set("contactsIds", relation.getContactsIds()).set("contractIds", relation.getContractIds()).set("customerIds", relation.getCustomerIds())));
         transfer(paginate.getList());
         return R.ok().put("data", paginate);
+    }
+
+    /**
+     * 递归查询上一审核人主管第一级审批步骤
+     */
+    private Long queryStep(OaExamineStep step, Integer recordId, Long ownerUserId){
+        Record r = Db.findFirst(Db.getSqlPara("oa.examine.queryExamineUserByExamineStepId",
+                Kv.by("recordId",recordId).set("examineStepId",step.getStepId()).set("examineStatus",1)));
+        if (r == null) {
+            //获取上一个审核步骤
+            OaExamineStep lastStep = OaExamineStep.dao.findFirst(Db.getSql("oa.examine.queryExamineStepByLastExamineIdOrderByStepId"), step.getCategoryId(), step.getStepId());
+            if (lastStep == null){
+                AdminUser adminUser = AdminUser.dao.findById(ownerUserId);
+                if (adminUser.getParentId() == null){
+                    return ownerUserId;
+                }else {
+                    return adminUser.getParentId();
+                }
+            }
+            Long userId = queryStep(lastStep, recordId,ownerUserId);
+            if (userId != null) {
+                AdminUser adminUser = AdminUser.dao.findById(userId);
+                if (adminUser == null || adminUser.getParentId() == null){
+                    return userId;
+                }else {
+                    return adminUser.getParentId();
+                }
+            }else{
+                AdminUser adminUser = AdminUser.dao.findById(ownerUserId);
+                if (adminUser.getParentId() == null){
+                    return ownerUserId;
+                }else {
+                    return adminUser.getParentId();
+                }
+            }
+        }else {
+            //已经生成审核
+            AdminUser adminUser = AdminUser.dao.findById(r.getLong("examine_user"));
+            if (adminUser.getParentId() == null){
+                return r.getLong("examine_user");
+            }else {
+                return adminUser.getParentId();
+            }
+        }
     }
 
 

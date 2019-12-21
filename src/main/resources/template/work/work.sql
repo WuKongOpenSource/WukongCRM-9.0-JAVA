@@ -2,7 +2,7 @@
   #sql("queryWorkNameList")
     select  a.work_id,a.name,owner_user_id
     from 72crm_work a
-    where 1 = 1
+    where 1 = 1 and status = 1
       #if(userId)
       and (owner_user_id like concat('%,',#para(userId),',%') and is_open = 0) or is_open = 1
       #end

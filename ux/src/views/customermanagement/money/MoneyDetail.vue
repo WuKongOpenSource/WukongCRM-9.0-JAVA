@@ -152,10 +152,10 @@ export default {
           this.detailData = res.data
           //   // 负责人
           this.headDetails[0].value = res.data.customerName
-          this.headDetails[1].value = res.data.contractMoney
+          this.headDetails[1].value = this.moneyFormat(res.data.contractMoney)
           this.headDetails[2].value = res.data.contractName
           this.headDetails[3].value = res.data.returnTime
-          this.headDetails[4].value = res.data.money
+          this.headDetails[4].value = this.moneyFormat(res.data.money)
           this.headDetails[5].value = res.data.ownerUserName
         })
         .catch(() => {

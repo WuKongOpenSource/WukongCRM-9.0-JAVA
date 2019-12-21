@@ -4,7 +4,7 @@
     :disabled="disabled"
     style="width: 100%;"
     placeholder="请选择"
-    @change="valueChange">
+    @change="valueChange(dataValue, option)">
     <el-option
       v-for="(item, index) in option"
       :key="index"

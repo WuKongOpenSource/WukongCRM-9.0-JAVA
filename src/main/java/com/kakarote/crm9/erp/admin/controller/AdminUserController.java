@@ -110,13 +110,13 @@ public class AdminUserController extends Controller {
      * @author zhangzhiwei
      */
     public void queryLoginUser(){
-        renderJson(R.ok().put("data",adminUserService.resetUser()));
+        renderJson(R.ok().put("data",adminUserService.resetUser(getRequest())));
     }
 
     public void updateImg(){
         String prefix= BaseUtil.getDate();
         UploadFile uploadFile=getFile("file",prefix);
-        R r=adminFileService.upload(uploadFile,null,"file","/"+prefix);
+        R r=adminFileService.upload(uploadFile,null,"file","/"+prefix,getRequest());
         if(r.isSuccess()){
             String url= (String) r.get("url");
             if(adminUserService.updateImg(url,getParaToLong("userId"))){

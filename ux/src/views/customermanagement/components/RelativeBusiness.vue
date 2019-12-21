@@ -64,6 +64,7 @@
         :key="index"
         :prop="item.prop"
         :label="item.label"
+        :formatter="fieldFormatter"
         show-overflow-tooltip/>
     </el-table>
 
@@ -90,6 +91,8 @@ import {
   crmContactsUnrelateBusinessAPI
 } from '@/api/customermanagement/contacts'
 import CrmRelative from '@/components/CreateCom/CrmRelative'
+
+import { moneyFormat } from '@/utils'
 
 export default {
   name: 'RelativeBusiness', // 相关联系人商机  可能再很多地方展示 放到客户管理目录下（新建时仅和客户进行关联）
@@ -299,6 +302,15 @@ export default {
       } else {
         this.getDetail()
       }
+    },
+    /**
+     * 格式化表格
+     */
+    fieldFormatter(row, column) {
+      if (column.property == 'money') {
+        return moneyFormat(row[column.property])
+      }
+      return row[column.property] || '--'
     }
   }
 }

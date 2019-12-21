@@ -1,18 +1,3 @@
-/*
- Navicat Premium Data Transfer
-
- Source Server         : local
- Source Server Type    : MySQL
- Source Server Version : 50720
- Source Host           : localhost:3306
- Source Schema         : crm20191010
-
- Target Server Type    : MySQL
- Target Server Version : 50720
- File Encoding         : 65001
-
- Date: 02/12/2019 09:39:24
-*/
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -275,6 +260,7 @@ CREATE TABLE `72crm_admin_field_sort`  (
   `label` int(2) NOT NULL COMMENT '标签 1 线索 2 客户 3 联系人 4 产品 5 商机 6 合同 7回款 8公海',
   `field_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '字段名称',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '字段中文名称',
+  `type` int(2) NULL DEFAULT NULL COMMENT '字段类型 1 单行文本 2 多行文本 3 单选 4日期 5 数字 6 小数 7 手机  8 文件 9 多选 10 人员 11 附件 12 部门 13 日期时间 14 邮箱 15客户 16 商机 17 联系人 18 地图 19 产品类型 20 合同 21 回款计划',
   `sort` int(5) NOT NULL DEFAULT 0 COMMENT '字段排序',
   `user_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '用户id',
   `is_hide` int(1) NOT NULL DEFAULT 1 COMMENT '是否隐藏 0、不隐藏 1、隐藏',
@@ -343,7 +329,7 @@ CREATE TABLE `72crm_admin_menu`  (
   `status` int(4) NULL DEFAULT 1 COMMENT '状态 1 启用 0 禁用',
   `remarks` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '菜单说明',
   PRIMARY KEY (`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 192 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '后台菜单表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 193 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '后台菜单表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of 72crm_admin_menu
@@ -481,6 +467,25 @@ INSERT INTO `72crm_admin_menu` VALUES (189, 187, '编辑', 'update', 3, 2, 1, NU
 INSERT INTO `72crm_admin_menu` VALUES (190, 187, '删除', 'delete', 3, 3, 1, NULL);
 INSERT INTO `72crm_admin_menu` VALUES (191, 10, '设置成交状态', 'dealStatus', 3, 0, 1, NULL);
 INSERT INTO `72crm_admin_menu` VALUES (192, 13, '合同作废', 'discard', 3, 1, 1, NULL);
+
+-- ----------------------------
+-- Table structure for 72crm_admin_message
+-- ----------------------------
+DROP TABLE IF EXISTS `72crm_admin_message`;
+CREATE TABLE `72crm_admin_message`  (
+  `message_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '消息ID',
+  `title` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息标题',
+  `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '内容',
+  `label` int(2) NULL DEFAULT NULL COMMENT '消息大类 1 任务 2 日志 3 oa审批 4公告 5 日程 6 crm消息',
+  `type` int(2) NULL DEFAULT NULL COMMENT '消息类型 详见AdminMessageEnum',
+  `type_id` int(11) NULL DEFAULT NULL COMMENT '关联ID',
+  `create_user` bigint(20) NOT NULL COMMENT '消息创建者 0为系统',
+  `recipient_user` bigint(20) NOT NULL COMMENT '接收人',
+  `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+  `is_read` int(1) NULL DEFAULT 0 COMMENT '是否已读 0 未读 1 已读',
+  `read_time` datetime(0) NULL DEFAULT NULL COMMENT '已读时间',
+  PRIMARY KEY (`message_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统消息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for 72crm_admin_record
@@ -4505,7 +4510,7 @@ CREATE TABLE `72crm_crm_contract_product`  (
   `price` decimal(18, 2) NOT NULL COMMENT '产品单价',
   `sales_price` decimal(18, 2) NOT NULL COMMENT '销售价格',
   `num` int(10) NOT NULL COMMENT '数量',
-  `discount` decimal(10, 4) NOT NULL COMMENT '折扣',
+  `discount` decimal(10, 2) NOT NULL COMMENT '折扣',
   `subtotal` decimal(18, 2) NOT NULL COMMENT '小计（折扣后价格）',
   `unit` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '单位',
   PRIMARY KEY (`r_id`) USING BTREE
@@ -4538,6 +4543,7 @@ CREATE TABLE `72crm_crm_customer`  (
   `create_time` datetime(0) NOT NULL COMMENT '创建时间',
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `batch_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '批次 比如附件批次',
+  `last_content` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`customer_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '客户表' ROW_FORMAT = Dynamic;
 
@@ -4606,6 +4612,7 @@ CREATE TABLE `72crm_crm_leads`  (
   `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `batch_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '批次 比如附件批次',
+  `last_content` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`leads_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '线索表' ROW_FORMAT = Dynamic;
 
@@ -4633,7 +4640,7 @@ CREATE TABLE `72crm_crm_product`  (
   `num` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '产品编码',
   `unit` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '单位',
   `price` decimal(18, 2) NULL DEFAULT NULL COMMENT '价格',
-  `status` int(1) NULL DEFAULT NULL COMMENT '状态 1 上架 0 下架',
+  `status` int(1) NULL DEFAULT 0 COMMENT '状态 1 上架 0 下架 3 删除',
   `category_id` int(11) NULL DEFAULT NULL COMMENT '产品分类ID',
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '产品描述',
   `create_user_id` bigint(20) NOT NULL COMMENT '创建人ID',

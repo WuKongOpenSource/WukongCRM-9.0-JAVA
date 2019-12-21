@@ -2,6 +2,7 @@ package com.kakarote.crm9.erp.crm.service;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -29,12 +30,10 @@ import com.kakarote.crm9.erp.oa.common.OaEnum;
 import com.kakarote.crm9.erp.oa.entity.OaEvent;
 import com.kakarote.crm9.erp.oa.entity.OaEventRelation;
 import com.kakarote.crm9.erp.oa.service.OaActionRecordService;
-import com.kakarote.crm9.utils.AuthUtil;
-import com.kakarote.crm9.utils.BaseUtil;
-import com.kakarote.crm9.utils.FieldUtil;
-import com.kakarote.crm9.utils.R;
+import com.kakarote.crm9.utils.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CrmContractService {
 
@@ -83,27 +82,22 @@ public class CrmContractService {
      * 根据id查询合同基本信息
      */
     public List<Record> information(Integer id) {
-        Record record = Db.findFirst(Db.getSql("crm.contract.queryByContractId"), id);
-        if (record == null) {
-            return null;
-        }
-        List<Record> fieldList = new ArrayList<>();
-        FieldUtil field = new FieldUtil(fieldList);
-        field.set("合同编号", record.getStr("num"))
-                .set("合同名称", record.getStr("name"))
-                .set("客户名称", record.getStr("customer_name"))
-                .set("商机名称", record.getStr("business_name"))
-                .set("下单时间", DateUtil.formatDate(record.getDate("order_date")))
-                .set("合同金额", record.getStr("money"))
-                .set("合同开始时间", DateUtil.formatDate(record.getDate("start_time")))
-                .set("合同结束时间", DateUtil.formatDate(record.getDate("end_time")))
-                .set("客户签约人", record.getStr("contacts_name"))
-                .set("公司签约人", record.getStr("company_user_name"))
-                .set("备注", record.getStr("remark"));
-        List<Record> recordList = Db.find(Db.getSql("admin.field.queryCustomField"), record.getStr("batch_id"));
-        fieldUtil.handleType(recordList);
-        fieldList.addAll(recordList);
-        return fieldList;
+        Record record = queryById(id);
+        List<String> keyList = Arrays.asList("num","name","order_date","money","start_time","end_time","remark");
+        List<Record> recordList = adminFieldService.queryInformation(CrmEnum.CRM_CONTRACT,record, keyList);
+        recordList.add(new Record().set("name","商机名称").set("value",new Record().set("businessId",record.getInt("business_id")).set("businessName",record.getStr("business_name"))).set("formType","business").set("field_type",1));
+        recordList.add(new Record().set("name","客户签约人").set("value",new Record().set("contacts_id",record.getInt("contacts_id")).set("contacts_name",record.getStr("contacts_name"))).set("formType","contacts").set("field_type",1));
+        recordList.add(new Record().set("name","公司签约人").set("value",Db.template("admin.user.queryByIds",Kv.by("ids", StrUtil.isNotEmpty(record.getStr("company_user_id")) ? record.getStr("company_user_id") : 0)).find()).set("formType","user").set("field_type",1));
+        recordList.add(new Record().set("name","客户名称").set("value",new Record().set("customerId",record.getInt("customer_id")).set("customerName",record.getStr("customer_name"))).set("formType","customer").set("field_type",1));
+        recordList.forEach(record1 -> {
+            String name = record1.getStr("name");
+            if ("下单时间".equals(name) || "合同开始时间".equals(name) || "合同结束时间".equals(name)){
+                if (ObjectUtil.isNotEmpty(record1.get("value"))){
+                    record1.set("value",DateUtil.formatDate(record1.getDate("value")));
+                }
+            }
+        });
+        return recordList.stream().sorted(Comparator.comparingInt(r->-r.getInt("field_type"))).map(r-> r.remove("field_type","field_name","setting","type")).collect(Collectors.toList());
     }
 
     /**

@@ -39,6 +39,7 @@ import {
 } from '@/api/customermanagement/money'
 import Lockr from 'lockr'
 import { Loading } from 'element-ui'
+import { moneyFormat } from '@/utils'
 
 export default {
   components: {
@@ -69,7 +70,10 @@ export default {
       /** 列表展示字段管理 */
       showFieldSet: false,
       /** 勾选行 */
-      selectionList: [] // 勾选数据 用于全局导出
+      // 勾选数据 用于全局导出
+      selectionList: [],
+      /** 格式化规则 */
+      formatterRules: {}
     }
   },
 
@@ -185,6 +189,15 @@ export default {
                 width = element.width
               }
 
+              if (element.formType === 'floatnumber') {
+                this.formatterRules[element.fieldName] = {
+                  type: 'floatnumber',
+                  formatter: function fieldFormatter(info) {
+                    return moneyFormat(info)
+                  }
+                }
+              }
+
               this.fieldList.push({
                 prop: element.fieldName,
                 label: element.name,
@@ -205,6 +218,10 @@ export default {
     },
     /** 格式化字段 */
     fieldFormatter(row, column) {
+      var aRules = this.formatterRules[column.property]
+      if (aRules) {
+        return aRules.formatter(row[column.property])
+      }
       // 如果需要格式化
       return row[column.property] || '--'
     },
@@ -508,6 +525,12 @@ export default {
       var offsetHei = document.documentElement.clientHeight
       var removeHeight = Object.keys(this.filterObj).length > 0 ? 310 : 240
       this.tableHeight = offsetHei - removeHeight
+    },
+    /**
+     * 导出
+     */
+    exportData(params) {
+      this.$refs.listHead.handleTypeDrop('out', params)
     }
   },
 

@@ -12,6 +12,7 @@ public class AdminRouter extends Routes {
         add("/system/dept", AdminDeptController.class);
         add("/system/menu", AdminMenuController.class);
         add("/system/role", AdminRoleController.class);
+        add("/system/message", AdminMessageController.class);
         add("/file", AdminFileController.class);
         add("/field",AdminFieldController.class);
         add("/scene",AdminSceneController.class);

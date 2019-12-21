@@ -1,17 +1,12 @@
 package com.kakarote.crm9.common.config.redis;
 
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
-import cn.hutool.crypto.asymmetric.KeyType;
-import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.jfinal.kit.PathKit;
 import com.jfinal.plugin.redis.IKeyNamingPolicy;
 import com.jfinal.plugin.redis.serializer.FstSerializer;
-import com.kakarote.crm9.common.constant.BaseConstant;
 import redis.clients.jedis.*;
 
 import java.io.File;
@@ -100,14 +95,4 @@ public class RedisManager {
 
         return redis;
     }
-
-    private String decrypt(String str){
-        RSA rsa=SecureUtil.rsa("PRIVATE_KEY","PUBILC_KEY");
-        return rsa.decryptFromBcdToStr(str,KeyType.PrivateKey, CharsetUtil.CHARSET_UTF_8);
-    }
-    private String encrypt(String key){
-        RSA rsa=SecureUtil.rsa("PRIVATE_KEY","PUBILC_KEY");
-        return rsa.encryptHex(key,CharsetUtil.CHARSET_UTF_8,KeyType.PublicKey);
-    }
-
 }

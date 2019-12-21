@@ -21,6 +21,7 @@ public class _MappingKit {
 		arp.addMapping("72crm_admin_fieldv", "id", AdminFieldv.class);
 		arp.addMapping("72crm_admin_file", "file_id", AdminFile.class);
 		arp.addMapping("72crm_admin_menu", "menu_id", AdminMenu.class);
+		arp.addMapping("72crm_admin_message", "message_id", AdminMessage.class);
 		arp.addMapping("72crm_admin_record", "record_id", AdminRecord.class);
 		arp.addMapping("72crm_admin_role", "role_id", AdminRole.class);
 		arp.addMapping("72crm_admin_role_menu", "id", AdminRoleMenu.class);

@@ -18,6 +18,7 @@
         ref="crmTableHead"
         :crm-type="crmType"
         @filter="handleFilter"
+        @exportData="exportData"
         @handle="handleHandle"
         @scene="handleScene"/>
       <el-table

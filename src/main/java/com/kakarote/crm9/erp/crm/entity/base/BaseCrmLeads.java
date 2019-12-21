@@ -129,4 +129,13 @@ public abstract class BaseCrmLeads<M extends BaseCrmLeads<M>> extends Model<M> i
 		return getStr("batch_id");
 	}
 
+	public M setLastContent(java.lang.String lastContent) {
+		set("last_content", lastContent);
+		return (M)this;
+	}
+
+	public java.lang.String getLastContent() {
+		return getStr("last_content");
+	}
+
 }

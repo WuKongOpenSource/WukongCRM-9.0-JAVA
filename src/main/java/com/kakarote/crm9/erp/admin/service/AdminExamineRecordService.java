@@ -6,10 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Aop;
 import com.kakarote.crm9.common.constant.BaseConstant;
 import com.kakarote.crm9.erp.admin.common.AdminMessageEnum;
-import com.kakarote.crm9.erp.admin.entity.AdminExamine;
-import com.kakarote.crm9.erp.admin.entity.AdminExamineLog;
-import com.kakarote.crm9.erp.admin.entity.AdminExamineRecord;
-import com.kakarote.crm9.erp.admin.entity.AdminExamineStep;
+import com.kakarote.crm9.erp.admin.entity.*;
 import com.kakarote.crm9.erp.crm.entity.CrmContract;
 import com.kakarote.crm9.erp.crm.entity.CrmReceivables;
 import com.kakarote.crm9.utils.BaseUtil;
@@ -323,12 +320,13 @@ public class AdminExamineRecordService {
                         } else {
                             Record r = Db.findFirst(Db.getSql("admin.examineLog.queryUserByUserId"), Db.findFirst(Db.getSql("admin.examineLog.queryUserByUserId"), ownerUserId).getLong("user_id"));
                             examineLog.setLogId(null);
-                            if (r == null|| r.getLong("user_id") == null) {
-                                examineLog.setExamineUser(BaseConstant.SUPER_ADMIN_USER_ID);
-                            } else {
-                                examineLog.setExamineUser(r.getLong("user_id"));
-
+                            AdminUser adminUser = AdminUser.dao.findById(nowadayExamineLog.getExamineUser());
+                            if (adminUser != null && adminUser.getParentId() != null) {
+                                examineLog.setExamineUser(adminUser.getParentId());
+                            }else {
+                                examineLog.setExamineUser(ownerUserId);
                             }
+
                             examineLog.setExamineStatus(0);
                             examineLog.setCreateTime(DateUtil.date());
                             examineLog.setCreateUser(BaseUtil.getUser().getUserId());
@@ -352,7 +350,7 @@ public class AdminExamineRecordService {
                             //合同
                             Db.update(Db.getSql("crm.contract.updateCheckStatusById"),1,id);
                             CrmContract contract = CrmContract.dao.findById(id);
-                            Db.update(Db.getSql("crm.customer.updateDealStatusById"),"已成交",contract.getCustomerId());
+                            Db.update(Db.getSql("crm.customer.updateDealStatusById"),"1",contract.getCustomerId());
                         } else {
                             //回款
                             Db.update(Db.getSql("crm.receivables.updateCheckStatusById"),1,id);
@@ -399,19 +397,6 @@ public class AdminExamineRecordService {
         if (status != 4) {
             nowadayExamineLog.update();
         }
-//        if(examineRecord.getExamineStatus().equals(1)){
-//            if(examine.getCategoryType().equals(1)){
-//                Aop.get(AdminMessageService.class).addMessage(AdminMessageEnum.CRM_CONTRACT_PASS,examineRecord,auditUserId);
-//            }else {
-//                Aop.get(AdminMessageService.class).addMessage(AdminMessageEnum.CRM_RECEIVABLES_PASS,examineRecord,auditUserId);
-//            }
-//        }else if(examineRecord.getExamineStatus().equals(2)){
-//            if(examine.getCategoryType().equals(1)){
-//                Aop.get(AdminMessageService.class).addMessage(AdminMessageEnum.CRM_CONTRACT_REJECT,examineRecord,auditUserId);
-//            }else {
-//                Aop.get(AdminMessageService.class).addMessage(AdminMessageEnum.CRM_RECEIVABLES_REJECT,examineRecord,auditUserId);
-//            }
-//        }
         return examineRecord.update() ? R.ok() : R.error();
     }
 
@@ -434,7 +419,7 @@ public class AdminExamineRecordService {
      * 根据审核记录id，查询审核日志
      * ownerUserId 负责人ID
      */
-    public R queryExamineRecordList(Integer recordId, Integer ownerUserId) {
+    public R queryExamineRecordList(Integer recordId, Long ownerUserId) {
         JSONObject jsonObject = new JSONObject();
         Record examineRecord = Db.findFirst(Db.getSql("admin.examineStep.queryExamineRecordById"), recordId);
         //如果当前审批已撤回
@@ -495,11 +480,13 @@ public class AdminExamineRecordService {
             jsonObject.put("examineType", 1);
             //固定审批
             List<Record> steps = Db.find("select * from 72crm_admin_examine_step where  examine_id = ? ORDER BY step_num", adminExamine.getExamineId());
-
-            steps.forEach(step -> {
+               //上一审核步骤
+                Long lsatuUserId = null;
+            for (Record step: steps) {
+                List<Record> logs ;
                 if (step.getInt("step_type") == 1) {
                     //负责人主管
-                    List<Record> logs = Db.find(Db.getSql("admin.examineLog.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
+                     logs = Db.find(Db.getSql("admin.examineLog.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
                     if (logs.size() == 1){
                         if (logs.get(0).getInt("user_id")==null){
                             logs = null;
@@ -530,7 +517,7 @@ public class AdminExamineRecordService {
                     }
                 } else if (step.getInt("step_type") == 2 || step.getInt("step_type") == 3) {
                     //先判断是否已经审核过
-                    List<Record> logs = Db.find(Db.getSql("admin.examineLog.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
+                   logs = Db.find(Db.getSql("admin.examineLog.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
                     if (logs != null && logs.size() != 0) {
                         //已经创建审核日志
                         int status = 0;
@@ -582,7 +569,7 @@ public class AdminExamineRecordService {
                     }
                 } else {
                     //主管的主管
-                    List<Record> logs = Db.find(Db.getSql("admin.examineLog.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
+                    logs = Db.find(Db.getSql("admin.examineLog.queryUserByRecordIdAndStepIdAndStatus"), recordId, step.getInt("step_id"));
                     if (logs.size() == 1){
                         if (logs.get(0).getInt("user_id")==null){
                             logs = null;
@@ -597,21 +584,20 @@ public class AdminExamineRecordService {
                         step.set("userList", logs);
                     } else {
                         step.set("examine_status", 0);
-                        //还未创建审核日志
+                        AdminUser adminUser = AdminUser.dao.findById(lsatuUserId);
+                        if (adminUser != null && adminUser.getParentId() != null) {
+                            logs = Db.find(Db.getSql("admin.examineLog.queryUserByUserIdAnd"),adminUser.getParentId());
+                        }else {
+                            logs = Db.find(Db.getSql("admin.examineLog.queryUserByUserIdAnd"),lsatuUserId);
+                        }
                         //查询负责人主管的主管
-                        List<Record> r = Db.find(Db.getSql("admin.examineLog.queryUserByUserId"), Db.findFirst(Db.getSql("admin.examineLog.queryUserByUserId"), ownerUserId).getLong("user_id"));
-                        if (r.size() == 1){
-                            if (r.get(0).getInt("user_id")==null){
-                                r = null;
-                            }
-                        }
-                        if (r == null) {
-                            r = Db.find(Db.getSql("admin.examineLog.queryUserByUserIdAnd"), BaseConstant.SUPER_ADMIN_USER_ID);
-                        }
-                        step.set("userList", r);
+                        step.set("userList", logs );
                     }
                 }
-            });
+                if (logs.size()>0){
+                    lsatuUserId = logs.get(0).getLong("user_id");
+                }
+            }
             //判断当前用户有没有权限审核
             Record reco = Db.findFirst(Db.getSqlPara("admin.examineLog.queryExamineLog",
                     Kv.by("recordId", recordId).set("auditUserId", auditUserId).set("stepId", examineRecord.getInt("examine_step_id"))));

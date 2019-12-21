@@ -22,6 +22,7 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.SqlPara;
 import com.jfinal.plugin.activerecord.tx.Tx;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 public class AdminUserService {
@@ -130,10 +131,10 @@ public class AdminUserService {
      *
      * @return 用户信息
      */
-    public AdminUser resetUser() {
+    public AdminUser resetUser(HttpServletRequest request) {
         AdminUser adminUser = AdminUser.dao.findFirst(Db.getSql("admin.user.queryUserByUserId"), BaseUtil.getUserId());
         adminUser.setRoles(adminRoleService.queryRoleIdsByUserId(adminUser.getUserId()));
-        RedisManager.getRedis().setex(BaseUtil.getToken(), 360000, adminUser);
+        RedisManager.getRedis().setex(BaseUtil.getToken(request), 360000, adminUser);
         adminUser.remove("password", "salt");
         return adminUser;
     }

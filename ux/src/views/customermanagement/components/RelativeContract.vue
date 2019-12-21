@@ -48,6 +48,7 @@ import loading from '../mixins/loading'
 import CRMCreateView from './CRMCreateView'
 import { crmCustomerQueryContract } from '@/api/customermanagement/customer'
 import { crmBusinessQueryContract } from '@/api/customermanagement/business'
+import { moneyFormat } from '@/utils'
 
 export default {
   name: 'RelativeContract', // 相关联系人  可能再很多地方展示 放到客户管理目录下
@@ -154,6 +155,8 @@ export default {
       // 如果需要格式化
       if (column.property === 'checkStatus') {
         return this.getStatusName(row.checkStatus)
+      } else if (column.property == 'money') {
+        return moneyFormat(row[column.property])
       }
       return row[column.property]
     },

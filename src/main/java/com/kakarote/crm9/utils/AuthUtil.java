@@ -62,7 +62,9 @@ public class AuthUtil {
         }
         return tableParaMap;
     }
-
+    public static boolean isCrmAuth(CrmEnum Enum, Integer id){
+        return isCrmAuth(getCrmTablePara(Enum),id);
+    }
     public static boolean isCrmAuth(Map<String,String> tablePara, Integer id){
         if(tablePara == null){
             return false;
@@ -87,13 +89,13 @@ public class AuthUtil {
     public static boolean oaAuth(Record record){
         boolean auth = false;
         if(record.getStr("business_ids") != null){
-            auth = isCrmAuth(getCrmTablePara(CrmEnum.CRM_BUSINESS),Integer.valueOf(record.getStr("business_ids")));
+            auth = isCrmAuth(CrmEnum.CRM_BUSINESS,Integer.valueOf(record.getStr("business_ids")));
         }else if(record.getStr("contacts_ids") != null){
-            auth = isCrmAuth(getCrmTablePara(CrmEnum.CRM_CONTACTS),Integer.valueOf(record.getStr("contacts_ids")));
+            auth = isCrmAuth(CrmEnum.CRM_CONTACTS,Integer.valueOf(record.getStr("contacts_ids")));
         }else if(record.getStr("contract_ids") != null){
-            auth = isCrmAuth(getCrmTablePara(CrmEnum.CRM_CONTRACT),Integer.valueOf(record.getStr("contract_ids")));
+            auth = isCrmAuth(CrmEnum.CRM_CONTRACT,Integer.valueOf(record.getStr("contract_ids")));
         }else if(record.getStr("customer_ids") != null){
-            auth = isCrmAuth(getCrmTablePara(CrmEnum.CRM_CUSTOMER),Integer.valueOf(record.getStr("customer_ids")));
+            auth = isCrmAuth(CrmEnum.CRM_CUSTOMER,Integer.valueOf(record.getStr("customer_ids")));
         }
         return auth;
     }
@@ -212,7 +214,7 @@ public class AuthUtil {
         if(ownerUserId==null){
             return false;
         }else {
-            return AuthUtil.isCrmAuth(AuthUtil.getCrmTablePara(CrmEnum.CRM_CUSTOMER), customerId);
+            return AuthUtil.isCrmAuth(CrmEnum.CRM_CUSTOMER, customerId);
         }
     }
 
