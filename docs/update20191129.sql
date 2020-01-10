@@ -30,6 +30,10 @@ ALTER TABLE `72crm_crm_contract` MODIFY COLUMN `create_user_id` bigint(20) NOT N
 
 ALTER TABLE `72crm_crm_contract` MODIFY COLUMN `owner_user_id` bigint(20) NULL DEFAULT NULL COMMENT '负责人ID' AFTER `create_user_id`;
 
+UPDATE `72crm_crm_customer` SET `deal_status` = 1 WHERE `deal_status` = '已成交';
+
+UPDATE `72crm_crm_customer` SET `deal_status` = 0 WHERE `deal_status` = '未成交';
+
 ALTER TABLE `72crm_crm_customer` MODIFY COLUMN `deal_status` int(4) NOT NULL DEFAULT 0 COMMENT '成交状态 0未成交 1已成交' AFTER `next_time`;
 
 ALTER TABLE `72crm_crm_customer` MODIFY COLUMN `create_user_id` bigint(20) NULL DEFAULT NULL COMMENT '创建人ID' AFTER `remark`;

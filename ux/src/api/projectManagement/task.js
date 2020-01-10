@@ -18,7 +18,7 @@ export function workTaskMyTaskAPI(data) {
  */
 export function workTaskSaveAPI(data) {
   return request({
-    url: 'task/setWorkTask',
+    url: 'task/setTask',
     method: 'post',
     data: data
   })
@@ -69,7 +69,7 @@ export function workIndexWorkListAPI(data) {
  */
 export function workTaskReadAPI(data) {
   return request({
-    url: 'task/queryTaskById',
+    url: 'task/queryTaskInfo',
     method: 'post',
     data: data
   })
@@ -105,7 +105,7 @@ export function workTaskArchiveAPI(data) {
  */
 export function workTaskReadLoglistAPI(data) {
   return request({
-    url: 'task/queryTaskLog',
+    url: 'task/queryWorkTaskLog',
     method: 'post',
     data: data
   })
@@ -117,7 +117,7 @@ export function workTaskReadLoglistAPI(data) {
  */
 export function workTaskcommentSaveAPI(data) {
   return request({
-    url: 'comment/setWorkTaskComment',
+    url: 'comment/setComment',
     method: 'post',
     data
   })
@@ -153,7 +153,7 @@ export function workTaskRecoverAPI(data) {
  */
 export function queryCommentListAPI(data) {
   return request({
-    url: 'comment/queryWorkCommentList',
+    url: 'comment/queryCommentList',
     method: 'post',
     data
   })
