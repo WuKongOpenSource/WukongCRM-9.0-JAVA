@@ -13,7 +13,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractCount,
-      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE TO_DAYS(create_time) = TO_DAYS(now()) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE TO_DAYS(create_time) = TO_DAYS(now()) AND owner_user_id is not null AND create_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as customerCount,
@@ -53,7 +53,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractCount,
-      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE to_days(NOW()) - TO_DAYS(create_time) = 1 AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE to_days(NOW()) - TO_DAYS(create_time) = 1 AND owner_user_id is not null AND create_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as customerCount,
@@ -93,7 +93,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractCount,
-      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE YEARWEEK(date_format(create_time,'%Y-%m-%d')) = YEARWEEK(now()) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE YEARWEEK(date_format(create_time,'%Y-%m-%d')) = YEARWEEK(now()) AND owner_user_id is not null AND create_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as customerCount,
@@ -133,7 +133,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractCount,
-      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE YEARWEEK(date_format(create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1 AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE YEARWEEK(date_format(create_time,'%Y-%m-%d')) = YEARWEEK(now()) -1 AND owner_user_id is not null AND create_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as customerCount,
@@ -173,7 +173,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractCount,
-      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE date_format(create_time,'%Y-%m')=date_format(now(),'%Y-%m') AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE date_format(create_time,'%Y-%m')=date_format(now(),'%Y-%m') AND owner_user_id is not null AND create_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as customerCount,
@@ -213,7 +213,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractCount,
-      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE date_format(create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE date_format(create_time,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') AND owner_user_id is not null AND create_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as customerCount,
@@ -253,7 +253,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractCount,
-      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE QUARTER(create_time)=QUARTER(now()) AND YEAR(create_time)=YEAR(NOW()) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE QUARTER(create_time)=QUARTER(now()) AND YEAR(create_time)=YEAR(NOW()) AND owner_user_id is not null AND create_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as customerCount,
@@ -293,7 +293,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractCount,
-      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE QUARTER(create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) and YEAR(DATE_SUB(create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER)) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE QUARTER(create_time)=QUARTER(DATE_SUB(now(),interval 1 QUARTER)) AND owner_user_id is not null and YEAR(DATE_SUB(create_time,interval 1 QUARTER)) = YEAR(DATE_SUB(NOW(),interval 1 QUARTER)) AND create_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as customerCount,
@@ -334,7 +334,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractCount,
-      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE YEAR(create_time)=YEAR(NOW()) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE YEAR(create_time)=YEAR(NOW()) AND owner_user_id is not null AND create_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as customerCount,
@@ -374,7 +374,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractCount,
-      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE YEAR(create_time)=YEAR(date_sub(now(),interval 1 year)) AND create_user_id in ( #for(x:userIds)
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE YEAR(create_time)=YEAR(date_sub(now(),interval 1 year)) AND owner_user_id is not null AND create_user_id in ( #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as customerCount,
@@ -414,7 +414,7 @@
           #(for.index == 0 ? "" : ",")
               #para(x)
           #end)) as contractCount,
-      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in (
+      (SELECT COUNT(*) FROM 72crm_crm_customer WHERE  TO_DAYS(create_time) >= TO_DAYS(#para(startTime)) AND owner_user_id is not null and  TO_DAYS(create_time) <= TO_DAYS(#para(endTime)) AND create_user_id in (
       #for(x:userIds)
           #(for.index == 0 ? "" : ",")
               #para(x)

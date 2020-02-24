@@ -176,6 +176,7 @@ export default {
       })
         .then(res => {
           this.list = res.data
+          this.fifterList = []
           this.list.forEach(item => {
             this.filtersData(item)
           })

@@ -2,6 +2,7 @@ package com.kakarote.crm9.common.config;
 
 import cn.hutool.core.util.ClassLoaderUtil;
 import com.jfinal.aop.Aop;
+import com.jfinal.ext.proxy.CglibProxyFactory;
 import com.kakarote.crm9.common.config.cache.CaffeineCache;
 import com.kakarote.crm9.common.config.druid.DruidConfig;
 import com.kakarote.crm9.common.config.json.ErpJsonFactory;
@@ -57,6 +58,8 @@ public class JfinalConfig extends JFinalConfig {
         me.setJsonFactory(new ErpJsonFactory());
         //限制上传100M
         me.setMaxPostSize(104857600);
+        //TODO 因为很多人配置jdk环境问题，默认使用cgilb代理
+        me.setProxyFactory(new CglibProxyFactory());
     }
 
     /**
