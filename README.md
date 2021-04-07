@@ -128,6 +128,8 @@ NOTE: Port 8090 will be used when running the front-end. So before running the f
 
 JAVA版QQ群交流群①群：[1026560336](https://shang.qq.com/wpa/qunwpa?idkey=13d5e5809eb9feb350336e55c8b7a00b9cb472078b09b4441222a52dd76b278e)
 
+码云地址：[https://gitee.com/wukongcrm](https://gitee.com/wukongcrm)
+
 
 
 
